@@ -1,4 +1,4 @@
-// Siège & Fusée — moteur de règles v0.3 (livret v0.3). Aucun accès au DOM : testable sous Node.
+// Swarm & Steel — moteur de règles v0.3 (livret v0.3). Aucun accès au DOM : testable sous Node.
 "use strict";
 const SF = (() => {
   // ------------------------------------------------------------------ données
@@ -464,7 +464,7 @@ const SF = (() => {
     if (card.name === "Sapeur" && S.chantiers[lane].length) {
       const ch = S.chantiers[lane].shift();
       S.tileDiscard.push(ch.tile);
-      log(S, "essaim", `Sabotage : le chantier de la lane ${LANE_NAME[lane]} est détruit (${ch.tile}).`);
+      log(S, "essaim", `Sabotage : le chantier de la lane ${LANE_NAME[lane]} est détruit (${pubName(ch.tile)}).`);
     }
     if (card.name === "Œil-sonde") revealLane(S, lane);
     if (card.name === "Catalyseur") { const m = caseMates(S, c); c.instinctTarget = m.length ? m[0].id : null; }
@@ -743,7 +743,122 @@ const SF = (() => {
   }
   function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
 
+  // ------------------------------------------------------------------ actions des joueurs
+  // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
+  // vérifie le camp, la phase et les paramètres, puis appelle les fonctions de règles ci-dessus.
+  // Les transitions de phase qui vivaient dans l'interface (fenêtres Famine / Réaction, passage aux tirs) sont ici.
+  const PHASE_SIDE = { A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
+  const actor = S => PHASE_SIDE[S.phase] || null;
+  const isInt = v => Number.isInteger(v);
+  const isLane = l => LANES.includes(l);
+  const own = (o, k) => typeof k === "string" && Object.prototype.hasOwnProperty.call(o, k);
+  const creatureById = (S, id) => S.creatures.find(c => c.id === id);
+  // à la fin du tour de la colonie : fenêtre Famine si la colonie tient Famine
+  function openFamine(S) { if (!S.winner && S.phase === "A_start" && S.spells.includes("Famine")) S.phase = "A_famine"; }
+  function spellArgOk(S, name, arg) {
+    switch (name) {
+      case "Frappe orbitale": case "Salve": case "Brouillage": return isInt(arg);
+      case "Barrage": case "Champ de stase": return isLane(arg);
+      case "Onde de choc": return [1, 2, 3, "1", "2", "3"].includes(arg);
+      case "Réparation": return Array.isArray(arg) && arg.length >= 1 && arg.length <= 3 && arg.every(k => own(S.tiles, k));
+      case "Renouvellement": return Array.isArray(arg) && arg.every(i => isInt(i) && i >= 0 && i < S.hand.length) && new Set(arg).size === arg.length;
+      case "Reconversion": return !!arg && isInt(arg.hand) && arg.hand >= 0 && arg.hand < S.hand.length && own(S.tiles, arg.tile);
+      default: return arg === null || arg === undefined;
+    }
+  }
+  const ACTIONS = {
+    famine: { phase: ["A_famine"], run(S, a) {
+      S.phase = "A_start";
+      if (a.play) { const i = S.spells.indexOf("Famine"); if (i >= 0) useSpell(S, i, null); }
+      return true;
+    } },
+    draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } },
+    deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && deploy(S, a.uid, a.lane, a.u) },
+    endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); return true; } },
+    invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
+    raid: { phase: ["A_upgrade"], run: (S, a) => isInt(a.id) && isLane(a.lane) && raid(S, a.id, a.lane) },
+    instinct: { phase: ["A_deploy", "A_upgrade"], run(S, a) {
+      const c = creatureById(S, a.id);
+      if (!c || c.name !== "Catalyseur" || !["mobilite", "furtivite"].includes(a.v)) return false;
+      c.instinct = a.v; return true;
+    } },
+    instTarget: { phase: ["A_deploy", "A_upgrade"], run(S, a) {
+      const c = creatureById(S, a.id);
+      if (!c || c.name !== "Catalyseur" || !caseMates(S, c).some(m => m.id === a.v)) return false;
+      c.instinctTarget = a.v; return true;
+    } },
+    toAttacks: { phase: ["A_upgrade"], run(S) {
+      startAttacks(S);
+      if (S.spells.some(s => SPELLS[s].kind === "off" && s !== "Famine")) S.phase = "A_react";
+      return true;
+    } },
+    reactDone: { phase: ["A_react"], run: S => { S.phase = "A_attack"; return true; } },
+    spell: { phase: ["A_react", "D_main"], run(S, a) {
+      const name = isInt(a.i) ? S.spells[a.i] : undefined; if (!name) return false;
+      const kind = S.phase === "A_react" ? "off" : "sup";
+      if (SPELLS[name].kind !== kind || name === "Famine" || !spellArgOk(S, name, a.arg)) return false;
+      return useSpell(S, a.i, a.arg === undefined ? null : a.arg);
+    } },
+    act: { phase: ["A_attack"], run(S, a) {
+      const c = creatureById(S, a.id); if (!c || c.acted) return false;
+      if (a.target !== undefined && a.target !== null && typeof a.target !== "string") return false;
+      act(S, c, a.target || undefined); return true;
+    } },
+    actAll: { phase: ["A_attack"], run(S) {
+      for (const c of attackOrder(S)) { if (S.winner) break; if (S.creatures.includes(c)) act(S, c); }
+      return true;
+    } },
+    endA: { phase: ["A_attack"], run(S) { if (attackOrder(S).length) return false; endAttackerTurn(S); return true; } },
+    startCh: { phase: ["D_main"], run: (S, a) => isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane) },
+    cancelCh: { phase: ["D_main"], run: (S, a) => isLane(a.lane) && isInt(a.i) && cancelChantier(S, a.lane, a.i) },
+    alloc: { phase: ["D_main"], run(S, a) {
+      if (!isLane(a.lane) || ![1, -1].includes(a.d)) return false;
+      const v = S.alloc[a.lane] + a.d;
+      if (v < 0 || allocated(S) + a.d > totalPoints(S)) return false;
+      S.alloc[a.lane] = v; return true;
+    } },
+    toFire: { phase: ["D_main"], run: S => { S.phase = "D_fire"; return true; } },
+    fire: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && isInt(a.id) && fire(S, a.sk, a.id) },
+    autoFire: { phase: ["D_fire"], run: S => { autoFire(S); return true; } },
+    endD: { phase: ["D_fire"], run(S) { endDefenderTurn(S); openFamine(S); return true; } },
+    placeAt: { phase: ["D_place"], run(S, a) { if (!placeTile(S, a.k)) return false; openFamine(S); return true; } },
+  };
+  // renvoie "" si l'action est appliquée, sinon la raison du refus (S n'est pas modifié dans ce cas)
+  function apply(S, side, type, args) {
+    const A = own(ACTIONS, type) ? ACTIONS[type] : null;
+    if (!A) return "action inconnue";
+    if (S.winner) return "la partie est terminée";
+    if (side !== actor(S)) return "ce n'est pas votre tour";
+    if (!A.phase.includes(S.phase)) return "action impossible dans cette phase";
+    return A.run(S, args && typeof args === "object" ? args : {}) ? "" : "action refusée";
+  }
+
+  // ------------------------------------------------------------------ vue filtrée par camp (jeu en ligne)
+  // Copie de S sans les informations cachées à ce camp. L'ordre des pioches n'est envoyé à personne :
+  // les listes cachées sont remplacées par des listes de null de même longueur (seul le nombre est connu).
+  const blank = a => a.map(() => null);
+  function viewFor(S, side) {
+    const V = JSON.parse(JSON.stringify(S));
+    V.view = side; V.handoff = null;
+    V.tileDeck = blank(V.tileDeck); V.tileDiscard = blank(V.tileDiscard);
+    V.spellDeck = blank(V.spellDeck); V.spellDiscard = blank(V.spellDiscard);
+    for (const l of [1, 2, 3]) V.piles[l] = blank(V.piles[l]);
+    if (side === "colonie") V.handA = blank(V.handA);
+    if (side === "essaim") {
+      V.hand = blank(V.hand); V.spells = blank(V.spells);
+      const hideName = n => (TILES[n] && TILES[n].camo ? null : n);
+      for (const l of LANES) for (const ch of V.chantiers[l]) ch.tile = hideName(ch.tile);
+      for (const p of V.toPlace) p.tile = hideName(p.tile);
+      if (!clairvoyance(S)) for (const k of Object.keys(V.tiles)) {
+        const t = V.tiles[k];
+        if (t.camo && !t.revealed) V.tiles[k] = { name: null, camo: 1, revealed: false, hidden: true, hp: null, max: null, ep: 0, ren: 0, tech: 0, temp: 0, trap: 0 };
+      }
+    }
+    return V;
+  }
+
   return {
+    PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,

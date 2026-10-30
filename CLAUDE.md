@@ -1,6 +1,8 @@
-# SWARM — « Siège & Fusée », prototype v0.3
+# Swarm & Steel — prototype v0.3 (dépôt SWARM)
 
-Jeu de société asymétrique pour 2 joueurs, conçu par Oni (game designer, francophone). Ce dépôt contient le **prototype jouable en HTML/JS** (2 joueurs sur le même appareil) et l'export du livret de règles. Prochaine étape demandée : **le jeu en ligne avec un lobby et un code pour rejoindre**.
+Ancien nom : « Siège & Fusée » (renommé le 30/10/2026 à la demande d'Oni). Le module du moteur s'appelle toujours `SF` dans le code.
+
+Jeu de société asymétrique pour 2 joueurs, conçu par Oni (game designer, francophone). Ce dépôt contient le **prototype jouable en HTML/JS** (2 joueurs sur le même appareil, ou **en ligne** sur deux appareils avec un code pour rejoindre) et l'export du livret de règles.
 
 Tout le contenu du jeu, les messages et la documentation sont **en français**. Réponds à Oni en français.
 
@@ -20,10 +22,16 @@ src/engine.js      Moteur de règles pur (aucun accès au DOM), module `SF`, uti
 src/ui.js          Interface : rendu par innerHTML, tous les clics délégués sur [data-a], fonction handle(a, d)
 src/style.css      Styles (thèmes clair/sombre, plateau 9 × 9 en CSS grid)
 tools/icons.py     Pictos SVG (viewBox 24, trait = currentColor), partagés avec les planches d'impression
-tools/build.py     Assemble dist/siege-fusee-jeu.html (une seule page autonome)
+tools/build.py     Assemble dist/swarm-steel-jeu.html (une seule page autonome)
 dist/              Page construite — à régénérer avec `npm run build`, ne pas éditer à la main
 tests/rules.test.js  Tests ciblés des règles (scénarios précis, pas de simulation)
 tests/e2e-partie.js  Partie complète jouée par clics souris réels (Playwright), vérifie erreurs JS et boutons recouverts
+tests/serveur.test.js  Tests du serveur en ligne (lobby, jetons, droits, vues filtrées)
+tests/e2e-en-ligne.js  Partie en ligne complète entre deux navigateurs + contrôle des fuites d'information + rechargement
+server/core.js     Serveur du jeu en ligne (lobby, codes, jetons, actions) — stockage fourni par l'appelant
+server/dev.js      Serveur local (page + /api, parties en mémoire) : `npm run serveur`
+netlify/functions/api.mjs  Le même serveur sur Netlify, état des parties dans Netlify Blobs (store « parties »)
+netlify.toml       Build Netlify (python3 tools/build.py → dist/) et routes
 docs/regles-v0.3.md  Export du livret de règles (instantané du 30/10/2026)
 ```
 
@@ -31,13 +39,14 @@ Le livret de référence est un document Claude d'Oni ; `docs/regles-v0.3.md` en
 
 ## Architecture actuelle
 
-- **État** : un seul objet `S`, entièrement sérialisable en JSON (sauvegardé dans `localStorage`, clé `siege-fusee-v03`). Créé par `SF.newGame()`.
+- **État** : un seul objet `S`, entièrement sérialisable en JSON (sauvegardé dans `localStorage`, clé `swarm-steel-v03`). Créé par `SF.newGame()`.
+- **Point d'entrée des actions** : `SF.apply(S, camp, type, args)` vérifie le camp (`SF.actor(S)`), la phase et les paramètres, puis appelle les fonctions de règles ; renvoie `""` ou la raison du refus. Table `SF.ACTIONS`. L'interface locale **et** le serveur passent par là. `SF.viewFor(S, camp)` produit la vue filtrée envoyée à un joueur.
 - **Moteur** (`SF`) : fonctions pures qui modifient `S` et renvoient `true/false` selon que l'action est légale. Principales actions :
   - Essaim : `attackerDraw`, `deploy`, `endDeploy`, `invest` (amélioration payée en plusieurs fois), `raid`, `startAttacks`, `act` (une créature se déplace puis attaque), `endAttackerTurn`.
   - Colonie : `useSpell`, `startChantier(S, i, lane)`, `cancelChantier`, `fire`, `autoFire`, `endDefenderTurn` → phase `D_place` → `placeTile(S, key)`.
   - Hasard : `Math.random` par défaut, remplaçable par `SF.setRng(f)` (utile pour un serveur ou des tests reproductibles).
 - **Phases** (`S.phase`) et camp qui agit (table `PHASE_TXT` dans `ui.js`) : `A_famine` (colonie), `A_start`, `A_deploy`, `A_upgrade` (essaim), `A_react` (colonie), `A_attack` (essaim), `D_main`, `D_fire`, `D_place` (colonie).
-- ⚠ **Une partie de la logique de phase vit dans `ui.js`** : l'ouverture des fenêtres de réaction `A_famine` / `A_react` (vers les lignes `S.phase = "A_react"` et `S.phase = "A_famine"` de `handle`). Pour le jeu en ligne, il faut la déplacer côté serveur/moteur.
+- Les transitions de phase qui vivaient dans `ui.js` (fenêtres `A_famine` / `A_react`, passage aux tirs, répartition des travailleurs, Instinct) sont maintenant dans `SF.ACTIONS` (moteur).
 - **Hot-seat** : écran de passage (`S.handoff`) entre les camps ; `S.view` = camp qui regarde l'écran. Les mains et les tuiles camouflées de l'autre camp sont masquées **à l'affichage seulement** — l'état complet est dans le navigateur.
 
 ## Cahier des charges du jeu en ligne
@@ -49,22 +58,22 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 1. **Serveur qui fait autorité** : il détient `S` et exécute `src/engine.js` tel quel (le moteur tourne sous Node).
 2. **Les clients envoient des actions** (`{type, args}` correspondant aux fonctions du moteur) ; le serveur vérifie que l'action vient du camp dont c'est le tour (selon la phase), l'applique, puis diffuse.
 3. **Chaque joueur reçoit une vue filtrée** de `S` :
-   - à l'essaim, ne jamais envoyer : `hand` (tuiles de la colonie), `spells` (sortilèges), le nom/les PV/les capacités des tuiles camouflées non révélées (`tile.camo && !tile.revealed`, sauf Clairvoyance — voir `clairvoyance(S)`), le nom des tuiles camouflées en chantier (`chantiers`) et à poser (`toPlace`) ;
+   - à l'essaim, ne jamais envoyer : `hand` (tuiles de la colonie), `spells` (sortilèges), le nom/les PV/les capacités des tuiles camouflées non révélées (`tile.camo && !tile.revealed`, sauf Clairvoyance — voir `clairvoyance(S)`), le nom des tuiles camouflées en chantier (`chantiers`) et à poser (`toPlace`) — les points restants d'un chantier restent visibles (validé par Oni le 30/10/2026) ;
    - à la colonie, ne jamais envoyer : `handA` (main de l'essaim) ;
    - à personne : l'ordre des pioches (`piles`, `tileDeck`, `spellDeck`, défausses) — envoyer seulement les nombres ;
    - le journal (`S.log`) est commun : il évite déjà de nommer les tuiles camouflées (`pubName`) — à garder ainsi.
-4. **Fenêtres de réaction** : aujourd'hui `A_famine` / `A_react` ne s'ouvrent que si la colonie tient le bon sortilège, ce qui révèle qu'elle en a un. En ligne, garder ce comportement tant qu'Oni n'a pas décidé autrement, mais **le signaler** à Oni.
+4. **Fenêtres de réaction** : `A_famine` / `A_react` ne s'ouvrent que si la colonie tient le bon sortilège. **Validé par Oni (30/10/2026) : on garde ce comportement en ligne** (l'essaim ne voit pas quelle carte la colonie tient).
 5. **Reconnexion** : jeton par joueur conservé dans le navigateur ; une partie survit à un rechargement de page.
 6. **Garder le mode local (hot-seat)** fonctionnel.
 7. L'état d'interface (`UI.sel`, carte choisie, etc.) reste local au client.
 
-Hébergement suggéré (à confirmer avec Oni) : un petit serveur Node + WebSocket qui sert aussi la page (Render, Railway, Fly.io…). GitHub Pages seul ne suffit pas (pas de serveur).
+**Réalisé (30/10/2026), hébergement Netlify choisi par Oni** : pas de WebSocket sur Netlify, donc fonctions + Netlify Blobs + interrogation périodique (toutes les 2 s, seulement quand ce n'est pas le tour du joueur ; écriture conditionnelle sur l'etag contre les collisions). Les parties ne sont jamais supprimées (pas d'expiration pour l'instant).
 
 ## Points de règles ouverts (ne pas trancher sans Oni)
 
 Marqués † dans le livret, ou repérés pendant la conception :
 
-- **Incohérence livret ↔ jeu** : la section « Tour de l'essaim · 4. Améliorations » du livret décrit encore l'ancien système (budget restant → réserve → achat à 8 / 16). Le jeu implémente le système validé ensuite : investir des points dans un nœud précis, payable en plusieurs fois (`invest`), commencer à investir dans un nœud ferme l'autre choix du même rang. Le livret est à mettre à jour.
+- **Livret ↔ jeu (décidé par Oni le 30/10/2026 : le jeu fait foi)** : améliorations payables en plusieurs fois (`invest`) et Brouillage joué dans la fenêtre de réaction, sur une créature déployée ce tour. `docs/regles-v0.3.md` est corrigé ; le livret de référence (document Claude d'Oni) reste à reporter.
 - Colosse 3 ATQ / 7 PV (Oni avait écrit 7/3) ; coûts des aggros et tanks (3 / 4 / 7) ; nombre d'exemplaires des soutiens.
 - Nom « Déploiement » utilisé à la fois pour une amélioration aggro et pour une étape du tour.
 - Cadence (+2 points) fait désormais exactement la même chose qu'Effort.
@@ -81,8 +90,10 @@ Marqués † dans le livret, ou repérés pendant la conception :
 ```
 npm install          # installe Playwright (tests e2e)
 npx playwright install chromium
-npm run build        # python3 tools/build.py → dist/siege-fusee-jeu.html
+npm run build        # python3 tools/build.py → dist/swarm-steel-jeu.html
 npm test             # tests de règles (Node)
 npm run e2e          # partie complète, 1400 px
 npm run e2e:mobile   # partie complète, 400 px
+npm run e2e:en-ligne         # partie en ligne, 2 navigateurs, 1400 px (aussi :mobile pour 400 px)
+npm run serveur      # serveur local http://localhost:8888
 ```

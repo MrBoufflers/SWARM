@@ -1,11 +1,24 @@
-// Siège & Fusée — interface 2 joueurs sur le même écran
+// Swarm & Steel — interface : 2 joueurs sur le même écran (local) ou sur deux appareils (en ligne)
 "use strict";
 (() => {
   const $ = s => document.querySelector(s);
   const E = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const icon = (n, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ""}</svg>`;
-  const SAVE = "siege-fusee-v03";
+  const SAVE = "swarm-steel-v03";
+  const NET_KEY = "swarm-steel-en-ligne";
+  // reprise des sauvegardes faites sous l'ancien nom du jeu (Siège & Fusée)
+  try {
+    for (const [o, n] of [["siege-fusee-v03", SAVE], ["siege-fusee-en-ligne", NET_KEY]]) {
+      const v = localStorage.getItem(o);
+      if (v !== null && localStorage.getItem(n) === null) localStorage.setItem(n, v);
+      localStorage.removeItem(o);
+    }
+  } catch (e) { /* stockage indisponible */ }
   let S = null;
+  let MODE = "home"; // "home" (accueil), "local" (même appareil) ou "online"
+  // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
+  let NET = null;
+  let busy = false;
   let UI = { sel: null, selCreature: null, spell: null, picks: [], support: null, mob: null, help: false, recoHand: null };
 
   const PHASE_TXT = {
@@ -19,7 +32,9 @@
     D_fire: ["colonie", "Tirs des supports", "Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
   };
-  const who = () => PHASE_TXT[S.phase] ? PHASE_TXT[S.phase][0] : "essaim";
+  const who = () => SF.actor(S) || "essaim";
+  const online = () => MODE === "online";
+  const myTurn = () => online() && NET.full && !S.winner && SF.actor(S) === NET.side;
   const SIDE = { essaim: "l'essaim", colonie: "la colonie" };
 
   // ---------------------------------------------------------------- sauvegarde
@@ -27,7 +42,7 @@
   function load() { try { const t = localStorage.getItem(SAVE); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
-  function newGame() { S = SF.newGame(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  function newGame() { MODE = "local"; S = SF.newGame(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, mob: null, help: false, recoHand: null });
   function setPhaseHandoff() { // passe la main si le joueur actif change
     const w = who();
@@ -36,15 +51,46 @@
 
   // ---------------------------------------------------------------- rendu
   function render() {
-    if (!S) return;
+    document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
+    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
-    $("#app").innerHTML = header() + (S.handoff ? handoff() : S.winner ? winner() + layout() : layout()) + (UI.help ? help() : "");
+    const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
+    $("#app").innerHTML = header() + main + (UI.help ? help() : "");
   }
   function header() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
-    return `<header class="top"><div class="brand">${icon("fusee")}<b>Siège &amp; Fusée</b><span>prototype v0.3</span></div>
+    const menu = online()
+      ? `<span class="code-chip" data-code="${E(NET.code)}">Partie <b>${E(NET.code)}</b> · ${E(SIDE[NET.side])}</span><button data-a="help" class="ghost">Règles</button><button data-a="quit" class="ghost">Quitter</button>`
+      : `<button data-a="help" class="ghost">Règles</button><button data-a="home" class="ghost">Menu</button><button data-a="new" class="ghost">Nouvelle partie</button>`;
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
-      <div class="menu"><button data-a="help" class="ghost">Règles</button><button data-a="new" class="ghost">Nouvelle partie</button></div></header>`;
+      <div class="menu">${menu}</div></header>`;
+  }
+  function homeHeader() {
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
+      <div class="menu"><button data-a="help" class="ghost">Règles</button></div></header>`;
+  }
+  // ---------------------------------------------------------------- accueil et salle d'attente (jeu en ligne)
+  function home() {
+    const saved = load();
+    const preset = new URLSearchParams(location.search).get("code") || "";
+    return `<section class="handoff home"><div class="ho-card">${icon("fusee", "i big")}
+      <h2>Swarm &amp; Steel</h2>
+      <p class="ho-k">Sur cet appareil</p>
+      <div class="home-acts">${saved && saved.phase ? `<button data-a="resume" class="primary">Reprendre la partie locale</button>` : ""}
+        <button data-a="local"${saved && saved.phase ? "" : ` class="primary"`}>Nouvelle partie locale</button></div>
+      <p class="ho-k">En ligne · créer une partie</p>
+      <div class="home-acts"><button data-a="create" data-side="essaim">Je joue l'essaim</button><button data-a="create" data-side="colonie">Je joue la colonie</button></div>
+      <p class="ho-k">En ligne · rejoindre</p>
+      <div class="home-acts join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="primary">Rejoindre</button></div>
+    </div></section>`;
+  }
+  function waitingRoom() {
+    const link = location.origin + location.pathname + "?code=" + NET.code;
+    return `<section class="handoff ${NET.side}"><div class="ho-card">${icon(NET.side === "essaim" ? "spores" : "fusee", "i big")}
+      <p class="ho-k">Vous jouez ${SIDE[NET.side]}</p><h2>Code : <span class="bigcode" data-code="${E(NET.code)}">${E(NET.code)}</span></h2>
+      <p>Donnez ce code à votre adversaire, ou envoyez-lui ce lien :</p><p class="link">${E(link)}</p>
+      <p>En attente de l'adversaire…</p></div></section>`;
   }
   function handoff() {
     const w = S.handoff;
@@ -67,6 +113,8 @@
   function phaseBox() {
     if (S.winner) return "";
     const p = PHASE_TXT[S.phase];
+    if (online() && !myTurn()) return `<section class="phase ${p[0]} waiting"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
+      <p class="ph-txt">Au tour de ${E(SIDE[p[0]])} : en attente de votre adversaire…</p></section>`;
     let body = "", acts = "";
     const ph = S.phase;
     if (ph === "A_famine") {
@@ -274,7 +322,7 @@
         const ch = chs[i];
         if (!ch) return mine && S.phase === "D_main" && UI.sel !== null && UI.spell === null && chs.length < S.chPerLane
           ? `<button data-a="startCh" data-l="${l}" class="slot empty go">Construire ici : ${E(S.hand[UI.sel])}</button>` : `<div class="slot empty">libre</div>`;
-        const hide = SF.TILES[ch.tile].camo && !mine;
+        const hide = !ch.tile || (SF.TILES[ch.tile].camo && !mine);
         return `<div class="slot">${E(hide ? "?" : ch.tile)} · ${ch.left} pt${ch.left > 1 ? "s" : ""}${mine && ch.fresh && S.phase === "D_main" ? ` <button data-a="cancelCh" data-l="${l}" data-i="${i}" class="x" aria-label="Annuler">×</button>` : ""}</div>`;
       }).join("");
       const step = mine && S.phase === "D_main" ? `<span class="step"><button data-a="alloc" data-l="${l}" data-d="-1" aria-label="Retirer un point">−</button><b>${S.alloc[l]}</b><button data-a="alloc" data-l="${l}" data-d="1" aria-label="Ajouter un point">+</button></span>` : `<b class="pts">${S.alloc[l]}</b>`;
@@ -350,58 +398,64 @@
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 4 · 7 · 10 · 13 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier), ou investissez dans un nœud d'amélioration (rang 1 : 8, rang 2 : 16, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque créature se déplace case par case, sans diagonale, et attaque la première tuile ou la fusée (une attaque contre la fusée tue un seul travailleur). Les soutiens avancent aussi mais n'attaquent jamais. +1 biomasse par tuile détruite.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier, 9 : nuke).</p>
       <p><b>Combat.</b> Toute forteresse a Épines 1. Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
-      <p><b>Écrans de passage.</b> À chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p></div></div>`;
+      <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
+      <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
 
   // ---------------------------------------------------------------- actions
+  // Les actions de jeu passent toutes par SF.apply (moteur) : en local directement, en ligne via le serveur.
+  function play(type, args, onOk) {
+    if (online()) { send(type, args, onOk); return; }
+    if (!SF.apply(S, who(), type, args || {}) && onOk) onOk();
+    if (!S.winner) setPhaseHandoff();
+    save(); render();
+  }
   function handle(a, d) {
-    if (a === "new") { if (!S || S.winner || confirmNew()) { clearSave(); newGame(); } return; }
     if (a === "help") { UI.help = !UI.help; render(); return; }
-    if (a === "reveal") { S.view = S.handoff; S.handoff = null; save(); render(); return; }
+    if (MODE === "home" || !S) { homeAction(a, d); return; }
+    if (a === "home") { if (online()) return; MODE = "home"; render(); return; }
+    if (a === "quit") { if (confirmQuit()) { setNet(null); MODE = "home"; S = null; UI = resetUI(); render(); } return; }
+    if (a === "new") {
+      if (online()) { if (S.winner) send("rematch", {}); return; }
+      if (!S || S.winner || confirmNew()) { clearSave(); newGame(); } return;
+    }
+    if (a === "reveal") { if (online()) return; S.view = S.handoff; S.handoff = null; save(); render(); return; }
     if (S.winner) return;
     switch (a) {
-      case "famine":
-        S.phase = "A_start";
-        if (d.v === "1") { const i = S.spells.indexOf("Famine"); if (i >= 0) SF.useSpell(S, i, null); }
-        break;
-      case "draw": SF.attackerDraw(S); break;
+      // choix locaux (sans effet sur la partie)
       case "card": UI.sel = UI.sel === Number(d.uid) ? null : Number(d.uid); break;
-      case "deployAt": if (UI.sel && SF.deploy(S, UI.sel, d.l, Number(d.u))) UI.sel = null; break;
-      case "endDeploy": SF.endDeploy(S); UI.sel = null; break;
-      case "buy": SF.buy(S, d.t, d.s); break;
-      case "invest": SF.invest(S, d.t, d.s, Number(d.n)); break;
-      case "raid": SF.raid(S, Number(d.id), d.v); break;
-      case "instinct": { const c = S.creatures.find(o => o.id === Number(d.id)); if (c) c.instinct = d.v; break; }
-      case "instTarget": { const c = S.creatures.find(o => o.id === Number(d.id)); if (c) c.instinctTarget = Number(d.v); break; }
-      case "toAttacks":
-        SF.startAttacks(S);
-        if (S.spells.some(s => SF.SPELLS[s].kind === "off" && s !== "Famine")) S.phase = "A_react";
-        break;
-      case "reactDone": S.phase = "A_attack"; UI.spell = null; break;
       case "creature": UI.selCreature = Number(d.id); break;
-      case "act": {
-        const c = S.creatures.find(o => o.id === Number(d.id));
-        if (!c) break;
-        if (SF.hasMobility(S, c) && SF.laneTiles(S, c.lane).length > 1) { UI.mob = c.id; break; }
-        SF.act(S, c); break;
-      }
-      case "mobTarget": { const c = S.creatures.find(o => o.id === UI.mob); UI.mob = null; if (c) SF.act(S, c, d.k || null); break; }
-      case "actAll": for (const c of SF.attackOrder(S)) { if (S.winner) break; if (S.creatures.includes(c)) SF.act(S, c); } break;
-      case "endA":
-        SF.endAttackerTurn(S); break;
       case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
-      case "startCh": if (UI.sel !== null && SF.startChantier(S, UI.sel, d.l)) UI.sel = null; break;
-      case "placeAt": SF.placeTile(S, d.k); break;
-      case "cancelCh": SF.cancelChantier(S, d.l, Number(d.i)); break;
-      case "alloc": {
-        const v = S.alloc[d.l] + Number(d.d);
-        if (v >= 0 && SF.allocated(S) + Number(d.d) <= SF.totalPoints(S)) S.alloc[d.l] = v; break;
-      }
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
       case "spellCancel": UI.spell = null; UI.picks = []; UI.recoHand = null; break;
       case "pick": if (UI.picks.length < 3) UI.picks.push(d.k); break;
       case "pickHand": { const i = Number(d.i); UI.picks = UI.picks.includes(i) ? UI.picks.filter(p => p !== i) : [...UI.picks, i]; break; }
       case "recoHand": UI.recoHand = Number(d.i); break;
+      case "support": UI.support = UI.support === d.k ? null : d.k; break;
+      case "act": {
+        const c = S.creatures.find(o => o.id === Number(d.id));
+        if (!c) break;
+        if (SF.hasMobility(S, c) && SF.laneTiles(S, c.lane).length > 1) { UI.mob = c.id; break; }
+        return play("act", { id: c.id });
+      }
+      // actions de jeu
+      case "famine": return play("famine", { play: d.v === "1" });
+      case "draw": return play("draw");
+      case "deployAt": if (UI.sel) return play("deploy", { uid: UI.sel, lane: d.l, u: Number(d.u) }, () => { UI.sel = null; }); break;
+      case "endDeploy": UI.sel = null; return play("endDeploy");
+      case "invest": return play("invest", { t: d.t, s: d.s, n: Number(d.n) });
+      case "raid": return play("raid", { id: Number(d.id), lane: d.v });
+      case "instinct": return play("instinct", { id: Number(d.id), v: d.v });
+      case "instTarget": return play("instTarget", { id: Number(d.id), v: Number(d.v) });
+      case "toAttacks": return play("toAttacks");
+      case "reactDone": UI.spell = null; return play("reactDone");
+      case "mobTarget": { const id = UI.mob; UI.mob = null; return play("act", { id, target: d.k || null }); }
+      case "actAll": return play("actAll");
+      case "endA": return play("endA");
+      case "startCh": if (UI.sel !== null) return play("startCh", { i: UI.sel, lane: d.l }, () => { UI.sel = null; }); break;
+      case "placeAt": return play("placeAt", { k: d.k });
+      case "cancelCh": return play("cancelCh", { lane: d.l, i: Number(d.i) });
+      case "alloc": return play("alloc", { lane: d.l, d: Number(d.d) });
       case "spellArg": {
         const name = S.spells[UI.spell];
         let arg = d.v;
@@ -409,21 +463,86 @@
         if (d.v === "picks") arg = UI.picks;
         if (name === "Reconversion") arg = { hand: UI.recoHand, tile: d.v };
         if (d.v === "go") arg = null;
-        SF.useSpell(S, UI.spell, arg);
-        UI.spell = null; UI.picks = []; UI.recoHand = null; break;
+        const i = UI.spell;
+        UI.spell = null; UI.picks = []; UI.recoHand = null;
+        return play("spell", { i, arg });
       }
-      case "toFire": S.phase = "D_fire"; UI.sel = null; UI.spell = null; break;
-      case "support": UI.support = UI.support === d.k ? null : d.k; break;
-      case "fireAt": if (UI.support) { SF.fire(S, UI.support, Number(d.id)); UI.support = null; } break;
-      case "autoFire": SF.autoFire(S); UI.support = null; break;
-      case "endD":
-        SF.endDefenderTurn(S);
-        if (!S.winner && S.spells.includes("Famine")) S.phase = "A_famine";
-        break;
+      case "toFire": UI.sel = null; UI.spell = null; return play("toFire");
+      case "fireAt": if (UI.support) { const sk = UI.support; UI.support = null; return play("fire", { sk, id: Number(d.id) }); } break;
+      case "autoFire": UI.support = null; return play("autoFire");
+      case "endD": return play("endD");
     }
-    if (!S.winner) setPhaseHandoff();
-    save(); render();
+    if (!online() && !S.winner) setPhaseHandoff();
+    if (!online()) save();
+    render();
   }
+  function homeAction(a, d) {
+    if (a === "resume") { const t = load(); if (t && t.phase) { S = upgradeSave(t); MODE = "local"; UI = resetUI(); render(); } return; }
+    if (a === "local") { MODE = "local"; clearSave(); newGame(); return; }
+    if (a === "create") { createOnline(d.side); return; }
+    if (a === "join") { const c = ($("#joincode").value || "").trim().toUpperCase(); if (c.length !== 5) { flash("Le code fait 5 caractères."); return; } joinOnline(c); }
+  }
+  function confirmQuit() { return UI.confirmQuit ? true : (UI.confirmQuit = true, setTimeout(() => { UI.confirmQuit = false; }, 4000), flash("Touchez encore « Quitter » : vous ne pourrez plus revenir dans cette partie depuis cet appareil."), false); }
+
+  // ---------------------------------------------------------------- jeu en ligne
+  const POLL_MS = window.SF_POLL_MS || 2000;
+  function setNet(n) { NET = n; try { if (n) localStorage.setItem(NET_KEY, JSON.stringify({ code: n.code, token: n.token, side: n.side })); else localStorage.removeItem(NET_KEY); } catch (e) { /* stockage indisponible */ } }
+  async function api(path, body) {
+    const res = await fetch("/api/" + path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : { cache: "no-store" });
+    let j = null; try { j = await res.json(); } catch (e) { /* réponse vide */ }
+    if (!res.ok) throw new Error((j && j.error) || "Serveur injoignable (" + res.status + ").");
+    return j;
+  }
+  function receive(j) { // nouvel état envoyé par le serveur (vue filtrée pour notre camp)
+    if (!j || !j.S) return;
+    const turnBefore = S && myTurn();
+    if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help };
+    S = j.S; NET.v = j.v; NET.full = j.players.essaim && j.players.colonie;
+    if (!turnBefore && myTurn()) UI = { ...resetUI(), help: UI.help, selCreature: UI.selCreature };
+  }
+  async function withBusy(f) {
+    if (busy) return; busy = true; document.body.dataset.busy = "1";
+    try { await f(); } catch (e) { flash(e.message); } finally { busy = false; document.body.dataset.busy = "0"; render(); }
+  }
+  function createOnline(side) {
+    withBusy(async () => {
+      const j = await api("create", { side });
+      setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
+      history.replaceState(null, "", location.pathname);
+    });
+  }
+  function joinOnline(code) {
+    withBusy(async () => {
+      const j = await api("join", { code });
+      setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
+      history.replaceState(null, "", location.pathname);
+    });
+  }
+  function send(type, args, onOk) {
+    withBusy(async () => {
+      const j = await api("action", { code: NET.code, token: NET.token, type, args: args || {} });
+      receive(j);
+      if (j.ok) { if (onOk) onOk(); } else flash(j.error || "Action refusée.");
+    });
+  }
+  async function poll() {
+    if (!online() || busy || document.visibilityState === "hidden") return;
+    if (NET.full && myTurn()) return; // c'est notre tour : rien ne peut changer sans nous
+    try {
+      const j = await api(`state?code=${encodeURIComponent(NET.code)}&token=${encodeURIComponent(NET.token)}&v=${NET.v || 0}`);
+      if (busy || !online()) return;
+      if (!j.same) { receive(j); render(); }
+    } catch (e) { /* réseau momentanément indisponible : on réessaiera */ }
+  }
+  function resumeOnline(n) {
+    NET = { ...n, v: 0, full: false }; MODE = "online";
+    withBusy(async () => {
+      try { const j = await api(`state?code=${encodeURIComponent(n.code)}&token=${encodeURIComponent(n.token)}&v=0`); receive(j); }
+      catch (e) { setNet(null); MODE = "home"; S = null; throw new Error("Impossible de reprendre la partie en ligne : " + e.message); }
+    });
+  }
+  setInterval(poll, POLL_MS);
+
   function confirmNew() { return UI.confirm ? true : (UI.confirm = true, setTimeout(() => { UI.confirm = false; }, 4000), flash("Touchez encore « Nouvelle partie » pour confirmer."), false); }
   function flash(msg) { const f = $("#flash"); f.textContent = msg; f.hidden = false; clearTimeout(flash.t); flash.t = setTimeout(() => { f.hidden = true; }, 3500); }
 
@@ -432,7 +551,13 @@
     if (!el || el.disabled) return;
     handle(el.dataset.a, el.dataset);
   });
-  // démarrage : reprendre la partie sauvegardée si elle existe
+  function upgradeSave(t) { t.invest = t.invest || {}; t.toPlace = t.toPlace || []; for (const x of Object.values(t.tiles || {})) if (SF.TILES[x.name] && SF.TILES[x.name].camo && x.camo === undefined) x.camo = 1; return t; }
+  // démarrage : partie en ligne en cours, sinon partie locale sauvegardée, sinon accueil
+  // (un lien d'invitation « ?code=… » ouvre toujours l'accueil, code prérempli)
+  let net0 = null; try { net0 = JSON.parse(localStorage.getItem(NET_KEY) || "null"); } catch (e) { /* rien */ }
   const saved = load();
-  if (saved && saved.phase) { S = saved; S.invest = S.invest || {}; S.toPlace = S.toPlace || []; for (const t of Object.values(S.tiles || {})) if (SF.TILES[t.name] && SF.TILES[t.name].camo && t.camo === undefined) t.camo = 1; render(); } else newGame();
+  const invite = new URLSearchParams(location.search).get("code");
+  if (net0 && net0.code && net0.token && (!invite || invite.toUpperCase() === net0.code)) resumeOnline(net0);
+  else if (!invite && saved && saved.phase) { S = upgradeSave(saved); MODE = "local"; render(); }
+  else render();
 })();

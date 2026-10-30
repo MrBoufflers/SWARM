@@ -6,7 +6,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   const browser = await chromium.launch();
   const page = await browser.newPage(); await page.setViewportSize({ width: Number(process.argv[2] || 1400), height: 1000 });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
-  const html = fs.readFileSync(path.join(__dirname, '../dist/siege-fusee-jeu.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, '../dist/swarm-steel-jeu.html'), 'utf8');
   await page.setContent(html);
   // vrais clics souris ; on vérifie que chaque bouton cliqué est bien l'élément au premier plan
   let covered = 0;
@@ -21,6 +21,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   const shots = {};
   for (let step = 0; step < 300; step++) {
     if (await page.$('.banner.win')) break;
+    if (await click('[data-a="local"]')) continue;
     if (await click('[data-a="reveal"]')) continue;
     if (await click('[data-a="famine"][data-v="1"]')) continue;
     if (await click('[data-a="draw"]')) continue;

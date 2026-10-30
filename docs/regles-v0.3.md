@@ -1,4 +1,4 @@
-# Siège & Fusée — Livret de règles v0.3
+# Swarm & Steel — Livret de règles v0.3
 
 2026-10-28 · @Oni
 
@@ -84,7 +84,7 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 ## Tour de l'essaim
 
-À chaque tour, l'essaim dispose d'un budget égal à sa biomasse ; tout ce qu'il ne dépense pas en créatures part dans ses améliorations.
+À chaque tour, l'essaim dispose d'un budget égal à sa biomasse ; il peut l'investir dans ses améliorations ; ce qu'il ne dépense pas va dans sa réserve.
 
 ### 1. Budget
 
@@ -104,10 +104,14 @@ Pour chaque carte que vous jouez :
 
 ### 4. Améliorations
 
-Ajoutez le budget restant à votre **réserve**. Dès que la réserve atteint le coût d'un nœud, vous pouvez l'acheter (8 biomasse pour un rang 1 †, 16 pour un rang 2 †) :
+Chaque nœud d'amélioration coûte **8 biomasse au rang 1 †, 16 au rang 2 †**, et se paie **en plusieurs fois** : vous investissez des points dans un nœud précis, et l'amélioration est acquise dès que le total investi atteint son coût.
 
+- **Pendant le déploiement**, vous pouvez investir votre budget du tour et votre réserve (le budget est utilisé en premier).
+- À la fin du déploiement, le **budget non dépensé va à votre réserve**. Vous pouvez ensuite investir votre réserve, ou la garder pour un tour suivant.
+- Les points investis dans un nœud y restent d'un tour à l'autre, jusqu'à ce que le nœud soit acquis.
+- **Commencer à investir dans un nœud ferme les autres choix du même rang** de cet arbre.
 - Chaque type (aggro, tank, soutien) a son arbre à deux rangs : un choix entre 2 au rang 1, puis un choix entre 3 au rang 2. Les arbres sont détaillés dans le Catalogue.
-- Acheter le rang 1 d'un type ajoute toutes ses cartes de niveau 2 à leur pioche ; le rang 2, toutes ses cartes de niveau 3. Mélangez la pioche concernée.
+- Acquérir le rang 1 d'un type ajoute toutes ses cartes de niveau 2 à leur pioche ; le rang 2, toutes ses cartes de niveau 3. Mélangez la pioche concernée.
 - L'effet s'applique aussi aux créatures déjà en jeu.
 
 ### 5. Défausse
@@ -116,7 +120,7 @@ Remettez les cartes non jouées dans leurs pioches et mélangez.
 
 ### 6. Fin de tour : attaques
 
-La colonie peut d'abord jouer ses **sortilèges offensifs** (Brouillage se joue, lui, au moment d'un déploiement). Puis, dans l'ordre de votre choix, **chaque créature se déplace puis attaque, l'une après l'autre** (voir Déplacement et combat). Les créatures posées ce tour attaquent aussi.
+La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis, dans l'ordre de votre choix, **chaque créature se déplace puis attaque, l'une après l'autre** (voir Déplacement et combat). Les créatures posées ce tour attaquent aussi.
 
 ## Déplacement et combat
 
@@ -222,7 +226,7 @@ La colonie pioche ses sorts en fin de tour selon ses technologies ; ils sont gra
 
 - **Technologies** = somme des technologies des forteresses en jeu (Antenne, Laboratoire, Observatoire), plus 2 après l'étage 3 de la fusée.
 - **Pioche** en fin de tour de la colonie : 3 technologies → 1 sortilège, 6 → 2, 9 → 3.
-- **Offensifs** : à jouer pendant le tour suivant de l'essaim, avant ses attaques (Famine au début de son tour, Brouillage au moment d'un déploiement).
+- **Offensifs** : à jouer pendant le tour suivant de l'essaim, avant ses attaques (Famine au début de son tour, les autres juste avant ses attaques).
 - **Soutien** : à jouer au début du tour suivant de la colonie.
 - Un sortilège non joué dans sa fenêtre est défaussé †.
 
@@ -317,7 +321,7 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
 | Champ de stase | Offensif | choisissez une lane : ses tuiles ne subissent aucun dégât ce tour | 2 |
 | Famine | Offensif | à jouer au début du tour de l'essaim : son budget baisse de 2 ce tour (sa biomasse ne change pas) | 2 |
-| Brouillage | Offensif | à jouer quand l'essaim déploie une carte : le déploiement est annulé, la carte retourne dans sa pioche, la biomasse dépensée est perdue † | 2 |
+| Brouillage | Offensif | à jouer avant les attaques, sur une créature déployée ce tour : elle est retirée du plateau, sa carte retourne dans sa pioche (mélangée), la biomasse dépensée est perdue † | 2 |
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |
 | Réparation | Soutien | rendez 3 PV, répartis sur vos tuiles abîmées, sans dépasser leurs PV de départ | 3 |
@@ -328,8 +332,8 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 
 Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 améliorations ; au rang 2, un choix entre 3 (le prolongement de chaque côté, et une option au centre).
 
-- **Coûts** : 8 biomasse pour le rang 1, 16 pour le rang 2, versés depuis la réserve †.
-- **Choix exclusifs** : prendre une amélioration ferme les autres du même rang.
+- **Coûts** : 8 biomasse pour le rang 1, 16 pour le rang 2 †, payables en plusieurs fois (budget du tour pendant le déploiement, puis réserve).
+- **Choix exclusifs** : commencer à investir dans une amélioration ferme les autres du même rang.
 - **Prérequis** : un côté du rang 2 demande le même côté au rang 1. Le **centre** est accessible depuis l'un ou l'autre côté.
 - **Cartes** : le rang 1 ajoute toutes les cartes de niveau 2 du type à leur pioche ; le rang 2, toutes celles de niveau 3.
 - **Cumul** : les bonus des deux rangs s'additionnent (+1 puis +2 ATQ donnent +3 ATQ ; +2 puis +4 PV donnent +6 PV).
