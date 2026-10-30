@@ -1,0 +1,1410 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Siège &amp; Fusée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>/* Table de jeu : plateau central entre le camp de la colonie (gauche) et celui de l'essaim (droite) */
+:root {
+  --bg: #e9ecea; --panel: #ffffff; --panel-2: #f4f6f5; --ink: #1b1f1d; --ink-soft: #5b6560; --rule: #d3d9d6;
+  --aggro: #b0372b; --tank: #2c5b8a; --soutien: #6b4c97;
+  --wall: #9c6a32; --wall-bg: #f3e7d6; --support: #1e7469; --support-bg: #d8ece8;
+  --off: #c4611d; --sup: #3a7a4a;
+  --north: #2563a8; --east: #2f8a55; --south: #c98a12; --west: #a03d8a;
+  --colonie: #1e7469; --essaim: #6b4c97; --hot: #e2a400; --danger: #b0372b;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --cell: min(64px, calc((100vw - 100px) / 9));
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #131716; --panel: #1c2120; --panel-2: #232927; --ink: #e5eae7; --ink-soft: #9ba7a1; --rule: #33403b;
+  --wall-bg: #3a2e20; --support-bg: #18332f; --colonie: #3fb3a3; --essaim: #a68bd6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #131716; --panel: #1c2120; --panel-2: #232927; --ink: #e5eae7; --ink-soft: #9ba7a1; --rule: #33403b;
+  --wall-bg: #3a2e20; --support-bg: #18332f; --colonie: #3fb3a3; --essaim: #a68bd6; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45;
+  padding-block: 0 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; }
+.i { width: 1.05em; height: 1.05em; vertical-align: -.16em; flex: none; }
+.i.big { width: 44px; height: 44px; }
+
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 14px 0; border-bottom: 1px solid var(--rule); margin-bottom: 16px; }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand b { font: 700 1.5rem/1 var(--display); letter-spacing: .01em; }
+.brand span { color: var(--ink-soft); font-size: .8rem; }
+.round { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 1.1rem; }
+.round b { font-size: 1.3rem; }
+.menu { margin-left: auto; display: flex; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--ink-soft); }
+.dot.colonie { background: var(--colonie); } .dot.essaim { background: var(--essaim); }
+
+button.primary, button.ghost, .acts button, .choices button, .step button { border: 1px solid var(--rule); background: var(--panel); padding: 7px 12px; border-radius: 6px; }
+button.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); font-weight: 600; }
+button.ghost { background: transparent; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.choices button.on { border-color: var(--hot); box-shadow: inset 0 0 0 1px var(--hot); }
+
+.layout { display: grid; grid-template-columns: minmax(250px, 1fr) auto minmax(250px, 1fr); gap: 18px; align-items: start; }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; min-width: 0; }
+.panel.colonie { border-top: 4px solid var(--colonie); } .panel.essaim { border-top: 4px solid var(--essaim); }
+.panel h3 { margin: 0 0 10px; font: 700 1.25rem/1 var(--display); display: flex; align-items: center; gap: 6px; }
+.panel h4 { margin: 14px 0 6px; font: 600 .78rem/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); display: flex; justify-content: space-between; gap: 8px; }
+.kv { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-bottom: 1px dotted var(--rule); font-variant-numeric: tabular-nums; }
+.kv span { color: var(--ink-soft); } .kv b { text-align: right; }
+.small { font-size: .8rem; color: var(--ink-soft); margin: 4px 0 0; }
+.muted { color: var(--ink-soft); }
+.floors { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin-top: 10px; }
+.fl { font: 600 .72rem/1 var(--display); font-style: normal; text-align: center; padding: 5px 0; border: 1px solid var(--rule); border-radius: 3px; color: var(--ink-soft); }
+.fl.ms { border-color: var(--colonie); }
+.fl.on { background: var(--colonie); color: #fff; border-color: var(--colonie); }
+.atelier { display: grid; grid-template-columns: 26px 1fr auto; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px dotted var(--rule); }
+.atelier .al { font: 700 1rem/1 var(--display); color: #fff; text-align: center; padding: 5px 0; border-radius: 4px; }
+.atelier.lane-N .al { background: var(--north); } .atelier.lane-E .al { background: var(--east); } .atelier.lane-S .al { background: var(--south); } .atelier.lane-O .al { background: var(--west); }
+.slots { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.slot { font-size: .82rem; padding: 2px 6px; border-radius: 4px; background: var(--wall-bg); }
+.slot.empty { background: transparent; border: 1px dashed var(--rule); color: var(--ink-soft); }
+.slot .x { border: 0; background: none; padding: 0 4px; font-weight: 700; }
+.step { display: flex; align-items: center; gap: 4px; }
+.step button { padding: 2px 9px; }
+.step b, .pts { min-width: 1.6em; text-align: center; font-variant-numeric: tabular-nums; }
+.hand { display: flex; flex-direction: column; gap: 5px; }
+.tcard, .ccard { text-align: left; border: 1px solid var(--rule); background: var(--panel-2); border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; }
+.tcard { border-left: 4px solid var(--wall); }
+.tcard small, .ccard small { color: var(--ink-soft); font-size: .76rem; }
+.tcard.sel, .ccard.sel { outline: 2px solid var(--hot); outline-offset: 1px; }
+.ccard { position: relative; padding-left: 40px; border-left: 4px solid var(--c); }
+.ccard.aggro { --c: var(--aggro); } .ccard.tank { --c: var(--tank); } .ccard.soutien { --c: var(--soutien); }
+.ccard .cost { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: var(--c); color: #fff; display: flex; align-items: center; justify-content: center; font: 700 .95rem/1 var(--display); }
+.hidden-hand { color: var(--ink-soft); font-style: italic; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { font-size: .78rem; padding: 2px 8px; border-radius: 99px; color: #fff; }
+.chip.off { background: var(--off); } .chip.sup { background: var(--sup); }
+.tree { border: 1px solid var(--rule); border-radius: 6px; padding: 6px; margin-bottom: 6px; display: grid; gap: 4px; }
+.tree .tt { font: 600 .8rem/1 var(--display); letter-spacing: .1em; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+.tree.aggro .tt { color: var(--aggro); } .tree.tank .tt { color: var(--tank); } .tree.soutien .tt { color: var(--soutien); }
+.tree .r { display: flex; gap: 4px; }
+.tree .node { flex: 1; min-width: 0; font-size: .74rem; padding: 4px 3px; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel-2); }
+.tree .node.taken { background: var(--essaim); color: #fff; border-color: var(--essaim); opacity: 1; }
+.log { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow-y: auto; font-size: .8rem; }
+.log li { padding: 3px 0; border-bottom: 1px dotted var(--rule); }
+.log li span { font: 600 .7rem/1 var(--display); color: var(--ink-soft); margin-right: 6px; }
+.log li.colonie { color: var(--colonie); } .log li.essaim { color: var(--essaim); }
+
+.center { display: flex; flex-direction: column; gap: 12px; min-width: 0; align-items: center; }
+.phase { width: 100%; max-width: calc(var(--cell) * 9 + 16px); box-sizing: border-box; background: var(--panel); border: 1px solid var(--rule); border-left: 5px solid var(--ink-soft); border-radius: 10px; padding: 10px 14px; }
+.phase.colonie { border-left-color: var(--colonie); } .phase.essaim { border-left-color: var(--essaim); }
+.ph-head { display: flex; align-items: center; gap: 8px; } .ph-head b { font: 700 1.15rem/1 var(--display); }
+.ph-head .side { margin-left: auto; color: var(--ink-soft); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.ph-txt { margin: 4px 0 6px; color: var(--ink-soft); font-size: .86rem; }
+.hint { margin: 6px 0; font-size: .88rem; }
+.acts, .choices { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; align-items: center; }
+.choices .lab { font-size: .8rem; color: var(--ink-soft); }
+.spells { display: flex; flex-direction: column; gap: 5px; }
+.spell { display: flex; gap: 8px; align-items: center; text-align: left; border: 1px solid var(--rule); border-left: 4px solid var(--c); border-radius: 6px; background: var(--panel-2); padding: 6px 8px; }
+.spell.off { --c: var(--off); } .spell.sup { --c: var(--sup); }
+.spell .i { width: 22px; height: 22px; color: var(--c); }
+.spell span { display: flex; flex-direction: column; } .spell small { color: var(--ink-soft); }
+
+.board-wrap { overflow-x: auto; max-width: 100%; }
+.board { display: grid; grid-template-columns: repeat(9, var(--cell)); grid-auto-rows: var(--cell); gap: 2px; padding: 8px; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; }
+.cell { position: relative; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 10px; }
+.cell.void { background: transparent; }
+.cell.entry { background: transparent; border: 1px dashed var(--rule); }
+.cell.entry .col { position: absolute; top: 2px; left: 4px; font: 600 10px/1 var(--display); color: var(--ink-soft); }
+.cell.lane { background: color-mix(in srgb, var(--lc) 13%, var(--panel)); }
+.cell.lane.r1 { background: color-mix(in srgb, var(--lc) 22%, var(--panel)); }
+.lane-N { --lc: var(--north); } .lane-E { --lc: var(--east); } .lane-S { --lc: var(--south); } .lane-O { --lc: var(--west); }
+.cell.stase { box-shadow: inset 0 0 0 3px #7fb6d9; }
+.cell.core { background: var(--ink); color: var(--panel); flex-direction: column; gap: 1px; }
+.cell.core .i { width: 22px; height: 22px; } .cell.core b { font: 700 13px/1 var(--display); } .cell.core small { font-size: 9px; opacity: .8; }
+.cell.corner { background: var(--panel-2); color: var(--ink-soft); }
+.cell.sup { background: var(--support); color: #fff; flex-direction: column; gap: 1px; }
+.cell.sup .i { width: 20px; height: 20px; } .cell.sup b { font: 700 12px/1 var(--display); }
+.cell.sup.spent { opacity: .55; }
+.cell .lv { position: absolute; top: 2px; left: 4px; font: 700 9px/1 var(--display); }
+.cell.hot { box-shadow: inset 0 0 0 3px var(--hot); cursor: pointer; }
+.cell.sel { box-shadow: inset 0 0 0 3px var(--ink); }
+.tile { position: absolute; inset: 3px; border-radius: 3px; background: var(--wall-bg); border: 1.5px solid var(--wall); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--ink); }
+.tile .tn { font: 600 9.5px/1 var(--display); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 2px; }
+.tile .hp { font: 700 15px/1 var(--display); color: var(--wall); } .tile .hp small { font-size: 9px; color: var(--ink-soft); }
+.tile .tb { display: flex; align-items: center; gap: 1px; font: 600 9px/1 var(--display); color: var(--wall); }
+.tile .tb .i { width: 9px; height: 9px; }
+.tile.hidden { background: repeating-linear-gradient(45deg, var(--wall) 0 4px, color-mix(in srgb, var(--wall) 75%, #000) 4px 8px); color: #fff; border-color: var(--wall); }
+.tile.hidden b { font: 700 18px/1 var(--display); } .tile.hidden small { font-size: 8px; }
+.tile.trap { border-style: dashed; }
+.cghost { position: absolute; inset: 4px; border: 1.5px dashed var(--wall); border-radius: 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--wall); font: 600 9px/1.1 var(--display); text-align: center; }
+.cghost .i { width: 13px; height: 13px; }
+.toks { position: absolute; inset: auto 2px 2px 2px; display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; z-index: 1; }
+.tok { width: calc(var(--cell) / 2.6); height: calc(var(--cell) / 3.4); min-width: 20px; min-height: 16px; border: 0; border-radius: 4px; padding: 0 2px; display: flex; justify-content: space-between; align-items: center; color: #fff; font: 700 10px/1 var(--display); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.tok.aggro { background: var(--aggro); } .tok.tank { background: var(--tank); } .tok.soutien { background: var(--soutien); }
+.tok.sel { outline: 2px solid var(--hot); } .tok.done { opacity: .5; } .tok.new { box-shadow: 0 0 0 1.5px #fff, 0 1px 2px rgba(0,0,0,.35); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; font-size: .75rem; color: var(--ink-soft); margin-top: 6px; }
+.legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--lc); margin-right: 4px; vertical-align: -1px; }
+.detail { width: 100%; max-width: calc(var(--cell) * 9 + 16px); box-sizing: border-box; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; font-size: .86rem; }
+.detail.empty { color: var(--ink-soft); text-align: center; background: transparent; border-style: dashed; margin: 0; }
+.detail.aggro { border-top: 4px solid var(--aggro); } .detail.tank { border-top: 4px solid var(--tank); } .detail.soutien { border-top: 4px solid var(--soutien); }
+.d-head { display: flex; align-items: center; gap: 6px; } .d-head b { font: 700 1.1rem/1 var(--display); } .d-head span { color: var(--ink-soft); font-size: .8rem; }
+.detail p { margin: 5px 0; }
+
+.handoff { display: flex; justify-content: center; padding: 40px 0; }
+.ho-card { background: var(--panel); border: 1px solid var(--rule); border-top: 6px solid var(--c); border-radius: 12px; padding: 28px 30px; max-width: 420px; text-align: center; }
+.handoff.essaim { --c: var(--essaim); } .handoff.colonie { --c: var(--colonie); }
+.ho-card .i.big { color: var(--c); }
+.ho-card h2 { margin: 6px 0 8px; font: 700 2rem/1.05 var(--display); text-wrap: balance; }
+.ho-k { margin: 8px 0 0; font: 600 .8rem/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.ho-card p { color: var(--ink-soft); }
+.banner.win { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; padding: 12px 16px; border-radius: 10px; color: #fff; margin-bottom: 14px; font-size: 1.05rem; }
+.banner.win.essaim { background: var(--essaim); } .banner.win.colonie { background: var(--colonie); }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+.modal-card { position: relative; background: var(--panel); border-radius: 12px; padding: 22px 24px; max-width: 640px; max-height: 85vh; overflow-y: auto; }
+.modal-card h2 { margin: 0 0 8px; font: 700 1.6rem/1 var(--display); }
+.modal-card .close { position: absolute; top: 10px; right: 12px; border: 0; background: none; font-size: 1.4rem; }
+#flash { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 9px 14px; border-radius: 8px; z-index: 30; font-size: .9rem; max-width: calc(100vw - 32px); }
+
+@media (max-width: 1180px) {
+  .layout { grid-template-columns: 1fr 1fr; }
+  .center { grid-column: 1 / -1; order: -1; }
+}
+@media (max-width: 680px) {
+  .layout { grid-template-columns: 1fr; }
+  .menu { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.capline { display: flex; gap: 6px; align-items: flex-start; font-size: .8rem; line-height: 1.35; margin-top: 3px; color: var(--ink); }
+.capline .i { width: 16px; height: 16px; color: var(--soutien); margin-top: 1px; }
+.capline b { color: var(--soutien); font-weight: 600; }
+
+.ccard:disabled { opacity: 1; cursor: default; }
+.ccard .stats { font-size: .8rem; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.ccard .stats em { color: var(--ink-soft); font-style: normal; font-size: .74rem; }
+.capline.none { color: var(--ink-soft); font-style: italic; }
+.upline { display: flex; gap: 6px; align-items: flex-start; font-size: .76rem; line-height: 1.3; color: var(--ink-soft); }
+.upline .i { width: 14px; height: 14px; color: var(--essaim); margin-top: 1px; }
+.tree .rk { font-size: .7rem; color: var(--ink-soft); margin-top: 2px; }
+.tree .r { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.tree .r.r3 { grid-template-columns: 1fr; }
+.tree .node { text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 6px 7px; font-size: .78rem; opacity: 1; cursor: default; }
+.tree .node .np { font: 600 .66rem/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.tree .node b { font-size: .86rem; }
+.tree .node .nt { line-height: 1.3; }
+.tree .node .ns { font: 600 .7rem/1.2 var(--display); letter-spacing: .04em; color: var(--ink-soft); margin-top: 2px; }
+.tree .node.can { border-color: var(--essaim); box-shadow: inset 0 0 0 1px var(--essaim); }
+.tree .node.can .ns { color: var(--essaim); }
+.tree .node.taken .np, .tree .node.taken .ns, .tree .node.taken .nt { color: rgba(255,255,255,.88); }
+.tree .node.closed { opacity: .55; }
+
+.tree .node.closed, .tree .node.needR1 { opacity: .55; }
+.tree .node .bar { display: block; height: 5px; border-radius: 3px; background: var(--rule); overflow: hidden; margin-top: 3px; }
+.tree .node .bar i { display: block; height: 100%; background: var(--essaim); }
+.tree .node .inv { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.tree .node .inv button { border: 1px solid var(--essaim); color: var(--essaim); background: var(--panel); border-radius: 4px; padding: 3px 8px; font-size: .76rem; font-weight: 600; }
+.tree .node.taken .bar { display: none; }
+.cell.hot .toks { pointer-events: none; }
+.cghost:has(+ .toks) { justify-content: flex-start; padding-top: 2px; }
+.cghost:has(+ .toks) .i { width: 10px; height: 10px; }
+.tcard .capline .i { color: var(--wall); } .tcard .capline b { color: var(--wall); }
+.tcard:disabled { opacity: 1; cursor: default; }
+.slot.go { display: block; width: 100%; text-align: left; border: 1px solid var(--hot); background: var(--panel); color: var(--ink); cursor: pointer; font-weight: 600; }
+</style></head><body>
+<div id="app"></div>
+<div id="flash" role="status" hidden></div>
+<script>const ICONS = {"atq": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "pv": "<path d=\"M12 20C4.5 14.5 2.5 10 5.5 6.2C7.9 3.6 10.8 4.6 12 7.2C13.2 4.6 16.1 3.6 18.5 6.2C21.5 10 19.5 14.5 12 20Z\" fill=\"currentColor\" stroke=\"none\"/>", "biomasse": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><circle cx=\"10\" cy=\"14\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14\" cy=\"16.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "duree": "<path d=\"M6 3H18M6 21H18M7.5 3C7.5 9 12 10 12 12C12 14 7.5 15 7.5 21M16.5 3C16.5 9 12 10 12 12C12 14 16.5 15 16.5 21\"/>", "travailleur": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M7.5 7.2H16.5M4.5 21C4.5 16.5 7.8 13.8 12 13.8C16.2 13.8 19.5 16.5 19.5 21\"/>", "tech": "<circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M12 11V21M8.5 21H15.5M8.6 5.6A4.8 4.8 0 0 0 8.6 12.4M15.4 5.6A4.8 4.8 0 0 1 15.4 12.4M5.6 3A8.6 8.6 0 0 0 5.6 15M18.4 3A8.6 8.6 0 0 1 18.4 15\"/>", "fusee": "<path d=\"M12 2C15.8 5 16.8 10 15.8 15H8.2C7.2 10 8.2 5 12 2Z\"/><circle cx=\"12\" cy=\"9\" r=\"1.8\"/><path d=\"M8.2 15L5 19.5L8.6 18.4M15.8 15L19 19.5L15.4 18.4M10.6 18L12 22L13.4 18\"/>", "chantier": "<path d=\"M5 21V4H19M5 4L10.5 9.5M19 4V8M17 8H21V11H17ZM3 21H9\"/>", "mur": "<path d=\"M3 5H21V19H3ZM3 9.7H21M3 14.3H21M9 5V9.7M15 5V9.7M6 9.7V14.3M12 9.7V14.3M18 9.7V14.3M9 14.3V19M15 14.3V19\"/>", "tourelle": "<circle cx=\"12\" cy=\"12\" r=\"6.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M12 2.5V6.5M12 17.5V21.5M2.5 12H6.5M17.5 12H21.5\"/>", "epines": "<path d=\"M2 20H22M3 20L6 11L9 20M9 20L12 4.5L15 20M15 20L18 11L21 20\"/>", "renforce": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/>", "temp": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4M15 13H21M15 21H21M16 13C16 16 18 16.5 18 17C18 17.5 16 18 16 21M20 13C20 16 18 16.5 18 17C18 17.5 20 18 20 21\"/>", "perm": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4\"/><path d=\"M18 11.5L19.3 14.6L22.6 14.8L20 17L20.9 20.2L18 18.4L15.1 20.2L16 17L13.4 14.8L16.7 14.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "cardinal": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 4.5L14.2 12L12 19.5L9.8 12Z\" fill=\"currentColor\" stroke=\"none\"/>", "couronne": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\"/><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\"/>", "piege": "<path d=\"M3 14H21M4 14L6 8.5L8 14L10 8.5L12 14L14 8.5L16 14L18 8.5L20 14M3 14C3 19 21 19 21 14\"/>", "aura": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "soin": "<path d=\"M9 3H15V9H21V15H15V21H9V15H3V9H9Z\"/>", "fureur": "<path d=\"M12 21C7.4 21 5.4 17.6 6.2 14.2C7 11.2 9.6 10.1 9 5.8C12 7.8 13.2 10 13 12.4C14.2 11.4 15 9.8 15 8.2C18 11 19.2 14 18.2 16.8C17.2 19.6 15 21 12 21Z\"/>", "vision": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "furtivite": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><path d=\"M4 3L20 21\"/>", "leurre": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>", "percee": "<path d=\"M9.5 3.5H14.5V20.5H9.5ZM9.5 9H14.5M9.5 15H14.5M2 12H21M17.5 8.5L21 12L17.5 15.5\"/>", "instinct": "<path d=\"M12 2L13.9 10.1L22 12L13.9 13.9L12 22L10.1 13.9L2 12L10.1 10.1Z\"/>", "spores": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"4\" r=\"1.6\"/><circle cx=\"12\" cy=\"20\" r=\"1.6\"/><circle cx=\"4\" cy=\"12\" r=\"1.6\"/><circle cx=\"20\" cy=\"12\" r=\"1.6\"/><circle cx=\"6.3\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"17.7\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"6.3\" cy=\"17.7\" r=\"1.2\"/>", "sabotage": "<circle cx=\"10\" cy=\"14.5\" r=\"6.5\"/><path d=\"M14.6 9.9L17.5 7M17.5 7L19 8.5M19.5 3V4.8M22 5.5H20.2M21.3 3.7L20.1 4.9\"/>", "mobilite": "<path d=\"M12 21V12M12 12L6 5M12 12L18 5M6 5V9M6 5H10M18 5V9M18 5H14\"/>", "deploiement": "<path d=\"M6 4L12 10L18 4M6 12L12 18L18 12M5 21H19\"/>", "reincarnation": "<path d=\"M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2\"/><path d=\"M12 15.5C9.2 13.5 8.5 12 9.6 10.6C10.4 9.7 11.5 10 12 11C12.5 10 13.6 9.7 14.4 10.6C15.5 12 14.8 13.5 12 15.5Z\" fill=\"currentColor\" stroke=\"none\"/>", "protection": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/><circle cx=\"12\" cy=\"10\" r=\"2.2\"/><path d=\"M8.5 16.5C9 14.5 10.3 13.5 12 13.5C13.7 13.5 15 14.5 15.5 16.5\"/>", "clairvoyance": "<path d=\"M4 12C6.2 8.2 8.8 7 12 7C15.2 7 17.8 8.2 20 12C17.8 15.8 15.2 17 12 17C8.8 17 6.2 15.8 4 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\"/><path d=\"M12 1.5V4M12 20V22.5M3.5 3.5L5.3 5.3M18.7 18.7L20.5 20.5M20.5 3.5L18.7 5.3M5.3 18.7L3.5 20.5\"/>", "frenesie": "<path d=\"M3 13C5 10 6.5 7.5 8.5 4.5M6 17C8 13.5 10 10.5 12.5 7M15 11L21 17M21 11L15 17\"/>", "frappe": "<path d=\"M13.5 2L5 13.5H11L9.5 22L19 9.5H13Z\"/>", "salve": "<path d=\"M8 2L3.5 9H7L6 15L11 7.5H7.5ZM17 6L12.5 13H16L15 19L20 11.5H16.5Z\"/>", "lane": "<path d=\"M8 3H16L20.5 21H3.5Z\"/><path d=\"M12 7V17M9.5 14.5L12 17L14.5 14.5\"/>", "stase": "<path d=\"M12 2V22M3.3 7L20.7 17M3.3 17L20.7 7M9.5 3.5L12 6L14.5 3.5M9.5 20.5L12 18L14.5 20.5\"/>", "famine": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><path d=\"M8.5 14.5H15.5\"/>", "brouillage": "<rect x=\"6\" y=\"3\" width=\"12\" height=\"18\"/><path d=\"M8.5 7.5L15.5 16.5M15.5 7.5L8.5 16.5\"/>", "effort": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"7.2\" stroke-width=\"3.2\" stroke-dasharray=\"2.6 2.1\"/>", "cadence": "<circle cx=\"8.5\" cy=\"9.5\" r=\"2\"/><circle cx=\"8.5\" cy=\"9.5\" r=\"5\" stroke-width=\"2.6\" stroke-dasharray=\"2 1.8\"/><circle cx=\"17\" cy=\"16.5\" r=\"1.6\"/><circle cx=\"17\" cy=\"16.5\" r=\"4\" stroke-width=\"2.4\" stroke-dasharray=\"1.8 1.6\"/>", "reparation": "<path d=\"M13 3L21 11L18 14L10 6ZM11.5 9.5L3 18L6 21L14.5 12.5\"/>", "renouvellement": "<path d=\"M20 12A8 8 0 1 1 17.7 6.3M18.5 2.5V6.8H14.2\"/>", "reconversion": "<path d=\"M4 8H19M15.5 4.5L19 8L15.5 11.5M20 16H5M8.5 12.5L5 16L8.5 19.5\"/>", "nuke": "<circle cx=\"12\" cy=\"12\" r=\"9.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(0 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(120 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(240 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "aggro": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "tank": "<path d=\"M3 15C3 9.5 7 5.5 12 5.5C17 5.5 21 9.5 21 15ZM3 15H21M8 15C8 11 9.8 8 12 8C14.2 8 16 11 16 15M12 5.5V15M2 18.5H22\"/>", "soutien": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "sort": "<path d=\"M12 2L13.6 8.4L20 10L13.6 11.6L12 18L10.4 11.6L4 10L10.4 8.4Z\"/><path d=\"M18.5 15.5L19.2 18.3L22 19L19.2 19.7L18.5 22.5L17.8 19.7L15 19L17.8 18.3Z\" fill=\"currentColor\" stroke=\"none\"/>", "palier": "<path d=\"M3 20H8V15H13V10H18V5H21\"/>"};
+// Siège & Fusée — moteur de règles v0.3 (livret v0.3). Aucun accès au DOM : testable sous Node.
+"use strict";
+const SF = (() => {
+  // ------------------------------------------------------------------ données
+  const CREATURES = {
+    "Écorcheur": { type: "aggro", lvl: 1, cost: 3, pv: 1, atq: 3 },
+    "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 2, atq: 5 },
+    "Massacreur": { type: "aggro", lvl: 3, cost: 7, pv: 3, atq: 7 },
+    "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 3, atq: 1 },
+    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 2 },
+    "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 3 },
+    "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Révèle les tuiles camouflées de sa lane." },
+    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV." },
+    "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
+    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "leurre", capName: "Aura Leurre", capText: "Une tourelle ou un sortilège qui vise une créature de sa case doit viser celle qui a le plus de PV." },
+    "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
+    "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "instinct", capName: "Aura Instinct", capText: "Une autre créature de sa case gagne Mobilité ou Furtivité, au choix." },
+    "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit une tuile en chantier dans l'atelier de sa lane." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât." },
+  };
+  const PILES = {
+    1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Hurleur", 2]] },
+    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Phéromone", 2], ["Perforeur", 2], ["Catalyseur", 2]] },
+    3: { aggro: [["Massacreur", 6]], tank: [["Colosse", 6]], soutien: [["Sapeur", 3], ["Sporeur", 3]] },
+  };
+  // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
+  const TILES = {
+    "Palissade": { d: 1, pv: 2, ep: 1, camo: 1, n: 6 },
+    "Muraille": { d: 2, pv: 4, ep: 1, camo: 1, n: 6 },
+    "Rempart": { d: 3, pv: 4, ep: 1, ren: 2, camo: 1, n: 3 },
+    "Bastion": { d: 3, pv: 3, ep: 1, ren: 3, camo: 1, n: 2 },
+    "Haie d'épines": { d: 1, pv: 1, ep: 2, camo: 1, n: 3 },
+    "Mur hérissé": { d: 2, pv: 2, ep: 3, camo: 1, n: 2 },
+    "Antenne": { d: 1, pv: 1, ep: 1, tech: 1, n: 3 },
+    "Laboratoire": { d: 2, pv: 2, ep: 1, tech: 2, n: 2 },
+    "Observatoire": { d: 3, pv: 3, ep: 1, tech: 3, n: 1 },
+    "Baraquement": { d: 1, pv: 1, ep: 1, temp: 1, n: 3 },
+    "Dortoir": { d: 3, pv: 1, ep: 1, perm: 1, n: 2 },
+    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 1, camo: 1, n: 1 },
+    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 1, camo: 1, n: 1 },
+    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 1, camo: 1, n: 1 },
+    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 1, camo: 1, n: 1 },
+    "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 },
+    "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 },
+    "Piège": { d: 2, pv: 2, ep: 1, trap: 1, camo: 1, n: 3 },
+  };
+  const TILE_TEXT = {
+    "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
+    "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
+    "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
+    "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
+    "Piège": "Camouflé. 2 dégâts à la créature qui le révèle en l'attaquant.",
+    "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
+    "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "+1 travailleur permanent, gagné à la construction.",
+  };
+  const SPELLS = {
+    "Frappe orbitale": { kind: "off", n: 3, text: "4 dégâts à 1 créature." },
+    "Salve": { kind: "off", n: 3, text: "2 dégâts à 2 créatures de la même case." },
+    "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
+    "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
+    "Champ de stase": { kind: "off", n: 2, text: "Choisissez une lane : ses tuiles ne subissent aucun dégât ce tour." },
+    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : son budget baisse de 2 ce tour." },
+    "Brouillage": { kind: "off", n: 2, text: "Annule le déploiement d'une créature posée ce tour ; la carte retourne dans sa pioche, la biomasse est perdue." },
+    "Effort": { kind: "sup", n: 3, text: "+2 points de construction ce tour." },
+    "Cadence": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
+    "Réparation": { kind: "sup", n: 3, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
+    "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant." },
+    "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
+  };
+  const TIERS = [ // biomasse mini, N1, N2, N3, plafond
+    { min: 0, n: [3, 0, 0], cap: 1 }, { min: 4, n: [3, 2, 0], cap: 2 }, { min: 7, n: [4, 2, 1], cap: 3 },
+    { min: 10, n: [4, 3, 2], cap: 4 }, { min: 13, n: [4, 3, 3], cap: 5 },
+  ];
+  const TREES = {
+    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Choisit sa cible parmi toutes les tuiles de sa lane."],
+      A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
+      B2: ["Raid", "Une fois par tour, une créature aggro peut passer dans une lane voisine."] },
+    tank: { A1: ["Carapace épaisse", "+2 PV."], B1: ["Protection", "Les tirs visant une créature non tank de sa case visent ce tank."],
+      A2: ["Blindage", "+4 PV (total +6)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
+      B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
+    soutien: { A1: ["Mue", "+1 PV et Furtivité."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
+      A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
+      B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
+  };
+  const COST_R1 = 8, COST_R2 = 16, FLOOR_COST = 3, FLOORS = 12;
+  const LANES = ["N", "E", "S", "O"];
+  const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
+  const COLS = ["A", "B", "C", "D", "E"];
+
+  // ------------------------------------------------------------------ géométrie
+  const key = (x, y) => x + "," + y;
+  const parse = k => k.split(",").map(Number);
+  const ring = (x, y) => Math.max(Math.abs(x), Math.abs(y));
+  function cellLane(x, y) {
+    if (Math.abs(y) > Math.abs(x)) return y > 0 ? "N" : "S";
+    if (Math.abs(x) > Math.abs(y)) return x > 0 ? "E" : "O";
+    return null;
+  }
+  // coordonnées locales d'une lane : u = décalage latéral (-2..2), k = couronne (4 = entrée, 0 = fusée)
+  function toGlobal(lane, u, k) {
+    if (k === 0) return [0, 0];
+    if (lane === "N") return [u, k];
+    if (lane === "S") return [-u, -k];
+    if (lane === "E") return [k, -u];
+    return [-k, u];
+  }
+  function toLocal(lane, x, y) {
+    const k = ring(x, y);
+    if (lane === "N") return [x, k];
+    if (lane === "S") return [-x, k];
+    if (lane === "E") return [-y, k];
+    return [y, k];
+  }
+  // pas suivant, sans diagonale : descendre si la case du dessous est dans la lane, sinon pas de côté vers l'axe
+  function nextStep(u, k) {
+    if (k === 4) return [u, 3];
+    if (k === 1) return [0, 0];
+    if (Math.abs(u) <= k - 2) return [u, k - 1];
+    return [u - Math.sign(u), k];
+  }
+  const isSupportCell = (x, y) => x !== 0 && Math.abs(x) === Math.abs(y) && ring(x, y) <= 3;
+  const supportLanes = (x, y) => [y > 0 ? "N" : "S", x > 0 ? "E" : "O"];
+  const supportInner = (x, y) => [key(x - Math.sign(x), y), key(x, y - Math.sign(y))];
+  const neighbors = (x, y) => [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]];
+  function supportWalls(x, y) {
+    return neighbors(x, y).filter(([a, b]) => ring(a, b) <= 3 && cellLane(a, b)).map(([a, b]) => key(a, b));
+  }
+
+  // ------------------------------------------------------------------ outils
+  let RNG = Math.random;
+  const setRng = f => { RNG = f; };
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(RNG() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  const log = (S, who, msg) => { S.log.unshift({ r: S.round, who, msg }); if (S.log.length > 250) S.log.pop(); };
+
+  // ------------------------------------------------------------------ mise en place
+  function newGame() {
+    const S = {
+      round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1,
+      tiles: {}, supports: {}, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
+      workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
+      tileDeck: [], tileDiscard: [], hand: [],
+      spellDeck: [], spellDiscard: [], spells: [],
+      alloc: { N: 0, E: 0, S: 0, O: 0 }, extraPts: 0, cadence: false, firedSupports: [],
+      biomass: 3, budget: 0, reserve: 0, famine: 0,
+      piles: { 1: [], 2: [], 3: [] }, handA: [], creatures: [], reincQueue: [], reincUsed: false, raidUsed: false,
+      upgrades: { aggro: { r1: null, r2: null }, tank: { r1: null, r2: null }, soutien: { r1: null, r2: null } }, invest: {},
+      stase: [], log: [],
+    };
+    for (const lane of LANES) {
+      const [x, y] = toGlobal(lane, 0, 1);
+      S.tiles[key(x, y)] = { name: "Mur de départ", hp: 2, max: 2, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
+    }
+    for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
+    for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
+    shuffle(S.tileDeck);
+    for (const [n, s] of Object.entries(SPELLS)) for (let i = 0; i < s.n; i++) S.spellDeck.push(n);
+    shuffle(S.spellDeck);
+    addPile(S, 1, "aggro"); addPile(S, 1, "tank"); addPile(S, 1, "soutien");
+    drawTiles(S);
+    log(S, "jeu", "Nouvelle partie. L'essaim commence.");
+    startAttackerTurn(S);
+    return S;
+  }
+  function addPile(S, lvl, type) {
+    for (const [name, n] of PILES[lvl][type]) for (let i = 0; i < n; i++) S.piles[lvl].push(name);
+    shuffle(S.piles[lvl]);
+  }
+
+  // ------------------------------------------------------------------ dérivés
+  const tier = S => { let t = 0; TIERS.forEach((r, i) => { if (S.biomass >= r.min) t = i; }); return t; };
+  const capOf = S => TIERS[tier(S)].cap;
+  const laneCount = (S, lane) => S.creatures.filter(c => c.lane === lane).length;
+  const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
+  const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
+  const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + 2 * Object.values(S.supports).filter(l => l === 3).length;
+  const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
+  const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
+  const handSize = S => 4 * S.chPerLane;
+  const posKey = c => { const [x, y] = toGlobal(c.lane, c.u, c.k); return c.k === 4 ? "in:" + c.lane + ":" + c.u : key(x, y); };
+  const caseMates = (S, c) => S.creatures.filter(o => o !== c && posKey(o) === posKey(c));
+  const anySoutien = S => S.creatures.some(c => CREATURES[c.name].type === "soutien");
+  const clairvoyance = S => S.upgrades.soutien.r2 === "C" && anySoutien(S);
+  function hasMobility(S, c) {
+    if (CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B") return true;
+    return caseMates(S, c).some(o => o.name === "Catalyseur" && o.instinct === "mobilite" && o.instinctTarget === c.id);
+  }
+  function isStealthy(S, c) {
+    if (CREATURES[c.name].type === "soutien" && S.upgrades.soutien.r1 === "A") return true;
+    return caseMates(S, c).some(o => o.name === "Catalyseur" && o.instinct === "furtivite" && o.instinctTarget === c.id);
+  }
+  function hasPercee(S, c) { return caseMates(S, c).some(o => o.name === "Perforeur"); }
+  function bonusHp(S, c) { return CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "B" ? caseMates(S, c).length : 0; }
+  function maxHp(S, name) {
+    const b = CREATURES[name]; let m = b.pv;
+    if (b.type === "tank") { if (S.upgrades.tank.r1 === "A") m += 2; if (S.upgrades.tank.r2 === "A") m += 4; }
+    if (b.type === "soutien" && S.upgrades.soutien.r1 === "A") m += 1;
+    return m;
+  }
+  function baseAtq(S, name) {
+    const b = CREATURES[name]; let a = b.atq;
+    if (b.type === "aggro") { if (S.upgrades.aggro.r1 === "A") a += 1; if (S.upgrades.aggro.r2 === "A") a += 2; }
+    return a;
+  }
+  function frenzyTarget(S, c) { // la créature doublée par un soutien Frénésie de sa case : la plus forte des autres
+    if (S.upgrades.soutien.r2 !== "B") return false;
+    const mates = caseMates(S, c);
+    const frenzySources = mates.filter(o => CREATURES[o.name].type === "soutien");
+    if (!frenzySources.length) return false;
+    // pour chaque soutien, l'autre créature de plus forte ATQ de la case est doublée
+    return frenzySources.some(src => {
+      const others = S.creatures.filter(o => o !== src && posKey(o) === posKey(src));
+      others.sort((a, b) => baseAtq(S, b.name) - baseAtq(S, a.name) || a.id - b.id);
+      return others[0] === c;
+    });
+  }
+  function effAtq(S, c) {
+    if (!attacks(c)) return 0;
+    let a = baseAtq(S, c.name);
+    if (caseMates(S, c).some(o => o.name === "Hurleur")) a += 1; // Aura Fureur, non cumulable
+    if (S.upgrades.soutien.r1 === "B" && caseMates(S, c).some(o => CREATURES[o.name].type === "soutien")) a += 1; // Aura Griffes, non cumulable, cumulable avec Fureur
+    if (frenzyTarget(S, c)) a *= 2;
+    return a;
+  }
+  function soinValue(S, c) { // aura de soin la plus forte présente sur la case (hors soi)
+    let v = 0;
+    for (const o of caseMates(S, c)) {
+      if (CREATURES[o.name].type !== "soutien") continue;
+      if (S.upgrades.soutien.r2 === "A") v = Math.max(v, 2);
+      if (o.name === "Glaneur") v = Math.max(v, 1);
+    }
+    return v;
+  }
+
+  // ------------------------------------------------------------------ tuiles et supports
+  function tileStats(name, x, y) {
+    const t = TILES[name], r = ring(x, y), lane = cellLane(x, y);
+    let pv = t.pv;
+    if (pv === "ap") pv = lane === t.dir ? 4 : 2;
+    if (pv === "front") pv = 1 + r;
+    if (pv === "reduit") pv = 5 - r;
+    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, camo: t.camo || 0, revealed: !t.camo };
+  }
+  function epinesOf(S, k) {
+    let e = S.tiles[k].ep;
+    if (Object.entries(S.supports).some(([sk, l]) => l === 2 && supportWalls(...parse(sk)).includes(k))) e += 1;
+    return e;
+  }
+  function destroyTile(S, k, why) {
+    const t = S.tiles[k]; if (!t) return;
+    delete S.tiles[k];
+    if (t.name !== "Mur de départ") S.tileDiscard.push(t.name);
+    S.biomass += 1;
+    log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +1 biomasse.`);
+    checkSupportsFall(S);
+  }
+  function checkSupportsFall(S) {
+    for (const sk of Object.keys(S.supports)) {
+      if (!supportWalls(...parse(sk)).some(w => S.tiles[w])) {
+        log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe : +1 biomasse.`);
+        delete S.supports[sk];
+        S.biomass += 1;
+      }
+    }
+  }
+  function placeSupports(S) {
+    for (let r = 1; r <= 3; r++) for (const sx of [1, -1]) for (const sy of [1, -1]) {
+      const x = sx * r, y = sy * r, k = key(x, y);
+      if (!S.supports[k] && supportInner(x, y).every(w => S.tiles[w])) {
+        S.supports[k] = r;
+        log(S, "colonie", `Un support de niveau ${r} apparaît en couronne ${r}.`);
+      }
+    }
+  }
+  // Un bâtiment qui sort de chantier sur une case occupée fait reculer les créatures d'une case vers le fond
+  // (même colonne, couronne +1). Si cette case porte déjà une tuile, elles reculent jusqu'à la première case libre.
+  function pushBack(S, k) {
+    const here = S.creatures.filter(c => c.k < 4 && posKey(c) === k);
+    if (!here.length) return;
+    const { lane, u } = here[0];
+    let nk = here[0].k + 1;
+    while (nk < 4 && S.tiles[key(...toGlobal(lane, u, nk))]) nk++;
+    for (const c of here) c.k = nk;
+    const where = nk === 4 ? "sur la case d'entrée" : `en couronne ${nk}`;
+    log(S, "colonie", `${here.map(c => c.name).join(", ")} recule${here.length > 1 ? "nt" : ""} ${where} pour laisser place au bâtiment.`);
+  }
+  function canTarget(S, lane, k) { // case cible valable pour un chantier de cette lane
+    const [x, y] = parse(k);
+    if (ring(x, y) > 3 || ring(x, y) < 1 || cellLane(x, y) !== lane) return false;
+    if (S.tiles[k]) return false;
+    return neighbors(x, y).some(([a, b]) => (a === 0 && b === 0) || S.tiles[key(a, b)] || S.supports[key(a, b)]);
+  }
+
+  // ------------------------------------------------------------------ créatures
+  function makeCreature(S, name, lane, u, extra) {
+    const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
+    if (name === "Catalyseur") { c.instinct = "mobilite"; c.instinctTarget = null; }
+    return c;
+  }
+  function killCheck(S) {
+    const dead = S.creatures.filter(c => c.hp + bonusHp(S, c) <= 0);
+    for (const c of dead) {
+      S.creatures.splice(S.creatures.indexOf(c), 1);
+      log(S, "colonie", `${c.name} est détruit.`);
+      if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "C" && !S.reincUsed) {
+        S.reincUsed = true;
+        S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u });
+        log(S, "essaim", `Réincarnation : ${c.name} reviendra au début du prochain tour de l'essaim.`);
+      } else {
+        S.piles[CREATURES[c.name].lvl].push(c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
+      }
+    }
+    // Catalyseur : la cible d'Instinct doit rester sur sa case
+    for (const c of S.creatures) if (c.name === "Catalyseur") {
+      const mates = caseMates(S, c);
+      if (!mates.some(o => o.id === c.instinctTarget)) c.instinctTarget = mates.length ? mates[0].id : null;
+    }
+  }
+  function damageCreature(S, c, n, why) {
+    c.hp -= n;
+    log(S, "colonie", `${c.name} subit ${n} dégât${n > 1 ? "s" : ""}${why ? " (" + why + ")" : ""}.`);
+  }
+  // cible imposée par Protection puis Leurre ; renvoie null si la créature est intouchable (Furtivité)
+  function resolveTarget(S, c) {
+    const mates = caseMates(S, c);
+    if (isStealthy(S, c) && mates.some(o => !isStealthy(S, o))) return null;
+    let t = c;
+    if (CREATURES[t.name].type !== "tank" && S.upgrades.tank.r1 === "B") {
+      const tank = mates.find(o => CREATURES[o.name].type === "tank");
+      if (tank) t = tank;
+    }
+    const group = [t, ...caseMates(S, t)];
+    if (group.some(o => o.name === "Phéromone")) {
+      const visible = group.filter(o => !(isStealthy(S, o) && group.some(p => !isStealthy(S, p))));
+      visible.sort((a, b) => (b.hp + bonusHp(S, b)) - (a.hp + bonusHp(S, a)) || a.id - b.id);
+      t = visible[0] || t;
+    }
+    return t;
+  }
+  const targetable = (S, c) => resolveTarget(S, c) !== null;
+
+  // trajet : renvoie {stand:[u,k], target:'fusee'|clé de tuile}
+  function walk(S, c) {
+    let u = c.u, k = c.k;
+    for (;;) {
+      const [nu, nk] = nextStep(u, k);
+      if (nk === 0) return { stand: [u, k], target: "fusee" };
+      const [x, y] = toGlobal(c.lane, nu, nk), tk = key(x, y);
+      if (S.tiles[tk]) return { stand: [u, k], target: tk };
+      u = nu; k = nk;
+    }
+  }
+  function laneTiles(S, lane) { return Object.keys(S.tiles).filter(k => cellLane(...parse(k)) === lane); }
+
+  const cellName = (u, k) => (k === 4 ? "entrée " + COLS[u + 2] : COLS[u + 2] + k);
+  const attacks = c => CREATURES[c.name].type !== "soutien";
+  function act(S, c, chosenTarget) {
+    if (c.acted) return;
+    c.acted = true;
+    const w = walk(S, c), from = cellName(c.u, c.k);
+    c.u = w.stand[0]; c.k = w.stand[1];
+    const to = cellName(c.u, c.k), tgt = w.target === "fusee" ? "la fusée" : `${cellName(...toLocal(c.lane, ...parse(w.target)))}`;
+    log(S, "essaim", `${c.name} (lane ${LANE_NAME[c.lane]}) : ${from === to ? "reste en " + from : from + " → " + to}, devant ${tgt}.`);
+    if (!attacks(c)) { // les soutiens avancent avec l'essaim mais n'attaquent jamais (ils ne s'empalent pas sur les Épines)
+      log(S, "essaim", `${c.name} avance sans attaquer.`);
+      return;
+    }
+    let target = w.target;
+    if (chosenTarget && hasMobility(S, c) && laneTiles(S, c.lane).includes(chosenTarget)) target = chosenTarget;
+    const dmg = effAtq(S, c);
+    if (target === "fusee") {
+      S.workersBase -= 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
+      log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
+      if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
+      return;
+    }
+    hitTile(S, c, target, dmg, true);
+    killCheck(S);
+  }
+  function hitTile(S, c, tk, dmg, primary) {
+    const t = S.tiles[tk]; if (!t) return;
+    const [x, y] = parse(tk), lane = cellLane(x, y);
+    const epVal = epinesOf(S, tk); // calculé avant les dégâts : la tuile peut tomber
+    if (t.camo && !t.revealed) { // Camouflage : la première attaque retourne la tuile
+      t.revealed = true;
+      if (t.trap) {
+        if (!clairvoyance(S)) damageCreature(S, c, 2, "piège");
+        log(S, "essaim", "Un piège est révélé.");
+      } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
+    }
+    if (S.stase.includes(lane)) {
+      log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
+    } else {
+      const loss = t.ren ? Math.floor(dmg / t.ren) : dmg;
+      const capacity = t.ren ? t.hp * t.ren : t.hp;
+      const excess = dmg - capacity;
+      t.hp -= loss;
+      log(S, "essaim", `${c.name} inflige ${dmg} à ${t.name} (−${Math.min(loss, t.hp + loss)} PV).`);
+      if (primary && caseMates(S, c).some(o => o.name === "Sporeur")) {
+        for (const [a, b] of neighbors(x, y)) {
+          const nk = key(a, b), nt = S.tiles[nk];
+          if (nt && !S.stase.includes(cellLane(a, b))) {
+            nt.hp -= nt.ren ? Math.floor(1 / nt.ren) : 1;
+            if (nt.hp <= 0) destroyTile(S, nk, "spores");
+          }
+        }
+      }
+      if (t.hp <= 0) {
+        destroyTile(S, tk);
+        if (excess > 0 && hasPercee(S, c)) {
+          const [lu, lk] = toLocal(lane, x, y);
+          const ghost = { ...c, u: lu, k: lk };
+          const w = walk(S, ghost);
+          if (w.target === "fusee") {
+            S.workersBase -= 1;
+            log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
+            if (S.workersBase <= 0) S.winner = "essaim";
+          } else hitTile(S, c, w.target, excess, false);
+        }
+      }
+    }
+    if (primary && epVal > 0) damageCreature(S, c, epVal, "épines");
+  }
+
+  // ------------------------------------------------------------------ tour de l'essaim
+  function startAttackerTurn(S) {
+    S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = [];
+    for (const c of S.creatures) { c.new = false; c.acted = false; }
+    // Réincarnation
+    for (const r of S.reincQueue) {
+      S.creatures.push(makeCreature(S, r.name, r.lane, r.u));
+      log(S, "essaim", `${r.name} se réincarne à l'entrée de la lane ${LANE_NAME[r.lane]}.`);
+    }
+    S.reincQueue = [];
+    S.famine = 0;
+  }
+  function attackerDraw(S) {
+    const t = TIERS[tier(S)];
+    S.handA = [];
+    for (let lvl = 3; lvl >= 1; lvl--) {
+      for (let i = 0; i < t.n[lvl - 1]; i++) {
+        for (let l = lvl; l >= 1; l--) if (S.piles[l].length) { S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ }); break; }
+      }
+    }
+    if (S.upgrades.aggro.r2 === "C") {
+      for (let i = 0; i < 2; i++) if (S.piles[1].length) S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ });
+    }
+    S.budget = Math.max(0, S.biomass - S.famine);
+    S.phase = "A_deploy";
+    log(S, "essaim", `Palier ${tier(S) + 1} : ${S.handA.length} cartes, budget ${S.budget}.`);
+  }
+  function canDeploy(S, card, lane) {
+    const cost = card.free ? 0 : CREATURES[card.name].cost;
+    return S.phase === "A_deploy" && cost <= S.budget && laneCount(S, lane) < capOf(S);
+  }
+  function deploy(S, uid, lane, u) {
+    const i = S.handA.findIndex(c => c.uid === uid); if (i < 0) return false;
+    const card = S.handA[i];
+    if (!canDeploy(S, card, lane)) return false;
+    S.budget -= card.free ? 0 : CREATURES[card.name].cost;
+    S.handA.splice(i, 1);
+    const c = makeCreature(S, card.name, lane, u);
+    S.creatures.push(c);
+    log(S, "essaim", `${card.name} déployé${card.free ? " gratuitement" : ""} en lane ${LANE_NAME[lane]}, colonne ${COLS[u + 2]}.`);
+    if (card.name === "Sapeur" && S.chantiers[lane].length) {
+      const ch = S.chantiers[lane].shift();
+      S.tileDiscard.push(ch.tile);
+      log(S, "essaim", `Sabotage : le chantier de la lane ${LANE_NAME[lane]} est détruit (${ch.tile}).`);
+    }
+    if (card.name === "Œil-sonde") revealLane(S, lane);
+    if (card.name === "Catalyseur") { const m = caseMates(S, c); c.instinctTarget = m.length ? m[0].id : null; }
+    for (const o of S.creatures) if (o.name === "Catalyseur" && !o.instinctTarget) { const m = caseMates(S, o); o.instinctTarget = m.length ? m[0].id : null; }
+    return true;
+  }
+  function revealLane(S, lane) {
+    for (const k of laneTiles(S, lane)) if (S.tiles[k].camo && !S.tiles[k].revealed) { S.tiles[k].revealed = true; if (S.tiles[k].trap) S.tiles[k].disarmed = true; log(S, "essaim", `Vision : tuile camouflée révélée (${S.tiles[k].name}).`); }
+  }
+  function endDeploy(S) {
+    if (S.budget > 0) { S.reserve += S.budget; log(S, "essaim", `${S.budget} biomasse versée à la réserve (réserve ${S.reserve}).`); }
+    S.budget = 0;
+    for (const c of S.handA) S.piles[CREATURES[c.name].lvl].push(c.name);
+    for (const l of [1, 2, 3]) shuffle(S.piles[l]);
+    S.handA = [];
+    S.phase = "A_upgrade";
+  }
+  // Améliorations payées en plusieurs fois : on investit des points de biomasse dans un nœud précis.
+  // Commencer à investir dans un nœud ferme l'autre choix du même rang.
+  const nodeCost = slot => (slot.endsWith("1") ? COST_R1 : COST_R2);
+  function invested(S, type, slot) { return (S.invest && S.invest[type + ":" + slot]) || 0; }
+  function nodeState(S, type, slot) {
+    const u = S.upgrades[type], r1 = slot.endsWith("1"), cur = r1 ? u.r1 : u.r2;
+    if (cur === slot[0]) return "taken";
+    if (cur) return "closed";
+    const siblings = r1 ? ["A1", "B1"] : ["A2", "C2", "B2"];
+    if (siblings.some(o => o !== slot && invested(S, type, o) > 0)) return "closed";
+    if (!r1 && !u.r1) return "needR1";
+    if (!r1 && slot !== "C2" && u.r1 !== slot[0]) return "closed";
+    return "open";
+  }
+  function investable(S) {
+    if (S.phase === "A_deploy") return S.budget + S.reserve;
+    if (S.phase === "A_upgrade") return S.reserve;
+    return 0;
+  }
+  function invest(S, type, slot, n) {
+    if (nodeState(S, type, slot) !== "open") return false;
+    const need = nodeCost(slot) - invested(S, type, slot);
+    n = Math.min(n, need, investable(S));
+    if (n <= 0) return false;
+    let left = n;
+    if (S.phase === "A_deploy") { const b = Math.min(left, S.budget); S.budget -= b; left -= b; }
+    S.reserve -= left;
+    S.invest = S.invest || {};
+    S.invest[type + ":" + slot] = invested(S, type, slot) + n;
+    log(S, "essaim", `${n} biomasse investie dans ${TREES[type][slot][0]} (${invested(S, type, slot)}/${nodeCost(slot)}).`);
+    if (invested(S, type, slot) >= nodeCost(slot)) { delete S.invest[type + ":" + slot]; acquire(S, type, slot); }
+    return true;
+  }
+  function acquire(S, type, slot) {
+    const u = S.upgrades[type];
+    const before = S.creatures.filter(c => CREATURES[c.name].type === type).map(c => [c, maxHp(S, c.name)]);
+    if (slot.endsWith("1")) { u.r1 = slot[0]; addPile(S, 2, type); } else { u.r2 = slot[0]; addPile(S, 3, type); }
+    for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
+    log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
+    if (type === "soutien" && slot === "C2") log(S, "essaim", "Clairvoyance : les tuiles camouflées sont visibles tant qu'un soutien est en jeu.");
+  }
+  function canBuy(S, type, slot) { return nodeState(S, type, slot) === "open" && investable(S) + invested(S, type, slot) >= nodeCost(slot); }
+  function buy(S, type, slot) { return canBuy(S, type, slot) && invest(S, type, slot, nodeCost(slot)); }
+  function raid(S, id, toLane) {
+    const c = S.creatures.find(o => o.id === id);
+    if (!c || S.raidUsed || S.upgrades.aggro.r2 !== "B" || CREATURES[c.name].type !== "aggro") return false;
+    const i = LANES.indexOf(c.lane), j = LANES.indexOf(toLane);
+    if (!((i + 1) % 4 === j || (i + 3) % 4 === j)) return false;
+    if (laneCount(S, toLane) >= capOf(S)) return false;
+    c.lane = toLane; c.u = 0; c.k = 4; S.raidUsed = true;
+    log(S, "essaim", `Raid : ${c.name} passe à l'entrée de la lane ${LANE_NAME[toLane]}.`);
+    return true;
+  }
+  function startAttacks(S) { S.phase = "A_attack"; }
+  function attackOrder(S) { return [...S.creatures].filter(c => !c.acted).sort((a, b) => a.k - b.k || a.id - b.id); }
+  function endAttackerTurn(S) {
+    if (S.winner) return;
+    // auras de soin
+    for (const c of S.creatures) {
+      const v = soinValue(S, c), m = maxHp(S, c.name);
+      if (v && c.hp < m) { c.hp = Math.min(m, c.hp + v); log(S, "essaim", `${c.name} regagne ${v} PV.`); }
+    }
+    // sortilèges offensifs non joués : défaussés
+    const off = S.spells.filter(s => SPELLS[s].kind === "off");
+    if (off.length) { S.spellDiscard.push(...off); S.spells = S.spells.filter(s => SPELLS[s].kind !== "off"); log(S, "colonie", `${off.length} sortilège${off.length > 1 ? "s" : ""} offensif${off.length > 1 ? "s" : ""} non joué${off.length > 1 ? "s" : ""} défaussé${off.length > 1 ? "s" : ""}.`); }
+    S.stase = [];
+    startDefenderTurn(S);
+  }
+
+  // ------------------------------------------------------------------ sortilèges
+  function useSpell(S, idx, arg) {
+    const name = S.spells[idx]; if (!name) return false;
+    const sp = SPELLS[name];
+    const ok = applySpell(S, name, arg);
+    if (!ok) return false;
+    S.spells.splice(idx, 1); S.spellDiscard.push(name);
+    log(S, "colonie", `Sortilège joué : ${name}.`);
+    killCheck(S);
+    return true;
+  }
+  function applySpell(S, name, arg) {
+    const cr = id => S.creatures.find(c => c.id === id);
+    switch (name) {
+      case "Frappe orbitale": { const c = cr(arg); if (!c) return false; const t = resolveTarget(S, c); if (!t) return false; damageCreature(S, t, 4, name); return true; }
+      case "Salve": {
+        const c = cr(arg); if (!c) return false;
+        const group = [c, ...caseMates(S, c)].filter(o => targetable(S, o));
+        if (!group.length) return false;
+        const first = resolveTarget(S, c) || group[0];
+        const rest = group.filter(o => o !== first).sort((a, b) => effAtq(S, b) - effAtq(S, a));
+        damageCreature(S, first, 2, name); if (rest[0]) damageCreature(S, rest[0], 2, name);
+        return true;
+      }
+      case "Barrage": { if (!LANES.includes(arg)) return false; for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
+      case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
+      case "Champ de stase": { if (!LANES.includes(arg)) return false; S.stase.push(arg); return true; }
+      case "Famine": { if (S.phase !== "A_start") return false; S.famine += 2; return true; }
+      case "Brouillage": {
+        const c = cr(arg); if (!c || !c.new) return false;
+        S.creatures.splice(S.creatures.indexOf(c), 1);
+        S.piles[CREATURES[c.name].lvl].push(c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
+        log(S, "colonie", `Brouillage : le déploiement de ${c.name} est annulé.`);
+        return true;
+      }
+      case "Effort": S.extraPts += 2; return true;
+      case "Cadence": S.extraPts += 2; return true;
+      case "Réparation": { // arg = liste de clés de tuiles, 3 PV au total
+        if (!Array.isArray(arg) || !arg.length || arg.length > 3) return false;
+        for (const k of arg) { const t = S.tiles[k]; if (t && t.hp < t.max) t.hp += 1; }
+        return true;
+      }
+      case "Renouvellement": { // arg = indices de la main à défausser
+        if (!Array.isArray(arg)) return false;
+        const idx = [...arg].sort((a, b) => b - a);
+        for (const i of idx) if (S.hand[i]) S.tileDiscard.push(S.hand.splice(i, 1)[0]);
+        for (let i = 0; i < arg.length; i++) drawOneTile(S);
+        return true;
+      }
+      case "Reconversion": { // arg = {hand: index, tile: clé}
+        if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].name === "Mur de départ") return false;
+        const old = S.tiles[arg.tile], nn = S.hand[arg.hand];
+        const [x, y] = parse(arg.tile);
+        S.tiles[arg.tile] = tileStats(nn, x, y);
+        if (TILES[nn].perm) S.workersBase += 1;
+        S.hand[arg.hand] = old.name;
+        log(S, "colonie", `Reconversion : ${pubName(nn)} remplace ${old.camo && !old.revealed ? "une tuile camouflée" : old.name}.`);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ------------------------------------------------------------------ tour de la colonie
+  function startDefenderTurn(S) {
+    S.phase = "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = [];
+  }
+  const pubName = name => (TILES[name] && TILES[name].camo ? "tuile camouflée" : name);
+  // Le chantier est affecté à une lane ; la case exacte n'est choisie qu'à la fin de la construction.
+  function startChantier(S, handIdx, lane) {
+    if (S.phase !== "D_main" || S.chantiers[lane].length >= S.chPerLane || S.hand[handIdx] === undefined) return false;
+    const name = S.hand.splice(handIdx, 1)[0];
+    S.chantiers[lane].push({ tile: name, left: TILES[name].d, fresh: true });
+    log(S, "colonie", `Chantier lancé en lane ${LANE_NAME[lane]} : ${pubName(name)}.`);
+    return true;
+  }
+  function cancelChantier(S, lane, i) {
+    const ch = S.chantiers[lane][i]; if (!ch || !ch.fresh || S.phase !== "D_main") return false;
+    S.chantiers[lane].splice(i, 1); S.hand.push(ch.tile); return true;
+  }
+  function supportTargets(S, sk) { // portée : les 8 cases autour du support (diagonales comprises)
+    const [x, y] = parse(sk);
+    return S.creatures.filter(c => { const [a, b] = toGlobal(c.lane, c.u, c.k); return Math.max(Math.abs(a - x), Math.abs(b - y)) === 1 && targetable(S, c); });
+  }
+  const rocketMilestones = S => [3, 6, 9].filter(f => S.floors >= f).length;
+  const turretDmg = (S, l) => (l === 1 ? 1 + rocketMilestones(S) : l === 2 ? 2 : 0);
+  function fire(S, sk, creatureId) {
+    const lvl = S.supports[sk];
+    if (!lvl || lvl === 3 || S.firedSupports.includes(sk)) return false;
+    const c = S.creatures.find(o => o.id === creatureId);
+    if (!c || !supportTargets(S, sk).includes(c)) return false;
+    const t = resolveTarget(S, c);
+    S.firedSupports.push(sk);
+    damageCreature(S, t, turretDmg(S, lvl), `tourelle de niveau ${lvl}`);
+    killCheck(S);
+    return true;
+  }
+  function autoFire(S) {
+    const order = Object.keys(S.supports).sort((a, b) => S.supports[a] - S.supports[b]);
+    for (const sk of order) {
+      if (S.supports[sk] === 3 || S.firedSupports.includes(sk)) continue;
+      const cands = supportTargets(S, sk); if (!cands.length) { S.firedSupports.push(sk); continue; }
+      const d = turretDmg(S, S.supports[sk]);
+      cands.sort((a, b) => ((resolveTarget(S, b).hp <= d) - (resolveTarget(S, a).hp <= d)) || a.k - b.k || effAtq(S, b) - effAtq(S, a));
+      fire(S, sk, cands[0].id);
+    }
+  }
+  function endDefenderTurn(S) {
+    // tirs restants (automatiques)
+    autoFire(S);
+    // chantiers et débordement
+    let rocket = totalPoints(S) - allocated(S);
+    for (const lane of LANES) {
+      let pts = S.alloc[lane];
+      const done = [];
+      for (const ch of S.chantiers[lane]) {
+        const use = Math.min(pts, ch.left); ch.left -= use; pts -= use;
+        if (ch.left === 0) done.push(ch);
+      }
+      rocket += pts;
+      for (const ch of done) {
+        S.chantiers[lane].splice(S.chantiers[lane].indexOf(ch), 1);
+        S.toPlace.push({ tile: ch.tile, lane });
+      }
+    }
+    for (const lane of LANES) for (const ch of S.chantiers[lane]) ch.fresh = false;
+    S.pendingRocket = rocket;
+    skipUnplaceable(S);
+    if (S.toPlace.length) { S.phase = "D_place"; return; }
+    finishDefenderTurn(S);
+  }
+  // pose d'un bâtiment achevé : la colonie choisit une case valable de sa lane
+  function placeTargets(S) {
+    const p = S.toPlace[0]; if (!p) return [];
+    const out = [];
+    for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) { const k = key(x, y); if (canTarget(S, p.lane, k)) out.push(k); }
+    return out;
+  }
+  function skipUnplaceable(S) {
+    while (S.toPlace.length && !placeTargets(S).length) {
+      const p = S.toPlace.shift(); S.hand.push(p.tile);
+      log(S, "colonie", `${pubName(p.tile)} : aucune case libre en lane ${LANE_NAME[p.lane]}, la tuile revient en main.`);
+    }
+  }
+  function placeTile(S, k) {
+    if (S.phase !== "D_place" || !placeTargets(S).includes(k)) return false;
+    const p = S.toPlace.shift(), [x, y] = parse(k);
+    pushBack(S, k);
+    S.tiles[k] = tileStats(p.tile, x, y);
+    if (TILES[p.tile].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
+    log(S, "colonie", TILES[p.tile].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[p.lane]}.` : `${p.tile} construit en lane ${LANE_NAME[p.lane]}.`);
+    skipUnplaceable(S);
+    if (!S.toPlace.length) finishDefenderTurn(S);
+    return true;
+  }
+  function finishDefenderTurn(S) {
+    const rocket = S.pendingRocket || 0; S.pendingRocket = 0;
+    // fusée
+    S.rocketPts += Math.max(0, rocket);
+    while (S.floors < FLOORS && S.rocketPts >= FLOOR_COST) {
+      S.rocketPts -= FLOOR_COST; S.floors += 1; S.workersBase += 1;
+      log(S, "colonie", `Étage ${S.floors} de la fusée achevé : +1 travailleur.`);
+      if (S.floors === 3) { S.techBonus += 2; log(S, "colonie", "Palier 3 : +2 technologies permanentes."); }
+      if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
+      if (S.floors === 9) {
+        for (const c of S.creatures) S.piles[CREATURES[c.name].lvl].push(c.name);
+        for (const l of [1, 2, 3]) shuffle(S.piles[l]);
+        log(S, "colonie", `Palier 9 · Nuke : ${S.creatures.length} créature${S.creatures.length > 1 ? "s" : ""} détruite${S.creatures.length > 1 ? "s" : ""}.`);
+        S.creatures = [];
+      }
+      if (S.floors === FLOORS) { S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
+    }
+    placeSupports(S);
+    // sortilèges de soutien non joués : défaussés
+    const sup = S.spells.filter(s => SPELLS[s].kind === "sup");
+    if (sup.length) { S.spellDiscard.push(...sup); S.spells = S.spells.filter(s => SPELLS[s].kind !== "sup"); }
+    drawTiles(S);
+    const n = spellsPerTurn(S);
+    for (let i = 0; i < n; i++) {
+      if (!S.spellDeck.length) { S.spellDeck = shuffle(S.spellDiscard); S.spellDiscard = []; }
+      if (S.spellDeck.length) S.spells.push(S.spellDeck.pop());
+    }
+    if (n) log(S, "colonie", `${n} sortilège${n > 1 ? "s" : ""} pioché${n > 1 ? "s" : ""}.`);
+    S.round += 1;
+    startAttackerTurn(S);
+  }
+  function drawOneTile(S) {
+    if (!S.tileDeck.length) { S.tileDeck = shuffle(S.tileDiscard); S.tileDiscard = []; }
+    if (S.tileDeck.length) S.hand.push(S.tileDeck.pop());
+  }
+  function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
+
+  return {
+    CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
+    key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
+    newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
+    clairvoyance, hasMobility, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    attacks, pushBack, act, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, raid, startAttacks, attackOrder, endAttackerTurn,
+    useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, targetable, resolveTarget,
+    tileStats, placeSupports, killCheck, pubName,
+  };
+})();
+if (typeof module !== "undefined") module.exports = SF;
+
+// Siège & Fusée — interface 2 joueurs sur le même écran
+"use strict";
+(() => {
+  const $ = s => document.querySelector(s);
+  const E = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const icon = (n, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ""}</svg>`;
+  const SAVE = "siege-fusee-v03";
+  let S = null;
+  let UI = { sel: null, selCreature: null, spell: null, picks: [], support: null, mob: null, help: false, recoHand: null };
+
+  const PHASE_TXT = {
+    A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
+    A_start: ["essaim", "Tour de l'essaim", "Piochez vos cartes selon votre palier."],
+    A_deploy: ["essaim", "Déploiement", "Choisissez une carte, puis une case d'entrée (bord du plateau) dans une lane. Vous pouvez aussi investir votre budget dans une amélioration (panneau Essaim). Le budget non dépensé ira à la réserve."],
+    A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
+    A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
+    A_attack: ["essaim", "Attaques", "Chaque créature se déplace puis attaque, une par une, dans l'ordre de votre choix."],
+    D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs."],
+    D_fire: ["colonie", "Tirs des supports", "Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
+    D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
+  };
+  const who = () => PHASE_TXT[S.phase] ? PHASE_TXT[S.phase][0] : "essaim";
+  const SIDE = { essaim: "l'essaim", colonie: "la colonie" };
+
+  // ---------------------------------------------------------------- sauvegarde
+  function save() { try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch (e) { /* stockage indisponible */ } }
+  function load() { try { const t = localStorage.getItem(SAVE); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+  function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
+
+  function newGame() { S = SF.newGame(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, mob: null, help: false, recoHand: null });
+  function setPhaseHandoff() { // passe la main si le joueur actif change
+    const w = who();
+    if (S.view !== w) { S.handoff = w; UI = { ...resetUI(), help: UI.help }; }
+  }
+
+  // ---------------------------------------------------------------- rendu
+  function render() {
+    if (!S) return;
+    document.body.dataset.view = S.view || "";
+    $("#app").innerHTML = header() + (S.handoff ? handoff() : S.winner ? winner() + layout() : layout()) + (UI.help ? help() : "");
+  }
+  function header() {
+    const p = PHASE_TXT[S.phase] || ["", "", ""];
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Siège &amp; Fusée</b><span>prototype v0.3</span></div>
+      <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
+      <div class="menu"><button data-a="help" class="ghost">Règles</button><button data-a="new" class="ghost">Nouvelle partie</button></div></header>`;
+  }
+  function handoff() {
+    const w = S.handoff;
+    return `<section class="handoff ${w}"><div class="ho-card">${icon(w === "essaim" ? "spores" : "fusee", "i big")}
+      <p class="ho-k">Manche ${S.round}</p><h2>Au tour de ${SIDE[w]}</h2>
+      <p>Passez l'appareil. Les mains et les tuiles camouflées de l'autre camp restent cachées.</p>
+      <button data-a="reveal" class="primary">Je joue ${SIDE[w]}</button></div></section>`;
+  }
+  function winner() {
+    return `<section class="banner win ${S.winner}">${icon(S.winner === "essaim" ? "spores" : "fusee")}<b>${S.winner === "essaim" ? "L'essaim gagne : la colonie n'a plus de travailleurs." : "La fusée décolle : la colonie gagne."}</b>
+      <button data-a="new" class="primary">Rejouer</button></section>`;
+  }
+  function layout() {
+    return `<main class="layout"><aside class="panel colonie">${colonyPanel()}</aside>
+      <section class="center">${phaseBox()}<div class="board-wrap">${board()}</div>${detail()}</section>
+      <aside class="panel essaim">${swarmPanel()}${logPanel()}</aside></main>`;
+  }
+
+  // ---------------------------------------------------------------- boîte d'action
+  function phaseBox() {
+    if (S.winner) return "";
+    const p = PHASE_TXT[S.phase];
+    let body = "", acts = "";
+    const ph = S.phase;
+    if (ph === "A_famine") {
+      acts = `<button data-a="famine" data-v="1" class="primary">Jouer Famine</button><button data-a="famine" data-v="0">Ne pas jouer</button>`;
+    } else if (ph === "A_start") {
+      acts = `<button data-a="draw" class="primary">Piocher (palier ${SF.tier(S) + 1})</button>`;
+    } else if (ph === "A_deploy") {
+      body = UI.sel ? `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez une case d'entrée surlignée.</p>` : "";
+      acts = `<button data-a="endDeploy" class="primary">Terminer les déploiements</button>`;
+    } else if (ph === "A_upgrade") {
+      body = `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
+      acts = `<button data-a="toAttacks" class="primary">Passer aux attaques</button>`;
+    } else if (ph === "A_react") {
+      body = spellBox("off");
+      acts = `<button data-a="reactDone" class="primary">Terminer la réaction</button>`;
+    } else if (ph === "A_attack") {
+      if (UI.mob) {
+        const c = S.creatures.find(o => o.id === UI.mob);
+        body = `<p class="hint">${E(c.name)} a la Mobilité : choisissez sa cible dans la lane ${SF.LANE_NAME[c.lane]}.</p><div class="choices">` +
+          SF.laneTiles(S, c.lane).map(k => `<button data-a="mobTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") +
+          `<button data-a="mobTarget" data-k="" class="primary">Cible normale</button></div>`;
+      } else {
+        const order = SF.attackOrder(S);
+        body = order.length ? `<div class="choices">` + order.map(c => `<button data-a="act" data-id="${c.id}">${E(c.name)} · ${posTxt(c)}${SF.attacks(c) ? "" : " · avance"}</button>`).join("") + `</div>` : `<p class="hint">Toutes les créatures ont agi.</p>`;
+        acts = (order.length ? `<button data-a="actAll">Tout résoudre (les plus avancées d'abord)</button>` : "") + `<button data-a="endA" class="primary"${order.length ? " disabled" : ""}>Fin du tour de l'essaim</button>`;
+      }
+    } else if (ph === "D_main") {
+      body = spellBox("sup") + (UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
+      acts = `<button data-a="toFire" class="primary">Passer aux tirs</button>`;
+    } else if (ph === "D_place") {
+      const p = S.toPlace[0];
+      body = p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
+    } else if (ph === "D_fire") {
+      if (UI.support) {
+        const c = SF.supportTargets(S, UI.support);
+        body = `<p class="hint">Tourelle de niveau ${S.supports[UI.support]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : choisissez la cible.</p><div class="choices">` +
+          c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("") + `</div>`;
+      } else {
+        const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && !S.firedSupports.includes(k) && SF.supportTargets(S, k).length);
+        body = ready.length ? `<p class="hint">Tourelles prêtes : cliquez une tourelle surlignée sur le plateau.</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
+      }
+      acts = `<button data-a="autoFire">Tirs automatiques</button><button data-a="endD" class="primary">Terminer le tour (construction et fusée)</button>`;
+    }
+    return `<section class="phase ${p[0]}"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
+      <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
+  }
+  function spellBox(kind) {
+    const list = S.spells.map((s, i) => [s, i]).filter(([s]) => SF.SPELLS[s].kind === kind && !(kind === "off" && s === "Famine"));
+    if (UI.spell !== null) return spellTargeting();
+    if (!list.length) return kind === "sup" ? "" : `<p class="hint">Aucun sortilège offensif jouable.</p>`;
+    return `<div class="spells">` + list.map(([s, i]) => `<button data-a="spell" data-i="${i}" class="spell ${kind}">${icon(spellIcon(s))}<span><b>${E(s)}</b><small>${E(SF.SPELLS[s].text)}</small></span></button>`).join("") + `</div>`;
+  }
+  function spellTargeting() {
+    const name = S.spells[UI.spell];
+    const cancel = `<button data-a="spellCancel">Annuler</button>`;
+    const crs = list => `<div class="choices">${list.map(c => `<button data-a="spellArg" data-v="${c.id}">${E(c.name)} · ${c.hp} PV · ${posTxt(c)}</button>`).join("")}${cancel}</div>`;
+    const lanes = `<div class="choices">${SF.LANES.map(l => `<button data-a="spellArg" data-v="${l}">Lane ${SF.LANE_NAME[l]}</button>`).join("")}${cancel}</div>`;
+    let inner = "";
+    switch (name) {
+      case "Frappe orbitale": case "Salve": inner = crs(S.creatures.filter(c => SF.targetable(S, c))); break;
+      case "Brouillage": inner = crs(S.creatures.filter(c => c.new)); break;
+      case "Barrage": case "Champ de stase": inner = lanes; break;
+      case "Onde de choc": inner = `<div class="choices">${[1, 2, 3].map(r => `<button data-a="spellArg" data-v="${r}">Couronne ${r}</button>`).join("")}${cancel}</div>`; break;
+      case "Réparation": {
+        const dmg = Object.keys(S.tiles).filter(k => S.tiles[k].hp < S.tiles[k].max);
+        inner = `<p class="hint">Points posés : ${UI.picks.length} / 3.</p><div class="choices">` +
+          dmg.map(k => `<button data-a="pick" data-k="${k}">+1 · ${E(tileLabel(k))} (${S.tiles[k].hp + UI.picks.filter(p => p === k).length}/${S.tiles[k].max})</button>`).join("") +
+          `<button data-a="spellArg" data-v="picks" class="primary"${UI.picks.length ? "" : " disabled"}>Valider</button>${cancel}</div>`;
+        break;
+      }
+      case "Renouvellement":
+        inner = `<p class="hint">Choisissez les tuiles à défausser.</p><div class="choices">` +
+          S.hand.map((t, i) => `<button data-a="pickHand" data-i="${i}" class="${UI.picks.includes(i) ? "on" : ""}">${E(t)}</button>`).join("") +
+          `<button data-a="spellArg" data-v="picks" class="primary">Défausser et repiocher</button>${cancel}</div>`;
+        break;
+      case "Reconversion":
+        inner = UI.recoHand === null
+          ? `<p class="hint">Choisissez la tuile de votre main.</p><div class="choices">${S.hand.map((t, i) => `<button data-a="recoHand" data-i="${i}">${E(t)}</button>`).join("")}${cancel}</div>`
+          : `<p class="hint">Elle remplace quelle tuile construite ?</p><div class="choices">${Object.keys(S.tiles).filter(k => S.tiles[k].name !== "Mur de départ").map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`;
+        break;
+      default: inner = `<div class="choices"><button data-a="spellArg" data-v="go" class="primary">Jouer ${E(name)}</button>${cancel}</div>`;
+    }
+    return `<div class="targeting"><p class="hint"><b>${E(name)}</b> : ${E(SF.SPELLS[name].text)}</p>${inner}</div>`;
+  }
+  const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
+  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", leurre: "leurre", percee: "percee", instinct: "instinct", sabotage: "sabotage", spores: "spores" }[c] || "aura");
+  const cardOf = uid => S.handA.find(c => c.uid === uid) || { name: "?" };
+  function posTxt(c) { return c.k === 4 ? `entrée ${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}` : `${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}${c.k}`; }
+  function tileLabel(k) {
+    const [x, y] = SF.parse(k), l = SF.cellLane(x, y), [u, r] = SF.toLocal(l, x, y);
+    return `${S.tiles[k] ? (hiddenTrap(S.tiles[k]) ? "Tuile camouflée" : S.tiles[k].name) : "case"} · ${SF.LANE_NAME[l]} ${SF.COLS[u + 2]}${r}`;
+  }
+
+  // ---------------------------------------------------------------- plateau
+  function hiddenTrap(t) { return t.camo && !t.revealed && S.view === "essaim" && !SF.clairvoyance(S); }
+  function board() {
+    const canDeployHere = (lane, u) => S.phase === "A_deploy" && S.view === "essaim" && UI.sel && SF.canDeploy(S, cardOf(UI.sel), lane);
+    const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : [];
+    let html = "";
+    for (let y = 4; y >= -4; y--) for (let x = -4; x <= 4; x++) {
+      const r = SF.ring(x, y), k = SF.key(x, y);
+      if (r === 4) { // entrées
+        const lane = SF.cellLane(x, y);
+        if (!lane) { html += `<div class="cell void"></div>`; continue; }
+        const [u] = SF.toLocal(lane, x, y);
+        if (Math.abs(u) > 2) { html += `<div class="cell void"></div>`; continue; }
+        const crs = S.creatures.filter(c => c.lane === lane && c.k === 4 && c.u === u);
+        const hot = canDeployHere(lane, u);
+        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : ""}><span class="col">${SF.COLS[u + 2]}</span>${tokens(crs)}</div>`;
+        continue;
+      }
+      if (x === 0 && y === 0) {
+        html += `<div class="cell core">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
+        continue;
+      }
+      if (SF.isSupportCell(x, y)) {
+        const lvl = S.supports[k];
+        const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && !S.firedSupports.includes(k) && SF.supportTargets(S, k).length;
+        const fired = S.firedSupports.includes(k);
+        html += lvl ? `<div class="cell sup${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
+            <span class="lv">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? icon("tourelle") + `<b>${SF.turretDmg(S, lvl)}</b>` : icon("travailleur") + "<b>+2</b>"}</div>`
+          : `<div class="cell corner"><span class="lv">${["", "I", "II", "III"][r]}</span></div>`;
+        continue;
+      }
+      const lane = SF.cellLane(x, y);
+      const t = S.tiles[k];
+      const crs = S.creatures.filter(c => c.k < 4 && SF.posKey(c) === k);
+      const target = placeHot.includes(k);
+      let inner = "";
+      if (t) {
+        if (hiddenTrap(t)) inner = `<div class="tile hidden"><b>?</b><small>camouflée</small></div>`;
+        else {
+          const ep = SF.epinesOf(S, k);
+          inner = `<div class="tile${t.camo && !t.revealed ? " trap" : ""}" title="${t.camo && !t.revealed ? "Camouflée : l'essaim ne la voit pas" : ""}"><span class="tn">${E(short(t.name))}</span><b class="hp">${t.hp}<small>/${t.max}</small></b>
+            <span class="tb">${icon("epines")}${ep}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
+        }
+      }
+      const stased = S.stase.includes(lane);
+      html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${stased ? " stase" : ""}" ${target ? `data-a="placeAt" data-k="${k}"` : ""}>${inner}${tokens(crs)}</div>`;
+    }
+    return `<div class="board" role="grid" aria-label="Plateau">${html}</div>
+      <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
+  }
+  // Carte de tuile en main : durée, PV, Épines et capacités (libellés du Catalogue du livret v0.3)
+  function tileCard(name) {
+    const t = SF.TILES[name], L = SF.LANE_NAME;
+    const pv = t.pv === "ap" ? `2 (4 en lane ${L[t.dir]})` : t.pv === "front" ? "2 à 4" : t.pv === "reduit" ? "2 à 4" : t.pv;
+    const caps = [];
+    const cap = (ic, n, txt) => caps.push(`<span class="capline">${icon(ic)}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`);
+    if (t.pv === "ap") cap("cardinal", "Avant-poste", `+2 PV si posé dans la lane ${L[t.dir]} (4 PV), sinon 2 PV.`);
+    if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
+    if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
+    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que par tranche complète de ${t.ren} dégâts d'une même attaque.`);
+    if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
+    if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
+    if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
+    if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque ou par Vision / Clairvoyance.");
+    if (t.trap) cap("piege", "Piège", "2 dégâts à la créature qui le révèle en l'attaquant. Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.");
+    cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 si la tuile touche un support de niveau 2).`);
+    return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
+      <span class="stats">${icon("pv")} ${pv} PV · ${icon("epines")} Épines ${t.ep}</span>${caps.join("")}`;
+  }
+  const short = n => ({ "Mur de départ": "Départ", "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Av.-poste N", "Avant-poste de l'Est": "Av.-poste E", "Avant-poste du Sud": "Av.-poste S", "Avant-poste de l'Ouest": "Av.-poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
+  function tokens(crs) {
+    if (!crs.length) return "";
+    return `<div class="toks">` + crs.map(c => {
+      const t = SF.CREATURES[c.name].type;
+      const cls = `tok ${t}${UI.selCreature === c.id ? " sel" : ""}${c.acted && S.phase === "A_attack" ? " done" : ""}${c.new ? " new" : ""}`;
+      return `<button class="${cls}" data-a="creature" data-id="${c.id}" title="${E(c.name)}"><span>${SF.effAtq(S, c)}</span><span>${c.hp + SF.bonusHp(S, c)}</span></button>`;
+    }).join("") + `</div>`;
+  }
+  function detail() {
+    const c = S.creatures.find(o => o.id === UI.selCreature);
+    if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
+    const b = SF.CREATURES[c.name];
+    const extras = [];
+    if (SF.hasMobility(S, c)) extras.push("Mobilité");
+    if (SF.isStealthy(S, c)) extras.push("Furtivité");
+    if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
+    let actions = "";
+    if (S.view === "essaim" && c.name === "Catalyseur" && ["A_deploy", "A_upgrade"].includes(S.phase)) {
+      const mates = SF.caseMates(S, c);
+      actions += `<div class="choices"><span class="lab">Instinct :</span>` +
+        ["mobilite", "furtivite"].map(v => `<button data-a="instinct" data-id="${c.id}" data-v="${v}" class="${c.instinct === v ? "on" : ""}">${v === "mobilite" ? "Mobilité" : "Furtivité"}</button>`).join("") +
+        mates.map(m => `<button data-a="instTarget" data-id="${c.id}" data-v="${m.id}" class="${c.instinctTarget === m.id ? "on" : ""}">→ ${E(m.name)}</button>`).join("") + `</div>`;
+    }
+    if (S.view === "essaim" && S.phase === "A_upgrade" && b.type === "aggro" && S.upgrades.aggro.r2 === "B" && !S.raidUsed) {
+      const i = SF.LANES.indexOf(c.lane);
+      actions += `<div class="choices"><span class="lab">Raid :</span>${[SF.LANES[(i + 1) % 4], SF.LANES[(i + 3) % 4]].map(l => `<button data-a="raid" data-id="${c.id}" data-v="${l}">Vers ${SF.LANE_NAME[l]}</button>`).join("")}</div>`;
+    }
+    return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
+      <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${posTxt(c)}</p>
+      ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${actions}</section>`;
+  }
+
+  // ---------------------------------------------------------------- panneaux
+  function colonyPanel() {
+    const mine = S.view === "colonie";
+    const pts = SF.totalPoints(S), used = SF.allocated(S);
+    const floors = Array.from({ length: 12 }, (_, i) => `<i class="fl${i < S.floors ? " on" : ""}${[2, 5, 8, 11].includes(i) ? " ms" : ""}">${i + 1}</i>`).join("");
+    let ateliers = "";
+    for (const l of SF.LANES) {
+      const chs = S.chantiers[l];
+      const slots = Array.from({ length: S.chPerLane }, (_, i) => {
+        const ch = chs[i];
+        if (!ch) return mine && S.phase === "D_main" && UI.sel !== null && UI.spell === null && chs.length < S.chPerLane
+          ? `<button data-a="startCh" data-l="${l}" class="slot empty go">Construire ici : ${E(S.hand[UI.sel])}</button>` : `<div class="slot empty">libre</div>`;
+        const hide = SF.TILES[ch.tile].camo && !mine;
+        return `<div class="slot">${E(hide ? "?" : ch.tile)} · ${ch.left} pt${ch.left > 1 ? "s" : ""}${mine && ch.fresh && S.phase === "D_main" ? ` <button data-a="cancelCh" data-l="${l}" data-i="${i}" class="x" aria-label="Annuler">×</button>` : ""}</div>`;
+      }).join("");
+      const step = mine && S.phase === "D_main" ? `<span class="step"><button data-a="alloc" data-l="${l}" data-d="-1" aria-label="Retirer un point">−</button><b>${S.alloc[l]}</b><button data-a="alloc" data-l="${l}" data-d="1" aria-label="Ajouter un point">+</button></span>` : `<b class="pts">${S.alloc[l]}</b>`;
+      ateliers += `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${slots}</div>${step}</div>`;
+    }
+    const hand = mine
+      ? `<div class="hand">${S.hand.map((t, i) => `<button data-a="tile" data-i="${i}" class="tcard${UI.sel === i ? " sel" : ""}"${S.phase === "D_main" ? "" : " disabled"}>${tileCard(t)}</button>`).join("")}</div>`
+      : `<p class="hidden-hand">${S.hand.length} tuiles en main (cachées)</p>`;
+    const spells = mine ? (S.spells.length ? S.spells.map(s => `<span class="chip ${SF.SPELLS[s].kind}">${E(s)}</span>`).join("") : `<span class="muted">aucun</span>`) : `<span class="muted">${S.spells.length} en main (cachés)</span>`;
+    return `<h3>${icon("fusee")} Colonie</h3>
+      <div class="kv"><span>Travailleurs</span><b>${S.workersBase}${SF.bonusWorkers(S) ? ` + ${SF.bonusWorkers(S)}` : ""}</b></div>
+      <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
+      <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/3 points vers le suivant. Paliers 3 · 6 · 9.</p>
+      <h4>Ateliers ${mine && S.phase === "D_main" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>${ateliers}
+      <h4>Main de tuiles</h4>${hand}<h4>Sortilèges</h4><div class="chips">${spells}</div>`;
+  }
+  function swarmPanel() {
+    const mine = S.view === "essaim";
+    const t = SF.TIERS[SF.tier(S)];
+    const acquired = ty => { // améliorations acquises pour ce type
+      const u = S.upgrades[ty], out = [];
+      if (u.r1) out.push(SF.TREES[ty][u.r1 + "1"]);
+      if (u.r2) out.push(SF.TREES[ty][u.r2 + "2"]);
+      return out;
+    };
+    const hand = mine
+      ? (S.handA.length ? `<div class="hand">${S.handA.map(c => {
+        const b = SF.CREATURES[c.name];
+        const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
+        const ups = acquired(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
+        return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>
+          <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
+          <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""}</span>
+          ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
+      }).join("")}</div>` : `<p class="muted">Pas de cartes en main.</p>`)
+      : `<p class="hidden-hand">${S.handA.length} cartes en main (cachées)</p>`;
+    let trees = "";
+    const POS = { A1: "Côté A", B1: "Côté B", A2: "Après A", C2: "Centre", B2: "Après B" };
+    for (const ty of ["aggro", "tank", "soutien"]) {
+      const u = S.upgrades[ty], T = SF.TREES[ty];
+      const node = slot => {
+        const st = SF.nodeState(S, ty, slot), cost = SF.nodeCost(slot), got = SF.invested(S, ty, slot);
+        const avail = SF.investable(S);
+        const canInv = mine && st === "open" && avail > 0 && ["A_deploy", "A_upgrade"].includes(S.phase);
+        let state, cls = st;
+        if (st === "taken") state = "Acquis";
+        else if (st === "closed") state = got ? "Fermé" : (u.r1 && !slot.endsWith("1") && slot !== "C2" && u.r1 !== slot[0] ? `Fermé : demande ${T[slot[0] + "1"][0]}` : "Fermé : biomasse déjà engagée sur l'autre choix de ce rang");
+        else if (st === "needR1") state = "Demande d'abord un rang 1";
+        else state = `${got} / ${cost} investis`;
+        const bar = st === "open" || got ? `<span class="bar"><i style="width:${Math.round(100 * got / cost)}%"></i></span>` : "";
+        const btns = canInv ? `<span class="inv"><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1">+1</button><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99">Tout investir (${Math.min(avail, cost - got)})</button></span>` : "";
+        return `<div class="node ${cls}${canInv ? " can" : ""}"><span class="np">${POS[slot]}</span><b>${E(T[slot][0])}</b><span class="nt">${E(T[slot][1])}</span>${bar}<span class="ns">${E(state)}</span>${btns}</div>`;
+      };
+      trees += `<div class="tree ${ty}"><span class="tt">${icon(ty)}${ty}</span>
+        <span class="rk">Rang 1 · ${SF.COST_R1} biomasse · 1 choix sur 2 · ajoute les cartes de niveau 2</span><div class="r">${node("A1")}${node("B1")}</div>
+        <span class="rk">Rang 2 · ${SF.COST_R2} biomasse · 1 choix sur 3 · ajoute les cartes de niveau 3</span><div class="r r3">${node("A2")}${node("C2")}${node("B2")}</div></div>`;
+    }
+    return `<h3>${icon("spores")} Essaim</h3>
+      <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
+      <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${t.n.join("/")} · plafond ${t.cap}</b></div>
+      <div class="kv"><span>Budget du tour</span><b>${S.budget}${S.famine ? ` (Famine −${S.famine})` : ""}</b></div>
+      <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
+      <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
+      <h4>Main</h4>${hand}<h4>Arbres d'amélioration</h4>${trees}`;
+  }
+  function logPanel() {
+    return `<h4>Journal</h4><ol class="log">${S.log.slice(0, 40).map(l => `<li class="${l.who}"><span>M${l.r}</span>${E(l.msg)}</li>`).join("")}</ol>`;
+  }
+  function help() {
+    return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
+      <h2>Règles en bref</h2>
+      <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
+      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 4 · 7 · 10 · 13 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier), ou investissez dans un nœud d'amélioration (rang 1 : 8, rang 2 : 16, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque créature se déplace case par case, sans diagonale, et attaque la première tuile ou la fusée (une attaque contre la fusée tue un seul travailleur). Les soutiens avancent aussi mais n'attaquent jamais. +1 biomasse par tuile détruite.</p>
+      <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier, 9 : nuke).</p>
+      <p><b>Combat.</b> Toute forteresse a Épines 1. Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Écrans de passage.</b> À chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p></div></div>`;
+  }
+
+  // ---------------------------------------------------------------- actions
+  function handle(a, d) {
+    if (a === "new") { if (!S || S.winner || confirmNew()) { clearSave(); newGame(); } return; }
+    if (a === "help") { UI.help = !UI.help; render(); return; }
+    if (a === "reveal") { S.view = S.handoff; S.handoff = null; save(); render(); return; }
+    if (S.winner) return;
+    switch (a) {
+      case "famine":
+        S.phase = "A_start";
+        if (d.v === "1") { const i = S.spells.indexOf("Famine"); if (i >= 0) SF.useSpell(S, i, null); }
+        break;
+      case "draw": SF.attackerDraw(S); break;
+      case "card": UI.sel = UI.sel === Number(d.uid) ? null : Number(d.uid); break;
+      case "deployAt": if (UI.sel && SF.deploy(S, UI.sel, d.l, Number(d.u))) UI.sel = null; break;
+      case "endDeploy": SF.endDeploy(S); UI.sel = null; break;
+      case "buy": SF.buy(S, d.t, d.s); break;
+      case "invest": SF.invest(S, d.t, d.s, Number(d.n)); break;
+      case "raid": SF.raid(S, Number(d.id), d.v); break;
+      case "instinct": { const c = S.creatures.find(o => o.id === Number(d.id)); if (c) c.instinct = d.v; break; }
+      case "instTarget": { const c = S.creatures.find(o => o.id === Number(d.id)); if (c) c.instinctTarget = Number(d.v); break; }
+      case "toAttacks":
+        SF.startAttacks(S);
+        if (S.spells.some(s => SF.SPELLS[s].kind === "off" && s !== "Famine")) S.phase = "A_react";
+        break;
+      case "reactDone": S.phase = "A_attack"; UI.spell = null; break;
+      case "creature": UI.selCreature = Number(d.id); break;
+      case "act": {
+        const c = S.creatures.find(o => o.id === Number(d.id));
+        if (!c) break;
+        if (SF.hasMobility(S, c) && SF.laneTiles(S, c.lane).length > 1) { UI.mob = c.id; break; }
+        SF.act(S, c); break;
+      }
+      case "mobTarget": { const c = S.creatures.find(o => o.id === UI.mob); UI.mob = null; if (c) SF.act(S, c, d.k || null); break; }
+      case "actAll": for (const c of SF.attackOrder(S)) { if (S.winner) break; if (S.creatures.includes(c)) SF.act(S, c); } break;
+      case "endA":
+        SF.endAttackerTurn(S); break;
+      case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
+      case "startCh": if (UI.sel !== null && SF.startChantier(S, UI.sel, d.l)) UI.sel = null; break;
+      case "placeAt": SF.placeTile(S, d.k); break;
+      case "cancelCh": SF.cancelChantier(S, d.l, Number(d.i)); break;
+      case "alloc": {
+        const v = S.alloc[d.l] + Number(d.d);
+        if (v >= 0 && SF.allocated(S) + Number(d.d) <= SF.totalPoints(S)) S.alloc[d.l] = v; break;
+      }
+      case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
+      case "spellCancel": UI.spell = null; UI.picks = []; UI.recoHand = null; break;
+      case "pick": if (UI.picks.length < 3) UI.picks.push(d.k); break;
+      case "pickHand": { const i = Number(d.i); UI.picks = UI.picks.includes(i) ? UI.picks.filter(p => p !== i) : [...UI.picks, i]; break; }
+      case "recoHand": UI.recoHand = Number(d.i); break;
+      case "spellArg": {
+        const name = S.spells[UI.spell];
+        let arg = d.v;
+        if (["Frappe orbitale", "Salve", "Brouillage"].includes(name)) arg = Number(d.v);
+        if (d.v === "picks") arg = UI.picks;
+        if (name === "Reconversion") arg = { hand: UI.recoHand, tile: d.v };
+        if (d.v === "go") arg = null;
+        SF.useSpell(S, UI.spell, arg);
+        UI.spell = null; UI.picks = []; UI.recoHand = null; break;
+      }
+      case "toFire": S.phase = "D_fire"; UI.sel = null; UI.spell = null; break;
+      case "support": UI.support = UI.support === d.k ? null : d.k; break;
+      case "fireAt": if (UI.support) { SF.fire(S, UI.support, Number(d.id)); UI.support = null; } break;
+      case "autoFire": SF.autoFire(S); UI.support = null; break;
+      case "endD":
+        SF.endDefenderTurn(S);
+        if (!S.winner && S.spells.includes("Famine")) S.phase = "A_famine";
+        break;
+    }
+    if (!S.winner) setPhaseHandoff();
+    save(); render();
+  }
+  function confirmNew() { return UI.confirm ? true : (UI.confirm = true, setTimeout(() => { UI.confirm = false; }, 4000), flash("Touchez encore « Nouvelle partie » pour confirmer."), false); }
+  function flash(msg) { const f = $("#flash"); f.textContent = msg; f.hidden = false; clearTimeout(flash.t); flash.t = setTimeout(() => { f.hidden = true; }, 3500); }
+
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-a]");
+    if (!el || el.disabled) return;
+    handle(el.dataset.a, el.dataset);
+  });
+  // démarrage : reprendre la partie sauvegardée si elle existe
+  const saved = load();
+  if (saved && saved.phase) { S = saved; S.invest = S.invest || {}; S.toPlace = S.toPlace || []; for (const t of Object.values(S.tiles || {})) if (SF.TILES[t.name] && SF.TILES[t.name].camo && t.camo === undefined) t.camo = 1; render(); } else newGame();
+})();
+</script>
+</body></html>
