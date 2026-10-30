@@ -1,20 +1,21 @@
 // Partie en ligne complète entre deux navigateurs (Playwright), en vrais clics souris, avec le serveur local (server/dev.js).
 // Usage : node tests/e2e-en-ligne.js [largeur]   (ex. 400 pour un téléphone)
+// E2E_URL=https://… pour jouer contre un site déployé au lieu du serveur local.
 // Vérifie : création / code / rejoindre, aucune erreur JavaScript, aucun bouton cliqué recouvert,
 // aucune information cachée dans les réponses du serveur reçues par chaque camp, reprise après rechargement, victoire.
 const { chromium } = require('playwright');
 const { start } = require('../server/dev.js');
 const SF = require('../src/engine.js');
-const W = Number(process.argv[2] || 1400), PORT = 8899, URL0 = `http://localhost:${PORT}/`;
+const W = Number(process.argv[2] || 1400), PORT = 8899, URL0 = process.env.E2E_URL || `http://localhost:${PORT}/`;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
-  const server = await start(PORT);
+  const server = process.env.E2E_URL ? null : await start(PORT);
   const browser = await chromium.launch();
   const errs = [], leaks = [];
   let covered = 0;
   async function open(side) {
     const ctx = await browser.newContext({ viewport: { width: W, height: 1000 } });
-    await ctx.addInitScript(() => { window.SF_POLL_MS = 150; });
+    await ctx.addInitScript(POLL => { window.SF_POLL_MS = POLL; }, process.env.E2E_URL ? 400 : 150);
     const page = await ctx.newPage();
     page.on('pageerror', e => errs.push(side + ' : ' + e.message));
     // contrôle anti-triche : chaque réponse du serveur reçue par ce camp ne contient rien de caché
@@ -55,7 +56,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await pC.goto(URL0 + '?code=' + code);
   const pre = await pC.evaluate(() => document.querySelector('#joincode').value);
   await click(pC, '[data-a="join"]');
-  await sleep(400);
+  await sleep(process.env.E2E_URL ? 1500 : 400);
   const started = await pE.evaluate(() => !document.querySelector('.bigcode') && !!document.querySelector('.board'));
   console.log('code :', code, '| prérempli par le lien :', pre === code, '| partie lancée chez le créateur :', started);
 
@@ -66,12 +67,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (await pE.$('.banner.win') && await pC.$('.banner.win')) break;
     let page = null;
     for (const s of ['essaim', 'colonie']) if ((await pages[s].evaluate(() => document.body.dataset.myturn)) === '1') page = pages[s];
-    if (!page) { if (++stuck > 200) { console.log('personne ne joue'); break; } await sleep(60); continue; }
+    if (!page) { if (++stuck > 400) { console.log('personne ne joue'); break; } await sleep(60); continue; }
     stuck = 0;
     const ph = await phase(page); seen[ph] = 1;
     // reprise après rechargement, une fois, en milieu de partie
     if (!reloaded && ph === 'Tour de la colonie') {
-      reloaded = true; await pC.reload(); await sleep(300); await idle(pC);
+      reloaded = true; await pC.reload(); await sleep(1500); await idle(pC);
       resumed = await pC.evaluate(() => !!document.querySelector('.board') && document.body.dataset.myturn === '1');
       continue;
     }
@@ -97,6 +98,6 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const ok = !errs.length && !leaks.length && !covered && started && pre === code && resumed === true && fin !== 'en cours' && fin === finC;
   console.log('erreurs :', errs.length ? errs : 'aucune', '| fuites :', leaks.length ? [...new Set(leaks)] : 'aucune', '| boutons masqués :', covered,
     '| reprise après rechargement :', resumed, '| fin (essaim / colonie) :', fin, '/', finC, '| phases vues :', Object.keys(seen).join(', '));
-  await browser.close(); server.close();
+  await browser.close(); if (server) server.close();
   process.exit(ok ? 0 : 1);
 })();
