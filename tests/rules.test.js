@@ -68,7 +68,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
 {
   const S = fresh();
   const t = b => { S.biomass = b; return SF.tier(S) + 1; };
-  ok([3, 7, 10, 13, 16].map(t).join() === "1,2,3,4,5" && [6, 9, 12, 15].map(t).join() === "1,2,3,4", "paliers (décalés de +3) : départ 3, puis 7 / 10 / 13 / 16");
+  ok([3, 6, 9, 12, 15].map(t).join() === "1,2,3,4,5" && [5, 8, 11, 14].map(t).join() === "1,2,3,4", "paliers : départ 3, puis 6 / 9 / 12 / 15");
 }
 // 9. Protection : un tir sur une créature non tank de la case d'un tank vise le tank
 {
@@ -174,7 +174,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
 // 18. plafond de population par lane : 1 / 2 / 3 / 4 / 5
 {
   const S = fresh();
-  ok([3, 7, 10, 13, 16].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "1,2,3,4,5", "plafonds 1 / 2 / 3 / 4 / 5 (biomasse 3 / 7 / 10 / 13 / 16)");
+  ok([3, 6, 9, 12, 15].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "1,2,3,4,5", "plafonds 1 / 2 / 3 / 4 / 5 (biomasse 3 / 6 / 9 / 12 / 15)");
 }
 // 19. Cadence : +2 points
 {
@@ -388,12 +388,11 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "N" }) !== "", "une seule fois par tour pour cette créature");
   ok(SF.apply(S, "essaim", "moveLane", { id: 71, lane: "E" }) !== "", "plafond de population de la lane Est (1) respecté");
   ok(SF.apply(S, "essaim", "moveLane", { id: 71, lane: "O" }) === "", "une autre créature aggro peut aussi changer de lane le même tour");
-  ok(SF.TREES.aggro.B2[0] === "Percée" && !SF.hasMobility(S, { name: "Carapace", lane: "N", u: 0, k: 4 }), "le Raid devient « Percée » ; les tanks n'ont pas la Mobilité");
-  const T = fresh(); T.upgrades.aggro.r2 = "B"; T.supports = {};
-  delete T.tiles["0,1"]; T.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); T.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
-  const w0 = T.workersBase;
-  const m = { id: 72, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(m); SF.act(T, m);
-  ok(!T.tiles["0,2"] && !T.tiles["0,1"] && T.workersBase === w0 - 1, "Percée : 7 dégâts → Palissade (2) puis Muraille (4) détruites, le dernier dégât atteint la fusée (−1 travailleur)");
+  ok(SF.TREES.aggro.B2[0] === "Essaim agrandi" && !SF.hasMobility(S, { name: "Carapace", lane: "N", u: 0, k: 4 }), "le rang 2 côté B s'appelle « Essaim agrandi » ; les tanks n'ont pas la Mobilité");
+  const T = fresh(); const before = SF.capOf(T);
+  T.upgrades.aggro.r2 = "B";
+  ok(SF.capOf(T) === before + 3, "Essaim agrandi : plafond de population +3 (" + before + " → " + SF.capOf(T) + ")");
+  ok(!SF.hasPercee(T, { name: "Massacreur", lane: "N", u: 0, k: 4 }), "les aggros n'ont plus la percée par amélioration (seulement l'Aura Percée du Perforeur)");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
