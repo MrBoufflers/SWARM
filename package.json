@@ -1,0 +1,15 @@
+{
+  "name": "swarm-siege-fusee",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Siège & Fusée — jeu de société asymétrique pour 2 joueurs (prototype HTML/JS)",
+  "scripts": {
+    "build": "python3 tools/build.py",
+    "test": "node tests/rules.test.js",
+    "e2e": "node tests/e2e-partie.js 1400",
+    "e2e:mobile": "node tests/e2e-partie.js 400"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}
