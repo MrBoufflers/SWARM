@@ -244,6 +244,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 #fx .float.aura { color: var(--soutien); font-size: .78rem; }
 #fx .float.up { color: var(--ink); font-size: .85rem; }
 #fx .nuke { background: radial-gradient(circle, #fff 0%, var(--hot) 60%, transparent 100%); border-radius: 12px; z-index: 4; }
+/* carte gratuite (amélioration Déploiement) */
+.ccard.free { box-shadow: inset 0 0 0 2px var(--hot); }
+.ccard.free .cost { background: var(--hot); color: #1b1f1d; }
 </style></head><body>
 <div id="app"></div>
 <div id="flash" role="status" hidden></div>
@@ -309,7 +312,7 @@ const SF = (() => {
     "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
     "Champ de stase": { kind: "off", n: 2, text: "Choisissez une lane : ses tuiles ne subissent aucun dégât ce tour." },
-    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : son budget baisse de 2 ce tour." },
+    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : son budget baisse de 5 ce tour." },
     "Brouillage": { kind: "off", n: 2, text: "Annule le déploiement d'une créature posée ce tour ; la carte retourne dans sa pioche, la biomasse est perdue." },
     "Effort": { kind: "sup", n: 3, text: "+2 points de construction ce tour." },
     "Cadence": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
@@ -333,7 +336,8 @@ const SF = (() => {
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
       B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
   };
-  const COST_R1 = 6, COST_R2 = 12, FLOORS = 12; // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
+  const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
+  const FAMINE = 5; // baisse du budget de l'essaim par Famine (décision d'Oni, 30/10/2026 ; avant 2) // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [3, 4, 5, 6];
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
@@ -772,13 +776,17 @@ const SF = (() => {
   function attackerDraw(S) {
     const t = TIERS[tier(S)];
     S.handA = [];
+    // Déploiement (aggro, centre du rang 2) : les 2 cartes gratuites de niveau 1 sont piochées EN PREMIER, sinon la pioche
+    // normale (qui se rabat sur le niveau 1 quand les niveaux 2 et 3 sont vides) pouvait vider le niveau 1 avant elles.
+    if (S.upgrades.aggro.r2 === "C") {
+      let n = 0;
+      for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); n++; }
+      log(S, "essaim", n === 2 ? "Déploiement : 2 cartes de niveau 1 gratuites." : `Déploiement : pioche de niveau 1 ${n ? "presque vide, 1 seule carte gratuite" : "vide, aucune carte gratuite"}.`);
+    }
     for (let lvl = 3; lvl >= 1; lvl--) {
       for (let i = 0; i < t.n[lvl - 1]; i++) {
         for (let l = lvl; l >= 1; l--) if (S.piles[l].length) { S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ }); break; }
       }
-    }
-    if (S.upgrades.aggro.r2 === "C") {
-      for (let i = 0; i < 2; i++) if (S.piles[1].length) S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ });
     }
     S.budget = Math.max(0, S.biomass - S.famine);
     fx(S, { t: "draw", n: S.handA.length });
@@ -929,7 +937,7 @@ const SF = (() => {
       case "Barrage": { if (!LANES.includes(arg)) return false; for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Champ de stase": { if (!LANES.includes(arg)) return false; S.stase.push(arg); return true; }
-      case "Famine": { if (S.phase !== "A_start") return false; S.famine += 2; return true; }
+      case "Famine": { if (S.phase !== "A_start") return false; S.famine += FAMINE; return true; }
       case "Brouillage": {
         const c = cr(arg); if (!c || !c.new) return false;
         S.creatures.splice(S.creatures.indexOf(c), 1);
@@ -1012,8 +1020,8 @@ const SF = (() => {
       fire(S, sk, cands[0].id);
     }
   }
-  // Fin du tour de la colonie (ordre décidé par Oni le 30/10/2026) : chantiers et pose des bâtiments, fusée (étages, paliers),
-  // nouveaux supports, PUIS tirs des tourelles (phase D_fire), puis pioches. Les supports apparus et les paliers atteints
+  // Fin du tour de la colonie (ordre décidé par Oni le 30/10/2026) : chantiers et pose des bâtiments, nouveaux supports
+  // (dès la pose), fusée (étages, paliers), PUIS tirs des tourelles (phase D_fire), puis pioches. Les supports apparus et les paliers atteints
   // pendant le tour comptent donc pour les tirs.
   function endDefenderTurn(S) {
     // chantiers et débordement
@@ -1059,6 +1067,7 @@ const SF = (() => {
     S.tiles[k] = tileStats(p.tile, x, y);
     fx(S, { t: "place", k });
     if (TILES[p.tile].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
+    placeSupports(S); // un support apparaît dès que ses murs sont construits
     log(S, "colonie", TILES[p.tile].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[p.lane]}.` : `${p.tile} construit en lane ${LANE_NAME[p.lane]}.`);
     skipUnplaceable(S);
     if (!S.toPlace.length) finishDefenderTurn(S);
@@ -1066,6 +1075,7 @@ const SF = (() => {
   }
   function finishDefenderTurn(S) {
     const rocket = S.pendingRocket || 0; S.pendingRocket = 0;
+    placeSupports(S); // supports d'abord (au moment où les bâtiments sont construits), puis la fusée (ordre décidé par Oni, 30/10/2026)
     // fusée
     S.rocketPts += Math.max(0, rocket);
     while (S.floors < FLOORS && S.rocketPts >= floorCost(S)) {
@@ -1083,7 +1093,6 @@ const SF = (() => {
       }
       if (S.floors === FLOORS) { fx(S, { t: "liftoff" }); S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
     }
-    placeSupports(S);
     S.phase = "D_fire"; // les tourelles tirent maintenant (choix de la colonie, ou tirs automatiques)
   }
   function endColonyTurn(S) {
@@ -1249,7 +1258,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor, migrate, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, FAMINE, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
@@ -1629,7 +1638,7 @@ if (typeof module !== "undefined") module.exports = SF;
         const b = SF.CREATURES[c.name];
         const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
         const ups = acquired(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
-        return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>
+        return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>
           <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
           <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""}</span>
           ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
@@ -1673,7 +1682,7 @@ if (typeof module !== "undefined") module.exports = SF;
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 6 · 9 · 12 · 15 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance d'un bloc, case par case, sans diagonale, jusqu'à la première tuile ou la fusée (les plus proches de la fusée d'abord) ; ses créatures attaquent dans l'ordre choisi, et si la tuile tombe, tout le bloc avance jusqu'à la suivante (une attaque contre la fusée tue un seul travailleur). Mobilité : une fois par tour, une aggro peut passer à l'entrée d'une lane voisine. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite rapporte autant de biomasse que sa durée de construction (1, 2 ou 3 ; 1 pour une haie de départ) ; un support qui tombe, 1.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, puis 4, 5 et 6 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, la fusée et l'apparition des nouveaux supports) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
@@ -1892,7 +1901,7 @@ if (typeof module !== "undefined") module.exports = SF;
         case "Barrage": await sweep(laneCells(e.lane), "off"); break;
         case "Champ de stase": await sweep(laneCells(e.lane), "stase"); break;
         case "Onde de choc": await sweep(ringCells(e.ring), "off", true); break;
-        case "Famine": { const b = document.querySelector('[data-fx="budget"]'); if (b) { flashEl(b, "var(--off)"); float(b, "−2 budget", "cr-dmg"); } await wait(300); break; }
+        case "Famine": { const b = document.querySelector('[data-fx="budget"]'); if (b) { flashEl(b, "var(--off)"); float(b, "−" + SF.FAMINE + " budget", "cr-dmg"); } await wait(300); break; }
         case "Effort": case "Cadence": { const h = document.querySelector('[data-fx="ateliers"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "+2 points", "heal"); } await wait(300); break; }
         case "Renouvellement": { const h = document.querySelector('[data-fx="tilehand"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "↻ " + e.n, "heal"); } await wait(300); break; }
         case "Reconversion": { const c = cellAt(e.k); if (c) await flip(c.querySelector(".tile") || c); break; }

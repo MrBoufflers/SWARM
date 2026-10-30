@@ -17,7 +17,9 @@ Repris du prototype jouable et validés par Oni :
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc, et si la tuile tombe, le bloc suit.
-- **Tirs des tourelles** : à la toute fin du tour de la colonie, après la construction, la fusée et l'apparition des nouveaux supports.
+- **Tirs des tourelles** : à la toute fin du tour de la colonie, après la construction, l'apparition des nouveaux supports et la fusée.
+- **Famine** : le budget de l'essaim baisse de **5** (au lieu de 2).
+- **Déploiement** (aggro, centre du rang 2) : les 2 cartes gratuites sont piochées avant la pioche normale.
 - **Paliers de l'essaim** : départ 3, puis 6, 9, 12 et 15 de biomasse (au lieu de 4, 7, 10 et 13).
 - **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine. **Raid** devient **Essaim agrandi** (aggro, rang 2) : +3 au plafond de population de chaque lane.
 
@@ -105,7 +107,7 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 ### 1. Budget
 
-Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite rapporte autant de biomasse que sa **durée de construction** (1, 2 ou 3 ; 1 pour une haie de départ), un support qui tombe rapporte **1**. Si la colonie a joué **Famine**, retirez 2 du budget de ce tour.
+Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite rapporte autant de biomasse que sa **durée de construction** (1, 2 ou 3 ; 1 pour une haie de départ), un support qui tombe rapporte **1**. Si la colonie a joué **Famine**, retirez 5 du budget de ce tour.
 
 ### 2. Pioche
 
@@ -217,8 +219,8 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 ### 4. Fin de tour, dans cet ordre
 
 1. **Chantiers** : retirez de la durée de chaque chantier les points de sa lane. Les points en trop d'une lane vont à la fusée. Une tuile à 0 est achevée : choisissez alors sa case dans la lane de son chantier (conditions de l'étape 2) et posez-la ; si aucune case n'est valable, la tuile revient en main †. Si des créatures (une ou plusieurs) se trouvent sur la case choisie, elles reculent d'une case vers le fond, dans la même colonne, pour laisser la place au bâtiment ; si cette case porte déjà une tuile, elles continuent de reculer jusqu'à la première case libre (au pire, la case d'entrée) †.
-2. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
-3. **Supports** : posez les supports dont les conditions sont réunies.
+2. **Supports** : posez les supports dont les conditions sont réunies, dès que leurs murs sont construits.
+3. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
 4. **Tirs** : chaque support de niveau 1 ou 2 inflige ses dégâts à une créature située sur l'une des **8 cases qui l'entourent** (diagonales comprises), au choix de la colonie. Niveau 1 : 1 dégât, +1 à chaque palier de la fusée (étages 3, 6 et 9), soit 1 / 2 / 3 / 4 † ; niveau 2 : 2 dégâts †. Les tourelles tirent **après** la construction et la fusée : un support apparu ce tour tire déjà, et un palier atteint ce tour compte déjà pour ses dégâts.
 5. **Pioche de tuiles** : complétez votre main jusqu'à **4 tuiles, +1 par palier de la fusée atteint** (étages 3, 6 et 9) : 4, 5, 6 puis 7.
 6. **Pioche de sorts** : piochez selon vos technologies en jeu : 3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts.
@@ -343,7 +345,7 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 | Barrage | Offensif | 1 dégât à chaque créature d'une lane | 2 |
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
 | Champ de stase | Offensif | choisissez une lane : ses tuiles ne subissent aucun dégât ce tour | 2 |
-| Famine | Offensif | à jouer au début du tour de l'essaim : son budget baisse de 2 ce tour (sa biomasse ne change pas) | 2 |
+| Famine | Offensif | à jouer au début du tour de l'essaim : son budget baisse de **5** ce tour (sa biomasse ne change pas) | 2 |
 | Brouillage | Offensif | à jouer avant les attaques, sur une créature déployée ce tour : elle est retirée du plateau, sa carte retourne dans sa pioche (mélangée), la biomasse dépensée est perdue † | 2 |
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |
@@ -369,7 +371,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | 1 | Côté A | Férocité | +1 ATQ |
 | 1 | Côté B | Mobilité | une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté) |
 | 2 | Côté A (après Férocité) | Carnage | +2 ATQ (total +3) |
-| 2 | Centre | Déploiement | à chaque tour, piochez 2 cartes de niveau 1 supplémentaires et déployez-les gratuitement, plafond de population respecté † |
+| 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † |
 | 2 | Côté B (après Mobilité) | Essaim agrandi | **+3 au plafond de population** de chaque lane |
 
 #### Tank
@@ -425,8 +427,8 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | 1. Budget = biomasse | 1. Sorts de soutien |
 | 2. Pioche selon le palier | 2. Lancer des chantiers |
 | 3. Déployer | 3. Affecter les travailleurs |
-| 4. Réserve et améliorations | 4. Chantiers, débordement, fusée |
-| 5. Défausse | 5. Supports |
+| 4. Réserve et améliorations | 4. Chantiers, débordement, supports |
+| 5. Défausse | 5. Fusée |
 | 6. Sorts offensifs de la colonie, puis attaques bloc par bloc | 6. Tirs, puis pioche de tuiles et de sorts |
 
 ## Points provisoires de cette version
@@ -454,7 +456,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 
 - [ ] Une créature qui atteint la fusée y reste et frappe à chaque tour.
 - [ ] Un bâtiment achevé se pose sur une case de la lane de son chantier qui touche une tuile, un support ou la fusée ; la case est choisie à la fin de la construction.
-- [x] Ordre de fin de tour de la colonie : chantiers (avancement puis pose des bâtiments achevés), fusée, supports, **tirs**, pioches (décidé le 30/10/2026).
+- [x] Ordre de fin de tour de la colonie : chantiers (avancement puis pose des bâtiments achevés), supports, fusée, **tirs**, pioches (décidé le 30/10/2026).
 - [ ] Sortilèges non joués défaussés.
 - [ ] Étage 3 : « +2 technologies » compte pour la pioche de sortilèges.
 - [ ] Un support tombé réapparaît gratuitement quand ses 2 murs côté fusée sont rebâtis.
