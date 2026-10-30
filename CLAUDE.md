@@ -31,7 +31,7 @@ tests/e2e-en-ligne.js  Partie en ligne complète entre deux navigateurs + contr�
 server/core.js     Serveur du jeu en ligne (lobby, codes, jetons, actions) — stockage fourni par l'appelant
 server/dev.js      Serveur local (page + /api, parties en mémoire) : `npm run serveur`
 netlify/functions/api.mjs  Le même serveur sur Netlify, état des parties dans Netlify Blobs (store « parties »)
-netlify.toml       Build Netlify (python3 tools/build.py → dist/) et routes
+netlify.toml       Build Netlify : `python3 tools/build.py --site` → site/index.html (dossier ignoré par git, recréé à chaque déploiement)
 docs/regles-v0.3.md  Export du livret de règles (instantané du 30/10/2026)
 ```
 
