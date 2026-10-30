@@ -104,7 +104,7 @@ Pour chaque carte que vous jouez :
 
 ### 4. Améliorations
 
-Chaque nœud d'amélioration coûte **8 biomasse au rang 1 †, 16 au rang 2 †**, et se paie **en plusieurs fois** : vous investissez des points dans un nœud précis, et l'amélioration est acquise dès que le total investi atteint son coût.
+Chaque nœud d'amélioration coûte **6 biomasse au rang 1 †, 12 au rang 2 †**, et se paie **en plusieurs fois** : vous investissez des points dans un nœud précis, et l'amélioration est acquise dès que le total investi atteint son coût.
 
 - **Pendant le déploiement**, vous pouvez investir votre budget du tour et votre réserve (le budget est utilisé en premier).
 - À la fin du déploiement, le **budget non dépensé va à votre réserve**. Vous pouvez ensuite investir votre réserve, ou la garder pour un tour suivant.
@@ -199,7 +199,7 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 2. **Chantiers** : retirez de la durée de chaque chantier les points de sa lane. Les points en trop d'une lane vont à la fusée. Une tuile à 0 est achevée : choisissez alors sa case dans la lane de son chantier (conditions de l'étape 2) et posez-la ; si aucune case n'est valable, la tuile revient en main †. Si des créatures (une ou plusieurs) se trouvent sur la case choisie, elles reculent d'une case vers le fond, dans la même colonne, pour laisser la place au bâtiment ; si cette case porte déjà une tuile, elles continuent de reculer jusqu'à la première case libre (au pire, la case d'entrée) †.
 3. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
 4. **Supports** : posez les supports dont les conditions sont réunies.
-5. **Pioche de tuiles** : complétez votre main jusqu'au nombre de vos chantiers (4, puis 8).
+5. **Pioche de tuiles** : complétez votre main jusqu'à **4 tuiles, +1 par palier de la fusée atteint** (étages 3, 6 et 9) : 4, 5, 6 puis 7.
 6. **Pioche de sorts** : piochez selon vos technologies en jeu : 3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts.
 
 ### Les forteresses
@@ -216,9 +216,11 @@ La fusée compte 12 étages, de plus en plus chers ; chaque étage achevé rappo
 | Étage | Bonus |
 | --- | --- |
 | 3 | **+2 technologies** de façon permanente, qui comptent pour la pioche de sortilèges † |
-| 6 | **+1 chantier par lane** : la main de tuiles passe à 8 |
+| 6 | **+1 chantier par lane** |
 | 9 | **Nuke** : toutes les créatures en jeu sont détruites, leurs cartes retournent dans leurs pioches |
 | 12 | **Décollage** : la colonie gagne |
+
+Chaque palier (étages 3, 6 et 9) donne aussi **+1 tuile en main** (4, puis 5, 6 et 7).
 
 ## Les sorts
 
@@ -332,7 +334,7 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 
 Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 améliorations ; au rang 2, un choix entre 3 (le prolongement de chaque côté, et une option au centre).
 
-- **Coûts** : 8 biomasse pour le rang 1, 16 pour le rang 2 †, payables en plusieurs fois (budget du tour pendant le déploiement, puis réserve).
+- **Coûts** : 6 biomasse pour le rang 1, 12 pour le rang 2 †, payables en plusieurs fois (budget du tour pendant le déploiement, puis réserve).
 - **Choix exclusifs** : commencer à investir dans une amélioration ferme les autres du même rang.
 - **Prérequis** : un côté du rang 2 demande le même côté au rang 1. Le **centre** est accessible depuis l'un ou l'autre côté.
 - **Cartes** : le rang 1 ajoute toutes les cartes de niveau 2 du type à leur pioche ; le rang 2, toutes celles de niveau 3.

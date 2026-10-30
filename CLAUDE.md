@@ -74,7 +74,9 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 
 - **Épines** : seulement les 4 **haies de départ** (anciens « murs de départ », 2 PV, Épines 1), la **Haie d'épines** et le **Mur hérissé** (Épines 2, au lieu de 3). Toutes les autres tuiles : 0. Le support de niveau 2 donne +1 Épines **seulement aux tuiles qui en ont déjà**.
 - **Fusée** : coût d'un étage 3 points (étages 1-3), 4 (4-6), 5 (7-9), 6 (10-12) — `SF.floorCost(S)`. Les points en trop passent à l'étage suivant.
-- Les parties enregistrées avant ces changements sont mises à jour à la lecture (`SF.migrate`, côté navigateur et serveur).
+- **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
+- **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).
+- Les parties enregistrées avant ces changements sont mises à jour à la lecture (`SF.migrate`, côté navigateur et serveur) ; un nœud déjà assez investi pour le nouveau coût est acquis.
 - Conséquence signalée, à trancher par Oni : la colonne « Points » du barème des forteresses comptait une Épines 1 gratuite pour toutes ; elle est à recalculer.
 
 ## Points de règles ouverts (ne pas trancher sans Oni)
