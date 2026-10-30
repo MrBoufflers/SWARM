@@ -65,7 +65,7 @@ const ok = (cond, msg) => { if (!cond) { fails++; console.log("ÉCHEC :", msg); 
       case "A_upgrade": type = view.reserve ? "invest" : "toAttacks"; args = { t: "aggro", s: view.upgrades.aggro.r1 ? "A2" : "A1", n: 99 }; break;
       case "A_react": type = "reactDone"; break;
       case "A_attack": type = view.creatures.some(c => !c.acted) ? "actAll" : "endA"; break;
-      case "D_main": type = view.hand.length && !view.chantiers.N.length ? "startCh" : "toFire"; args = { i: 0, lane: "N" }; break;
+      case "D_main": type = view.hand.length && !view.chantiers.N.length ? "startCh" : "build"; args = { i: 0, lane: "N" }; break;
       case "D_fire": type = "endD"; break;
       case "D_place": { const SF = require("../src/engine.js"); type = "placeAt"; args = { k: SF.placeTargets(view)[0] }; break; }
     }
@@ -73,7 +73,7 @@ const ok = (cond, msg) => { if (!cond) { fails++; console.log("ÉCHEC :", msg); 
     if (!r.json.ok && view.phase === "A_upgrade") r = await call("POST", "action", { code, token: tok[side], type: "toAttacks" });
     if (!r.json.ok && view.phase === "A_deploy") r = await call("POST", "action", { code, token: tok[side], type: "endDeploy" });
     if (!r.json.ok && view.phase === "A_attack") r = await call("POST", "action", { code, token: tok[side], type: "endA" });
-    if (!r.json.ok && view.phase === "D_main") r = await call("POST", "action", { code, token: tok[side], type: "toFire" });
+    if (!r.json.ok && view.phase === "D_main") r = await call("POST", "action", { code, token: tok[side], type: "build" });
     if (!r.json.ok) { ok(false, `bloqué en ${view.phase} : ${r.json.error}`); break; }
     st = r.json;
   }

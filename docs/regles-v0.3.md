@@ -17,6 +17,7 @@ Repris du prototype jouable et validés par Oni :
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc, et si la tuile tombe, le bloc suit.
+- **Tirs des tourelles** : à la toute fin du tour de la colonie, après la construction, la fusée et l'apparition des nouveaux supports.
 - **Paliers de l'essaim** : départ 3, puis 6, 9, 12 et 15 de biomasse (au lieu de 4, 7, 10 et 13).
 - **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine. **Raid** devient **Essaim agrandi** (aggro, rang 2) : +3 au plafond de population de chaque lane.
 
@@ -94,7 +95,7 @@ Le carré de départ correspond à la couronne 1 : chaque lane s'étendra ensuit
 Une manche = le tour de l'essaim, puis le tour de la colonie. On enchaîne les manches jusqu'à la victoire d'un camp.
 
 1. **Tour de l'essaim** : piocher, déployer des créatures, investir dans les améliorations, puis résoudre les attaques en fin de tour.
-2. **Tour de la colonie** : jouer ses sorts de soutien, lancer ses chantiers, affecter ses travailleurs, puis résoudre en fin de tour les tirs, la construction et la fusée.
+2. **Tour de la colonie** : jouer ses sorts de soutien, lancer ses chantiers, affecter ses travailleurs, puis résoudre en fin de tour la construction, la fusée, et enfin les tirs de ses tourelles.
 
 Chaque camp résout **ses propres attaques à la fin de son propre tour** : les créatures frappent à la fin du tour de l'essaim, les tourelles tirent à la fin du tour de la colonie.
 
@@ -213,12 +214,12 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 - sur une **lane** : il avancera le chantier de cette lane ;
 - ou sur la **fusée**.
 
-### 4. Fin de tour, dans cet ordre †
+### 4. Fin de tour, dans cet ordre
 
-1. **Tirs** : chaque support de niveau 1 ou 2 inflige ses dégâts à une créature située sur l'une des **8 cases qui l'entourent** (diagonales comprises), au choix de la colonie. Niveau 1 : 1 dégât, +1 à chaque palier de la fusée (étages 3, 6 et 9), soit 1 / 2 / 3 / 4 † ; niveau 2 : 2 dégâts †.
-2. **Chantiers** : retirez de la durée de chaque chantier les points de sa lane. Les points en trop d'une lane vont à la fusée. Une tuile à 0 est achevée : choisissez alors sa case dans la lane de son chantier (conditions de l'étape 2) et posez-la ; si aucune case n'est valable, la tuile revient en main †. Si des créatures (une ou plusieurs) se trouvent sur la case choisie, elles reculent d'une case vers le fond, dans la même colonne, pour laisser la place au bâtiment ; si cette case porte déjà une tuile, elles continuent de reculer jusqu'à la première case libre (au pire, la case d'entrée) †.
-3. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
-4. **Supports** : posez les supports dont les conditions sont réunies.
+1. **Chantiers** : retirez de la durée de chaque chantier les points de sa lane. Les points en trop d'une lane vont à la fusée. Une tuile à 0 est achevée : choisissez alors sa case dans la lane de son chantier (conditions de l'étape 2) et posez-la ; si aucune case n'est valable, la tuile revient en main †. Si des créatures (une ou plusieurs) se trouvent sur la case choisie, elles reculent d'une case vers le fond, dans la même colonne, pour laisser la place au bâtiment ; si cette case porte déjà une tuile, elles continuent de reculer jusqu'à la première case libre (au pire, la case d'entrée) †.
+2. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
+3. **Supports** : posez les supports dont les conditions sont réunies.
+4. **Tirs** : chaque support de niveau 1 ou 2 inflige ses dégâts à une créature située sur l'une des **8 cases qui l'entourent** (diagonales comprises), au choix de la colonie. Niveau 1 : 1 dégât, +1 à chaque palier de la fusée (étages 3, 6 et 9), soit 1 / 2 / 3 / 4 † ; niveau 2 : 2 dégâts †. Les tourelles tirent **après** la construction et la fusée : un support apparu ce tour tire déjà, et un palier atteint ce tour compte déjà pour ses dégâts.
 5. **Pioche de tuiles** : complétez votre main jusqu'à **4 tuiles, +1 par palier de la fusée atteint** (étages 3, 6 et 9) : 4, 5, 6 puis 7.
 6. **Pioche de sorts** : piochez selon vos technologies en jeu : 3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts.
 
@@ -424,9 +425,9 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | 1. Budget = biomasse | 1. Sorts de soutien |
 | 2. Pioche selon le palier | 2. Lancer des chantiers |
 | 3. Déployer | 3. Affecter les travailleurs |
-| 4. Réserve et améliorations | 4. Tirs |
-| 5. Défausse | 5. Chantiers, débordement, fusée |
-| 6. Sorts offensifs de la colonie, puis attaques bloc par bloc | 6. Supports, pioche de tuiles, pioche de sorts |
+| 4. Réserve et améliorations | 4. Chantiers, débordement, fusée |
+| 5. Défausse | 5. Supports |
+| 6. Sorts offensifs de la colonie, puis attaques bloc par bloc | 6. Tirs, puis pioche de tuiles et de sorts |
 
 ## Points provisoires de cette version
 
@@ -453,7 +454,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 
 - [ ] Une créature qui atteint la fusée y reste et frappe à chaque tour.
 - [ ] Un bâtiment achevé se pose sur une case de la lane de son chantier qui touche une tuile, un support ou la fusée ; la case est choisie à la fin de la construction.
-- [ ] Ordre de fin de tour de la colonie : tirs, chantiers (avancement puis pose des bâtiments achevés), fusée, supports, pioches.
+- [x] Ordre de fin de tour de la colonie : chantiers (avancement puis pose des bâtiments achevés), fusée, supports, **tirs**, pioches (décidé le 30/10/2026).
 - [ ] Sortilèges non joués défaussés.
 - [ ] Étage 3 : « +2 technologies » compte pour la pioche de sortilèges.
 - [ ] Un support tombé réapparaît gratuitement quand ses 2 murs côté fusée sont rebâtis.
