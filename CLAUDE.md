@@ -32,7 +32,8 @@ server/core.js     Serveur du jeu en ligne (lobby, codes, jetons, actions) — s
 server/dev.js      Serveur local (page + /api, parties en mémoire) : `npm run serveur`
 netlify/functions/api.mjs  Le même serveur sur Netlify, état des parties dans Netlify Blobs (store « parties »)
 netlify.toml       Build Netlify : `python3 tools/build.py --site` → site/index.html (dossier ignoré par git, recréé à chaque déploiement)
-docs/regles-v0.3.md  Export du livret de règles (instantané du 30/10/2026)
+docs/regles-v0.3.md  Export du livret de règles (instantané du 30/10/2026), source du PDF
+docs/swarm-steel-livret-v0.3.pdf  Livret en PDF, régénéré par `npm run livret` (tools/livret.py → docs/livret.html → tools/livret-pdf.js)
 ```
 
 Le livret de référence est un document Claude d'Oni ; `docs/regles-v0.3.md` en est un export qui peut prendre du retard. En cas de doute sur une règle, demande à Oni.
@@ -72,11 +73,11 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 
 ## Règles modifiées par Oni le 30/10/2026
 
-- **Épines** : seulement les 4 **haies de départ** (anciens « murs de départ », 2 PV, Épines 1), la **Haie d'épines** et le **Mur hérissé** (Épines 2, au lieu de 3). Toutes les autres tuiles : 0. Le support de niveau 2 donne +1 Épines **seulement aux tuiles qui en ont déjà**.
+- **Épines** : seulement les 4 **Haies d'épines de départ** (anciens « murs de départ » : nom « Haie d'épines », `start: true`, 1 PV, Épines 1, face visible, retirées du jeu quand elles sont détruites), la **Haie d'épines** et le **Mur hérissé** (Épines 2, au lieu de 3). Toutes les autres tuiles : 0. Le support de niveau 2 donne +1 Épines **seulement aux tuiles qui en ont déjà**.
 - **Fusée** : coût d'un étage 3 points (étages 1-3), 4 (4-6), 5 (7-9), 6 (10-12) — `SF.floorCost(S)`. Les points en trop passent à l'étage suivant.
 - **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
 - **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).
-- **Biomasse** : une tuile détruite rapporte 1 / 2 / 3 biomasse selon sa couronne (avant : 1) ; un support qui tombe rapporte toujours 1.
+- **Biomasse** : une tuile détruite rapporte sa **durée de construction** (1 / 2 / 3 ; haie de départ : 1 ; avant : toujours 1) ; un support qui tombe rapporte toujours 1.
 - Les parties enregistrées avant ces changements sont mises à jour à la lecture (`SF.migrate`, côté navigateur et serveur) ; un nœud déjà assez investi pour le nouveau coût est acquis.
 - Conséquence signalée, à trancher par Oni : la colonne « Points » du barème des forteresses comptait une Épines 1 gratuite pour toutes ; elle est à recalculer.
 
@@ -89,7 +90,7 @@ Marqués † dans le livret, ou repérés pendant la conception :
 - Nom « Déploiement » utilisé à la fois pour une amélioration aggro et pour une étape du tour.
 - Cadence (+2 points) fait désormais exactement la même chose qu'Effort.
 - Aura Griffes : non cumulable avec elle-même, cumulable avec l'Aura Fureur (interprétation).
-- Haies de départ posées face visible (non camouflées).
+- Haies d'épines de départ posées face visible (non camouflées).
 - Percée qui atteint la fusée : 1 seul travailleur (interprétation).
 - Bâtiment achevé sans case valable : retour en main (interprétation).
 - Vision (Œil-sonde) révèle les tuiles camouflées de sa lane **au moment du déploiement** seulement.

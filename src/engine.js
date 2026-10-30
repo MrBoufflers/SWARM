@@ -86,7 +86,9 @@ const SF = (() => {
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [3, 4, 5, 6];
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
-  const START_WALL = "Haie de départ"; // ancien « Mur de départ »
+  // tuiles de départ : 4 « Haie d'épines » (1 PV, Épines 1, face visible), repérées par start: true ;
+  // détruites, elles sont retirées du jeu (pas de défausse) — décisions d'Oni, 30/10/2026 (ancien « Mur de départ », 2 PV)
+  const START_WALL = "Haie d'épines";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -155,7 +157,7 @@ const SF = (() => {
     };
     for (const lane of LANES) {
       const [x, y] = toGlobal(lane, 0, 1);
-      S.tiles[key(x, y)] = { name: START_WALL, hp: 2, max: 2, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
+      S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
@@ -258,9 +260,10 @@ const SF = (() => {
   function destroyTile(S, k, why) {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
-    if (t.name !== START_WALL) S.tileDiscard.push(t.name);
-    // biomasse gagnée = couronne de la tuile : 1, 2 ou 3 (décision d'Oni, 30/10/2026 ; avant : toujours 1). Supports : toujours 1.
-    const gain = ring(...parse(k));
+    if (!t.start) S.tileDiscard.push(t.name);
+    // biomasse gagnée = durée de construction de la tuile : 1, 2 ou 3 (décision d'Oni, 30/10/2026 ; avant : toujours 1).
+    // Haies de départ : 1 (comme une Haie d'épines). Supports : toujours 1.
+    const gain = !t.start && TILES[t.name] ? TILES[t.name].d : 1;
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
     log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);
@@ -647,7 +650,7 @@ const SF = (() => {
         return true;
       }
       case "Reconversion": { // arg = {hand: index, tile: clé}
-        if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].name === START_WALL) return false;
+        if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].start) return false;
         const old = S.tiles[arg.tile], nn = S.hand[arg.hand];
         const [x, y] = parse(arg.tile);
         S.tiles[arg.tile] = tileStats(nn, x, y);
@@ -797,19 +800,19 @@ const SF = (() => {
   }
   function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
 
-  // Parties enregistrées avant le 30/10/2026 : « Mur de départ » devient « Haie de départ »,
-  // et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
+  // Parties enregistrées avant le 30/10/2026 : « Mur de départ » / « Haie de départ » deviennent des Haies d'épines
+  // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
     for (const t of Object.values(S.tiles || {})) {
-      if (t.name === "Mur de départ") t.name = START_WALL;
-      if (t.name === START_WALL) t.ep = 1;
+      if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.name = START_WALL; t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
+      if (t.start) t.ep = 1;
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
     }
     if (S.invest && S.upgrades) for (const [key, got] of Object.entries(S.invest)) {
       const [type, slot] = key.split(":");
       if (TREES[type] && TREES[type][slot] && got >= nodeCost(slot) && nodeState(S, type, slot) === "open") { delete S.invest[key]; acquire(S, type, slot); }
     }
-    for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ") list.splice(i, 1);
+    for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ" || list[i] === "Haie de départ") list.splice(i, 1);
     return S;
   }
 

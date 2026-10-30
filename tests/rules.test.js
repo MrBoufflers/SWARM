@@ -13,12 +13,12 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   while (k !== 0) { [u, k] = SF.nextStep(u, k); steps.push(k === 0 ? "F" : "ABCDE"[u + 2] + k); }
   ok(steps.join(" ") === "D3 D2 C2 C1 F", "chemin colonne D : " + steps.join(" "));
 }
-// 2. une créature traverse les cases vides et frappe la haie de départ (2 PV) ; Épines 1 en retour
+// 2. une créature traverse les cases vides et frappe la haie d'épines de départ (1 PV) ; Épines 1 en retour
 {
   const S = fresh(); SF.attackerDraw(S);
   S.creatures.push({ id: 900, name: "Écorcheur", lane: "N", u: -2, k: 4, hp: 1, new: true, acted: false });
   SF.act(S, S.creatures[0]);
-  ok(!S.tiles["0,1"], "Écorcheur (3 ATQ) détruit la haie de départ Nord (2 PV)");
+  ok(!S.tiles["0,1"], "Écorcheur (3 ATQ) détruit la haie de départ Nord (1 PV)");
   ok(S.biomass === 4 + 0 || S.biomass >= 4, "biomasse +1 après destruction (biomasse " + S.biomass + ")");
   ok(S.creatures.length === 0, "l'Écorcheur (1 PV) meurt sur Épines 1");
 }
@@ -125,7 +125,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   const h = { id: 2, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2, new: true, acted: false };
   S.creatures.push(g, h);
   SF.act(S, g);
-  ok(S.tiles["0,1"].hp === 2 && g.hp === 2 && g.k === 2, "le Glaneur avance jusqu'au mur, ne le frappe pas et ne prend pas d'Épines");
+  ok(S.tiles["0,1"].hp === 1 && g.hp === 2 && g.k === 2, "le Glaneur avance jusqu'à la haie de départ, ne la frappe pas et ne prend pas d'Épines");
   ok(SF.effAtq(S, g) === 0, "un soutien reste à 0 ATQ même sous l'Aura Fureur d'un autre Hurleur");
 }
 // 14. Camouflage : toutes les forteresses sauf Antenne, Laboratoire, Observatoire, Baraquement, Dortoir
@@ -273,12 +273,12 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(hidden[0].hp === null && hidden[0].n === null, "PV d'une tuile camouflée encore cachée non transmis à l'essaim");
   ok(SF.fxFor(T, "colonie", [{ t: "hit", id: null, k: "1,2", n: 1, hp: 3 }])[0].hp === 3, "la colonie reçoit les PV de ses tuiles");
 }
-// 27. Épines (décision d'Oni, 30/10/2026) : seulement la Haie de départ (1), la Haie d'épines et le Mur hérissé (2)
+// 27. Épines (décision d'Oni, 30/10/2026) : seulement les Haies d'épines de départ (1), la Haie d'épines et le Mur hérissé (2)
 {
   const withEp = Object.keys(SF.TILES).filter(n => SF.TILES[n].ep > 0).sort();
   ok(withEp.join() === ["Haie d'épines", "Mur hérissé"].sort().join() && SF.TILES["Haie d'épines"].ep === 2 && SF.TILES["Mur hérissé"].ep === 2, "seules la Haie d'épines et le Mur hérissé ont des Épines (2)");
   const S = fresh();
-  ok(S.tiles["0,1"].name === "Haie de départ" && S.tiles["0,1"].ep === 1 && S.tiles["0,1"].hp === 2, "les 4 haies de départ : 2 PV, Épines 1");
+  ok(["0,1", "1,0", "0,-1", "-1,0"].every(k => S.tiles[k].name === "Haie d'épines" && S.tiles[k].start && S.tiles[k].ep === 1 && S.tiles[k].hp === 1 && S.tiles[k].max === 1 && S.tiles[k].revealed), "les 4 Haies d'épines de départ : 1 PV, Épines 1, face visible");
   // support de niveau 2 en (1,2) / (-1,2)… : il touche les murs (0,2) et (1,1) côté fusée
   S.supports["1,2"] = 2;
   S.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
@@ -289,7 +289,10 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(!tk || SF.epinesOf(S, "0,2") === 3, "support de niveau 2 : +1 à une Haie d'épines (2 → 3)");
   const old = { tiles: { "0,1": { name: "Mur de départ", ep: 1 }, "0,2": { name: "Muraille", ep: 1 } }, tileDiscard: ["Mur de départ", "Muraille"], tileDeck: [], hand: [] };
   SF.migrate(old);
-  ok(old.tiles["0,1"].name === "Haie de départ" && old.tiles["0,2"].ep === 0 && old.tileDiscard.join() === "Muraille", "ancienne partie : Mur de départ renommé, Épines mises à jour");
+  ok(old.tiles["0,1"].name === "Haie d'épines" && old.tiles["0,1"].start && old.tiles["0,2"].ep === 0 && old.tileDiscard.join() === "Muraille", "ancienne partie : Mur de départ devenu Haie d'épines de départ, Épines mises à jour");
+  const old2 = { tiles: { "0,1": { name: "Haie de départ", ep: 1, hp: 2, max: 2 } }, tileDiscard: [], tileDeck: [], hand: [] };
+  SF.migrate(old2);
+  ok(old2.tiles["0,1"].name === "Haie d'épines" && old2.tiles["0,1"].hp === 1 && old2.tiles["0,1"].max === 1, "partie d'hier : Haie de départ (2 PV) ramenée à 1 PV");
 }
 // 28. fusée : coût d'un étage 3 / 4 / 5 / 6 selon le palier (étages 1-3, 4-6, 7-9, 10-12)
 {
@@ -331,26 +334,26 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   SF.migrate(old);
   ok(old.upgrades.aggro.r1 === "A" && !old.invest["aggro:A1"], "ancienne partie : un nœud déjà payé 7 (≥ 6) est acquis");
 }
-// 31. biomasse : une tuile détruite rapporte sa couronne (1 / 2 / 3), un support qui tombe 1 (décision d'Oni, 30/10/2026)
+// 31. biomasse : une tuile détruite rapporte sa durée de construction (1 / 2 / 3), une haie de départ 1, un support 1 (décision d'Oni, 30/10/2026)
 {
-  const gains = [[0, 1], [0, 2], [0, 3]].map(([x, y]) => {
-    const S = fresh(); S.tiles[x + "," + y] = SF.tileStats("Palissade", x, y);
-    for (const k of Object.keys(S.supports)) S.supports[k] = S.supports[k]; // supports inchangés
-    const b = S.biomass; S.tiles[x + "," + y].hp = 1;
-    const c = { id: 80 + y, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 3, acted: false };
-    // on vide le chemin jusqu'à la tuile visée
-    for (const k of ["0,1", "0,2", "0,3"]) if (k !== x + "," + y) delete S.tiles[k];
-    S.supports = {}; S.creatures.push(c); SF.act(S, c);
-    return S.biomass - b;
-  });
-  ok(gains.join() === "1,2,3", "tuile détruite en couronne 1 / 2 / 3 : +" + gains.join(" / +") + " biomasse");
-  const T = fresh(); const b = T.biomass;
-  delete T.tiles["0,1"]; delete T.tiles["1,0"]; SF.placeSupports(T);
-  const c = { id: 90, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 3, acted: false };
-  T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); T.tiles["0,1"].hp = 1; T.creatures.push(c);
-  const sup = Object.keys(T.supports).length; SF.act(T, c);
+  const gain = (name, k = "0,2") => {
+    const S = fresh(); delete S.tiles["0,1"]; S.supports = {};
+    const [x, y] = k.split(",").map(Number); S.tiles[k] = SF.tileStats(name, x, y); S.tiles[k].hp = 1;
+    const b = S.biomass, c = { id: 81, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 9, acted: false };
+    S.creatures.push(c); SF.act(S, c);
+    return S.tiles[k] ? "intacte" : S.biomass - b;
+  };
+  const g = [gain("Palissade"), gain("Muraille"), gain("Rempart"), gain("Muraille", "0,3")];
+  ok(g.join() === "1,2,3,2", "Palissade (durée 1) / Muraille (2) / Rempart (3) : +" + g.slice(0, 3).join(" / +") + " ; la couronne ne compte pas (Muraille en couronne 3 : +" + g[3] + ")");
+  const S = fresh(); S.supports = {}; const b = S.biomass, n = S.tileDiscard.length;
+  const c = { id: 82, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
+  ok(!S.tiles["0,1"] && S.biomass - b === 1 && S.tileDiscard.length === n, "haie de départ détruite : +1 biomasse, retirée du jeu (pas de défausse)");
+  const T = fresh(); const tb = T.biomass;
+  const d = { id: 83, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 9, acted: false };
+  const sup = Object.keys(T.supports).length; delete T.tiles["1,0"]; delete T.tiles["-1,0"];
+  T.creatures.push(d); SF.act(T, d);
   const fell = sup - Object.keys(T.supports).length;
-  ok(T.biomass - b === 1 + fell, "support tombé : +1 chacun (" + fell + " support(s) tombé(s), +" + (T.biomass - b) + " au total)");
+  ok(fell > 0 && T.biomass - tb === 1 + fell, "support tombé : +1 chacun (" + fell + " tombé(s), +" + (T.biomass - tb) + " au total avec la haie)");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
