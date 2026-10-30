@@ -21,6 +21,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   const shots = {};
   for (let step = 0; step < 300; step++) {
     if (await page.$('.banner.win')) break;
+    if (await click('[data-a="local"]')) continue;
     if (await click('[data-a="reveal"]')) continue;
     if (await click('[data-a="famine"][data-v="1"]')) continue;
     if (await click('[data-a="draw"]')) continue;

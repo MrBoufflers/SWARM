@@ -1,0 +1,13 @@
+# Site Netlify : la page du jeu (dist/) et la fonction /api/* (server/core.js + Netlify Blobs)
+[build]
+  command = "python3 tools/build.py"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+# la page du jeu à la racine du site (les liens d'invitation « /?code=… » y mènent)
+[[redirects]]
+  from = "/"
+  to = "/siege-fusee-jeu.html"
+  status = 200

@@ -193,5 +193,70 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(SF.placeTile(S, "0,2") && S.tiles["0,2"].name === "Palissade" && c.k === 3, "posée en C2, la créature recule en C3");
   ok(S.phase !== "D_place", "le tour de la colonie se termine après la pose");
 }
+// 21. actions des joueurs (SF.apply) : camp, phase et paramètres vérifiés par le moteur
+{
+  const S = fresh();
+  ok(SF.apply(S, "colonie", "draw") !== "" && S.phase === "A_start", "la colonie ne peut pas piocher pour l'essaim");
+  ok(SF.apply(S, "essaim", "endDeploy") !== "", "fin de déploiement refusée avant la pioche");
+  ok(SF.apply(S, "essaim", "draw") === "" && S.phase === "A_deploy", "l'essaim pioche");
+  ok(SF.apply(S, "essaim", "deploy", { uid: S.handA[0].uid, lane: "X", u: 0 }) !== "", "lane inconnue refusée");
+  ok(SF.apply(S, "essaim", "deploy", { uid: S.handA[0].uid, lane: "N", u: 7 }) !== "", "colonne hors plateau refusée");
+  ok(SF.apply(S, "essaim", "nimporte") !== "", "action inconnue refusée");
+  ok(SF.apply(S, "essaim", "endDeploy") === "" && SF.apply(S, "essaim", "toAttacks") === "", "fin de déploiement puis passage aux attaques");
+  ok(S.phase === "A_attack" || S.phase === "A_react", "phase d'attaque (ou de réaction si la colonie tient un sortilège offensif)");
+}
+// 22. fenêtre de réaction : ouverte seulement si la colonie tient un sortilège offensif autre que Famine
+{
+  const S = fresh(); SF.apply(S, "essaim", "draw"); SF.apply(S, "essaim", "endDeploy");
+  S.spells = ["Barrage"];
+  SF.apply(S, "essaim", "toAttacks");
+  ok(S.phase === "A_react", "Barrage en main → fenêtre de réaction");
+  ok(SF.apply(S, "essaim", "endA") !== "", "l'essaim ne peut pas agir pendant la réaction");
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: "N" }) === "" && S.spells.length === 0, "la colonie joue Barrage");
+  ok(SF.apply(S, "colonie", "reactDone") === "" && S.phase === "A_attack", "fin de la réaction");
+  const T = fresh(); SF.apply(T, "essaim", "draw"); SF.apply(T, "essaim", "endDeploy"); T.spells = ["Famine", "Effort"];
+  SF.apply(T, "essaim", "toAttacks");
+  ok(T.phase === "A_attack", "Famine ou sort de soutien seuls : pas de fenêtre de réaction");
+}
+// 23. Renouvellement : indices invalides refusés (sinon pioche gratuite)
+{
+  const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
+  S.spells = ["Renouvellement"]; const n = S.hand.length, deck = S.tileDeck.length;
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: ["a", "b"] }) !== "" && S.tileDeck.length === deck && S.spells.length === 1, "indices non numériques refusés");
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: [0, 0] }) !== "", "indice en double refusé");
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: [0] }) === "" && S.hand.length === n, "défausser 1 tuile et en repiocher 1");
+}
+// 24. fenêtre Famine : ouverte aussi quand le tour de la colonie se termine par la pose d'un bâtiment
+{
+  const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
+  S.hand.unshift("Palissade");
+  SF.apply(S, "colonie", "startCh", { i: 0, lane: "N" }); S.alloc.N = 1;
+  SF.apply(S, "colonie", "toFire");
+  const deck = S.spellDeck; S.spellDeck = [...deck.filter(s => s !== "Famine"), "Famine"]; S.techBonus = 3; // pioche 1 sortilège : Famine
+  SF.apply(S, "colonie", "endD");
+  ok(S.phase === "D_place", "pose du bâtiment achevé");
+  ok(SF.apply(S, "colonie", "placeAt", { k: "0,2" }) === "" && S.spells.includes("Famine") && S.phase === "A_famine", "après la pose : fenêtre Famine ouverte");
+  ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine === 2, "Famine jouée : budget −2");
+}
+// 25. vue filtrée : rien de caché n'est envoyé à l'autre camp
+{
+  const S = fresh(); SF.attackerDraw(S);
+  S.tiles["0,2"] = SF.tileStats("Piège", 0, 2);
+  S.chantiers.E.push({ tile: "Muraille", left: 2, fresh: true }); S.chantiers.S.push({ tile: "Antenne", left: 1, fresh: true });
+  S.toPlace.push({ tile: "Rempart", lane: "O" }); S.spells = ["Famine", "Effort"];
+  const A = SF.viewFor(S, "essaim"), txt = JSON.stringify(A);
+  ok(A.hand.length === S.hand.length && A.hand.every(x => x === null), "essaim : main de la colonie réduite à son nombre");
+  ok(A.spells.length === 2 && A.spells.every(x => x === null), "essaim : sortilèges réduits à leur nombre");
+  ok(A.tiles["0,2"].name === null && A.tiles["0,2"].hp === null && !txt.includes("Piège"), "essaim : tuile camouflée sans nom ni PV");
+  ok(A.chantiers.E[0].tile === null && A.chantiers.S[0].tile === "Antenne", "essaim : chantier camouflé sans nom, Antenne visible");
+  ok(A.toPlace[0].tile === null && !txt.includes("Muraille") && !txt.includes("Rempart"), "essaim : tuile à poser camouflée sans nom");
+  ok(A.handA.length && A.handA[0].name, "essaim : voit sa propre main");
+  ok([1, 2, 3].every(l => A.piles[l].every(x => x === null)) && A.tileDeck.every(x => x === null) && A.spellDeck.every(x => x === null), "personne ne voit l'ordre des pioches");
+  const C = SF.viewFor(S, "colonie");
+  ok(C.handA.length === S.handA.length && C.handA.every(x => x === null), "colonie : main de l'essaim réduite à son nombre");
+  ok(C.tiles["0,2"].name === "Piège" && C.hand[0] === S.hand[0], "colonie : voit ses tuiles et sa main");
+  S.upgrades.soutien.r2 = "C"; S.creatures.push({ id: 90, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2 });
+  ok(SF.viewFor(S, "essaim").tiles["0,2"].name === "Piège", "Clairvoyance : la tuile camouflée est visible pour l'essaim");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
