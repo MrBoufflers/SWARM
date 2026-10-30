@@ -68,14 +68,14 @@ const SF = (() => {
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
-    // seuils décalés de +3 (décision d'Oni, 30/10/2026) : départ (3), puis 7, 10, 13, 16 (avant 4, 7, 10, 13)
-    { min: 0, n: [3, 0, 0], cap: 1 }, { min: 7, n: [3, 2, 0], cap: 2 }, { min: 10, n: [4, 2, 1], cap: 3 },
-    { min: 13, n: [4, 3, 2], cap: 4 }, { min: 16, n: [4, 3, 3], cap: 5 },
+    // seuils (décision d'Oni, 30/10/2026) : départ (3), puis 6, 9, 12, 15 (à l'origine 4, 7, 10, 13)
+    { min: 0, n: [3, 0, 0], cap: 1 }, { min: 6, n: [3, 2, 0], cap: 2 }, { min: 9, n: [4, 2, 1], cap: 3 },
+    { min: 12, n: [4, 3, 2], cap: 4 }, { min: 15, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
     aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté)."],
       A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
-      B2: ["Percée", "Les créatures aggro gagnent la percée : les dégâts en trop passent à la tuile suivante."] },
+      B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     tank: { A1: ["Carapace épaisse", "+2 PV."], B1: ["Protection", "Les tirs visant une créature non tank de sa case visent ce tank."],
       A2: ["Blindage", "+4 PV (total +6)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
@@ -178,7 +178,8 @@ const SF = (() => {
 
   // ------------------------------------------------------------------ dérivés
   const tier = S => { let t = 0; TIERS.forEach((r, i) => { if (S.biomass >= r.min) t = i; }); return t; };
-  const capOf = S => TIERS[tier(S)].cap;
+  // plafond de population par lane : celui du palier, +3 avec l'amélioration aggro « Essaim agrandi » (décision d'Oni, 30/10/2026)
+  const capOf = S => TIERS[tier(S)].cap + (S.upgrades.aggro.r2 === "B" ? 3 : 0);
   const laneCount = (S, lane) => S.creatures.filter(c => c.lane === lane).length;
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
@@ -201,7 +202,6 @@ const SF = (() => {
     return caseMates(S, c).some(o => o.name === "Catalyseur" && o.instinct === "furtivite" && o.instinctTarget === c.id);
   }
   function hasPercee(S, c) {
-    if (CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r2 === "B") return true; // amélioration Percée (ancien Raid)
     return caseMates(S, c).some(o => o.name === "Perforeur");
   }
   function bonusHp(S, c) { return CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "B" ? caseMates(S, c).length : 0; }
@@ -998,7 +998,7 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, hasMobility, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    clairvoyance, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, moveLane, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,

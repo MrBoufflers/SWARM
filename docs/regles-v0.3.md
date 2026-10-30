@@ -17,8 +17,8 @@ Repris du prototype jouable et validés par Oni :
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc, et si la tuile tombe, le bloc suit.
-- **Paliers de l'essaim** : décalés de +3 (départ 3, puis 7, 10, 13 et 16 de biomasse).
-- **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine. **Raid** devient **Percée** (aggro, rang 2) : les aggros gagnent la percée.
+- **Paliers de l'essaim** : départ 3, puis 6, 9, 12 et 15 de biomasse (au lieu de 4, 7, 10 et 13).
+- **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine. **Raid** devient **Essaim agrandi** (aggro, rang 2) : +3 au plafond de population de chaque lane.
 
 ## Le jeu en bref
 
@@ -115,7 +115,7 @@ Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe combien
 Pour chaque carte que vous jouez :
 
 1. Payez son coût sur votre budget.
-2. Choisissez une lane, sans dépasser le **plafond de population** de votre palier sur cette lane.
+2. Choisissez une lane, sans dépasser le **plafond de population** de votre palier sur cette lane (+3 avec l'amélioration Essaim agrandi).
 3. Placez sa figurine à l'entrée de la lane, devant l'une des 5 colonnes de la couronne 3, et la carte devant vous. Réglez son socle sur ses PV.
 
 ### 4. Améliorations
@@ -369,7 +369,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | 1 | Côté B | Mobilité | une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté) |
 | 2 | Côté A (après Férocité) | Carnage | +2 ATQ (total +3) |
 | 2 | Centre | Déploiement | à chaque tour, piochez 2 cartes de niveau 1 supplémentaires et déployez-les gratuitement, plafond de population respecté † |
-| 2 | Côté B (après Mobilité) | Percée | les créatures aggro gagnent la **percée** |
+| 2 | Côté B (après Mobilité) | Essaim agrandi | **+3 au plafond de population** de chaque lane |
 
 #### Tank
 
@@ -402,10 +402,10 @@ Les chiffres de référence des deux camps, à garder sous la main.
 | Palier | Biomasse | Cartes piochées (N1 / N2 / N3) | Plafond par lane |
 | --- | --- | --- | --- |
 | 1 | départ (3) | 3 / 0 / 0 | 1 |
-| 2 | 7 et plus | 3 / 2 / 0 | 2 |
-| 3 | 10 et plus | 4 / 2 / 1 | 3 |
-| 4 | 13 et plus | 4 / 3 / 2 | 4 |
-| 5 | 16 et plus | 4 / 3 / 3 | 5 |
+| 2 | 6 et plus | 3 / 2 / 0 | 2 |
+| 3 | 9 et plus | 4 / 2 / 1 | 3 |
+| 4 | 12 et plus | 4 / 3 / 2 | 4 |
+| 5 | 15 et plus | 4 / 3 / 3 | 5 |
 
 Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalogue.
 
