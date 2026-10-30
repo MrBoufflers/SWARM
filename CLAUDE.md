@@ -76,6 +76,7 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 - **Fusée** : coût d'un étage 3 points (étages 1-3), 4 (4-6), 5 (7-9), 6 (10-12) — `SF.floorCost(S)`. Les points en trop passent à l'étage suivant.
 - **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
 - **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).
+- **Biomasse** : une tuile détruite rapporte 1 / 2 / 3 biomasse selon sa couronne (avant : 1) ; un support qui tombe rapporte toujours 1.
 - Les parties enregistrées avant ces changements sont mises à jour à la lecture (`SF.migrate`, côté navigateur et serveur) ; un nœud déjà assez investi pour le nouveau coût est acquis.
 - Conséquence signalée, à trancher par Oni : la colonne « Points » du barème des forteresses comptait une Épines 1 gratuite pour toutes ; elle est à recalculer.
 
