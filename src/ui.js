@@ -383,7 +383,7 @@
         else state = `${got} / ${cost} investis`;
         const bar = st === "open" || got ? `<span class="bar"><i style="width:${Math.round(100 * got / cost)}%"></i></span>` : "";
         const btns = canInv ? `<span class="inv"><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1">+1</button><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99">Tout investir (${Math.min(avail, cost - got)})</button></span>` : "";
-        return `<div class="node ${cls}${canInv ? " can" : ""}"><span class="np">${POS[slot]}</span><b>${E(T[slot][0])}</b><span class="nt">${E(T[slot][1])}</span>${bar}<span class="ns">${E(state)}</span>${btns}</div>`;
+        return `<div class="node ${cls}${canInv ? " can" : ""}" data-node="${ty}:${slot}"><span class="np">${POS[slot]}</span><b>${E(T[slot][0])}</b><span class="nt">${E(T[slot][1])}</span>${bar}<span class="ns">${E(state)}</span>${btns}</div>`;
       };
       trees += `<div class="tree ${ty}"><span class="tt">${icon(ty)}${ty}</span>
         <span class="rk">Rang 1 · ${SF.COST_R1} biomasse · 1 choix sur 2 · ajoute les cartes de niveau 2</span><div class="r">${node("A1")}${node("B1")}</div>
@@ -552,7 +552,7 @@
   }
   function ringCells(r) { return [...document.querySelectorAll(".board .cell.lane.r" + r)]; }
   async function sweep(cells, kind, together) { // vague sobre sur des cases (lane ou couronne)
-    const color = kind === "stase" ? "var(--support)" : "var(--off)";
+    const color = kind === "stase" ? "var(--support)" : kind === "vision" ? "var(--essaim)" : "var(--off)";
     for (const c of cells) {
       c.animate([{ boxShadow: `inset 0 0 0 0 ${color}` }, { boxShadow: `inset 0 0 0 3px ${color}` }, { boxShadow: `inset 0 0 0 0 ${color}` }], { duration: dur(380) });
       if (!together) await wait(35);
@@ -569,9 +569,9 @@
       d.remove();
     }
   }
-  function spellBanner(name, kind) {
+  function spellBanner(name, kind, raw) {
     const b = document.createElement("div");
-    b.className = "turn-banner spell-banner " + (kind || ""); b.textContent = "Sortilège : " + name;
+    b.className = "turn-banner spell-banner " + (kind || ""); b.textContent = raw ? name : "Sortilège : " + name;
     layer().appendChild(b);
     b.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }], { duration: FX.skip ? 1 : 1400, fill: "forwards" }).finished.then(() => b.remove(), () => b.remove());
   }
@@ -660,6 +660,59 @@
       const b = box(dest);
       await Promise.all(e.ids.map(id => { const g = ghost(id); return g ? glide(g, b.cx, b.cy, 260) : null; }));
     },
+    // ---- lot 3 : fusée, Nuke, décollage, améliorations, auras, Vision, Raid
+    async vision(e) {
+      await sweep(laneCells(e.lane), "vision");
+      for (const k of e.keys || []) { const c = cellAt(k); if (c) flip(c.querySelector(".tile") || c); }
+      if ((e.keys || []).length) await wait(320);
+    },
+    async invest(e) {
+      const node = document.querySelector(`.node[data-node="${e.type}:${e.slot}"]`), bar = node && node.querySelector(".bar i");
+      if (bar) await bar.animate([{ width: bar.style.width || "0%" }, { width: Math.round(100 * e.got / e.cost) + "%" }], { duration: dur(320), easing: "ease-out", fill: "forwards" }).finished.catch(() => {});
+    },
+    async upgrade(e) {
+      const node = document.querySelector(`.node[data-node="${e.type}:${e.slot}"]`);
+      if (node) { flashEl(node, "var(--hot)"); float(node, "Acquis : " + e.name, "up"); }
+      await wait(380);
+    },
+    async raid(e) {
+      const g = ghost(e.id), c = cellAt(SF.toGlobal(e.lane, 0, 4).join(","));
+      if (g && c) { const b = box(c); await glide(g, b.cx, b.cy, 380); }
+    },
+    async aura(e) {
+      const t = tokAt(e.id); if (!t) return;
+      t.animate([{ boxShadow: "0 0 0 0 var(--soutien)" }, { boxShadow: "0 0 0 4px var(--soutien)" }, { boxShadow: "0 0 0 0 var(--soutien)" }], { duration: dur(360) });
+      float(t, e.names.join(" · "), "aura");
+      await wait(220);
+    },
+    async cheal(e) {
+      const t = tokAt(e.id); if (!t) return;
+      float(t, "+" + e.n + " PV", "heal");
+      const spans = t.querySelectorAll("span"); if (spans[1]) spans[1].textContent = e.hp;
+      await wait(160);
+    },
+    async floor(e) {
+      const fl = document.querySelectorAll(".floors .fl")[e.n - 1], core = cellAt("0,0");
+      if (fl) { fl.classList.add("on"); fl.animate([{ transform: "scale(1)" }, { transform: "scale(1.35)" }, { transform: "scale(1)" }], { duration: dur(360) }); }
+      if (core) { const b = core.querySelector("b"); if (b) b.textContent = e.n + "/12"; float(core, `Étage ${e.n} · +1 travailleur`, "heal"); }
+      const bonus = { 3: "Palier 3 : +2 technologies", 6: "Palier 6 : +1 chantier par lane", 9: "Palier 9 : Nuke !" }[e.n];
+      if (bonus) { if (core) flashEl(core, "var(--hot)"); spellBanner(bonus, "sup", true); await wait(700); }
+      await wait(260);
+    },
+    async nuke(e) {
+      const board = document.querySelector(".board"); if (!board) return;
+      const b = box(board), f = document.createElement("div"); f.className = "nuke";
+      Object.assign(f.style, { left: b.x + "px", top: b.y + "px", width: b.w + "px", height: b.h + "px" });
+      layer().appendChild(f);
+      f.animate([{ opacity: 0 }, { opacity: .85, offset: .3 }, { opacity: 0 }], { duration: dur(700) }).finished.then(() => f.remove(), () => f.remove());
+      await Promise.all(e.ids.map(id => fade(tokAt(id))));
+      await wait(250);
+    },
+    async liftoff() {
+      const core = cellAt("0,0"), ic = core && core.querySelector("svg"); if (!ic) return;
+      float(core, "Décollage !", "heal");
+      await ic.animate([{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-140px)", opacity: 0 }], { duration: dur(1000), easing: "ease-in", fill: "forwards" }).finished.catch(() => {});
+    },
     async shot(e) {
       const from = cellAt(e.sk), to = tokAt(e.id); if (!from || !to) return;
       const a = box(from), b = box(to), d = document.createElement("div");
@@ -682,11 +735,18 @@
   }
   function afterRender(events) { // apparitions, une fois le nouvel état affiché
     if (!animOn || !events) return;
+    if (S && S.winner && events.length) { const w = document.querySelector(".banner.win"); if (w) w.animate([{ transform: "scale(.9)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 420, easing: "ease-out" }); }
     const pop = el => el && el.animate([{ transform: "scale(.2)", opacity: 0 }, { transform: "scale(1.12)", opacity: 1, offset: .7 }, { transform: "scale(1)", opacity: 1 }], { duration: 300, easing: "ease-out" });
     for (const e of events) {
       if (e.t === "deploy") pop(document.querySelector(`.board .tok[data-id="${e.id}"]`));
       if (e.t === "place") { const c = cellAt(e.k); pop(c && (c.querySelector(".tile") || c)); }
       if (e.t === "supUp") pop(cellAt(e.k));
+      if (e.t === "reinc") pop(document.querySelector(`.board .tok[data-id="${e.id}"]`));
+      if (e.t === "draw") {
+        const cards = document.querySelectorAll(".panel.essaim .hand .ccard");
+        if (cards.length) cards.forEach((c, i) => c.animate([{ transform: "translateY(-14px)", opacity: 0 }, { transform: "translateY(0)", opacity: 1 }], { duration: 260, delay: i * 90, easing: "ease-out", fill: "backwards" }));
+        else pop(document.querySelector(".panel.essaim .hidden-hand"));
+      }
       if (e.t === "chantier") { const sl = document.querySelectorAll(`.atelier.lane-${e.lane} .slot:not(.empty)`); pop(sl[sl.length - 1]); }
     }
   }

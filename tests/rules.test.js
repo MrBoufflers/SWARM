@@ -302,5 +302,24 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   SF.endDefenderTurn(T);
   ok(T.floors === 3 && T.rocketPts === 3, "6 points avec 2 étages : étage 3 (3 points), 3 points gardés, pas assez pour l'étage 4 (4 points)");
 }
+// 29. animations du lot 3 : fusée (étage, Nuke, décollage), Vision, améliorations — événements seulement, règles inchangées
+{
+  const T = fresh(); T.phase = "D_fire"; T.floors = 8; T.rocketPts = 0; T.workersBase = 5;
+  T.alloc = { N: 0, E: 0, S: 0, O: 0 }; T.extraPts = 0;
+  T.creatures.push({ id: 70, name: "Carapace", lane: "S", u: 0, k: 4, hp: 3, acted: false });
+  T.fx = []; SF.endDefenderTurn(T);
+  ok(T.floors === 9 && T.fx.some(e => e.t === "floor" && e.n === 9) && T.fx.some(e => e.t === "nuke" && e.ids.includes(70)) && T.creatures.length === 0, "étage 9 : événements étage + Nuke, créatures détruites");
+  const U = fresh(); U.phase = "D_fire"; U.floors = 11; U.rocketPts = 0; U.workersBase = 6;
+  U.alloc = { N: 0, E: 0, S: 0, O: 0 }; U.extraPts = 0; U.fx = []; SF.endDefenderTurn(U);
+  ok(U.winner === "colonie" && U.fx.some(e => e.t === "liftoff"), "étage 12 : décollage et victoire de la colonie");
+  const V = fresh(); SF.attackerDraw(V); V.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
+  V.handA = [{ name: "Œil-sonde", free: true, uid: 999 }]; V.fx = [];
+  SF.deploy(V, 999, "N", 0);
+  ok(V.fx.some(e => e.t === "vision" && e.keys.includes("0,2")) && V.tiles["0,2"].revealed, "Vision : événement avec la tuile révélée");
+  V.budget = 20; V.fx = []; SF.invest(V, "aggro", "A1", 99);
+  ok(V.fx.some(e => e.t === "invest") && V.fx.some(e => e.t === "upgrade" && e.name === "Férocité"), "investissement puis amélioration acquise");
+  const D = fresh(); D.fx = []; SF.attackerDraw(D);
+  ok(D.fx.some(e => e.t === "draw" && e.n === D.handA.length), "pioche de l'essaim");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

@@ -239,6 +239,11 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .spell.card .i { margin-top: 2px; }
 .spell.card small.when { color: var(--c); font-weight: 600; }
 .spell.card small.lost { font-size: .72rem; }
+
+/* animations (lot 3) */
+#fx .float.aura { color: var(--soutien); font-size: .78rem; }
+#fx .float.up { color: var(--ink); font-size: .85rem; }
+#fx .nuke { background: radial-gradient(circle, #fff 0%, var(--hot) 60%, transparent 100%); border-radius: 12px; z-index: 4; }
 </style></head><body>
 <div id="app"></div>
 <div id="flash" role="status" hidden></div>
@@ -624,6 +629,12 @@ const SF = (() => {
       log(S, "essaim", `${c.name} avance sans attaquer.`);
       return;
     }
+    const auras = [];
+    if (caseMates(S, c).some(o => o.name === "Hurleur")) auras.push("Fureur");
+    if (S.upgrades.soutien.r1 === "B" && caseMates(S, c).some(o => CREATURES[o.name].type === "soutien")) auras.push("Griffes");
+    if (frenzyTarget(S, c)) auras.push("Frénésie");
+    if (hasPercee(S, c)) auras.push("Percée");
+    if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
     let target = w.target;
     if (chosenTarget && hasMobility(S, c) && laneTiles(S, c.lane).includes(chosenTarget)) target = chosenTarget;
     const dmg = effAtq(S, c);
@@ -693,7 +704,9 @@ const SF = (() => {
     for (const c of S.creatures) { c.new = false; c.acted = false; }
     // Réincarnation
     for (const r of S.reincQueue) {
-      S.creatures.push(makeCreature(S, r.name, r.lane, r.u));
+      const nc = makeCreature(S, r.name, r.lane, r.u);
+      S.creatures.push(nc);
+      fx(S, { t: "reinc", id: nc.id });
       log(S, "essaim", `${r.name} se réincarne à l'entrée de la lane ${LANE_NAME[r.lane]}.`);
     }
     S.reincQueue = [];
@@ -711,6 +724,7 @@ const SF = (() => {
       for (let i = 0; i < 2; i++) if (S.piles[1].length) S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ });
     }
     S.budget = Math.max(0, S.biomass - S.famine);
+    fx(S, { t: "draw", n: S.handA.length });
     S.phase = "A_deploy";
     log(S, "essaim", `Palier ${tier(S) + 1} : ${S.handA.length} cartes, budget ${S.budget}.`);
   }
@@ -740,6 +754,7 @@ const SF = (() => {
     return true;
   }
   function revealLane(S, lane) {
+    fx(S, { t: "vision", lane, keys: laneTiles(S, lane).filter(k => S.tiles[k].camo && !S.tiles[k].revealed) });
     for (const k of laneTiles(S, lane)) if (S.tiles[k].camo && !S.tiles[k].revealed) { S.tiles[k].revealed = true; if (S.tiles[k].trap) S.tiles[k].disarmed = true; log(S, "essaim", `Vision : tuile camouflée révélée (${S.tiles[k].name}).`); }
   }
   function endDeploy(S) {
@@ -779,6 +794,7 @@ const SF = (() => {
     S.reserve -= left;
     S.invest = S.invest || {};
     S.invest[type + ":" + slot] = invested(S, type, slot) + n;
+    fx(S, { t: "invest", type, slot, got: invested(S, type, slot), cost: nodeCost(slot) });
     log(S, "essaim", `${n} biomasse investie dans ${TREES[type][slot][0]} (${invested(S, type, slot)}/${nodeCost(slot)}).`);
     if (invested(S, type, slot) >= nodeCost(slot)) { delete S.invest[type + ":" + slot]; acquire(S, type, slot); }
     return true;
@@ -787,6 +803,7 @@ const SF = (() => {
     const u = S.upgrades[type];
     const before = S.creatures.filter(c => CREATURES[c.name].type === type).map(c => [c, maxHp(S, c.name)]);
     if (slot.endsWith("1")) { u.r1 = slot[0]; addPile(S, 2, type); } else { u.r2 = slot[0]; addPile(S, 3, type); }
+    fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
     if (type === "soutien" && slot === "C2") log(S, "essaim", "Clairvoyance : les tuiles camouflées sont visibles tant qu'un soutien est en jeu.");
@@ -799,6 +816,7 @@ const SF = (() => {
     const i = LANES.indexOf(c.lane), j = LANES.indexOf(toLane);
     if (!((i + 1) % 4 === j || (i + 3) % 4 === j)) return false;
     if (laneCount(S, toLane) >= capOf(S)) return false;
+    fx(S, { t: "raid", id, lane: toLane });
     c.lane = toLane; c.u = 0; c.k = 4; S.raidUsed = true;
     log(S, "essaim", `Raid : ${c.name} passe à l'entrée de la lane ${LANE_NAME[toLane]}.`);
     return true;
@@ -810,7 +828,7 @@ const SF = (() => {
     // auras de soin
     for (const c of S.creatures) {
       const v = soinValue(S, c), m = maxHp(S, c.name);
-      if (v && c.hp < m) { c.hp = Math.min(m, c.hp + v); log(S, "essaim", `${c.name} regagne ${v} PV.`); }
+      if (v && c.hp < m) { const before = c.hp; c.hp = Math.min(m, c.hp + v); fx(S, { t: "cheal", id: c.id, n: c.hp - before, hp: c.hp + bonusHp(S, c) }); log(S, "essaim", `${c.name} regagne ${v} PV.`); }
     }
     // sortilèges offensifs non joués : défaussés
     const off = S.spells.filter(s => SPELLS[s].kind === "off");
@@ -992,16 +1010,18 @@ const SF = (() => {
     S.rocketPts += Math.max(0, rocket);
     while (S.floors < FLOORS && S.rocketPts >= floorCost(S)) {
       S.rocketPts -= floorCost(S); S.floors += 1; S.workersBase += 1;
+      fx(S, { t: "floor", n: S.floors });
       log(S, "colonie", `Étage ${S.floors} de la fusée achevé : +1 travailleur.`);
       if (S.floors === 3) { S.techBonus += 2; log(S, "colonie", "Palier 3 : +2 technologies permanentes."); }
       if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
       if (S.floors === 9) {
+        fx(S, { t: "nuke", ids: S.creatures.map(c => c.id) });
         for (const c of S.creatures) S.piles[CREATURES[c.name].lvl].push(c.name);
         for (const l of [1, 2, 3]) shuffle(S.piles[l]);
         log(S, "colonie", `Palier 9 · Nuke : ${S.creatures.length} créature${S.creatures.length > 1 ? "s" : ""} détruite${S.creatures.length > 1 ? "s" : ""}.`);
         S.creatures = [];
       }
-      if (S.floors === FLOORS) { S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
+      if (S.floors === FLOORS) { fx(S, { t: "liftoff" }); S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
     }
     placeSupports(S);
     // sortilèges de soutien non joués : défaussés
@@ -1559,7 +1579,7 @@ if (typeof module !== "undefined") module.exports = SF;
         else state = `${got} / ${cost} investis`;
         const bar = st === "open" || got ? `<span class="bar"><i style="width:${Math.round(100 * got / cost)}%"></i></span>` : "";
         const btns = canInv ? `<span class="inv"><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1">+1</button><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99">Tout investir (${Math.min(avail, cost - got)})</button></span>` : "";
-        return `<div class="node ${cls}${canInv ? " can" : ""}"><span class="np">${POS[slot]}</span><b>${E(T[slot][0])}</b><span class="nt">${E(T[slot][1])}</span>${bar}<span class="ns">${E(state)}</span>${btns}</div>`;
+        return `<div class="node ${cls}${canInv ? " can" : ""}" data-node="${ty}:${slot}"><span class="np">${POS[slot]}</span><b>${E(T[slot][0])}</b><span class="nt">${E(T[slot][1])}</span>${bar}<span class="ns">${E(state)}</span>${btns}</div>`;
       };
       trees += `<div class="tree ${ty}"><span class="tt">${icon(ty)}${ty}</span>
         <span class="rk">Rang 1 · ${SF.COST_R1} biomasse · 1 choix sur 2 · ajoute les cartes de niveau 2</span><div class="r">${node("A1")}${node("B1")}</div>
@@ -1728,7 +1748,7 @@ if (typeof module !== "undefined") module.exports = SF;
   }
   function ringCells(r) { return [...document.querySelectorAll(".board .cell.lane.r" + r)]; }
   async function sweep(cells, kind, together) { // vague sobre sur des cases (lane ou couronne)
-    const color = kind === "stase" ? "var(--support)" : "var(--off)";
+    const color = kind === "stase" ? "var(--support)" : kind === "vision" ? "var(--essaim)" : "var(--off)";
     for (const c of cells) {
       c.animate([{ boxShadow: `inset 0 0 0 0 ${color}` }, { boxShadow: `inset 0 0 0 3px ${color}` }, { boxShadow: `inset 0 0 0 0 ${color}` }], { duration: dur(380) });
       if (!together) await wait(35);
@@ -1745,9 +1765,9 @@ if (typeof module !== "undefined") module.exports = SF;
       d.remove();
     }
   }
-  function spellBanner(name, kind) {
+  function spellBanner(name, kind, raw) {
     const b = document.createElement("div");
-    b.className = "turn-banner spell-banner " + (kind || ""); b.textContent = "Sortilège : " + name;
+    b.className = "turn-banner spell-banner " + (kind || ""); b.textContent = raw ? name : "Sortilège : " + name;
     layer().appendChild(b);
     b.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }], { duration: FX.skip ? 1 : 1400, fill: "forwards" }).finished.then(() => b.remove(), () => b.remove());
   }
@@ -1836,6 +1856,59 @@ if (typeof module !== "undefined") module.exports = SF;
       const b = box(dest);
       await Promise.all(e.ids.map(id => { const g = ghost(id); return g ? glide(g, b.cx, b.cy, 260) : null; }));
     },
+    // ---- lot 3 : fusée, Nuke, décollage, améliorations, auras, Vision, Raid
+    async vision(e) {
+      await sweep(laneCells(e.lane), "vision");
+      for (const k of e.keys || []) { const c = cellAt(k); if (c) flip(c.querySelector(".tile") || c); }
+      if ((e.keys || []).length) await wait(320);
+    },
+    async invest(e) {
+      const node = document.querySelector(`.node[data-node="${e.type}:${e.slot}"]`), bar = node && node.querySelector(".bar i");
+      if (bar) await bar.animate([{ width: bar.style.width || "0%" }, { width: Math.round(100 * e.got / e.cost) + "%" }], { duration: dur(320), easing: "ease-out", fill: "forwards" }).finished.catch(() => {});
+    },
+    async upgrade(e) {
+      const node = document.querySelector(`.node[data-node="${e.type}:${e.slot}"]`);
+      if (node) { flashEl(node, "var(--hot)"); float(node, "Acquis : " + e.name, "up"); }
+      await wait(380);
+    },
+    async raid(e) {
+      const g = ghost(e.id), c = cellAt(SF.toGlobal(e.lane, 0, 4).join(","));
+      if (g && c) { const b = box(c); await glide(g, b.cx, b.cy, 380); }
+    },
+    async aura(e) {
+      const t = tokAt(e.id); if (!t) return;
+      t.animate([{ boxShadow: "0 0 0 0 var(--soutien)" }, { boxShadow: "0 0 0 4px var(--soutien)" }, { boxShadow: "0 0 0 0 var(--soutien)" }], { duration: dur(360) });
+      float(t, e.names.join(" · "), "aura");
+      await wait(220);
+    },
+    async cheal(e) {
+      const t = tokAt(e.id); if (!t) return;
+      float(t, "+" + e.n + " PV", "heal");
+      const spans = t.querySelectorAll("span"); if (spans[1]) spans[1].textContent = e.hp;
+      await wait(160);
+    },
+    async floor(e) {
+      const fl = document.querySelectorAll(".floors .fl")[e.n - 1], core = cellAt("0,0");
+      if (fl) { fl.classList.add("on"); fl.animate([{ transform: "scale(1)" }, { transform: "scale(1.35)" }, { transform: "scale(1)" }], { duration: dur(360) }); }
+      if (core) { const b = core.querySelector("b"); if (b) b.textContent = e.n + "/12"; float(core, `Étage ${e.n} · +1 travailleur`, "heal"); }
+      const bonus = { 3: "Palier 3 : +2 technologies", 6: "Palier 6 : +1 chantier par lane", 9: "Palier 9 : Nuke !" }[e.n];
+      if (bonus) { if (core) flashEl(core, "var(--hot)"); spellBanner(bonus, "sup", true); await wait(700); }
+      await wait(260);
+    },
+    async nuke(e) {
+      const board = document.querySelector(".board"); if (!board) return;
+      const b = box(board), f = document.createElement("div"); f.className = "nuke";
+      Object.assign(f.style, { left: b.x + "px", top: b.y + "px", width: b.w + "px", height: b.h + "px" });
+      layer().appendChild(f);
+      f.animate([{ opacity: 0 }, { opacity: .85, offset: .3 }, { opacity: 0 }], { duration: dur(700) }).finished.then(() => f.remove(), () => f.remove());
+      await Promise.all(e.ids.map(id => fade(tokAt(id))));
+      await wait(250);
+    },
+    async liftoff() {
+      const core = cellAt("0,0"), ic = core && core.querySelector("svg"); if (!ic) return;
+      float(core, "Décollage !", "heal");
+      await ic.animate([{ transform: "translateY(0)", opacity: 1 }, { transform: "translateY(-140px)", opacity: 0 }], { duration: dur(1000), easing: "ease-in", fill: "forwards" }).finished.catch(() => {});
+    },
     async shot(e) {
       const from = cellAt(e.sk), to = tokAt(e.id); if (!from || !to) return;
       const a = box(from), b = box(to), d = document.createElement("div");
@@ -1858,11 +1931,18 @@ if (typeof module !== "undefined") module.exports = SF;
   }
   function afterRender(events) { // apparitions, une fois le nouvel état affiché
     if (!animOn || !events) return;
+    if (S && S.winner && events.length) { const w = document.querySelector(".banner.win"); if (w) w.animate([{ transform: "scale(.9)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 420, easing: "ease-out" }); }
     const pop = el => el && el.animate([{ transform: "scale(.2)", opacity: 0 }, { transform: "scale(1.12)", opacity: 1, offset: .7 }, { transform: "scale(1)", opacity: 1 }], { duration: 300, easing: "ease-out" });
     for (const e of events) {
       if (e.t === "deploy") pop(document.querySelector(`.board .tok[data-id="${e.id}"]`));
       if (e.t === "place") { const c = cellAt(e.k); pop(c && (c.querySelector(".tile") || c)); }
       if (e.t === "supUp") pop(cellAt(e.k));
+      if (e.t === "reinc") pop(document.querySelector(`.board .tok[data-id="${e.id}"]`));
+      if (e.t === "draw") {
+        const cards = document.querySelectorAll(".panel.essaim .hand .ccard");
+        if (cards.length) cards.forEach((c, i) => c.animate([{ transform: "translateY(-14px)", opacity: 0 }, { transform: "translateY(0)", opacity: 1 }], { duration: 260, delay: i * 90, easing: "ease-out", fill: "backwards" }));
+        else pop(document.querySelector(".panel.essaim .hidden-hand"));
+      }
       if (e.t === "chantier") { const sl = document.querySelectorAll(`.atelier.lane-${e.lane} .slot:not(.empty)`); pop(sl[sl.length - 1]); }
     }
   }
