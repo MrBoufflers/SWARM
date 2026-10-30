@@ -82,7 +82,7 @@ const SF = (() => {
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
       B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
   };
-  const COST_R1 = 8, COST_R2 = 16, FLOORS = 12;
+  const COST_R1 = 6, COST_R2 = 12, FLOORS = 12; // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [3, 4, 5, 6];
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
@@ -182,7 +182,9 @@ const SF = (() => {
   const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + 2 * Object.values(S.supports).filter(l => l === 3).length;
   const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
   const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
-  const handSize = S => 4 * S.chPerLane;
+  // main de tuiles : 4, +1 à chaque palier de la fusée atteint (étages 3, 6, 9) → 4 / 5 / 6 / 7 (décision d'Oni, 30/10/2026 ;
+  // avant : 4, puis 8 à l'étage 6). Le 2ᵉ chantier par lane de l'étage 6 ne change plus la main.
+  const handSize = S => 4 + rocketMilestones(S);
   const posKey = c => { const [x, y] = toGlobal(c.lane, c.u, c.k); return c.k === 4 ? "in:" + c.lane + ":" + c.u : key(x, y); };
   const caseMates = (S, c) => S.creatures.filter(o => o !== c && posKey(o) === posKey(c));
   const anySoutien = S => S.creatures.some(c => CREATURES[c.name].type === "soutien");
@@ -800,6 +802,10 @@ const SF = (() => {
       if (t.name === "Mur de départ") t.name = START_WALL;
       if (t.name === START_WALL) t.ep = 1;
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
+    }
+    if (S.invest && S.upgrades) for (const [key, got] of Object.entries(S.invest)) {
+      const [type, slot] = key.split(":");
+      if (TREES[type] && TREES[type][slot] && got >= nodeCost(slot) && nodeState(S, type, slot) === "open") { delete S.invest[key]; acquire(S, type, slot); }
     }
     for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ") list.splice(i, 1);
     return S;

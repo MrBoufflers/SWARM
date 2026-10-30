@@ -92,11 +92,11 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(SF.invest(S, "aggro", "A1", 2) && S.budget === 1 && S.reserve === 2, "déploiement : l'investissement prend d'abord le budget");
   ok(SF.nodeState(S, "aggro", "B1") === "closed", "commencer à investir dans A1 ferme B1");
   ok(!SF.invest(S, "aggro", "B1", 1), "investir dans B1 refusé");
-  ok(SF.invest(S, "aggro", "A1", 99) && SF.invested(S, "aggro", "A1") === 5 && S.budget === 0 && S.reserve === 0, "Tout investir : budget puis réserve (5 / 8)");
+  ok(SF.invest(S, "aggro", "A1", 99) && SF.invested(S, "aggro", "A1") === 5 && S.budget === 0 && S.reserve === 0, "Tout investir : budget puis réserve (5 / 6)");
   ok(SF.nodeState(S, "aggro", "A2") === "needR1" && !SF.invest(S, "aggro", "A2", 1), "rang 2 bloqué tant que le rang 1 n'est pas acquis");
   SF.endDeploy(S); S.reserve = 4;
   const n2 = S.piles[2].length;
-  ok(SF.invest(S, "aggro", "A1", 99) && S.upgrades.aggro.r1 === "A" && S.reserve === 1, "étape Améliorations : 3 points de plus → Férocité acquise, 1 reste en réserve");
+  ok(SF.invest(S, "aggro", "A1", 99) && S.upgrades.aggro.r1 === "A" && S.reserve === 3, "étape Améliorations : 1 point de plus → Férocité acquise (6), 3 restent en réserve");
   ok(S.piles[2].length > n2, "les cartes aggro de niveau 2 entrent dans la pioche");
   ok(SF.nodeState(S, "aggro", "C2") === "open" && SF.nodeState(S, "aggro", "A2") === "open" && SF.nodeState(S, "aggro", "B2") === "closed", "rang 2 : suite de A et centre ouverts, suite de B fermée");
   S.phase = "A_attack"; S.reserve = 20;
@@ -320,6 +320,16 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(V.fx.some(e => e.t === "invest") && V.fx.some(e => e.t === "upgrade" && e.name === "Férocité"), "investissement puis amélioration acquise");
   const D = fresh(); D.fx = []; SF.attackerDraw(D);
   ok(D.fx.some(e => e.t === "draw" && e.n === D.handA.length), "pioche de l'essaim");
+}
+// 30. coûts des améliorations 6 / 12 et main de la colonie 4 + 1 par palier (décisions d'Oni, 30/10/2026)
+{
+  ok(SF.COST_R1 === 6 && SF.COST_R2 === 12 && SF.nodeCost("A1") === 6 && SF.nodeCost("C2") === 12, "améliorations : rang 1 = 6, rang 2 = 12");
+  const S = fresh();
+  const sizes = [0, 3, 6, 9].map(f => { S.floors = f; S.chPerLane = f >= 6 ? 2 : 1; return SF.handSize(S); });
+  ok(sizes.join() === "4,5,6,7", "main de tuiles : 4 / 5 / 6 / 7 selon les paliers (" + sizes.join(" / ") + ")");
+  const old = fresh(); old.invest = { "aggro:A1": 7 };
+  SF.migrate(old);
+  ok(old.upgrades.aggro.r1 === "A" && !old.invest["aggro:A1"], "ancienne partie : un nœud déjà payé 7 (≥ 6) est acquis");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
