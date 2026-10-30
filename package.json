@@ -10,7 +10,8 @@
     "e2e:mobile": "node tests/e2e-partie.js 400",
     "serveur": "node server/dev.js",
     "e2e:en-ligne": "node tests/e2e-en-ligne.js 1400",
-    "e2e:en-ligne:mobile": "node tests/e2e-en-ligne.js 400"
+    "e2e:en-ligne:mobile": "node tests/e2e-en-ligne.js 400",
+    "livret": "python3 tools/livret.py && node tools/livret-pdf.js"
   },
   "devDependencies": {
     "playwright": "^1.47.0"

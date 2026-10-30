@@ -336,7 +336,9 @@ const SF = (() => {
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [3, 4, 5, 6];
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
-  const START_WALL = "Haie de départ"; // ancien « Mur de départ »
+  // tuiles de départ : 4 « Haie d'épines » (1 PV, Épines 1, face visible), repérées par start: true ;
+  // détruites, elles sont retirées du jeu (pas de défausse) — décisions d'Oni, 30/10/2026 (ancien « Mur de départ », 2 PV)
+  const START_WALL = "Haie d'épines";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -405,7 +407,7 @@ const SF = (() => {
     };
     for (const lane of LANES) {
       const [x, y] = toGlobal(lane, 0, 1);
-      S.tiles[key(x, y)] = { name: START_WALL, hp: 2, max: 2, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
+      S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
@@ -508,9 +510,10 @@ const SF = (() => {
   function destroyTile(S, k, why) {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
-    if (t.name !== START_WALL) S.tileDiscard.push(t.name);
-    // biomasse gagnée = couronne de la tuile : 1, 2 ou 3 (décision d'Oni, 30/10/2026 ; avant : toujours 1). Supports : toujours 1.
-    const gain = ring(...parse(k));
+    if (!t.start) S.tileDiscard.push(t.name);
+    // biomasse gagnée = durée de construction de la tuile : 1, 2 ou 3 (décision d'Oni, 30/10/2026 ; avant : toujours 1).
+    // Haies de départ : 1 (comme une Haie d'épines). Supports : toujours 1.
+    const gain = !t.start && TILES[t.name] ? TILES[t.name].d : 1;
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
     log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);
@@ -897,7 +900,7 @@ const SF = (() => {
         return true;
       }
       case "Reconversion": { // arg = {hand: index, tile: clé}
-        if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].name === START_WALL) return false;
+        if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].start) return false;
         const old = S.tiles[arg.tile], nn = S.hand[arg.hand];
         const [x, y] = parse(arg.tile);
         S.tiles[arg.tile] = tileStats(nn, x, y);
@@ -1047,19 +1050,19 @@ const SF = (() => {
   }
   function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
 
-  // Parties enregistrées avant le 30/10/2026 : « Mur de départ » devient « Haie de départ »,
-  // et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
+  // Parties enregistrées avant le 30/10/2026 : « Mur de départ » / « Haie de départ » deviennent des Haies d'épines
+  // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
     for (const t of Object.values(S.tiles || {})) {
-      if (t.name === "Mur de départ") t.name = START_WALL;
-      if (t.name === START_WALL) t.ep = 1;
+      if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.name = START_WALL; t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
+      if (t.start) t.ep = 1;
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
     }
     if (S.invest && S.upgrades) for (const [key, got] of Object.entries(S.invest)) {
       const [type, slot] = key.split(":");
       if (TREES[type] && TREES[type][slot] && got >= nodeCost(slot) && nodeState(S, type, slot) === "open") { delete S.invest[key]; acquire(S, type, slot); }
     }
-    for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ") list.splice(i, 1);
+    for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ" || list[i] === "Haie de départ") list.splice(i, 1);
     return S;
   }
 
@@ -1398,7 +1401,7 @@ if (typeof module !== "undefined") module.exports = SF;
       case "Reconversion":
         inner = UI.recoHand === null
           ? `<p class="hint">Choisissez la tuile de votre main.</p><div class="choices">${S.hand.map((t, i) => `<button data-a="recoHand" data-i="${i}">${E(t)}</button>`).join("")}${cancel}</div>`
-          : `<p class="hint">Elle remplace quelle tuile construite ?</p><div class="choices">${Object.keys(S.tiles).filter(k => S.tiles[k].name !== SF.START_WALL).map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`;
+          : `<p class="hint">Elle remplace quelle tuile construite ?</p><div class="choices">${Object.keys(S.tiles).filter(k => !S.tiles[k].start).map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`;
         break;
       default: inner = `<div class="choices"><button data-a="spellArg" data-v="go" class="primary">Jouer ${E(name)}</button>${cancel}</div>`;
     }
@@ -1490,7 +1493,7 @@ if (typeof module !== "undefined") module.exports = SF;
     return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
       <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : " · sans Épines"}</span>${caps.join("")}`;
   }
-  const short = n => ({ "Haie de départ": "Départ", "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Av.-poste N", "Avant-poste de l'Est": "Av.-poste E", "Avant-poste du Sud": "Av.-poste S", "Avant-poste de l'Ouest": "Av.-poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
+  const short = n => ({ "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Av.-poste N", "Avant-poste de l'Est": "Av.-poste E", "Avant-poste du Sud": "Av.-poste S", "Avant-poste de l'Ouest": "Av.-poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
   function tokens(crs) {
     if (!crs.length) return "";
     return `<div class="toks">` + crs.map(c => {
@@ -1608,9 +1611,9 @@ if (typeof module !== "undefined") module.exports = SF;
     return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
       <h2>Règles en bref</h2>
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
-      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 4 · 7 · 10 · 13 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque créature se déplace case par case, sans diagonale, et attaque la première tuile ou la fusée (une attaque contre la fusée tue un seul travailleur). Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite rapporte 1, 2 ou 3 biomasse selon sa couronne ; un support qui tombe, 1.</p>
+      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 4 · 7 · 10 · 13 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque créature se déplace case par case, sans diagonale, et attaque la première tuile ou la fusée (une attaque contre la fusée tue un seul travailleur). Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite rapporte autant de biomasse que sa durée de construction (1, 2 ou 3 ; 1 pour une haie de départ) ; un support qui tombe, 1.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, puis 4, 5 et 6 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Seules les haies de départ (Épines 1), la Haie d'épines et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }

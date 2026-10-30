@@ -1,8 +1,21 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-10-28 · @Oni
+2026-10-30 · @Oni
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
+
+## Changements du 30 octobre 2026
+
+Repris du prototype jouable et validés par Oni :
+
+- **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
+- **Haies d'épines de départ** : les 4 tuiles de départ (anciens murs de départ) sont des Haies d'épines à **1 PV** et **Épines 1**, posées face visible ; détruites, elles sont retirées du jeu.
+- **Épines** : seules les haies de départ (1), la Haie d'épines et le Mur hérissé (2, au lieu de 3) en ont ; le support de niveau 2 donne +1 seulement aux tuiles à Épines.
+- **Biomasse** : une tuile détruite rapporte sa **durée de construction** (1, 2 ou 3) ; un support qui tombe, 1.
+- **Améliorations** : payables en plusieurs fois, **6** biomasse au rang 1 et **12** au rang 2 (au lieu de 8 / 16).
+- **Fusée** : un étage coûte 3, 4, 5 puis 6 points selon le palier atteint.
+- **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
+- **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
 
 ## Le jeu en bref
 
@@ -24,7 +37,7 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 | --- | --- | --- |
 | Fusée | 1 socle + 12 étages | les étages s'empilent sur le socle |
 | Plateau des ateliers | 1 | 4 ateliers (un par lane) de 2 emplacements de chantier |
-| Haies de départ | 4 | 2 PV, Épines 1 |
+| Haies d'épines de départ | 4 | 1 PV, Épines 1 |
 | Forteresses (tuiles de construction) | 44 | 15 sortes, voir le Catalogue |
 | Tuiles support | 12 | 4 de niveau 1, 4 de niveau 2, 4 de niveau 3 |
 | Cartes sortilège | 26 | 15 offensives, 11 de soutien, voir le Catalogue |
@@ -58,7 +71,7 @@ Le carré de départ correspond à la couronne 1 : chaque lane s'étendra ensuit
 ### Colonie
 
 1. Placez le socle de la fusée au centre, sans étage.
-2. Posez les 4 **haies de départ** sur les 4 cases de la couronne 1 (2 PV et Épines 1).
+2. Posez les 4 **Haies d'épines de départ** sur les 4 cases de la couronne 1, face visible (1 PV et Épines 1).
 3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1.
 4. Prenez **3 travailleurs**.
 5. Mélangez les 44 forteresses en une pioche. Piochez-en **4** : c'est votre main.
@@ -88,7 +101,7 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 ### 1. Budget
 
-Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite rapporte **1, 2 ou 3 biomasse selon sa couronne**, un support qui tombe rapporte **1**. Si la colonie a joué **Famine**, retirez 2 du budget de ce tour.
+Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite rapporte autant de biomasse que sa **durée de construction** (1, 2 ou 3 ; 1 pour une haie de départ), un support qui tombe rapporte **1**. Si la colonie a joué **Famine**, retirez 2 du budget de ce tour.
 
 ### 2. Pioche
 
@@ -150,9 +163,9 @@ Les créatures agissent **une par une**, dans l'ordre choisi par l'essaim : une 
 
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Seules les **haies de départ** (Épines 1), la **Haie d'épines** et le **Mur hérissé** (Épines 2) ont des Épines ; un support de niveau 2 ajoute **+1 Épines** aux tuiles à Épines qui le touchent.
+- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Seules les **Haies d'épines de départ** (Épines 1), les **Haies d'épines** construites et le **Mur hérissé** (Épines 2) ont des Épines ; un support de niveau 2 ajoute **+1 Épines** aux tuiles à Épines qui le touchent.
 - **Piège** : la première attaque le retourne face visible et inflige 2 dégâts à la créature.
-- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne autant de biomasse que le numéro de sa **couronne** : **1** en couronne 1, **2** en couronne 2, **3** en couronne 3.
+- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne autant de biomasse que sa **durée de construction** : **1**, **2** ou **3**. Une Haie d'épines de départ détruite rapporte **1** et est retirée du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
 
 ### Supports
@@ -251,9 +264,9 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Zones** : une **case** ; une **lane** (toutes ses cases) ; une **couronne** (toutes les cases de même couronne, sur les 4 lanes).
 - **Aura** : effet d'un soutien sur les autres créatures de sa case. Deux auras **du même nom** ne se cumulent pas ; deux auras de noms différents se cumulent.
 - **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque. Seules les haies de départ (1), la Haie d'épines et le Mur hérissé (2) en ont.
+- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque. Seules les Haies d'épines de départ (1), les Haies d'épines construites et le Mur hérissé (2) en ont.
 - **Percée** : les dégâts en trop après la destruction d'une tuile passent à la tuile suivante sur le chemin ; s'ils atteignent la fusée, ils retirent un seul travailleur †.
-- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, le Baraquement et le Dortoir ; les haies de départ sont posées face visible †.
+- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, le Baraquement et le Dortoir ; les Haies d'épines de départ sont posées face visible †.
 
 ### Barème de points
 
@@ -420,7 +433,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Aura Instinct** (Catalyseur) : la capacité accordée est au choix Mobilité ou Furtivité.
 - [ ] **Nom « Déploiement »** : c'est aussi le nom de l'étape 3 du tour de l'essaim. Renommer l'un des deux ?
 - [ ] **Déploiement** (centre de l'arbre aggro) : les 2 cartes viennent de la pioche de niveau 1 et respectent le plafond de population.
-- [x] **Haies de départ** (anciens murs de départ) : 2 PV, Épines 1 (décidé le 30/10/2026).
+- [x] **Haies d'épines de départ** (anciens murs de départ) : 1 PV, Épines 1, retirées du jeu quand elles sont détruites (décidé le 30/10/2026).
 - [ ] **Barème des forteresses** : la colonne « Points » comptait une Épines 1 gratuite pour toutes les tuiles ; à recalculer depuis sa suppression.
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
 - [ ] **Brouillage** : la biomasse dépensée pour la carte annulée est perdue.
