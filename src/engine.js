@@ -25,24 +25,24 @@ const SF = (() => {
   };
   // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
   const TILES = {
-    "Palissade": { d: 1, pv: 2, ep: 1, camo: 1, n: 6 },
-    "Muraille": { d: 2, pv: 4, ep: 1, camo: 1, n: 6 },
-    "Rempart": { d: 3, pv: 4, ep: 1, ren: 2, camo: 1, n: 3 },
-    "Bastion": { d: 3, pv: 3, ep: 1, ren: 3, camo: 1, n: 2 },
+    "Palissade": { d: 1, pv: 2, ep: 0, camo: 1, n: 6 },
+    "Muraille": { d: 2, pv: 4, ep: 0, camo: 1, n: 6 },
+    "Rempart": { d: 3, pv: 4, ep: 0, ren: 2, camo: 1, n: 3 },
+    "Bastion": { d: 3, pv: 3, ep: 0, ren: 3, camo: 1, n: 2 },
     "Haie d'épines": { d: 1, pv: 1, ep: 2, camo: 1, n: 3 },
-    "Mur hérissé": { d: 2, pv: 2, ep: 3, camo: 1, n: 2 },
-    "Antenne": { d: 1, pv: 1, ep: 1, tech: 1, n: 3 },
-    "Laboratoire": { d: 2, pv: 2, ep: 1, tech: 2, n: 2 },
-    "Observatoire": { d: 3, pv: 3, ep: 1, tech: 3, n: 1 },
-    "Baraquement": { d: 1, pv: 1, ep: 1, temp: 1, n: 3 },
-    "Dortoir": { d: 3, pv: 1, ep: 1, perm: 1, n: 2 },
-    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 1, camo: 1, n: 1 },
-    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 1, camo: 1, n: 1 },
-    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 1, camo: 1, n: 1 },
-    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 1, camo: 1, n: 1 },
-    "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 },
-    "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 },
-    "Piège": { d: 2, pv: 2, ep: 1, trap: 1, camo: 1, n: 3 },
+    "Mur hérissé": { d: 2, pv: 2, ep: 2, camo: 1, n: 2 },
+    "Antenne": { d: 1, pv: 1, ep: 0, tech: 1, n: 3 },
+    "Laboratoire": { d: 2, pv: 2, ep: 0, tech: 2, n: 2 },
+    "Observatoire": { d: 3, pv: 3, ep: 0, tech: 3, n: 1 },
+    "Baraquement": { d: 1, pv: 1, ep: 0, temp: 1, n: 3 },
+    "Dortoir": { d: 3, pv: 1, ep: 0, perm: 1, n: 2 },
+    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, camo: 1, n: 1 },
+    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, camo: 1, n: 1 },
+    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, camo: 1, n: 1 },
+    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, camo: 1, n: 1 },
+    "Ligne de front": { d: 2, pv: "front", ep: 0, camo: 1, n: 2 },
+    "Réduit": { d: 2, pv: "reduit", ep: 0, camo: 1, n: 2 },
+    "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 },
   };
   const TILE_TEXT = {
     "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
@@ -82,7 +82,11 @@ const SF = (() => {
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
       B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
   };
-  const COST_R1 = 8, COST_R2 = 16, FLOOR_COST = 3, FLOORS = 12;
+  const COST_R1 = 8, COST_R2 = 16, FLOORS = 12;
+  // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
+  const FLOOR_COSTS = [3, 4, 5, 6];
+  const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
+  const START_WALL = "Haie de départ"; // ancien « Mur de départ »
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -151,7 +155,7 @@ const SF = (() => {
     };
     for (const lane of LANES) {
       const [x, y] = toGlobal(lane, 0, 1);
-      S.tiles[key(x, y)] = { name: "Mur de départ", hp: 2, max: 2, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
+      S.tiles[key(x, y)] = { name: START_WALL, hp: 2, max: 2, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
@@ -245,13 +249,14 @@ const SF = (() => {
   }
   function epinesOf(S, k) {
     let e = S.tiles[k].ep;
-    if (Object.entries(S.supports).some(([sk, l]) => l === 2 && supportWalls(...parse(sk)).includes(k))) e += 1;
+    // support de niveau 2 : +1 Épines, seulement aux tuiles qui ont déjà des Épines (décision d'Oni, 30/10/2026)
+    if (e > 0 && Object.entries(S.supports).some(([sk, l]) => l === 2 && supportWalls(...parse(sk)).includes(k))) e += 1;
     return e;
   }
   function destroyTile(S, k, why) {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
-    if (t.name !== "Mur de départ") S.tileDiscard.push(t.name);
+    if (t.name !== START_WALL) S.tileDiscard.push(t.name);
     S.biomass += 1;
     fx(S, { t: "tileDown", k });
     log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +1 biomasse.`);
@@ -272,6 +277,7 @@ const SF = (() => {
       const x = sx * r, y = sy * r, k = key(x, y);
       if (!S.supports[k] && supportInner(x, y).every(w => S.tiles[w])) {
         S.supports[k] = r;
+        fx(S, { t: "supUp", k });
         log(S, "colonie", `Un support de niveau ${r} apparaît en couronne ${r}.`);
       }
     }
@@ -284,6 +290,7 @@ const SF = (() => {
     const { lane, u } = here[0];
     let nk = here[0].k + 1;
     while (nk < 4 && S.tiles[key(...toGlobal(lane, u, nk))]) nk++;
+    fx(S, { t: "push", ids: here.map(c => c.id), lane, u, to: nk });
     for (const c of here) c.k = nk;
     const where = nk === 4 ? "sur la case d'entrée" : `en couronne ${nk}`;
     log(S, "colonie", `${here.map(c => c.name).join(", ")} recule${here.length > 1 ? "nt" : ""} ${where} pour laisser place au bâtiment.`);
@@ -391,6 +398,7 @@ const SF = (() => {
     const epVal = epinesOf(S, tk); // calculé avant les dégâts : la tuile peut tomber
     if (t.camo && !t.revealed) { // Camouflage : la première attaque retourne la tuile
       t.revealed = true;
+      fx(S, { t: "reveal", k: tk, trap: !!t.trap });
       if (t.trap) {
         if (!clairvoyance(S)) damageCreature(S, c, 2, "piège");
         log(S, "essaim", "Un piège est révélé.");
@@ -477,6 +485,7 @@ const SF = (() => {
     log(S, "essaim", `${card.name} déployé${card.free ? " gratuitement" : ""} en lane ${LANE_NAME[lane]}, colonne ${COLS[u + 2]}.`);
     if (card.name === "Sapeur" && S.chantiers[lane].length) {
       const ch = S.chantiers[lane].shift();
+      fx(S, { t: "sabotage", lane });
       S.tileDiscard.push(ch.tile);
       log(S, "essaim", `Sabotage : le chantier de la lane ${LANE_NAME[lane]} est détruit (${pubName(ch.tile)}).`);
     }
@@ -569,8 +578,14 @@ const SF = (() => {
   function useSpell(S, idx, arg) {
     const name = S.spells[idx]; if (!name) return false;
     const sp = SPELLS[name];
+    // événement visuel du sort, placé avant ses effets (dégâts, soins…) ; seules des informations publiques
+    const at = S.fx ? S.fx.length : 0;
+    const pubArg = ["Frappe orbitale", "Salve", "Brouillage"].includes(name) ? { id: arg } : ["Barrage", "Champ de stase"].includes(name) ? { lane: arg }
+      : name === "Onde de choc" ? { ring: Number(arg) } : name === "Réparation" ? { keys: arg } : name === "Reconversion" ? { k: arg && arg.tile }
+      : name === "Renouvellement" ? { n: Array.isArray(arg) ? arg.length : 0 } : {};
+    fx(S, { t: "spell", name, kind: sp.kind, ...pubArg });
     const ok = applySpell(S, name, arg);
-    if (!ok) return false;
+    if (!ok) { if (S.fx) S.fx.splice(at); return false; }
     S.spells.splice(idx, 1); S.spellDiscard.push(name);
     log(S, "colonie", `Sortilège joué : ${name}.`);
     killCheck(S);
@@ -604,7 +619,7 @@ const SF = (() => {
       case "Cadence": S.extraPts += 2; return true;
       case "Réparation": { // arg = liste de clés de tuiles, 3 PV au total
         if (!Array.isArray(arg) || !arg.length || arg.length > 3) return false;
-        for (const k of arg) { const t = S.tiles[k]; if (t && t.hp < t.max) t.hp += 1; }
+        for (const k of arg) { const t = S.tiles[k]; if (t && t.hp < t.max) { t.hp += 1; fx(S, { t: "heal", k, n: 1, hp: t.hp }); } }
         return true;
       }
       case "Renouvellement": { // arg = indices de la main à défausser
@@ -615,10 +630,11 @@ const SF = (() => {
         return true;
       }
       case "Reconversion": { // arg = {hand: index, tile: clé}
-        if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].name === "Mur de départ") return false;
+        if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].name === START_WALL) return false;
         const old = S.tiles[arg.tile], nn = S.hand[arg.hand];
         const [x, y] = parse(arg.tile);
         S.tiles[arg.tile] = tileStats(nn, x, y);
+        fx(S, { t: "place", k: arg.tile });
         if (TILES[nn].perm) S.workersBase += 1;
         S.hand[arg.hand] = old.name;
         log(S, "colonie", `Reconversion : ${pubName(nn)} remplace ${old.camo && !old.revealed ? "une tuile camouflée" : old.name}.`);
@@ -638,6 +654,7 @@ const SF = (() => {
     if (S.phase !== "D_main" || S.chantiers[lane].length >= S.chPerLane || S.hand[handIdx] === undefined) return false;
     const name = S.hand.splice(handIdx, 1)[0];
     S.chantiers[lane].push({ tile: name, left: TILES[name].d, fresh: true });
+    fx(S, { t: "chantier", lane });
     log(S, "colonie", `Chantier lancé en lane ${LANE_NAME[lane]} : ${pubName(name)}.`);
     return true;
   }
@@ -683,6 +700,7 @@ const SF = (() => {
       const done = [];
       for (const ch of S.chantiers[lane]) {
         const use = Math.min(pts, ch.left); ch.left -= use; pts -= use;
+        if (use) fx(S, { t: "work", lane, n: use });
         if (ch.left === 0) done.push(ch);
       }
       rocket += pts;
@@ -692,6 +710,7 @@ const SF = (() => {
       }
     }
     for (const lane of LANES) for (const ch of S.chantiers[lane]) ch.fresh = false;
+    if (rocket > 0) fx(S, { t: "rocketPts", n: rocket });
     S.pendingRocket = rocket;
     skipUnplaceable(S);
     if (S.toPlace.length) { S.phase = "D_place"; return; }
@@ -715,6 +734,7 @@ const SF = (() => {
     const p = S.toPlace.shift(), [x, y] = parse(k);
     pushBack(S, k);
     S.tiles[k] = tileStats(p.tile, x, y);
+    fx(S, { t: "place", k });
     if (TILES[p.tile].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
     log(S, "colonie", TILES[p.tile].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[p.lane]}.` : `${p.tile} construit en lane ${LANE_NAME[p.lane]}.`);
     skipUnplaceable(S);
@@ -725,8 +745,8 @@ const SF = (() => {
     const rocket = S.pendingRocket || 0; S.pendingRocket = 0;
     // fusée
     S.rocketPts += Math.max(0, rocket);
-    while (S.floors < FLOORS && S.rocketPts >= FLOOR_COST) {
-      S.rocketPts -= FLOOR_COST; S.floors += 1; S.workersBase += 1;
+    while (S.floors < FLOORS && S.rocketPts >= floorCost(S)) {
+      S.rocketPts -= floorCost(S); S.floors += 1; S.workersBase += 1;
       log(S, "colonie", `Étage ${S.floors} de la fusée achevé : +1 travailleur.`);
       if (S.floors === 3) { S.techBonus += 2; log(S, "colonie", "Palier 3 : +2 technologies permanentes."); }
       if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
@@ -757,6 +777,18 @@ const SF = (() => {
     if (S.tileDeck.length) S.hand.push(S.tileDeck.pop());
   }
   function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
+
+  // Parties enregistrées avant le 30/10/2026 : « Mur de départ » devient « Haie de départ »,
+  // et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
+  function migrate(S) {
+    for (const t of Object.values(S.tiles || {})) {
+      if (t.name === "Mur de départ") t.name = START_WALL;
+      if (t.name === START_WALL) t.ep = 1;
+      else if (TILES[t.name]) t.ep = TILES[t.name].ep;
+    }
+    for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ") list.splice(i, 1);
+    return S;
+  }
 
   // ------------------------------------------------------------------ actions des joueurs
   // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
@@ -875,7 +907,7 @@ const SF = (() => {
   // événements visuels envoyés à un camp : les PV d'une tuile camouflée encore cachée ne sont pas transmis à l'essaim
   function fxFor(S, side, events) {
     return events.map(e => {
-      if (side === "essaim" && e.t === "hit") {
+      if (side === "essaim" && (e.t === "hit" || e.t === "heal")) {
         const t = S.tiles[e.k];
         if (t && t.camo && !t.revealed && !clairvoyance(S)) return { ...e, n: null, hp: null };
       }
@@ -884,7 +916,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor,
+    fxFor, migrate, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

@@ -194,11 +194,19 @@
       case "Reconversion":
         inner = UI.recoHand === null
           ? `<p class="hint">Choisissez la tuile de votre main.</p><div class="choices">${S.hand.map((t, i) => `<button data-a="recoHand" data-i="${i}">${E(t)}</button>`).join("")}${cancel}</div>`
-          : `<p class="hint">Elle remplace quelle tuile construite ?</p><div class="choices">${Object.keys(S.tiles).filter(k => S.tiles[k].name !== "Mur de départ").map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`;
+          : `<p class="hint">Elle remplace quelle tuile construite ?</p><div class="choices">${Object.keys(S.tiles).filter(k => S.tiles[k].name !== SF.START_WALL).map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`;
         break;
       default: inner = `<div class="choices"><button data-a="spellArg" data-v="go" class="primary">Jouer ${E(name)}</button>${cancel}</div>`;
     }
     return `<div class="targeting"><p class="hint"><b>${E(name)}</b> : ${E(SF.SPELLS[name].text)}</p>${inner}</div>`;
+  }
+  // carte de sortilège en main : type, moment où le jouer, effet complet
+  function spellCard(s) {
+    const sp = SF.SPELLS[s];
+    const when = s === "Famine" ? "Offensif · au début du tour de l'essaim, avant qu'il calcule son budget"
+      : sp.kind === "off" ? "Offensif · pendant le tour de l'essaim, juste avant ses attaques"
+      : "Soutien · pendant votre tour, avant de passer aux tirs";
+    return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Non joué dans sa fenêtre : défaussé.</small></span></div>`;
   }
   const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
   const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", leurre: "leurre", percee: "percee", instinct: "instinct", sabotage: "sabotage", spores: "spores" }[c] || "aura");
@@ -250,7 +258,7 @@
         else {
           const ep = SF.epinesOf(S, k);
           inner = `<div class="tile${t.camo && !t.revealed ? " trap" : ""}" title="${t.camo && !t.revealed ? "Camouflée : l'essaim ne la voit pas" : ""}"><span class="tn">${E(short(t.name))}</span><b class="hp">${t.hp}<small>/${t.max}</small></b>
-            <span class="tb">${icon("epines")}${ep}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
+            <span class="tb">${ep ? icon("epines") + ep : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
         }
       }
       const stased = S.stase.includes(lane);
@@ -274,11 +282,11 @@
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque ou par Vision / Clairvoyance.");
     if (t.trap) cap("piege", "Piège", "2 dégâts à la créature qui le révèle en l'attaquant. Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.");
-    cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 si la tuile touche un support de niveau 2).`);
+    if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 si la tuile touche un support de niveau 2).`);
     return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
-      <span class="stats">${icon("pv")} ${pv} PV · ${icon("epines")} Épines ${t.ep}</span>${caps.join("")}`;
+      <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : " · sans Épines"}</span>${caps.join("")}`;
   }
-  const short = n => ({ "Mur de départ": "Départ", "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Av.-poste N", "Avant-poste de l'Est": "Av.-poste E", "Avant-poste du Sud": "Av.-poste S", "Avant-poste de l'Ouest": "Av.-poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
+  const short = n => ({ "Haie de départ": "Départ", "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Av.-poste N", "Avant-poste de l'Est": "Av.-poste E", "Avant-poste du Sud": "Av.-poste S", "Avant-poste de l'Ouest": "Av.-poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
   function tokens(crs) {
     if (!crs.length) return "";
     return `<div class="toks">` + crs.map(c => {
@@ -332,13 +340,13 @@
     const hand = mine
       ? `<div class="hand">${S.hand.map((t, i) => `<button data-a="tile" data-i="${i}" class="tcard${UI.sel === i ? " sel" : ""}"${S.phase === "D_main" ? "" : " disabled"}>${tileCard(t)}</button>`).join("")}</div>`
       : `<p class="hidden-hand">${S.hand.length} tuiles en main (cachées)</p>`;
-    const spells = mine ? (S.spells.length ? S.spells.map(s => `<span class="chip ${SF.SPELLS[s].kind}">${E(s)}</span>`).join("") : `<span class="muted">aucun</span>`) : `<span class="muted">${S.spells.length} en main (cachés)</span>`;
+    const spells = mine ? (S.spells.length ? `<div class="spells">${S.spells.map(s => spellCard(s)).join("")}</div>` : `<span class="muted">aucun</span>`) : `<span class="muted">${S.spells.length} en main (cachés)</span>`;
     return `<h3>${icon("fusee")} Colonie</h3>
       <div class="kv"><span>Travailleurs</span><b>${S.workersBase}${SF.bonusWorkers(S) ? ` + ${SF.bonusWorkers(S)}` : ""}</b></div>
       <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
-      <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/3 points vers le suivant. Paliers 3 · 6 · 9.</p>
-      <h4>Ateliers ${mine && S.phase === "D_main" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>${ateliers}
-      <h4>Main de tuiles</h4>${hand}<h4>Sortilèges</h4><div class="chips">${spells}</div>`;
+      <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 3 points (étages 1 à 3), puis 4, 5 et 6 après les paliers 3 · 6 · 9.</p>
+      <h4 data-fx="ateliers">Ateliers ${mine && S.phase === "D_main" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>${ateliers}
+      <h4 data-fx="tilehand">Main de tuiles</h4>${hand}<h4>Sortilèges</h4>${spells}`;
   }
   function swarmPanel() {
     const mine = S.view === "essaim";
@@ -384,7 +392,7 @@
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
       <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${t.n.join("/")} · plafond ${t.cap}</b></div>
-      <div class="kv"><span>Budget du tour</span><b>${S.budget}${S.famine ? ` (Famine −${S.famine})` : ""}</b></div>
+      <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? ` (Famine −${S.famine})` : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
       <h4>Main</h4>${hand}<h4>Arbres d'amélioration</h4>${trees}`;
@@ -397,8 +405,8 @@
       <h2>Règles en bref</h2>
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 4 · 7 · 10 · 13 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier), ou investissez dans un nœud d'amélioration (rang 1 : 8, rang 2 : 16, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque créature se déplace case par case, sans diagonale, et attaque la première tuile ou la fusée (une attaque contre la fusée tue un seul travailleur). Les soutiens avancent aussi mais n'attaquent jamais. +1 biomasse par tuile détruite.</p>
-      <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier, 9 : nuke).</p>
-      <p><b>Combat.</b> Toute forteresse a Épines 1. Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, puis 4, 5 et 6 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier, 9 : nuke).</p>
+      <p><b>Combat.</b> Seules les haies de départ (Épines 1), la Haie d'épines et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
@@ -535,6 +543,38 @@
   }
   const shake = el => el && el.animate([{ transform: "translateX(0)" }, { transform: "translateX(-3px)" }, { transform: "translateX(3px)" }, { transform: "translateX(0)" }], { duration: dur(220) });
   const fade = el => el ? el.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.4)" }], { duration: dur(260), fill: "forwards" }).finished.catch(() => {}) : Promise.resolve();
+  function flashEl(el, color) { el.animate([{ boxShadow: `0 0 0 0 ${color}` }, { boxShadow: `0 0 0 4px ${color}` }, { boxShadow: `0 0 0 0 ${color}` }], { duration: dur(420) }); }
+  const flip = el => el ? el.animate([{ transform: "rotateY(0)" }, { transform: "rotateY(90deg)" }, { transform: "rotateY(0)" }], { duration: dur(320) }).finished.catch(() => {}) : Promise.resolve();
+  function laneCells(lane) { // de l'entrée vers la fusée
+    const out = [];
+    for (let k = 4; k >= 1; k--) for (let u = -2; u <= 2; u++) { const c = cellAt(SF.toGlobal(lane, u, k).join(",")); if (c && !out.includes(c)) out.push(c); }
+    return out;
+  }
+  function ringCells(r) { return [...document.querySelectorAll(".board .cell.lane.r" + r)]; }
+  async function sweep(cells, kind, together) { // vague sobre sur des cases (lane ou couronne)
+    const color = kind === "stase" ? "var(--support)" : "var(--off)";
+    for (const c of cells) {
+      c.animate([{ boxShadow: `inset 0 0 0 0 ${color}` }, { boxShadow: `inset 0 0 0 3px ${color}` }, { boxShadow: `inset 0 0 0 0 ${color}` }], { duration: dur(380) });
+      if (!together) await wait(35);
+    }
+    await wait(together ? 300 : 200);
+  }
+  async function beam(tok, n) { // trait vertical qui tombe sur la créature
+    const b = box(tok);
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement("div"); d.className = "beam";
+      Object.assign(d.style, { left: b.cx + "px", top: (b.cy - 60) + "px" });
+      layer().appendChild(d);
+      await d.animate([{ transform: "translate(-50%, -20px) scaleY(.2)", opacity: 0 }, { transform: "translate(-50%, 0) scaleY(1)", opacity: 1, offset: .6 }, { transform: "translate(-50%, 0) scaleY(1)", opacity: 0 }], { duration: dur(260) }).finished.catch(() => {});
+      d.remove();
+    }
+  }
+  function spellBanner(name, kind) {
+    const b = document.createElement("div");
+    b.className = "turn-banner spell-banner " + (kind || ""); b.textContent = "Sortilège : " + name;
+    layer().appendChild(b);
+    b.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }], { duration: FX.skip ? 1 : 1400, fill: "forwards" }).finished.then(() => b.remove(), () => b.remove());
+  }
   const STEP = {
     async move(e) {
       const g = ghost(e.id); if (!g) return;
@@ -574,6 +614,52 @@
       float(core, "−1 travailleur", "cr-dmg");
       await wait(300);
     },
+    // ---- lot 2 : sortilèges, piège, chantiers, poses, supports
+    async spell(e) {
+      spellBanner(e.name, e.kind);
+      const tok = e.id !== undefined ? tokAt(e.id) : null;
+      switch (e.name) {
+        case "Frappe orbitale": case "Salve": if (tok) await beam(tok, e.name === "Salve" ? 2 : 1); break;
+        case "Brouillage": if (tok) { await tok.animate([{ transform: "translateX(0)" }, { transform: "translateX(-2px)" }, { transform: "translateX(2px)" }, { transform: "translateX(-2px)" }, { transform: "translateX(0)" }], { duration: dur(260) }).finished.catch(() => {}); await fade(tok); } break;
+        case "Barrage": await sweep(laneCells(e.lane), "off"); break;
+        case "Champ de stase": await sweep(laneCells(e.lane), "stase"); break;
+        case "Onde de choc": await sweep(ringCells(e.ring), "off", true); break;
+        case "Famine": { const b = document.querySelector('[data-fx="budget"]'); if (b) { flashEl(b, "var(--off)"); float(b, "−2 budget", "cr-dmg"); } await wait(300); break; }
+        case "Effort": case "Cadence": { const h = document.querySelector('[data-fx="ateliers"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "+2 points", "heal"); } await wait(300); break; }
+        case "Renouvellement": { const h = document.querySelector('[data-fx="tilehand"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "↻ " + e.n, "heal"); } await wait(300); break; }
+        case "Reconversion": { const c = cellAt(e.k); if (c) await flip(c.querySelector(".tile") || c); break; }
+        default: await wait(250);
+      }
+    },
+    async heal(e) {
+      const cell = cellAt(e.k), tile = cell && cell.querySelector(".tile");
+      if (e.hp !== null) float(tile || cell, "+" + e.n + " PV", "heal");
+      const hp = tile && tile.querySelector(".hp");
+      if (hp && e.hp !== null && hp.firstChild) hp.firstChild.textContent = e.hp;
+      if (tile) flashEl(tile, "var(--sup)");
+      await wait(180);
+    },
+    async reveal(e) {
+      const cell = cellAt(e.k); if (!cell) return;
+      await flip(cell.querySelector(".tile") || cell);
+      if (e.trap) float(cell, "Piège !", "cr-dmg");
+    },
+    async sabotage(e) {
+      const slot = document.querySelector(`.atelier.lane-${e.lane} .slot:not(.empty)`);
+      if (slot) { shake(slot); await fade(slot); }
+    },
+    async work(e) {
+      const a = document.querySelector(`.atelier.lane-${e.lane} .slots`);
+      if (a) { float(a, "+" + e.n, "heal"); flashEl(a, "var(--sup)"); }
+      await wait(120);
+    },
+    async rocketPts(e) { const core = cellAt("0,0"); if (core) float(core, "+" + e.n + " fusée", "heal"); await wait(200); },
+    async push(e) { // créatures qui reculent pour laisser place au bâtiment
+      const dest = cellAt(SF.toGlobal(e.lane, e.u, e.to).join(","));
+      if (!dest) return;
+      const b = box(dest);
+      await Promise.all(e.ids.map(id => { const g = ghost(id); return g ? glide(g, b.cx, b.cy, 260) : null; }));
+    },
     async shot(e) {
       const from = cellAt(e.sk), to = tokAt(e.id); if (!from || !to) return;
       const a = box(from), b = box(to), d = document.createElement("div");
@@ -596,9 +682,12 @@
   }
   function afterRender(events) { // apparitions, une fois le nouvel état affiché
     if (!animOn || !events) return;
-    for (const e of events) if (e.t === "deploy") {
-      const t = document.querySelector(`.board .tok[data-id="${e.id}"]`);
-      if (t) t.animate([{ transform: "scale(.2)", opacity: 0 }, { transform: "scale(1.15)", opacity: 1, offset: .7 }, { transform: "scale(1)", opacity: 1 }], { duration: 300, easing: "ease-out" });
+    const pop = el => el && el.animate([{ transform: "scale(.2)", opacity: 0 }, { transform: "scale(1.12)", opacity: 1, offset: .7 }, { transform: "scale(1)", opacity: 1 }], { duration: 300, easing: "ease-out" });
+    for (const e of events) {
+      if (e.t === "deploy") pop(document.querySelector(`.board .tok[data-id="${e.id}"]`));
+      if (e.t === "place") { const c = cellAt(e.k); pop(c && (c.querySelector(".tile") || c)); }
+      if (e.t === "supUp") pop(cellAt(e.k));
+      if (e.t === "chantier") { const sl = document.querySelectorAll(`.atelier.lane-${e.lane} .slot:not(.empty)`); pop(sl[sl.length - 1]); }
     }
   }
   function banner(text) { // bandeau de changement de tour (jeu en ligne)
@@ -688,7 +777,7 @@
     if (!el || el.disabled) return;
     handle(el.dataset.a, el.dataset);
   });
-  function upgradeSave(t) { t.invest = t.invest || {}; t.toPlace = t.toPlace || []; for (const x of Object.values(t.tiles || {})) if (SF.TILES[x.name] && SF.TILES[x.name].camo && x.camo === undefined) x.camo = 1; return t; }
+  function upgradeSave(t) { SF.migrate(t); t.invest = t.invest || {}; t.toPlace = t.toPlace || []; for (const x of Object.values(t.tiles || {})) if (SF.TILES[x.name] && SF.TILES[x.name].camo && x.camo === undefined) x.camo = 1; return t; }
   // démarrage : partie en ligne en cours, sinon partie locale sauvegardée, sinon accueil
   // (un lien d'invitation « ?code=… » ouvre toujours l'accueil, code prérempli)
   let net0 = null; try { net0 = JSON.parse(localStorage.getItem(NET_KEY) || "null"); } catch (e) { /* rien */ }

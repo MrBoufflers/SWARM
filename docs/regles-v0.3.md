@@ -24,7 +24,7 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 | --- | --- | --- |
 | Fusée | 1 socle + 12 étages | les étages s'empilent sur le socle |
 | Plateau des ateliers | 1 | 4 ateliers (un par lane) de 2 emplacements de chantier |
-| Murs de départ | 4 | 2 PV |
+| Haies de départ | 4 | 2 PV, Épines 1 |
 | Forteresses (tuiles de construction) | 44 | 15 sortes, voir le Catalogue |
 | Tuiles support | 12 | 4 de niveau 1, 4 de niveau 2, 4 de niveau 3 |
 | Cartes sortilège | 26 | 15 offensives, 11 de soutien, voir le Catalogue |
@@ -58,7 +58,7 @@ Le carré de départ correspond à la couronne 1 : chaque lane s'étendra ensuit
 ### Colonie
 
 1. Placez le socle de la fusée au centre, sans étage.
-2. Posez les 4 **murs de départ** sur les 4 cases de la couronne 1 (2 PV et Épines 1 †).
+2. Posez les 4 **haies de départ** sur les 4 cases de la couronne 1 (2 PV et Épines 1).
 3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1.
 4. Prenez **3 travailleurs**.
 5. Mélangez les 44 forteresses en une pioche. Piochez-en **4** : c'est votre main.
@@ -150,7 +150,7 @@ Les créatures agissent **une par une**, dans l'ordre choisi par l'essaim : une 
 
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Toute forteresse a **Épines 1** de base ; un support de niveau 2 ajoute **+1 Épines** aux murs qui le touchent.
+- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Seules les **haies de départ** (Épines 1), la **Haie d'épines** et le **Mur hérissé** (Épines 2) ont des Épines ; un support de niveau 2 ajoute **+1 Épines** aux tuiles à Épines qui le touchent.
 - **Piège** : la première attaque le retourne face visible et inflige 2 dégâts à la créature.
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**.
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
@@ -208,9 +208,9 @@ Les 44 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
 
 ## La fusée et ses paliers
 
-La fusée compte 12 étages de 3 points chacun ; chaque étage achevé rapporte un travailleur, et les étages 3, 6 et 9 débloquent un bonus majeur.
+La fusée compte 12 étages, de plus en plus chers ; chaque étage achevé rapporte un travailleur, et les étages 3, 6 et 9 débloquent un bonus majeur.
 
-- Chaque fois que la fusée accumule **3 points de construction**, ajoutez un étage. Les points en trop restent acquis pour l'étage suivant.
+- Un étage coûte **3 points de construction** pour les étages 1 à 3, **4** pour les étages 4 à 6, **5** pour les étages 7 à 9 et **6** pour les étages 10 à 12. Chaque fois que la fusée accumule le coût de l'étage suivant, ajoutez-le. Les points en trop restent acquis pour l'étage suivant.
 - Chaque étage achevé : **+1 travailleur** de base.
 
 | Étage | Bonus |
@@ -249,9 +249,9 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Zones** : une **case** ; une **lane** (toutes ses cases) ; une **couronne** (toutes les cases de même couronne, sur les 4 lanes).
 - **Aura** : effet d'un soutien sur les autres créatures de sa case. Deux auras **du même nom** ne se cumulent pas ; deux auras de noms différents se cumulent.
 - **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque. **Toute forteresse a Épines 1 de base** ; certaines en ont davantage.
+- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque. Seules les haies de départ (1), la Haie d'épines et le Mur hérissé (2) en ont.
 - **Percée** : les dégâts en trop après la destruction d'une tuile passent à la tuile suivante sur le chemin ; s'ils atteignent la fusée, ils retirent un seul travailleur †.
-- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, le Baraquement et le Dortoir ; les murs de départ sont posés face visible †.
+- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, le Baraquement et le Dortoir ; les haies de départ sont posées face visible †.
 
 ### Barème de points
 
@@ -286,25 +286,25 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 
 ### Forteresses
 
-44 tuiles de construction, toutes plafonnées à 4 PV et toutes dotées d'Épines 1 de base. La colonne « Points » vérifie le barème (2 points par tour de construction ; l'Épines de base est gratuite). Un support de niveau 2 ajoute +1 Épines aux murs qui le touchent.
+44 tuiles de construction, toutes plafonnées à 4 PV. Seules la Haie d'épines et le Mur hérissé ont des Épines (2). La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis la suppression des Épines de base †. Un support de niveau 2 ajoute +1 Épines aux tuiles à Épines qui le touchent.
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
-| Palissade | 1 | 2 | 1 | Camouflé | 2 | 6 |
-| Muraille | 2 | 4 | 1 | Camouflé | 4 | 6 |
-| Rempart | 3 | 4 | 1 | Camouflé ; Renforcé 2 | 6 | 3 |
-| Bastion | 3 | 3 | 1 | Camouflé ; Renforcé 3 | 6 | 2 |
+| Palissade | 1 | 2 | — | Camouflé | 2 | 6 |
+| Muraille | 2 | 4 | — | Camouflé | 4 | 6 |
+| Rempart | 3 | 4 | — | Camouflé ; Renforcé 2 | 6 | 3 |
+| Bastion | 3 | 3 | — | Camouflé ; Renforcé 3 | 6 | 2 |
 | Haie d'épines | 1 | 1 | **2** | Camouflée | 2 | 3 |
-| Mur hérissé | 2 | 2 | **3** | Camouflé | 4 | 2 |
-| Antenne | 1 | 1 | 1 | +1 technologie | 2 | 3 |
-| Laboratoire | 2 | 2 | 1 | +2 technologies | 4 | 2 |
-| Observatoire | 3 | 3 | 1 | +3 technologies | 6 | 1 |
-| Baraquement | 1 | 1 | 1 | +1 travailleur **temporaire** : tant que la tuile tient | 2 | 3 |
-| Dortoir | 3 | 1 | 1 | +1 travailleur **permanent** : gagné à la construction, conservé même si la tuile tombe | 6 | 2 |
-| Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | 1 | Camouflé ; +2 PV si posé dans la lane de son point cardinal (4 PV) | 3 | 1 de chaque |
-| Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | 1 | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
-| Réduit † | 2 | 5 − couronne (4 / 3 / 2) | 1 | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
-| Piège | 2 | 2 | 1 | Camouflé ; 2 dégâts à la créature qui le révèle en l'attaquant | 4 | 3 |
+| Mur hérissé | 2 | 2 | **2** | Camouflé | 4 | 2 |
+| Antenne | 1 | 1 | — | +1 technologie | 2 | 3 |
+| Laboratoire | 2 | 2 | — | +2 technologies | 4 | 2 |
+| Observatoire | 3 | 3 | — | +3 technologies | 6 | 1 |
+| Baraquement | 1 | 1 | — | +1 travailleur **temporaire** : tant que la tuile tient | 2 | 3 |
+| Dortoir | 3 | 1 | — | +1 travailleur **permanent** : gagné à la construction, conservé même si la tuile tombe | 6 | 2 |
+| Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | — | Camouflé ; +2 PV si posé dans la lane de son point cardinal (4 PV) | 3 | 1 de chaque |
+| Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | — | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
+| Réduit † | 2 | 5 − couronne (4 / 3 / 2) | — | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
+| Piège | 2 | 2 | — | Camouflé ; 2 dégâts à la créature qui le révèle en l'attaquant | 4 | 3 |
 
 - **Total des technologies possibles** : 10 (3 Antennes, 2 Laboratoires, 1 Observatoire).
 - **Total des travailleurs bonus possibles** : 3 temporaires et 2 permanents.
@@ -392,7 +392,7 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | Niveau | Couronne | Effet † |
 | --- | --- | --- |
 | 1 | 1 | tourelle : 1 dégât par tour, +1 aux étages 3, 6 et 9 de la fusée |
-| 2 | 2 | tourelle : 2 dégâts par tour ; Épines 1 aux murs qui le touchent |
+| 2 | 2 | tourelle : 2 dégâts par tour ; +1 Épines aux tuiles à Épines qui le touchent |
 | 3 | 3 | pas de tir ; +2 travailleur tant qu'il tient |
 
 ### Résumé du tour
@@ -418,7 +418,8 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Aura Instinct** (Catalyseur) : la capacité accordée est au choix Mobilité ou Furtivité.
 - [ ] **Nom « Déploiement »** : c'est aussi le nom de l'étape 3 du tour de l'essaim. Renommer l'un des deux ?
 - [ ] **Déploiement** (centre de l'arbre aggro) : les 2 cartes viennent de la pioche de niveau 1 et respectent le plafond de population.
-- [ ] **Murs de départ** : ont-ils aussi Épines 1, comme toutes les forteresses ?
+- [x] **Haies de départ** (anciens murs de départ) : 2 PV, Épines 1 (décidé le 30/10/2026).
+- [ ] **Barème des forteresses** : la colonne « Points » comptait une Épines 1 gratuite pour toutes les tuiles ; à recalculer depuis sa suppression.
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
 - [ ] **Brouillage** : la biomasse dépensée pour la carte annulée est perdue.
 - [ ] **Furtivité** : non ciblable tant qu'une créature non furtive est sur sa case.

@@ -224,3 +224,13 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 #fx .shot { width: 8px; height: 8px; border-radius: 50%; background: var(--support); box-shadow: 0 0 0 2px var(--support-bg); z-index: 3; }
 #fx .turn-banner { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 9px 16px; border-radius: 8px; font: 600 1rem/1.2 var(--display); letter-spacing: .02em; max-width: calc(100vw - 32px); text-align: center; border-left: 5px solid var(--c, var(--hot)); z-index: 50; }
 #fx .turn-banner.essaim { --c: var(--essaim); } #fx .turn-banner.colonie { --c: var(--colonie); }
+
+/* animations (lot 2) et cartes de sortilège en main */
+#fx .float.heal { color: var(--sup); }
+#fx .beam { width: 4px; height: 60px; border-radius: 2px; background: linear-gradient(var(--off), transparent); transform-origin: bottom; z-index: 3; }
+#fx .turn-banner.spell-banner { top: 56px; font-size: .9rem; }
+#fx .turn-banner.spell-banner.off { --c: var(--off); } #fx .turn-banner.spell-banner.sup { --c: var(--sup); }
+.spell.card { align-items: flex-start; cursor: default; }
+.spell.card .i { margin-top: 2px; }
+.spell.card small.when { color: var(--c); font-weight: 600; }
+.spell.card small.lost { font-size: .72rem; }

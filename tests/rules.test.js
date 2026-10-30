@@ -13,12 +13,12 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   while (k !== 0) { [u, k] = SF.nextStep(u, k); steps.push(k === 0 ? "F" : "ABCDE"[u + 2] + k); }
   ok(steps.join(" ") === "D3 D2 C2 C1 F", "chemin colonne D : " + steps.join(" "));
 }
-// 2. une créature traverse les cases vides et frappe le mur de départ (2 PV) ; Épines 1 en retour
+// 2. une créature traverse les cases vides et frappe la haie de départ (2 PV) ; Épines 1 en retour
 {
   const S = fresh(); SF.attackerDraw(S);
   S.creatures.push({ id: 900, name: "Écorcheur", lane: "N", u: -2, k: 4, hp: 1, new: true, acted: false });
   SF.act(S, S.creatures[0]);
-  ok(!S.tiles["0,1"], "Écorcheur (3 ATQ) détruit le mur de départ Nord (2 PV)");
+  ok(!S.tiles["0,1"], "Écorcheur (3 ATQ) détruit la haie de départ Nord (2 PV)");
   ok(S.biomass === 4 + 0 || S.biomass >= 4, "biomasse +1 après destruction (biomasse " + S.biomass + ")");
   ok(S.creatures.length === 0, "l'Écorcheur (1 PV) meurt sur Épines 1");
 }
@@ -38,7 +38,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   SF.act(S, S.creatures[0]);
   const c = S.creatures[0];
   ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 1, "piège révélé, 2 → 1 PV");
-  ok(!c, "Carapace : 2 (piège) + 1 (épines) = 3 dégâts, détruite");
+  ok(c && c.hp === 1, "Carapace : 2 dégâts du piège, pas d'Épines (3 → 1 PV)");
 }
 // 5. un support tombe quand tous les murs qui le touchent ont disparu
 {
@@ -137,7 +137,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   const c = { id: 950, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, new: true, acted: false };
   S.creatures.push(c); SF.act(S, c);
   ok(S.tiles["0,1"] === undefined || S.tiles["0,1"].revealed, "la Muraille est révélée à la première attaque");
-  ok(c.hp === 2, "pas de dégâts de piège (seulement Épines 1)");
+  ok(c.hp === 3, "Muraille : ni piège ni Épines, la Carapace ne perd rien");
   ok(SF.pubName("Muraille") === "tuile camouflée" && SF.pubName("Dortoir") === "Dortoir", "le journal ne nomme pas une tuile camouflée");
 }
 // 15. Griffes : Aura +1 ATQ aux autres créatures de la case, non cumulable, cumulable avec Fureur
@@ -272,6 +272,35 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   const hidden = SF.fxFor(T, "essaim", [{ t: "hit", id: null, k: "1,2", n: 1, hp: 3 }]);
   ok(hidden[0].hp === null && hidden[0].n === null, "PV d'une tuile camouflée encore cachée non transmis à l'essaim");
   ok(SF.fxFor(T, "colonie", [{ t: "hit", id: null, k: "1,2", n: 1, hp: 3 }])[0].hp === 3, "la colonie reçoit les PV de ses tuiles");
+}
+// 27. Épines (décision d'Oni, 30/10/2026) : seulement la Haie de départ (1), la Haie d'épines et le Mur hérissé (2)
+{
+  const withEp = Object.keys(SF.TILES).filter(n => SF.TILES[n].ep > 0).sort();
+  ok(withEp.join() === ["Haie d'épines", "Mur hérissé"].sort().join() && SF.TILES["Haie d'épines"].ep === 2 && SF.TILES["Mur hérissé"].ep === 2, "seules la Haie d'épines et le Mur hérissé ont des Épines (2)");
+  const S = fresh();
+  ok(S.tiles["0,1"].name === "Haie de départ" && S.tiles["0,1"].ep === 1 && S.tiles["0,1"].hp === 2, "les 4 haies de départ : 2 PV, Épines 1");
+  // support de niveau 2 en (1,2) / (-1,2)… : il touche les murs (0,2) et (1,1) côté fusée
+  S.supports["1,2"] = 2;
+  S.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
+  const touching = SF.supportWalls(1, 2);
+  const tk = touching.find(k => k === "0,2");
+  ok(!tk || SF.epinesOf(S, "0,2") === 0, "support de niveau 2 : pas d'Épines ajoutées à une Muraille (0 Épines)");
+  S.tiles["0,2"] = SF.tileStats("Haie d'épines", 0, 2);
+  ok(!tk || SF.epinesOf(S, "0,2") === 3, "support de niveau 2 : +1 à une Haie d'épines (2 → 3)");
+  const old = { tiles: { "0,1": { name: "Mur de départ", ep: 1 }, "0,2": { name: "Muraille", ep: 1 } }, tileDiscard: ["Mur de départ", "Muraille"], tileDeck: [], hand: [] };
+  SF.migrate(old);
+  ok(old.tiles["0,1"].name === "Haie de départ" && old.tiles["0,2"].ep === 0 && old.tileDiscard.join() === "Muraille", "ancienne partie : Mur de départ renommé, Épines mises à jour");
+}
+// 28. fusée : coût d'un étage 3 / 4 / 5 / 6 selon le palier (étages 1-3, 4-6, 7-9, 10-12)
+{
+  const S = fresh();
+  const costs = [];
+  for (let f = 0; f < 12; f++) { S.floors = f; costs.push(SF.floorCost(S)); }
+  ok(costs.join("") === "333444555666", "coût par étage : " + costs.join(" "));
+  const T = fresh(); T.phase = "D_fire"; T.floors = 2; T.rocketPts = 0; T.workersBase = 6;
+  T.alloc = { N: 0, E: 0, S: 0, O: 0 }; T.extraPts = 0;
+  SF.endDefenderTurn(T);
+  ok(T.floors === 3 && T.rocketPts === 3, "6 points avec 2 étages : étage 3 (3 points), 3 points gardés, pas assez pour l'étage 4 (4 points)");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

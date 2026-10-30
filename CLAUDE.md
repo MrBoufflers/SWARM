@@ -47,7 +47,7 @@ Le livret de référence est un document Claude d'Oni ; `docs/regles-v0.3.md` en
   - Hasard : `Math.random` par défaut, remplaçable par `SF.setRng(f)` (utile pour un serveur ou des tests reproductibles).
 - **Phases** (`S.phase`) et camp qui agit (table `PHASE_TXT` dans `ui.js`) : `A_famine` (colonie), `A_start`, `A_deploy`, `A_upgrade` (essaim), `A_react` (colonie), `A_attack` (essaim), `D_main`, `D_fire`, `D_place` (colonie).
 - Les transitions de phase qui vivaient dans `ui.js` (fenêtres `A_famine` / `A_react`, passage aux tirs, répartition des travailleurs, Instinct) sont maintenant dans `SF.ACTIONS` (moteur).
-- **Animations (lot 1, validé par Oni : style sobre, rapide)** : le moteur décrit ce qui se passe dans `S.fx` (déplacement, attaque de tuile, dégâts, mort, tuile ou support détruit, fusée touchée, tir de tourelle, déploiement) — seulement quand l'appelant crée `S.fx = []` avant l'action, et sans effet sur les règles. L'interface rejoue ces événements par-dessus le plateau encore à l'ancien état (calque `#fx`), puis affiche l'état final ; un toucher termine l'animation ; bouton « Animations : oui/non » (désactivées par défaut si le système demande moins d'animations). En ligne, le serveur garde les 400 derniers événements (`room.fx`) et renvoie à chaque joueur ceux qu'il n'a pas vus (paramètre `f`), filtrés par `SF.fxFor` (PV d'une tuile camouflée encore cachée non transmis à l'essaim). Bandeau « À vous de jouer » en ligne. Pas de son pour l'instant. Lots suivants proposés : sortilèges, piège, chantiers et supports (lot 2) ; fusée, Nuke, décollage, améliorations, auras, Vision, pioche (lot 3).
+- **Animations (lot 1, validé par Oni : style sobre, rapide)** : le moteur décrit ce qui se passe dans `S.fx` (déplacement, attaque de tuile, dégâts, mort, tuile ou support détruit, fusée touchée, tir de tourelle, déploiement) — seulement quand l'appelant crée `S.fx = []` avant l'action, et sans effet sur les règles. L'interface rejoue ces événements par-dessus le plateau encore à l'ancien état (calque `#fx`), puis affiche l'état final ; un toucher termine l'animation ; bouton « Animations : oui/non » (désactivées par défaut si le système demande moins d'animations). En ligne, le serveur garde les 400 derniers événements (`room.fx`) et renvoie à chaque joueur ceux qu'il n'a pas vus (paramètre `f`), filtrés par `SF.fxFor` (PV d'une tuile camouflée encore cachée non transmis à l'essaim). Bandeau « À vous de jouer » en ligne. Pas de son pour l'instant. **Lot 2 fait** : sortilèges (bandeau « Sortilège : … » + effet sobre par sort), soins, tuile camouflée retournée / piège, chantier lancé, saboté, avancé, bâtiment posé, créatures qui reculent, support apparu, points vers la fusée. Lot 3 proposé : fusée, Nuke, décollage, améliorations, auras, Vision, pioche.
 - **Hot-seat** : écran de passage (`S.handoff`) entre les camps ; `S.view` = camp qui regarde l'écran. Les mains et les tuiles camouflées de l'autre camp sont masquées **à l'affichage seulement** — l'état complet est dans le navigateur.
 
 ## Cahier des charges du jeu en ligne
@@ -70,6 +70,13 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 
 **Réalisé (30/10/2026), hébergement Netlify choisi par Oni** : pas de WebSocket sur Netlify, donc fonctions + Netlify Blobs + interrogation périodique (toutes les 2 s, seulement quand ce n'est pas le tour du joueur ; écriture conditionnelle sur l'etag contre les collisions). Les parties ne sont jamais supprimées (pas d'expiration pour l'instant).
 
+## Règles modifiées par Oni le 30/10/2026
+
+- **Épines** : seulement les 4 **haies de départ** (anciens « murs de départ », 2 PV, Épines 1), la **Haie d'épines** et le **Mur hérissé** (Épines 2, au lieu de 3). Toutes les autres tuiles : 0. Le support de niveau 2 donne +1 Épines **seulement aux tuiles qui en ont déjà**.
+- **Fusée** : coût d'un étage 3 points (étages 1-3), 4 (4-6), 5 (7-9), 6 (10-12) — `SF.floorCost(S)`. Les points en trop passent à l'étage suivant.
+- Les parties enregistrées avant ces changements sont mises à jour à la lecture (`SF.migrate`, côté navigateur et serveur).
+- Conséquence signalée, à trancher par Oni : la colonne « Points » du barème des forteresses comptait une Épines 1 gratuite pour toutes ; elle est à recalculer.
+
 ## Points de règles ouverts (ne pas trancher sans Oni)
 
 Marqués † dans le livret, ou repérés pendant la conception :
@@ -79,7 +86,7 @@ Marqués † dans le livret, ou repérés pendant la conception :
 - Nom « Déploiement » utilisé à la fois pour une amélioration aggro et pour une étape du tour.
 - Cadence (+2 points) fait désormais exactement la même chose qu'Effort.
 - Aura Griffes : non cumulable avec elle-même, cumulable avec l'Aura Fureur (interprétation).
-- Murs de départ posés face visible (non camouflés).
+- Haies de départ posées face visible (non camouflées).
 - Percée qui atteint la fusée : 1 seul travailleur (interprétation).
 - Bâtiment achevé sans case valable : retour en main (interprétation).
 - Vision (Œil-sonde) révèle les tuiles camouflées de sa lane **au moment du déploiement** seulement.
