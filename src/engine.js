@@ -259,9 +259,11 @@ const SF = (() => {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
     if (t.name !== START_WALL) S.tileDiscard.push(t.name);
-    S.biomass += 1;
-    fx(S, { t: "tileDown", k });
-    log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +1 biomasse.`);
+    // biomasse gagnée = couronne de la tuile : 1, 2 ou 3 (décision d'Oni, 30/10/2026 ; avant : toujours 1). Supports : toujours 1.
+    const gain = ring(...parse(k));
+    S.biomass += gain;
+    fx(S, { t: "tileDown", k, n: gain });
+    log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);
     checkSupportsFall(S);
   }
   function checkSupportsFall(S) {
@@ -270,7 +272,7 @@ const SF = (() => {
         log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe : +1 biomasse.`);
         delete S.supports[sk];
         S.biomass += 1;
-        fx(S, { t: "tileDown", k: sk });
+        fx(S, { t: "tileDown", k: sk, n: 1 });
       }
     }
   }

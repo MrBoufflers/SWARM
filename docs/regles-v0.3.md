@@ -88,7 +88,7 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 ### 1. Budget
 
-Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter, de **1 par tuile détruite** (mur ou support). Si la colonie a joué **Famine**, retirez 2 du budget de ce tour.
+Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite rapporte **1, 2 ou 3 biomasse selon sa couronne**, un support qui tombe rapporte **1**. Si la colonie a joué **Famine**, retirez 2 du budget de ce tour.
 
 ### 2. Pioche
 
@@ -152,7 +152,7 @@ Les créatures agissent **une par une**, dans l'ordre choisi par l'essaim : une 
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque.
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Seules les **haies de départ** (Épines 1), la **Haie d'épines** et le **Mur hérissé** (Épines 2) ont des Épines ; un support de niveau 2 ajoute **+1 Épines** aux tuiles à Épines qui le touchent.
 - **Piège** : la première attaque le retourne face visible et inflige 2 dégâts à la créature.
-- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**.
+- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne autant de biomasse que le numéro de sa **couronne** : **1** en couronne 1, **2** en couronne 2, **3** en couronne 3.
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
 
 ### Supports

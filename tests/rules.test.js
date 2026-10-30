@@ -331,5 +331,26 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   SF.migrate(old);
   ok(old.upgrades.aggro.r1 === "A" && !old.invest["aggro:A1"], "ancienne partie : un nœud déjà payé 7 (≥ 6) est acquis");
 }
+// 31. biomasse : une tuile détruite rapporte sa couronne (1 / 2 / 3), un support qui tombe 1 (décision d'Oni, 30/10/2026)
+{
+  const gains = [[0, 1], [0, 2], [0, 3]].map(([x, y]) => {
+    const S = fresh(); S.tiles[x + "," + y] = SF.tileStats("Palissade", x, y);
+    for (const k of Object.keys(S.supports)) S.supports[k] = S.supports[k]; // supports inchangés
+    const b = S.biomass; S.tiles[x + "," + y].hp = 1;
+    const c = { id: 80 + y, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 3, acted: false };
+    // on vide le chemin jusqu'à la tuile visée
+    for (const k of ["0,1", "0,2", "0,3"]) if (k !== x + "," + y) delete S.tiles[k];
+    S.supports = {}; S.creatures.push(c); SF.act(S, c);
+    return S.biomass - b;
+  });
+  ok(gains.join() === "1,2,3", "tuile détruite en couronne 1 / 2 / 3 : +" + gains.join(" / +") + " biomasse");
+  const T = fresh(); const b = T.biomass;
+  delete T.tiles["0,1"]; delete T.tiles["1,0"]; SF.placeSupports(T);
+  const c = { id: 90, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 3, acted: false };
+  T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); T.tiles["0,1"].hp = 1; T.creatures.push(c);
+  const sup = Object.keys(T.supports).length; SF.act(T, c);
+  const fell = sup - Object.keys(T.supports).length;
+  ok(T.biomass - b === 1 + fell, "support tombé : +1 chacun (" + fell + " support(s) tombé(s), +" + (T.biomass - b) + " au total)");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
