@@ -68,7 +68,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
 {
   const S = fresh();
   const t = b => { S.biomass = b; return SF.tier(S) + 1; };
-  ok([3, 4, 7, 10, 13].map(t).join() === "1,2,3,4,5", "paliers 3 / 4 / 7 / 10 / 13");
+  ok([3, 7, 10, 13, 16].map(t).join() === "1,2,3,4,5" && [6, 9, 12, 15].map(t).join() === "1,2,3,4", "paliers (décalés de +3) : départ 3, puis 7 / 10 / 13 / 16");
 }
 // 9. Protection : un tir sur une créature non tank de la case d'un tank vise le tank
 {
@@ -174,7 +174,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
 // 18. plafond de population par lane : 1 / 2 / 3 / 4 / 5
 {
   const S = fresh();
-  ok([3, 4, 7, 10, 13].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "1,2,3,4,5", "plafonds 1 / 2 / 3 / 4 / 5");
+  ok([3, 7, 10, 13, 16].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "1,2,3,4,5", "plafonds 1 / 2 / 3 / 4 / 5 (biomasse 3 / 7 / 10 / 13 / 16)");
 }
 // 19. Cadence : +2 points
 {
@@ -266,7 +266,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   const T = fresh(); T.tiles["1,2"] = SF.tileStats("Muraille", 1, 2); T.tiles["0,2"] = SF.tileStats("Piège", 0, 2);
   const c = { id: 50, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(c);
   T.phase = "A_attack"; T.fx = [];
-  SF.apply(T, "essaim", "act", { id: 50 });
+  SF.apply(T, "essaim", "act", { key: SF.posKey(c) });
   ok(T.fx.some(e => e.t === "move") && T.fx.some(e => e.t === "hit" && e.k === "0,2"), "déplacement (C3) puis attaque du piège en C2");
   ok(T.fx.some(e => e.t === "dmg" && e.id === 50) && T.fx.some(e => e.t === "die" && e.id === 50), "piège et Épines : dégâts puis mort de la créature");
   const hidden = SF.fxFor(T, "essaim", [{ t: "hit", id: null, k: "1,2", n: 1, hp: 3 }]);
@@ -354,6 +354,46 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   T.creatures.push(d); SF.act(T, d);
   const fell = sup - Object.keys(T.supports).length;
   ok(fell > 0 && T.biomass - tb === 1 + fell, "support tombé : +1 chacun (" + fell + " tombé(s), +" + (T.biomass - tb) + " au total avec la haie)");
+}
+// 32. blocs (décision d'Oni, 30/10/2026) : une case avance d'un bloc ; les plus avancées d'abord ; ordre d'attaque choisi
+{
+  const S = fresh(); S.phase = "A_attack"; S.supports = {};
+  delete S.tiles["0,1"];
+  S.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); S.tiles["0,2"].hp = 1; // tombe au premier coup
+  S.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
+  const a = { id: 60, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
+  const b = { id: 61, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false };
+  const g = { id: 62, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, acted: false };
+  const back = { id: 63, name: "Écorcheur", lane: "N", u: -2, k: 4, hp: 1, acted: false }; // plus loin de la fusée (A)
+  S.creatures.push(a, b, g, back);
+  const key = SF.posKey(a);
+  ok(SF.readyCases(S).join() === key, "seule la case la plus avancée de la lane peut agir (pas la colonne A)");
+  ok(SF.apply(S, "essaim", "act", { key: SF.posKey(back) }) !== "", "la case de la colonne A doit attendre");
+  S.fx = [];
+  ok(SF.apply(S, "essaim", "act", { key, order: [61, 60] }) === "", "le bloc agit, la Carapace frappe d'abord (ordre choisi)");
+  ok(!S.tiles["0,2"] && [a, b, g].every(c => c.k === 2 && c.u === 0) && S.tiles["0,1"].hp === 4 - 3, "Palissade détruite par la Carapace : tout le bloc avance en C2 ; l'Écorcheur frappe la Muraille (4 → 1)");
+  ok(S.fx.filter(e => e.t === "move").every(e => e.ids && e.ids.length === 3), "les déplacements concernent les 3 créatures du bloc (soutien compris)");
+  ok(SF.readyCases(S).join() === SF.posKey(back), "ensuite seulement, la case de la colonne A peut agir");
+}
+// 33. Mobilité (nouvelle) et Percée (ancien Raid) — décisions d'Oni, 30/10/2026
+{
+  const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); // phase A_upgrade
+  const c = { id: 70, name: "Écorcheur", lane: "N", u: 1, k: 3, hp: 1, acted: false };
+  const d = { id: 71, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
+  S.creatures.push(c, d);
+  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "E" }) !== "", "sans l'amélioration Mobilité : refusé");
+  S.upgrades.aggro.r1 = "B";
+  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "S" }) !== "", "Mobilité : lane opposée refusée (seulement les lanes voisines)");
+  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "E" }) === "" && c.lane === "E" && c.k === 4 && c.u === 0, "Mobilité : passe à l'entrée de la lane Est");
+  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "N" }) !== "", "une seule fois par tour pour cette créature");
+  ok(SF.apply(S, "essaim", "moveLane", { id: 71, lane: "E" }) !== "", "plafond de population de la lane Est (1) respecté");
+  ok(SF.apply(S, "essaim", "moveLane", { id: 71, lane: "O" }) === "", "une autre créature aggro peut aussi changer de lane le même tour");
+  ok(SF.TREES.aggro.B2[0] === "Percée" && !SF.hasMobility(S, { name: "Carapace", lane: "N", u: 0, k: 4 }), "le Raid devient « Percée » ; les tanks n'ont pas la Mobilité");
+  const T = fresh(); T.upgrades.aggro.r2 = "B"; T.supports = {};
+  delete T.tiles["0,1"]; T.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); T.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
+  const w0 = T.workersBase;
+  const m = { id: 72, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(m); SF.act(T, m);
+  ok(!T.tiles["0,2"] && !T.tiles["0,1"] && T.workersBase === w0 - 1, "Percée : 7 dégâts → Palissade (2) puis Muraille (4) détruites, le dernier dégât atteint la fusée (−1 travailleur)");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

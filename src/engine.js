@@ -68,13 +68,14 @@ const SF = (() => {
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
-    { min: 0, n: [3, 0, 0], cap: 1 }, { min: 4, n: [3, 2, 0], cap: 2 }, { min: 7, n: [4, 2, 1], cap: 3 },
-    { min: 10, n: [4, 3, 2], cap: 4 }, { min: 13, n: [4, 3, 3], cap: 5 },
+    // seuils décalés de +3 (décision d'Oni, 30/10/2026) : départ (3), puis 7, 10, 13, 16 (avant 4, 7, 10, 13)
+    { min: 0, n: [3, 0, 0], cap: 1 }, { min: 7, n: [3, 2, 0], cap: 2 }, { min: 10, n: [4, 2, 1], cap: 3 },
+    { min: 13, n: [4, 3, 2], cap: 4 }, { min: 16, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Choisit sa cible parmi toutes les tuiles de sa lane."],
+    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté)."],
       A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
-      B2: ["Raid", "Une fois par tour, une créature aggro peut passer dans une lane voisine."] },
+      B2: ["Percée", "Les créatures aggro gagnent la percée : les dégâts en trop passent à la tuile suivante."] },
     tank: { A1: ["Carapace épaisse", "+2 PV."], B1: ["Protection", "Les tirs visant une créature non tank de sa case visent ce tank."],
       A2: ["Blindage", "+4 PV (total +6)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
@@ -199,7 +200,10 @@ const SF = (() => {
     if (CREATURES[c.name].type === "soutien" && S.upgrades.soutien.r1 === "A") return true;
     return caseMates(S, c).some(o => o.name === "Catalyseur" && o.instinct === "furtivite" && o.instinctTarget === c.id);
   }
-  function hasPercee(S, c) { return caseMates(S, c).some(o => o.name === "Perforeur"); }
+  function hasPercee(S, c) {
+    if (CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r2 === "B") return true; // amélioration Percée (ancien Raid)
+    return caseMates(S, c).some(o => o.name === "Perforeur");
+  }
   function bonusHp(S, c) { return CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "B" ? caseMates(S, c).length : 0; }
   function maxHp(S, name) {
     const b = CREATURES[name]; let m = b.pv;
@@ -374,7 +378,66 @@ const SF = (() => {
 
   const cellName = (u, k) => (k === 4 ? "entrée " + COLS[u + 2] : COLS[u + 2] + k);
   const attacks = c => CREATURES[c.name].type !== "soutien";
-  function act(S, c, chosenTarget) {
+  // ---- blocs (décision d'Oni, 30/10/2026) : toutes les créatures d'une même case avancent ensemble.
+  // Dans une lane, les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc ;
+  // quand la tuile visée tombe, tout le bloc avance jusqu'à la tuile suivante et les créatures qui n'ont pas frappé la frappent.
+  const pathLen = (u, k) => { let n = 0; while (k !== 0 && n < 12) { [u, k] = nextStep(u, k); n++; } return n; };
+  const blockAt = (S, key) => S.creatures.filter(c => posKey(c) === key);
+  function readyCases(S) {
+    const un = S.creatures.filter(c => !c.acted);
+    return [...new Set(un.map(posKey))].filter(key => {
+      const c = un.find(o => posKey(o) === key), d = pathLen(c.u, c.k);
+      return !un.some(o => o.lane === c.lane && pathLen(o.u, o.k) < d);
+    }).sort((a, b) => { const ca = un.find(o => posKey(o) === a), cb = un.find(o => posKey(o) === b); return pathLen(ca.u, ca.k) - pathLen(cb.u, cb.k) || ca.id - cb.id; });
+  }
+  function auraFx(S, c) {
+    const auras = [];
+    if (caseMates(S, c).some(o => o.name === "Hurleur")) auras.push("Fureur");
+    if (S.upgrades.soutien.r1 === "B" && caseMates(S, c).some(o => CREATURES[o.name].type === "soutien")) auras.push("Griffes");
+    if (frenzyTarget(S, c)) auras.push("Frénésie");
+    if (hasPercee(S, c)) auras.push("Percée");
+    if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
+  }
+  function hitRocket(S, c) {
+    S.workersBase -= 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
+    fx(S, { t: "rocket", id: c.id });
+    log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
+    if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
+  }
+  function actCase(S, key, order) {
+    if (!readyCases(S).includes(key)) return false;
+    const block = blockAt(S, key).filter(c => !c.acted);
+    const att = block.filter(attacks);
+    const seq = [];
+    for (const id of Array.isArray(order) ? order : []) { const c = att.find(o => o.id === id); if (c && !seq.includes(c)) seq.push(c); }
+    for (const c of att) if (!seq.includes(c)) seq.push(c);
+    for (const c of block) c.acted = true;
+    let pos = { lane: block[0].lane, u: block[0].u, k: block[0].k };
+    const advance = () => { // toute la case avance jusqu'à la prochaine tuile (ou la fusée)
+      const members = blockAt(S, posKey(pos)), w = walk(S, pos), from = cellName(pos.u, pos.k);
+      if (pos.u !== w.stand[0] || pos.k !== w.stand[1]) {
+        fx(S, { t: "move", ids: members.map(c => c.id), lane: pos.lane, from: [pos.u, pos.k], to: [w.stand[0], w.stand[1]] });
+        for (const c of members) { c.u = w.stand[0]; c.k = w.stand[1]; }
+        pos = { lane: pos.lane, u: w.stand[0], k: w.stand[1] };
+      }
+      const to = cellName(pos.u, pos.k), tgt = w.target === "fusee" ? "la fusée" : cellName(...toLocal(pos.lane, ...parse(w.target)));
+      log(S, "essaim", `Bloc de ${members.length} (${members.map(c => c.name).join(", ")}, lane ${LANE_NAME[pos.lane]}) : ${from === to ? "reste en " + from : from + " → " + to}, devant ${tgt}.`);
+      return w.target;
+    };
+    let target = advance();
+    for (const c of seq) {
+      if (S.winner) break;
+      if (!S.creatures.includes(c)) continue; // tuée entre-temps (Épines, piège)
+      auraFx(S, c);
+      if (target === "fusee") { hitRocket(S, c); continue; }
+      hitTile(S, c, target, effAtq(S, c), true);
+      killCheck(S);
+      if (!S.tiles[target] && S.creatures.some(o => posKey(o) === posKey(pos))) target = advance();
+    }
+    return true;
+  }
+  // une seule créature (utilisé par les tests de règles ciblés)
+  function act(S, c) {
     if (c.acted) return;
     c.acted = true;
     const w = walk(S, c), from = cellName(c.u, c.k);
@@ -386,23 +449,10 @@ const SF = (() => {
       log(S, "essaim", `${c.name} avance sans attaquer.`);
       return;
     }
-    const auras = [];
-    if (caseMates(S, c).some(o => o.name === "Hurleur")) auras.push("Fureur");
-    if (S.upgrades.soutien.r1 === "B" && caseMates(S, c).some(o => CREATURES[o.name].type === "soutien")) auras.push("Griffes");
-    if (frenzyTarget(S, c)) auras.push("Frénésie");
-    if (hasPercee(S, c)) auras.push("Percée");
-    if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
-    let target = w.target;
-    if (chosenTarget && hasMobility(S, c) && laneTiles(S, c.lane).includes(chosenTarget)) target = chosenTarget;
-    const dmg = effAtq(S, c);
-    if (target === "fusee") {
-      S.workersBase -= 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
-      fx(S, { t: "rocket", id: c.id });
-      log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
-      if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
-      return;
-    }
-    hitTile(S, c, target, dmg, true);
+    auraFx(S, c);
+    const target = w.target;
+    if (target === "fusee") { hitRocket(S, c); return; }
+    hitTile(S, c, target, effAtq(S, c), true);
     killCheck(S);
   }
   function hitTile(S, c, tk, dmg, primary) {
@@ -458,7 +508,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
     S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = [];
-    for (const c of S.creatures) { c.new = false; c.acted = false; }
+    for (const c of S.creatures) { c.new = false; c.acted = false; c.mobUsed = false; }
     // Réincarnation
     for (const r of S.reincQueue) {
       const nc = makeCreature(S, r.name, r.lane, r.u);
@@ -567,15 +617,17 @@ const SF = (() => {
   }
   function canBuy(S, type, slot) { return nodeState(S, type, slot) === "open" && investable(S) + invested(S, type, slot) >= nodeCost(slot); }
   function buy(S, type, slot) { return canBuy(S, type, slot) && invest(S, type, slot, nodeCost(slot)); }
-  function raid(S, id, toLane) {
+  // Mobilité (décision d'Oni, 30/10/2026) : une fois par tour et par créature, avant les attaques, une créature qui a la
+  // Mobilité (aggro avec l'amélioration, ou cible d'Instinct) passe à l'entrée (colonne C) d'une lane voisine, plafond respecté.
+  function moveLane(S, id, toLane) {
     const c = S.creatures.find(o => o.id === id);
-    if (!c || S.raidUsed || S.upgrades.aggro.r2 !== "B" || CREATURES[c.name].type !== "aggro") return false;
+    if (!c || c.mobUsed || !hasMobility(S, c)) return false;
     const i = LANES.indexOf(c.lane), j = LANES.indexOf(toLane);
     if (!((i + 1) % 4 === j || (i + 3) % 4 === j)) return false;
     if (laneCount(S, toLane) >= capOf(S)) return false;
     fx(S, { t: "raid", id, lane: toLane });
-    c.lane = toLane; c.u = 0; c.k = 4; S.raidUsed = true;
-    log(S, "essaim", `Raid : ${c.name} passe à l'entrée de la lane ${LANE_NAME[toLane]}.`);
+    c.lane = toLane; c.u = 0; c.k = 4; c.mobUsed = true;
+    log(S, "essaim", `Mobilité : ${c.name} passe à l'entrée de la lane ${LANE_NAME[toLane]}.`);
     return true;
   }
   function startAttacks(S) { S.phase = "A_attack"; }
@@ -849,7 +901,7 @@ const SF = (() => {
     deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && deploy(S, a.uid, a.lane, a.u) },
     endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); return true; } },
     invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
-    raid: { phase: ["A_upgrade"], run: (S, a) => isInt(a.id) && isLane(a.lane) && raid(S, a.id, a.lane) },
+    moveLane: { phase: ["A_upgrade"], run: (S, a) => isInt(a.id) && isLane(a.lane) && moveLane(S, a.id, a.lane) },
     instinct: { phase: ["A_deploy", "A_upgrade"], run(S, a) {
       const c = creatureById(S, a.id);
       if (!c || c.name !== "Catalyseur" || !["mobilite", "furtivite"].includes(a.v)) return false;
@@ -872,13 +924,12 @@ const SF = (() => {
       if (SPELLS[name].kind !== kind || name === "Famine" || !spellArgOk(S, name, a.arg)) return false;
       return useSpell(S, a.i, a.arg === undefined ? null : a.arg);
     } },
-    act: { phase: ["A_attack"], run(S, a) {
-      const c = creatureById(S, a.id); if (!c || c.acted) return false;
-      if (a.target !== undefined && a.target !== null && typeof a.target !== "string") return false;
-      act(S, c, a.target || undefined); return true;
+    act: { phase: ["A_attack"], run(S, a) { // a.key : la case (bloc) qui agit ; a.order : ordre d'attaque (identifiants)
+      if (typeof a.key !== "string" || (a.order !== undefined && !(Array.isArray(a.order) && a.order.every(isInt)))) return false;
+      return actCase(S, a.key, a.order);
     } },
     actAll: { phase: ["A_attack"], run(S) {
-      for (const c of attackOrder(S)) { if (S.winner) break; if (S.creatures.includes(c)) act(S, c); }
+      for (let i = 0; i < 200 && !S.winner; i++) { const r = readyCases(S); if (!r.length) break; actCase(S, r[0]); }
       return true;
     } },
     endA: { phase: ["A_attack"], run(S) { if (attackOrder(S).length) return false; endAttackerTurn(S); return true; } },
@@ -948,7 +999,7 @@ const SF = (() => {
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
     clairvoyance, hasMobility, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
-    attacks, pushBack, act, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, raid, startAttacks, attackOrder, endAttackerTurn,
+    attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, moveLane, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };

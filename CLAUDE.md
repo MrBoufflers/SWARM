@@ -78,6 +78,10 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 - **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
 - **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).
 - **Biomasse** : une tuile détruite rapporte sa **durée de construction** (1 / 2 / 3 ; haie de départ : 1 ; avant : toujours 1) ; un support qui tombe rapporte toujours 1.
+- **Paliers de l'essaim** : seuils décalés de +3 → départ 3, puis 7 / 10 / 13 / 16 (avant 4 / 7 / 10 / 13).
+- **Blocs** : toutes les créatures d'une case avancent ensemble (`SF.actCase`, action `act` avec `{key, order}`). Dans une lane, les cases les plus proches de la fusée (chemin le plus court, `pathLen`) agissent d'abord (`SF.readyCases`) ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, toute la case avance jusqu'à la suivante et les créatures qui n'ont pas frappé la frappent ; un bloc qui arrive sur une case occupée fusionne avec elle. `SF.act` (une seule créature) ne sert plus qu'aux tests ciblés.
+- **Mobilité** (aggro rang 1, et cible d'Instinct) : une fois par tour **par créature**, en phase Améliorations, passe à l'entrée (colonne C) d'une lane voisine, plafond respecté (action `moveLane`). Remplace l'ancien « choisit sa cible dans la lane ».
+- **Percée** (aggro rang 2 côté B, ancien « Raid ») : les créatures aggro ont la percée.
 - Les parties enregistrées avant ces changements sont mises à jour à la lecture (`SF.migrate`, côté navigateur et serveur) ; un nœud déjà assez investi pour le nouveau coût est acquis.
 - Conséquence signalée, à trancher par Oni : la colonne « Points » du barème des forteresses comptait une Épines 1 gratuite pour toutes ; elle est à recalculer.
 

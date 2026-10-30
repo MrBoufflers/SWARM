@@ -84,7 +84,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (ph === 'Déploiement') { if (!(await page.$('.ccard.sel'))) { if (await click(page, '[data-a="card"]:not([disabled])') && await click(page, '[data-a="deployAt"]')) continue; } await click(page, '[data-a="endDeploy"]'); continue; }
     if (ph === 'Améliorations') { await click(page, '[data-a="invest"][data-n="99"]'); await click(page, '[data-a="toAttacks"]'); continue; }
     if (ph === 'Réaction de la colonie') { if (await click(page, '[data-a="spell"]')) { if (!(await click(page, '[data-a="spellArg"]'))) await click(page, '[data-a="spellCancel"]'); } await click(page, '[data-a="reactDone"]'); continue; }
-    if (ph === 'Attaques') { if (await click(page, '[data-a="mobTarget"]')) continue; if (await click(page, '[data-a="act"]')) continue; await click(page, '[data-a="endA"]'); continue; }
+    if (ph === 'Attaques') { if (await click(page, '[data-a="ordGo"]')) continue; if (await click(page, '[data-a="act"]')) continue; await click(page, '[data-a="endA"]'); continue; }
     if (ph === 'Tour de la colonie') {
       if (!(await page.$('.tcard.sel'))) { if (await click(page, '[data-a="tile"]:not([disabled])') && await click(page, '[data-a="startCh"]')) continue; }
       for (let i = 0; i < 4; i++) { const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; await bs[i].click(); await sleep(20); await idle(page); }
