@@ -1,4 +1,4 @@
-// Siège & Fusée — cœur du serveur en ligne (lobby, codes, jetons, actions).
+// Swarm & Steel — cœur du serveur en ligne (lobby, codes, jetons, actions).
 // Le serveur fait autorité : il détient l'état complet S, exécute src/engine.js tel quel
 // et n'envoie à chaque joueur que la vue filtrée de son camp (SF.viewFor).
 // Le stockage est fourni par l'appelant (Netlify Blobs en production, mémoire en local) :

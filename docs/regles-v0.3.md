@@ -1,4 +1,4 @@
-# Siège & Fusée — Livret de règles v0.3
+# Swarm & Steel — Livret de règles v0.3
 
 2026-10-28 · @Oni
 

@@ -1,11 +1,19 @@
-// Siège & Fusée — interface : 2 joueurs sur le même écran (local) ou sur deux appareils (en ligne)
+// Swarm & Steel — interface : 2 joueurs sur le même écran (local) ou sur deux appareils (en ligne)
 "use strict";
 (() => {
   const $ = s => document.querySelector(s);
   const E = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const icon = (n, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ""}</svg>`;
-  const SAVE = "siege-fusee-v03";
-  const NET_KEY = "siege-fusee-en-ligne";
+  const SAVE = "swarm-steel-v03";
+  const NET_KEY = "swarm-steel-en-ligne";
+  // reprise des sauvegardes faites sous l'ancien nom du jeu (Siège & Fusée)
+  try {
+    for (const [o, n] of [["siege-fusee-v03", SAVE], ["siege-fusee-en-ligne", NET_KEY]]) {
+      const v = localStorage.getItem(o);
+      if (v !== null && localStorage.getItem(n) === null) localStorage.setItem(n, v);
+      localStorage.removeItem(o);
+    }
+  } catch (e) { /* stockage indisponible */ }
   let S = null;
   let MODE = "home"; // "home" (accueil), "local" (même appareil) ou "online"
   // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
@@ -54,12 +62,12 @@
     const menu = online()
       ? `<span class="code-chip" data-code="${E(NET.code)}">Partie <b>${E(NET.code)}</b> · ${E(SIDE[NET.side])}</span><button data-a="help" class="ghost">Règles</button><button data-a="quit" class="ghost">Quitter</button>`
       : `<button data-a="help" class="ghost">Règles</button><button data-a="home" class="ghost">Menu</button><button data-a="new" class="ghost">Nouvelle partie</button>`;
-    return `<header class="top"><div class="brand">${icon("fusee")}<b>Siège &amp; Fusée</b><span>prototype v0.3</span></div>
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
       <div class="menu">${menu}</div></header>`;
   }
   function homeHeader() {
-    return `<header class="top"><div class="brand">${icon("fusee")}<b>Siège &amp; Fusée</b><span>prototype v0.3</span></div>
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
       <div class="menu"><button data-a="help" class="ghost">Règles</button></div></header>`;
   }
   // ---------------------------------------------------------------- accueil et salle d'attente (jeu en ligne)
@@ -67,7 +75,7 @@
     const saved = load();
     const preset = new URLSearchParams(location.search).get("code") || "";
     return `<section class="handoff home"><div class="ho-card">${icon("fusee", "i big")}
-      <h2>Siège &amp; Fusée</h2>
+      <h2>Swarm &amp; Steel</h2>
       <p class="ho-k">Sur cet appareil</p>
       <div class="home-acts">${saved && saved.phase ? `<button data-a="resume" class="primary">Reprendre la partie locale</button>` : ""}
         <button data-a="local"${saved && saved.phase ? "" : ` class="primary"`}>Nouvelle partie locale</button></div>

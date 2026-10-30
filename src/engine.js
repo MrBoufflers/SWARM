@@ -1,4 +1,4 @@
-// Siège & Fusée — moteur de règles v0.3 (livret v0.3). Aucun accès au DOM : testable sous Node.
+// Swarm & Steel — moteur de règles v0.3 (livret v0.3). Aucun accès au DOM : testable sous Node.
 "use strict";
 const SF = (() => {
   // ------------------------------------------------------------------ données

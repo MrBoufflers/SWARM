@@ -1,8 +1,8 @@
 {
-  "name": "swarm-siege-fusee",
+  "name": "swarm-steel",
   "version": "0.3.0",
   "private": true,
-  "description": "Siège & Fusée — jeu de société asymétrique pour 2 joueurs (prototype HTML/JS)",
+  "description": "Swarm & Steel — jeu de société asymétrique pour 2 joueurs (prototype HTML/JS)",
   "scripts": {
     "build": "python3 tools/build.py",
     "test": "node tests/rules.test.js && node tests/serveur.test.js",

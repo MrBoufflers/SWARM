@@ -1,4 +1,4 @@
-# SWARM — Siège & Fusée
+# Swarm & Steel
 
 Jeu de société asymétrique pour 2 joueurs (prototype v0.3).
 
@@ -9,7 +9,7 @@ La colonie gagne quand le 12ᵉ étage est achevé ; l'essaim gagne quand la col
 
 ## Jouer
 
-- **Sur un seul appareil** : ouvrir `dist/siege-fusee-jeu.html` dans un navigateur, puis « Nouvelle partie locale ». Écran de passage entre les tours ; la partie est sauvegardée dans le navigateur.
+- **Sur un seul appareil** : ouvrir `dist/swarm-steel-jeu.html` dans un navigateur, puis « Nouvelle partie locale ». Écran de passage entre les tours ; la partie est sauvegardée dans le navigateur.
 - **En ligne** (site Netlify) : un joueur choisit son camp et crée la partie ; il obtient un **code de 5 caractères** (et un lien) à donner à l'adversaire, qui le saisit dans « Rejoindre ». Chaque joueur ne reçoit que ce que son camp a le droit de voir. Recharger la page reprend la partie.
 - **En ligne sur son ordinateur** : `npm run serveur`, puis http://localhost:8888 (parties gardées en mémoire).
 
@@ -21,7 +21,7 @@ Voir [`docs/regles-v0.3.md`](docs/regles-v0.3.md) (export du livret ; les valeur
 
 ```
 npm install && npx playwright install chromium
-npm run build      # régénère dist/siege-fusee-jeu.html à partir de src/
+npm run build      # régénère dist/swarm-steel-jeu.html à partir de src/
 npm test           # tests de règles et du serveur
 npm run e2e        # partie locale complète jouée en clics réels dans Chromium
 npm run e2e:en-ligne   # partie en ligne complète entre deux navigateurs

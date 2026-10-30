@@ -1,4 +1,6 @@
-# SWARM — « Siège & Fusée », prototype v0.3
+# Swarm & Steel — prototype v0.3 (dépôt SWARM)
+
+Ancien nom : « Siège & Fusée » (renommé le 30/10/2026 à la demande d'Oni). Le module du moteur s'appelle toujours `SF` dans le code.
 
 Jeu de société asymétrique pour 2 joueurs, conçu par Oni (game designer, francophone). Ce dépôt contient le **prototype jouable en HTML/JS** (2 joueurs sur le même appareil, ou **en ligne** sur deux appareils avec un code pour rejoindre) et l'export du livret de règles.
 
@@ -20,7 +22,7 @@ src/engine.js      Moteur de règles pur (aucun accès au DOM), module `SF`, uti
 src/ui.js          Interface : rendu par innerHTML, tous les clics délégués sur [data-a], fonction handle(a, d)
 src/style.css      Styles (thèmes clair/sombre, plateau 9 × 9 en CSS grid)
 tools/icons.py     Pictos SVG (viewBox 24, trait = currentColor), partagés avec les planches d'impression
-tools/build.py     Assemble dist/siege-fusee-jeu.html (une seule page autonome)
+tools/build.py     Assemble dist/swarm-steel-jeu.html (une seule page autonome)
 dist/              Page construite — à régénérer avec `npm run build`, ne pas éditer à la main
 tests/rules.test.js  Tests ciblés des règles (scénarios précis, pas de simulation)
 tests/e2e-partie.js  Partie complète jouée par clics souris réels (Playwright), vérifie erreurs JS et boutons recouverts
@@ -37,7 +39,7 @@ Le livret de référence est un document Claude d'Oni ; `docs/regles-v0.3.md` en
 
 ## Architecture actuelle
 
-- **État** : un seul objet `S`, entièrement sérialisable en JSON (sauvegardé dans `localStorage`, clé `siege-fusee-v03`). Créé par `SF.newGame()`.
+- **État** : un seul objet `S`, entièrement sérialisable en JSON (sauvegardé dans `localStorage`, clé `swarm-steel-v03`). Créé par `SF.newGame()`.
 - **Point d'entrée des actions** : `SF.apply(S, camp, type, args)` vérifie le camp (`SF.actor(S)`), la phase et les paramètres, puis appelle les fonctions de règles ; renvoie `""` ou la raison du refus. Table `SF.ACTIONS`. L'interface locale **et** le serveur passent par là. `SF.viewFor(S, camp)` produit la vue filtrée envoyée à un joueur.
 - **Moteur** (`SF`) : fonctions pures qui modifient `S` et renvoient `true/false` selon que l'action est légale. Principales actions :
   - Essaim : `attackerDraw`, `deploy`, `endDeploy`, `invest` (amélioration payée en plusieurs fois), `raid`, `startAttacks`, `act` (une créature se déplace puis attaque), `endAttackerTurn`.
@@ -56,7 +58,7 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 1. **Serveur qui fait autorité** : il détient `S` et exécute `src/engine.js` tel quel (le moteur tourne sous Node).
 2. **Les clients envoient des actions** (`{type, args}` correspondant aux fonctions du moteur) ; le serveur vérifie que l'action vient du camp dont c'est le tour (selon la phase), l'applique, puis diffuse.
 3. **Chaque joueur reçoit une vue filtrée** de `S` :
-   - à l'essaim, ne jamais envoyer : `hand` (tuiles de la colonie), `spells` (sortilèges), le nom/les PV/les capacités des tuiles camouflées non révélées (`tile.camo && !tile.revealed`, sauf Clairvoyance — voir `clairvoyance(S)`), le nom des tuiles camouflées en chantier (`chantiers`) et à poser (`toPlace`) ;
+   - à l'essaim, ne jamais envoyer : `hand` (tuiles de la colonie), `spells` (sortilèges), le nom/les PV/les capacités des tuiles camouflées non révélées (`tile.camo && !tile.revealed`, sauf Clairvoyance — voir `clairvoyance(S)`), le nom des tuiles camouflées en chantier (`chantiers`) et à poser (`toPlace`) — les points restants d'un chantier restent visibles (validé par Oni le 30/10/2026) ;
    - à la colonie, ne jamais envoyer : `handA` (main de l'essaim) ;
    - à personne : l'ordre des pioches (`piles`, `tileDeck`, `spellDeck`, défausses) — envoyer seulement les nombres ;
    - le journal (`S.log`) est commun : il évite déjà de nommer les tuiles camouflées (`pubName`) — à garder ainsi.
@@ -88,7 +90,7 @@ Marqués † dans le livret, ou repérés pendant la conception :
 ```
 npm install          # installe Playwright (tests e2e)
 npx playwright install chromium
-npm run build        # python3 tools/build.py → dist/siege-fusee-jeu.html
+npm run build        # python3 tools/build.py → dist/swarm-steel-jeu.html
 npm test             # tests de règles (Node)
 npm run e2e          # partie complète, 1400 px
 npm run e2e:mobile   # partie complète, 400 px

@@ -1,4 +1,4 @@
-# Pictos de Siège & Fusée — viewBox 0 0 24 24, trait = currentColor.
+# Pictos de Swarm & Steel — viewBox 0 0 24 24, trait = currentColor.
 # Chaque entrée : (libellé du lexique, contenu SVG)
 
 ICONS = {

@@ -1,4 +1,4 @@
-// Serveur local pour jouer en ligne sur son réseau ou tester : sert dist/siege-fusee-jeu.html et /api/*.
+// Serveur local pour jouer en ligne sur son réseau ou tester : sert dist/swarm-steel-jeu.html et /api/*.
 // Usage : npm run serveur  (port 8888 par défaut, ou PORT=…). Les parties sont gardées en mémoire.
 "use strict";
 const http = require("http");
@@ -8,7 +8,7 @@ const core = require("./core.js");
 
 function start(port) {
   const store = core.memoryStore();
-  const page = () => fs.readFileSync(path.join(__dirname, "../dist/siege-fusee-jeu.html"));
+  const page = () => fs.readFileSync(path.join(__dirname, "../dist/swarm-steel-jeu.html"));
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, "http://local");
     if (url.pathname.startsWith("/api/")) {
@@ -31,6 +31,6 @@ function start(port) {
 }
 if (require.main === module) {
   const port = Number(process.env.PORT || 8888);
-  start(port).then(() => console.log(`Siège & Fusée : http://localhost:${port}`));
+  start(port).then(() => console.log(`Swarm & Steel : http://localhost:${port}`));
 }
 module.exports = { start };

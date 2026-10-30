@@ -12,7 +12,7 @@ css = (ROOT / "src/style.css").read_text(encoding="utf-8")
 
 page = f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Siège &amp; Fusée</title>
+<title>Swarm &amp; Steel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>{css}</style></head><body>
@@ -23,7 +23,7 @@ page = f"""<!doctype html>
 {ui}</script>
 </body></html>
 """
-out = ROOT / "dist/siege-fusee-jeu.html"
+out = ROOT / "dist/swarm-steel-jeu.html"
 out.parent.mkdir(exist_ok=True)
 out.write_text(page, encoding="utf-8")
 print("ok", out.relative_to(ROOT), len(page) // 1024, "Ko")
