@@ -24,9 +24,15 @@ function sideOf(room, token) {
   return SIDES.find(s => room.tokens[s] && room.tokens[s] === token) || null;
 }
 function freshGame() { const S = SF.newGame(); S.handoff = null; return S; }
-function pub(room, side, extra) {
-  return { ...extra, code: room.code, side, v: room.v, players: { essaim: !!room.tokens.essaim, colonie: !!room.tokens.colonie }, S: SF.viewFor(room.S, side) };
+// f = numéro du dernier événement visuel déjà reçu par ce joueur : on lui renvoie les suivants (animations à rejouer)
+const FX_KEEP = 400;
+function pub(room, side, extra, f) {
+  const log = room.fx || [], fxN = room.fxN || 0;
+  const since = Number.isInteger(f) ? log.filter(x => x.n > f) : [];
+  return { ...extra, code: room.code, side, v: room.v, players: { essaim: !!room.tokens.essaim, colonie: !!room.tokens.colonie },
+    S: SF.viewFor(room.S, side), fxN, fx: SF.fxFor(room.S, side, since.map(x => x.e)) };
 }
+const asInt = v => (v === undefined || v === null || v === "" ? undefined : Number.isInteger(Number(v)) ? Number(v) : undefined);
 const out = (status, json) => ({ status, json });
 const err = (status, error) => out(status, { error });
 
@@ -69,7 +75,7 @@ async function handle(store, method, route, query, body) {
     const side = sideOf(r.data, query.token);
     if (!side) return err(403, "Jeton inconnu pour cette partie.");
     if (Number(query.v) === r.data.v) return out(200, { same: true, v: r.data.v });
-    return out(200, pub(r.data, side));
+    return out(200, pub(r.data, side, {}, asInt(query.f)));
   }
   if (method === "POST" && (route === "action" || route === "rematch")) {
     const code = normCode(body.code);
@@ -83,15 +89,23 @@ async function handle(store, method, route, query, body) {
       if (!side) return err(403, "Jeton inconnu pour cette partie.");
       let refusal = "";
       if (!room.tokens.essaim || !room.tokens.colonie) refusal = "En attente de l'adversaire.";
-      else if (type === "rematch") { if (room.S.winner) room.S = freshGame(); else refusal = "La partie n'est pas terminée."; }
+      else if (type === "rematch") { if (room.S.winner) { room.S = freshGame(); room.fx = []; } else refusal = "La partie n'est pas terminée."; }
       else {
         const before = JSON.stringify(room.S);
+        room.S.fx = [];
         try { refusal = SF.apply(room.S, side, type, body.args); } catch (e) { refusal = "action invalide"; }
         if (refusal) room.S = JSON.parse(before);
+        else {
+          room.fx = room.fx || []; room.fxN = room.fxN || 0;
+          for (const e of room.S.fx) room.fx.push({ n: ++room.fxN, e });
+          if (room.fx.length > FX_KEEP) room.fx = room.fx.slice(-FX_KEEP);
+          delete room.S.fx;
+        }
       }
-      if (refusal) return out(200, pub(room, side, { ok: false, error: refusal.charAt(0).toUpperCase() + refusal.slice(1) + (refusal.endsWith(".") ? "" : ".") }));
+      const f = asInt(body.f);
+      if (refusal) return out(200, pub(room, side, { ok: false, error: refusal.charAt(0).toUpperCase() + refusal.slice(1) + (refusal.endsWith(".") ? "" : ".") }, f));
       room.v += 1; room.updated = Date.now();
-      if (await store.update(code, room, r.etag)) return out(200, pub(room, side, { ok: true }));
+      if (await store.update(code, room, r.etag)) return out(200, pub(room, side, { ok: true }, f));
     }
     return err(503, "Partie occupée, réessayez.");
   }

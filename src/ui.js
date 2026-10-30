@@ -62,9 +62,10 @@
     const menu = online()
       ? `<span class="code-chip" data-code="${E(NET.code)}">Partie <b>${E(NET.code)}</b> · ${E(SIDE[NET.side])}</span><button data-a="help" class="ghost">Règles</button><button data-a="quit" class="ghost">Quitter</button>`
       : `<button data-a="help" class="ghost">Règles</button><button data-a="home" class="ghost">Menu</button><button data-a="new" class="ghost">Nouvelle partie</button>`;
+    const animBtn = `<button data-a="anim" class="ghost" aria-pressed="${animOn}">Animations : ${animOn ? "oui" : "non"}</button>`;
     return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
-      <div class="menu">${menu}</div></header>`;
+      <div class="menu">${animBtn}${menu}</div></header>`;
   }
   function homeHeader() {
     return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
@@ -223,18 +224,18 @@
         if (Math.abs(u) > 2) { html += `<div class="cell void"></div>`; continue; }
         const crs = S.creatures.filter(c => c.lane === lane && c.k === 4 && c.u === u);
         const hot = canDeployHere(lane, u);
-        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : ""}><span class="col">${SF.COLS[u + 2]}</span>${tokens(crs)}</div>`;
+        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}" data-xy="${k}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : ""}><span class="col">${SF.COLS[u + 2]}</span>${tokens(crs)}</div>`;
         continue;
       }
       if (x === 0 && y === 0) {
-        html += `<div class="cell core">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
+        html += `<div class="cell core" data-xy="${k}">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
         continue;
       }
       if (SF.isSupportCell(x, y)) {
         const lvl = S.supports[k];
         const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && !S.firedSupports.includes(k) && SF.supportTargets(S, k).length;
         const fired = S.firedSupports.includes(k);
-        html += lvl ? `<div class="cell sup${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
+        html += lvl ? `<div class="cell sup${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
             <span class="lv">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? icon("tourelle") + `<b>${SF.turretDmg(S, lvl)}</b>` : icon("travailleur") + "<b>+2</b>"}</div>`
           : `<div class="cell corner"><span class="lv">${["", "I", "II", "III"][r]}</span></div>`;
         continue;
@@ -253,7 +254,7 @@
         }
       }
       const stased = S.stase.includes(lane);
-      html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${stased ? " stase" : ""}" ${target ? `data-a="placeAt" data-k="${k}"` : ""}>${inner}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : ""}>${inner}${tokens(crs)}</div>`;
     }
     return `<div class="board" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -406,12 +407,17 @@
   // Les actions de jeu passent toutes par SF.apply (moteur) : en local directement, en ligne via le serveur.
   function play(type, args, onOk) {
     if (online()) { send(type, args, onOk); return; }
-    if (!SF.apply(S, who(), type, args || {}) && onOk) onOk();
+    S.fx = [];
+    const refused = SF.apply(S, who(), type, args || {});
+    const events = S.fx; delete S.fx;
+    if (!refused && onOk) onOk();
     if (!S.winner) setPhaseHandoff();
-    save(); render();
+    save();
+    animate(events).then(() => { render(); afterRender(events); });
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
+    if (a === "anim") { animOn = !animOn; try { localStorage.setItem(ANIM_KEY, animOn ? "1" : "0"); } catch (e) { /* rien */ } render(); return; }
     if (MODE === "home" || !S) { homeAction(a, d); return; }
     if (a === "home") { if (online()) return; MODE = "home"; render(); return; }
     if (a === "quit") { if (confirmQuit()) { setNet(null); MODE = "home"; S = null; UI = resetUI(); render(); } return; }
@@ -484,6 +490,126 @@
   }
   function confirmQuit() { return UI.confirmQuit ? true : (UI.confirmQuit = true, setTimeout(() => { UI.confirmQuit = false; }, 4000), flash("Touchez encore « Quitter » : vous ne pourrez plus revenir dans cette partie depuis cet appareil."), false); }
 
+  // ---------------------------------------------------------------- animations (lot 1)
+  // Rejouées par-dessus le plateau encore à l'ancien état, à partir des événements du moteur (S.fx) ;
+  // l'état final est affiché ensuite. Sobres et courtes ; un toucher les termine ; réglage « Animations ».
+  const ANIM_KEY = "swarm-steel-anim";
+  let animOn = (() => {
+    try { const v = localStorage.getItem(ANIM_KEY); if (v !== null) return v === "1"; } catch (e) { /* rien */ }
+    return !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  })();
+  const FX = { playing: false, skip: false, ghosts: {}, speed: 1 };
+  const wait = ms => new Promise(res => setTimeout(res, FX.skip ? 0 : ms * FX.speed));
+  const dur = ms => (FX.skip ? 1 : ms * FX.speed);
+  function layer() { let l = $("#fx"); if (!l) { l = document.createElement("div"); l.id = "fx"; document.body.appendChild(l); } return l; }
+  function box(el) { const r = el.getBoundingClientRect(); return { x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height, cx: r.left + scrollX + r.width / 2, cy: r.top + scrollY + r.height / 2 }; }
+  const cellAt = k => document.querySelector(`.board [data-xy="${k}"]`);
+  const tokAt = id => FX.ghosts[id] || document.querySelector(`.board .tok[data-id="${id}"]`);
+  function ghost(id) { // jeton flottant qui remplace le vrai jeton pendant qu'il se déplace
+    if (FX.ghosts[id]) return FX.ghosts[id];
+    const t = document.querySelector(`.board .tok[data-id="${id}"]`); if (!t) return null;
+    const b = box(t), g = t.cloneNode(true);
+    g.removeAttribute("data-a"); g.classList.add("ghost");
+    Object.assign(g.style, { left: b.x + "px", top: b.y + "px", width: b.w + "px", height: b.h + "px" });
+    layer().appendChild(g); t.style.visibility = "hidden";
+    return (FX.ghosts[id] = g);
+  }
+  function glide(g, cx, cy, ms) {
+    const nx = cx - g.offsetWidth / 2, ny = cy - g.offsetHeight / 2;
+    const a = g.animate([{ left: g.style.left, top: g.style.top }, { left: nx + "px", top: ny + "px" }], { duration: dur(ms), easing: "ease-in-out", fill: "forwards" });
+    g.style.left = nx + "px"; g.style.top = ny + "px";
+    return a.finished.catch(() => {});
+  }
+  function lunge(el, toward, ms) { // petit élan vers la cible, puis retour
+    if (!el || !toward) return Promise.resolve();
+    const a = box(el), b = box(toward), dx = (b.cx - a.cx) * 0.3, dy = (b.cy - a.cy) * 0.3;
+    return el.animate([{ transform: "translate(0,0)" }, { transform: `translate(${dx}px,${dy}px)` }, { transform: "translate(0,0)" }], { duration: dur(ms), easing: "ease-out" }).finished.catch(() => {});
+  }
+  function float(el, text, cls) { // chiffre qui monte et s'efface (n'attend pas)
+    if (!el || FX.skip) return;
+    const b = box(el), f = document.createElement("div");
+    f.className = "float " + (cls || ""); f.textContent = text;
+    Object.assign(f.style, { left: b.cx + "px", top: b.y + "px" });
+    layer().appendChild(f);
+    f.animate([{ transform: "translate(-50%, 0)", opacity: 1 }, { transform: "translate(-50%, -26px)", opacity: 0 }], { duration: 900, easing: "ease-out", fill: "forwards" }).finished.then(() => f.remove(), () => f.remove());
+  }
+  const shake = el => el && el.animate([{ transform: "translateX(0)" }, { transform: "translateX(-3px)" }, { transform: "translateX(3px)" }, { transform: "translateX(0)" }], { duration: dur(220) });
+  const fade = el => el ? el.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.4)" }], { duration: dur(260), fill: "forwards" }).finished.catch(() => {}) : Promise.resolve();
+  const STEP = {
+    async move(e) {
+      const g = ghost(e.id); if (!g) return;
+      let [u, k] = e.from;
+      for (let i = 0; i < 12 && !(u === e.to[0] && k === e.to[1]); i++) {
+        [u, k] = SF.nextStep(u, k);
+        const c = cellAt(SF.toGlobal(e.lane, u, k).join(","));
+        if (c) { const b = box(c); await glide(g, b.cx, b.cy, 130); }
+      }
+    },
+    async hit(e) {
+      const cell = cellAt(e.k), tile = cell && cell.querySelector(".tile");
+      await lunge(e.id !== null ? tokAt(e.id) : null, cell, 200);
+      shake(tile || cell);
+      if (e.n !== null) float(tile || cell, e.n ? "−" + e.n : "0", "tile-dmg");
+      const hp = tile && tile.querySelector(".hp");
+      if (hp && e.hp !== null && hp.firstChild) hp.firstChild.textContent = e.hp;
+      await wait(180);
+    },
+    async tileDown(e) {
+      const cell = cellAt(e.k); if (!cell) return;
+      float(cell, "+1 biomasse", "bio");
+      await fade(cell.querySelector(".tile") || cell.firstElementChild);
+    },
+    async dmg(e) {
+      const t = tokAt(e.id); if (!t) return;
+      float(t, "−" + e.n, "cr-dmg");
+      t.animate([{ filter: "brightness(1.9)" }, { filter: "none" }], { duration: dur(220) });
+      const spans = t.querySelectorAll("span"); if (spans[1]) spans[1].textContent = e.hp;
+      await wait(160);
+    },
+    async die(e) { await fade(tokAt(e.id)); },
+    async rocket(e) {
+      const core = cellAt("0,0"); if (!core) return;
+      await lunge(tokAt(e.id), core, 220);
+      core.animate([{ boxShadow: "0 0 0 0 var(--danger)" }, { boxShadow: "0 0 0 6px var(--danger)" }, { boxShadow: "0 0 0 0 var(--danger)" }], { duration: dur(420) });
+      float(core, "−1 travailleur", "cr-dmg");
+      await wait(300);
+    },
+    async shot(e) {
+      const from = cellAt(e.sk), to = tokAt(e.id); if (!from || !to) return;
+      const a = box(from), b = box(to), d = document.createElement("div");
+      d.className = "shot"; Object.assign(d.style, { left: a.cx + "px", top: a.cy + "px" });
+      layer().appendChild(d);
+      await d.animate([{ transform: "translate(-50%,-50%)" }, { transform: `translate(calc(-50% + ${b.cx - a.cx}px), calc(-50% + ${b.cy - a.cy}px))` }], { duration: dur(220), easing: "ease-in" }).finished.catch(() => {});
+      d.remove();
+    },
+  };
+  async function animate(events) {
+    if (!animOn || !events || !events.length || !document.querySelector(".board")) return;
+    FX.playing = true; FX.skip = false; FX.ghosts = {}; FX.speed = events.length > 40 ? 0.6 : 1;
+    document.body.dataset.anim = "1";
+    try { for (const e of events) if (STEP[e.t]) await STEP[e.t](e); }
+    catch (err) { console.error("animation :", err); } // une animation ratée ne doit jamais bloquer le jeu
+    finally {
+      for (const g of Object.values(FX.ghosts)) g.remove();
+      FX.ghosts = {}; FX.playing = false; document.body.dataset.anim = "0";
+    }
+  }
+  function afterRender(events) { // apparitions, une fois le nouvel état affiché
+    if (!animOn || !events) return;
+    for (const e of events) if (e.t === "deploy") {
+      const t = document.querySelector(`.board .tok[data-id="${e.id}"]`);
+      if (t) t.animate([{ transform: "scale(.2)", opacity: 0 }, { transform: "scale(1.15)", opacity: 1, offset: .7 }, { transform: "scale(1)", opacity: 1 }], { duration: 300, easing: "ease-out" });
+    }
+  }
+  function banner(text) { // bandeau de changement de tour (jeu en ligne)
+    const b = document.createElement("div");
+    b.className = "turn-banner " + (SF.actor(S) || ""); b.textContent = text;
+    layer().appendChild(b);
+    const kf = animOn ? [{ opacity: 0, transform: "translate(-50%, -12px)" }, { opacity: 1, transform: "translate(-50%, 0)", offset: .15 }, { opacity: 1, transform: "translate(-50%, 0)", offset: .8 }, { opacity: 0, transform: "translate(-50%, -12px)" }]
+      : [{ opacity: 1 }, { opacity: 1 }];
+    b.animate(kf, { duration: 1800, fill: "forwards" }).finished.then(() => b.remove(), () => b.remove());
+  }
+
   // ---------------------------------------------------------------- jeu en ligne
   const POLL_MS = window.SF_POLL_MS || 2000;
   function setNet(n) { NET = n; try { if (n) localStorage.setItem(NET_KEY, JSON.stringify({ code: n.code, token: n.token, side: n.side })); else localStorage.removeItem(NET_KEY); } catch (e) { /* stockage indisponible */ } }
@@ -495,10 +621,19 @@
   }
   function receive(j) { // nouvel état envoyé par le serveur (vue filtrée pour notre camp)
     if (!j || !j.S) return;
-    const turnBefore = S && myTurn();
+    if (Number.isInteger(j.fxN)) NET.fx = j.fxN;
+    const had = !!S, turnBefore = had && myTurn();
     if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help };
     S = j.S; NET.v = j.v; NET.full = j.players.essaim && j.players.colonie;
-    if (!turnBefore && myTurn()) UI = { ...resetUI(), help: UI.help, selCreature: UI.selCreature };
+    if (!turnBefore && myTurn()) { UI = { ...resetUI(), help: UI.help, selCreature: UI.selCreature }; NET.banner = had; }
+  }
+  // animations des événements reçus (sur l'ancien plateau), puis nouvel état
+  async function show(j, onOk) {
+    await animate(j.fx || []);
+    receive(j);
+    if (j.ok && onOk) onOk(); // ex. désélectionner la carte jouée, avant de redessiner
+    render(); afterRender(j.fx || []);
+    if (NET.banner) { NET.banner = false; banner(`À vous de jouer · ${PHASE_TXT[S.phase][1]}`); }
   }
   async function withBusy(f) {
     if (busy) return; busy = true; document.body.dataset.busy = "1";
@@ -520,18 +655,19 @@
   }
   function send(type, args, onOk) {
     withBusy(async () => {
-      const j = await api("action", { code: NET.code, token: NET.token, type, args: args || {} });
-      receive(j);
-      if (j.ok) { if (onOk) onOk(); } else flash(j.error || "Action refusée.");
+      const j = await api("action", { code: NET.code, token: NET.token, type, args: args || {}, f: NET.fx });
+      await show(j, onOk);
+      if (!j.ok) flash(j.error || "Action refusée.");
     });
   }
   async function poll() {
     if (!online() || busy || document.visibilityState === "hidden") return;
     if (NET.full && myTurn()) return; // c'est notre tour : rien ne peut changer sans nous
     try {
-      const j = await api(`state?code=${encodeURIComponent(NET.code)}&token=${encodeURIComponent(NET.token)}&v=${NET.v || 0}`);
-      if (busy || !online()) return;
-      if (!j.same) { receive(j); render(); }
+      const j = await api(`state?code=${encodeURIComponent(NET.code)}&token=${encodeURIComponent(NET.token)}&v=${NET.v || 0}&f=${NET.fx || 0}`);
+      if (busy || !online() || j.same) return;
+      busy = true; document.body.dataset.busy = "1";
+      try { await show(j); } finally { busy = false; document.body.dataset.busy = "0"; }
     } catch (e) { /* réseau momentanément indisponible : on réessaiera */ }
   }
   function resumeOnline(n) {
@@ -547,6 +683,7 @@
   function flash(msg) { const f = $("#flash"); f.textContent = msg; f.hidden = false; clearTimeout(flash.t); flash.t = setTimeout(() => { f.hidden = true; }, 3500); }
 
   document.addEventListener("click", e => {
+    if (FX.playing) { FX.skip = true; return; } // un toucher pendant une animation la termine
     const el = e.target.closest("[data-a]");
     if (!el || el.disabled) return;
     handle(el.dataset.a, el.dataset);
