@@ -59,7 +59,7 @@ const SF = (() => {
     "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
     "Champ de stase": { kind: "off", n: 2, text: "Choisissez une lane : ses tuiles ne subissent aucun dégât ce tour." },
-    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : son budget baisse de 2 ce tour." },
+    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : son budget baisse de 5 ce tour." },
     "Brouillage": { kind: "off", n: 2, text: "Annule le déploiement d'une créature posée ce tour ; la carte retourne dans sa pioche, la biomasse est perdue." },
     "Effort": { kind: "sup", n: 3, text: "+2 points de construction ce tour." },
     "Cadence": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
@@ -83,7 +83,8 @@ const SF = (() => {
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
       B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
   };
-  const COST_R1 = 6, COST_R2 = 12, FLOORS = 12; // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
+  const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
+  const FAMINE = 5; // baisse du budget de l'essaim par Famine (décision d'Oni, 30/10/2026 ; avant 2) // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [3, 4, 5, 6];
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
@@ -522,13 +523,17 @@ const SF = (() => {
   function attackerDraw(S) {
     const t = TIERS[tier(S)];
     S.handA = [];
+    // Déploiement (aggro, centre du rang 2) : les 2 cartes gratuites de niveau 1 sont piochées EN PREMIER, sinon la pioche
+    // normale (qui se rabat sur le niveau 1 quand les niveaux 2 et 3 sont vides) pouvait vider le niveau 1 avant elles.
+    if (S.upgrades.aggro.r2 === "C") {
+      let n = 0;
+      for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); n++; }
+      log(S, "essaim", n === 2 ? "Déploiement : 2 cartes de niveau 1 gratuites." : `Déploiement : pioche de niveau 1 ${n ? "presque vide, 1 seule carte gratuite" : "vide, aucune carte gratuite"}.`);
+    }
     for (let lvl = 3; lvl >= 1; lvl--) {
       for (let i = 0; i < t.n[lvl - 1]; i++) {
         for (let l = lvl; l >= 1; l--) if (S.piles[l].length) { S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ }); break; }
       }
-    }
-    if (S.upgrades.aggro.r2 === "C") {
-      for (let i = 0; i < 2; i++) if (S.piles[1].length) S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ });
     }
     S.budget = Math.max(0, S.biomass - S.famine);
     fx(S, { t: "draw", n: S.handA.length });
@@ -679,7 +684,7 @@ const SF = (() => {
       case "Barrage": { if (!LANES.includes(arg)) return false; for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Champ de stase": { if (!LANES.includes(arg)) return false; S.stase.push(arg); return true; }
-      case "Famine": { if (S.phase !== "A_start") return false; S.famine += 2; return true; }
+      case "Famine": { if (S.phase !== "A_start") return false; S.famine += FAMINE; return true; }
       case "Brouillage": {
         const c = cr(arg); if (!c || !c.new) return false;
         S.creatures.splice(S.creatures.indexOf(c), 1);
@@ -762,8 +767,8 @@ const SF = (() => {
       fire(S, sk, cands[0].id);
     }
   }
-  // Fin du tour de la colonie (ordre décidé par Oni le 30/10/2026) : chantiers et pose des bâtiments, fusée (étages, paliers),
-  // nouveaux supports, PUIS tirs des tourelles (phase D_fire), puis pioches. Les supports apparus et les paliers atteints
+  // Fin du tour de la colonie (ordre décidé par Oni le 30/10/2026) : chantiers et pose des bâtiments, nouveaux supports
+  // (dès la pose), fusée (étages, paliers), PUIS tirs des tourelles (phase D_fire), puis pioches. Les supports apparus et les paliers atteints
   // pendant le tour comptent donc pour les tirs.
   function endDefenderTurn(S) {
     // chantiers et débordement
@@ -809,6 +814,7 @@ const SF = (() => {
     S.tiles[k] = tileStats(p.tile, x, y);
     fx(S, { t: "place", k });
     if (TILES[p.tile].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
+    placeSupports(S); // un support apparaît dès que ses murs sont construits
     log(S, "colonie", TILES[p.tile].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[p.lane]}.` : `${p.tile} construit en lane ${LANE_NAME[p.lane]}.`);
     skipUnplaceable(S);
     if (!S.toPlace.length) finishDefenderTurn(S);
@@ -816,6 +822,7 @@ const SF = (() => {
   }
   function finishDefenderTurn(S) {
     const rocket = S.pendingRocket || 0; S.pendingRocket = 0;
+    placeSupports(S); // supports d'abord (au moment où les bâtiments sont construits), puis la fusée (ordre décidé par Oni, 30/10/2026)
     // fusée
     S.rocketPts += Math.max(0, rocket);
     while (S.floors < FLOORS && S.rocketPts >= floorCost(S)) {
@@ -833,7 +840,6 @@ const SF = (() => {
       }
       if (S.floors === FLOORS) { fx(S, { t: "liftoff" }); S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
     }
-    placeSupports(S);
     S.phase = "D_fire"; // les tourelles tirent maintenant (choix de la colonie, ou tirs automatiques)
   }
   function endColonyTurn(S) {
@@ -999,7 +1005,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor, migrate, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, FAMINE, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

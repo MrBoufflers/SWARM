@@ -236,7 +236,7 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(S.phase === "D_place", "pose du bâtiment achevé");
   ok(SF.apply(S, "colonie", "placeAt", { k: "0,2" }) === "" && S.phase === "D_fire", "après la pose : les tourelles tirent");
   ok(SF.apply(S, "colonie", "endD") === "" && S.spells.includes("Famine") && S.phase === "A_famine", "fin du tour : pioche, puis fenêtre Famine ouverte");
-  ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine === 2, "Famine jouée : budget −2");
+  ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine === 5, "Famine jouée : budget −5");
 }
 // 25. vue filtrée : rien de caché n'est envoyé à l'autre camp
 {
@@ -407,6 +407,23 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   const hp = c.hp; SF.apply(S, "colonie", "fire", { sk: "1,1", id: 95 });
   ok(c.hp === hp - 2, "tir de la nouvelle tourelle : −2");
   ok(SF.apply(S, "colonie", "endD") === "" && ["A_start", "A_famine"].includes(S.phase), "fin du tour : tirs restants automatiques, puis tour de l'essaim");
+}
+// 35. Famine −5, Déploiement (cartes gratuites piochées en premier), supports avant la fusée (décisions d'Oni, 30/10/2026)
+{
+  const S = fresh(); S.biomass = 9; S.spells = ["Famine"]; S.phase = "A_famine";
+  SF.apply(S, "colonie", "famine", { play: true }); SF.apply(S, "essaim", "draw");
+  ok(S.budget === 4, "Famine : budget 9 − 5 = 4");
+  const T = fresh(); T.upgrades.aggro = { r1: "A", r2: "C" }; T.biomass = 15;
+  for (let i = 0; i < 10; i++) { const n = T.piles[1].pop(); T.creatures.push({ id: 900 + i, name: n, lane: "N", u: 0, k: 4, hp: 1 }); }
+  T.log = []; SF.attackerDraw(T);
+  ok(T.handA.filter(c => c.free).length === 2 && T.log.some(l => l.msg.includes("2 cartes de niveau 1 gratuites")), "Déploiement : 2 cartes gratuites même quand la pioche normale vide le niveau 1");
+  const U = fresh(); U.upgrades.aggro = { r1: "A", r2: "C" }; U.piles[1] = []; U.log = []; SF.attackerDraw(U);
+  ok(U.log.some(l => l.msg.includes("vide, aucune carte gratuite")), "Déploiement : message clair si la pioche de niveau 1 est vide");
+  const V = fresh(); V.phase = "D_main"; V.supports = {}; V.floors = 2; V.rocketPts = 0; V.workersBase = 3;
+  V.alloc = { N: 0, E: 0, S: 0, O: 0 }; V.extraPts = 0; V.fx = [];
+  SF.apply(V, "colonie", "build");
+  const iSup = V.fx.findIndex(e => e.t === "supUp"), iFloor = V.fx.findIndex(e => e.t === "floor");
+  ok(iSup >= 0 && iFloor >= 0 && iSup < iFloor, "fin de tour : les supports apparaissent avant les étages de la fusée");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
