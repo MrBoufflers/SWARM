@@ -226,16 +226,16 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(SF.apply(S, "colonie", "spell", { i: 0, arg: [0, 0] }) !== "", "indice en double refusé");
   ok(SF.apply(S, "colonie", "spell", { i: 0, arg: [0] }) === "" && S.hand.length === n, "défausser 1 tuile et en repiocher 1");
 }
-// 24. fenêtre Famine : ouverte aussi quand le tour de la colonie se termine par la pose d'un bâtiment
+// 24. fin du tour de la colonie : construction et pose, puis tirs, puis fenêtre Famine si la colonie tient Famine
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
   S.hand.unshift("Palissade");
   SF.apply(S, "colonie", "startCh", { i: 0, lane: "N" }); S.alloc.N = 1;
-  SF.apply(S, "colonie", "toFire");
   const deck = S.spellDeck; S.spellDeck = [...deck.filter(s => s !== "Famine"), "Famine"]; S.techBonus = 3; // pioche 1 sortilège : Famine
-  SF.apply(S, "colonie", "endD");
+  SF.apply(S, "colonie", "build");
   ok(S.phase === "D_place", "pose du bâtiment achevé");
-  ok(SF.apply(S, "colonie", "placeAt", { k: "0,2" }) === "" && S.spells.includes("Famine") && S.phase === "A_famine", "après la pose : fenêtre Famine ouverte");
+  ok(SF.apply(S, "colonie", "placeAt", { k: "0,2" }) === "" && S.phase === "D_fire", "après la pose : les tourelles tirent");
+  ok(SF.apply(S, "colonie", "endD") === "" && S.spells.includes("Famine") && S.phase === "A_famine", "fin du tour : pioche, puis fenêtre Famine ouverte");
   ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine === 2, "Famine jouée : budget −2");
 }
 // 25. vue filtrée : rien de caché n'est envoyé à l'autre camp
@@ -393,6 +393,20 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   T.upgrades.aggro.r2 = "B";
   ok(SF.capOf(T) === before + 3, "Essaim agrandi : plafond de population +3 (" + before + " → " + SF.capOf(T) + ")");
   ok(!SF.hasPercee(T, { name: "Massacreur", lane: "N", u: 0, k: 4 }), "les aggros n'ont plus la percée par amélioration (seulement l'Aura Percée du Perforeur)");
+}
+// 34. les tourelles tirent APRÈS la construction et la fusée (décision d'Oni, 30/10/2026)
+{
+  // un support de niveau 1 apparaît ce tour et un palier (étage 3) est atteint : la tourelle tire déjà, avec +1 dégât
+  const S = fresh(); S.phase = "D_main"; S.supports = {}; S.floors = 2; S.rocketPts = 0; S.workersBase = 3;
+  S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0;
+  const c = { id: 95, name: "Béhémoth", lane: "N", u: 0, k: 2, hp: 5, acted: false };
+  S.creatures.push(c);
+  ok(SF.apply(S, "colonie", "build") === "" && S.phase === "D_fire", "construction et fusée d'abord, puis phase de tirs");
+  ok(S.floors === 3 && S.supports["1,1"] === 1 && S.supports["-1,1"] === 1, "étage 3 atteint, supports de niveau 1 posés ce tour");
+  ok(SF.turretDmg(S, 1) === 2 && SF.supportTargets(S, "1,1").includes(c), "la nouvelle tourelle a déjà le bonus du palier (2 dégâts) et vise le Béhémoth");
+  const hp = c.hp; SF.apply(S, "colonie", "fire", { sk: "1,1", id: 95 });
+  ok(c.hp === hp - 2, "tir de la nouvelle tourelle : −2");
+  ok(SF.apply(S, "colonie", "endD") === "" && ["A_start", "A_famine"].includes(S.phase), "fin du tour : tirs restants automatiques, puis tour de l'essaim");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

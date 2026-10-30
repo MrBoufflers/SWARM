@@ -762,9 +762,10 @@ const SF = (() => {
       fire(S, sk, cands[0].id);
     }
   }
+  // Fin du tour de la colonie (ordre décidé par Oni le 30/10/2026) : chantiers et pose des bâtiments, fusée (étages, paliers),
+  // nouveaux supports, PUIS tirs des tourelles (phase D_fire), puis pioches. Les supports apparus et les paliers atteints
+  // pendant le tour comptent donc pour les tirs.
   function endDefenderTurn(S) {
-    // tirs restants (automatiques)
-    autoFire(S);
     // chantiers et débordement
     let rocket = totalPoints(S) - allocated(S);
     for (const lane of LANES) {
@@ -833,6 +834,10 @@ const SF = (() => {
       if (S.floors === FLOORS) { fx(S, { t: "liftoff" }); S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
     }
     placeSupports(S);
+    S.phase = "D_fire"; // les tourelles tirent maintenant (choix de la colonie, ou tirs automatiques)
+  }
+  function endColonyTurn(S) {
+    autoFire(S); // tirs restants (automatiques)
     // sortilèges de soutien non joués : défaussés
     const sup = S.spells.filter(s => SPELLS[s].kind === "sup");
     if (sup.length) { S.spellDiscard.push(...sup); S.spells = S.spells.filter(s => SPELLS[s].kind !== "sup"); }
@@ -941,10 +946,11 @@ const SF = (() => {
       if (v < 0 || allocated(S) + a.d > totalPoints(S)) return false;
       S.alloc[a.lane] = v; return true;
     } },
-    toFire: { phase: ["D_main"], run: S => { S.phase = "D_fire"; return true; } },
+    build: { phase: ["D_main"], run: S => { endDefenderTurn(S); return true; } }, // construction et fusée, puis tirs
+    toFire: { phase: ["D_main"], run: S => { endDefenderTurn(S); return true; } }, // ancien nom (pages encore ouvertes)
     fire: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && isInt(a.id) && fire(S, a.sk, a.id) },
     autoFire: { phase: ["D_fire"], run: S => { autoFire(S); return true; } },
-    endD: { phase: ["D_fire"], run(S) { endDefenderTurn(S); openFamine(S); return true; } },
+    endD: { phase: ["D_fire"], run(S) { endColonyTurn(S); openFamine(S); return true; } },
     placeAt: { phase: ["D_place"], run(S, a) { if (!placeTile(S, a.k)) return false; openFamine(S); return true; } },
   };
   // renvoie "" si l'action est appliquée, sinon la raison du refus (S n'est pas modifié dans ce cas)
@@ -1000,7 +1006,7 @@ const SF = (() => {
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
     clairvoyance, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, moveLane, startAttacks, attackOrder, endAttackerTurn,
-    useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, targetable, resolveTarget,
+    useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };
 })();

@@ -88,7 +88,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (ph === 'Tour de la colonie') {
       if (!(await page.$('.tcard.sel'))) { if (await click(page, '[data-a="tile"]:not([disabled])') && await click(page, '[data-a="startCh"]')) continue; }
       for (let i = 0; i < 4; i++) { const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; await bs[i].click(); await sleep(20); await idle(page); }
-      await click(page, '[data-a="toFire"]'); continue;
+      await click(page, '[data-a="build"]'); continue;
     }
     if (ph === 'Pose des bâtiments') { if (await click(page, '[data-a="placeAt"]')) continue; console.log('pose impossible'); break; }
     if (ph === 'Tirs des supports') { if (await click(page, '[data-a="support"]') && await click(page, '[data-a="fireAt"]')) continue; await click(page, '[data-a="endD"]'); continue; }

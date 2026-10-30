@@ -28,8 +28,8 @@
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
     A_attack: ["essaim", "Attaques", "Chaque case avance d'un bloc puis ses créatures attaquent, dans l'ordre de votre choix ; les cases les plus proches de la fusée d'abord."],
-    D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs."],
-    D_fire: ["colonie", "Tirs des supports", "Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
+    D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
+    D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
   };
   const who = () => SF.actor(S) || "essaim";
@@ -147,7 +147,7 @@
       }
     } else if (ph === "D_main") {
       body = spellBox("sup") + (UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
-      acts = `<button data-a="toFire" class="primary">Passer aux tirs</button>`;
+      acts = `<button data-a="build" class="primary">Construire, puis passer aux tirs</button>`;
     } else if (ph === "D_place") {
       const p = S.toPlace[0];
       body = p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
@@ -160,7 +160,7 @@
         const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && !S.firedSupports.includes(k) && SF.supportTargets(S, k).length);
         body = ready.length ? `<p class="hint">Tourelles prêtes : cliquez une tourelle surlignée sur le plateau.</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
       }
-      acts = `<button data-a="autoFire">Tirs automatiques</button><button data-a="endD" class="primary">Terminer le tour (construction et fusée)</button>`;
+      acts = `<button data-a="autoFire">Tirs automatiques</button><button data-a="endD" class="primary">Terminer le tour</button>`;
     }
     return `<section class="phase ${p[0]}"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
       <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
@@ -409,7 +409,7 @@
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 6 · 9 · 12 · 15 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance d'un bloc, case par case, sans diagonale, jusqu'à la première tuile ou la fusée (les plus proches de la fusée d'abord) ; ses créatures attaquent dans l'ordre choisi, et si la tuile tombe, tout le bloc avance jusqu'à la suivante (une attaque contre la fusée tue un seul travailleur). Mobilité : une fois par tour, une aggro peut passer à l'entrée d'une lane voisine. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite rapporte autant de biomasse que sa durée de construction (1, 2 ou 3 ; 1 pour une haie de départ) ; un support qui tombe, 1.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, puis 4, 5 et 6 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, la fusée et l'apparition des nouveaux supports) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
@@ -485,7 +485,7 @@
         UI.spell = null; UI.picks = []; UI.recoHand = null;
         return play("spell", { i, arg });
       }
-      case "toFire": UI.sel = null; UI.spell = null; return play("toFire");
+      case "build": UI.sel = null; UI.spell = null; return play("build");
       case "fireAt": if (UI.support) { const sk = UI.support; UI.support = null; return play("fire", { sk, id: Number(d.id) }); } break;
       case "autoFire": UI.support = null; return play("autoFire");
       case "endD": return play("endD");
