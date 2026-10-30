@@ -27,3 +27,12 @@ out = ROOT / "dist/swarm-steel-jeu.html"
 out.parent.mkdir(exist_ok=True)
 out.write_text(page, encoding="utf-8")
 print("ok", out.relative_to(ROOT), len(page) // 1024, "Ko")
+
+# « --site » : dossier de publication Netlify, recréé à neuf à chaque build (page servie à la racine)
+if "--site" in sys.argv:
+    import shutil
+    site = ROOT / "site"
+    shutil.rmtree(site, ignore_errors=True)
+    site.mkdir()
+    (site / "index.html").write_text(page, encoding="utf-8")
+    print("ok", (site / "index.html").relative_to(ROOT))
