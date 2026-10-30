@@ -379,6 +379,12 @@ const SF = (() => {
       log(S, "essaim", `${c.name} avance sans attaquer.`);
       return;
     }
+    const auras = [];
+    if (caseMates(S, c).some(o => o.name === "Hurleur")) auras.push("Fureur");
+    if (S.upgrades.soutien.r1 === "B" && caseMates(S, c).some(o => CREATURES[o.name].type === "soutien")) auras.push("Griffes");
+    if (frenzyTarget(S, c)) auras.push("Frénésie");
+    if (hasPercee(S, c)) auras.push("Percée");
+    if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
     let target = w.target;
     if (chosenTarget && hasMobility(S, c) && laneTiles(S, c.lane).includes(chosenTarget)) target = chosenTarget;
     const dmg = effAtq(S, c);
@@ -448,7 +454,9 @@ const SF = (() => {
     for (const c of S.creatures) { c.new = false; c.acted = false; }
     // Réincarnation
     for (const r of S.reincQueue) {
-      S.creatures.push(makeCreature(S, r.name, r.lane, r.u));
+      const nc = makeCreature(S, r.name, r.lane, r.u);
+      S.creatures.push(nc);
+      fx(S, { t: "reinc", id: nc.id });
       log(S, "essaim", `${r.name} se réincarne à l'entrée de la lane ${LANE_NAME[r.lane]}.`);
     }
     S.reincQueue = [];
@@ -466,6 +474,7 @@ const SF = (() => {
       for (let i = 0; i < 2; i++) if (S.piles[1].length) S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ });
     }
     S.budget = Math.max(0, S.biomass - S.famine);
+    fx(S, { t: "draw", n: S.handA.length });
     S.phase = "A_deploy";
     log(S, "essaim", `Palier ${tier(S) + 1} : ${S.handA.length} cartes, budget ${S.budget}.`);
   }
@@ -495,6 +504,7 @@ const SF = (() => {
     return true;
   }
   function revealLane(S, lane) {
+    fx(S, { t: "vision", lane, keys: laneTiles(S, lane).filter(k => S.tiles[k].camo && !S.tiles[k].revealed) });
     for (const k of laneTiles(S, lane)) if (S.tiles[k].camo && !S.tiles[k].revealed) { S.tiles[k].revealed = true; if (S.tiles[k].trap) S.tiles[k].disarmed = true; log(S, "essaim", `Vision : tuile camouflée révélée (${S.tiles[k].name}).`); }
   }
   function endDeploy(S) {
@@ -534,6 +544,7 @@ const SF = (() => {
     S.reserve -= left;
     S.invest = S.invest || {};
     S.invest[type + ":" + slot] = invested(S, type, slot) + n;
+    fx(S, { t: "invest", type, slot, got: invested(S, type, slot), cost: nodeCost(slot) });
     log(S, "essaim", `${n} biomasse investie dans ${TREES[type][slot][0]} (${invested(S, type, slot)}/${nodeCost(slot)}).`);
     if (invested(S, type, slot) >= nodeCost(slot)) { delete S.invest[type + ":" + slot]; acquire(S, type, slot); }
     return true;
@@ -542,6 +553,7 @@ const SF = (() => {
     const u = S.upgrades[type];
     const before = S.creatures.filter(c => CREATURES[c.name].type === type).map(c => [c, maxHp(S, c.name)]);
     if (slot.endsWith("1")) { u.r1 = slot[0]; addPile(S, 2, type); } else { u.r2 = slot[0]; addPile(S, 3, type); }
+    fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
     if (type === "soutien" && slot === "C2") log(S, "essaim", "Clairvoyance : les tuiles camouflées sont visibles tant qu'un soutien est en jeu.");
@@ -554,6 +566,7 @@ const SF = (() => {
     const i = LANES.indexOf(c.lane), j = LANES.indexOf(toLane);
     if (!((i + 1) % 4 === j || (i + 3) % 4 === j)) return false;
     if (laneCount(S, toLane) >= capOf(S)) return false;
+    fx(S, { t: "raid", id, lane: toLane });
     c.lane = toLane; c.u = 0; c.k = 4; S.raidUsed = true;
     log(S, "essaim", `Raid : ${c.name} passe à l'entrée de la lane ${LANE_NAME[toLane]}.`);
     return true;
@@ -565,7 +578,7 @@ const SF = (() => {
     // auras de soin
     for (const c of S.creatures) {
       const v = soinValue(S, c), m = maxHp(S, c.name);
-      if (v && c.hp < m) { c.hp = Math.min(m, c.hp + v); log(S, "essaim", `${c.name} regagne ${v} PV.`); }
+      if (v && c.hp < m) { const before = c.hp; c.hp = Math.min(m, c.hp + v); fx(S, { t: "cheal", id: c.id, n: c.hp - before, hp: c.hp + bonusHp(S, c) }); log(S, "essaim", `${c.name} regagne ${v} PV.`); }
     }
     // sortilèges offensifs non joués : défaussés
     const off = S.spells.filter(s => SPELLS[s].kind === "off");
@@ -747,16 +760,18 @@ const SF = (() => {
     S.rocketPts += Math.max(0, rocket);
     while (S.floors < FLOORS && S.rocketPts >= floorCost(S)) {
       S.rocketPts -= floorCost(S); S.floors += 1; S.workersBase += 1;
+      fx(S, { t: "floor", n: S.floors });
       log(S, "colonie", `Étage ${S.floors} de la fusée achevé : +1 travailleur.`);
       if (S.floors === 3) { S.techBonus += 2; log(S, "colonie", "Palier 3 : +2 technologies permanentes."); }
       if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
       if (S.floors === 9) {
+        fx(S, { t: "nuke", ids: S.creatures.map(c => c.id) });
         for (const c of S.creatures) S.piles[CREATURES[c.name].lvl].push(c.name);
         for (const l of [1, 2, 3]) shuffle(S.piles[l]);
         log(S, "colonie", `Palier 9 · Nuke : ${S.creatures.length} créature${S.creatures.length > 1 ? "s" : ""} détruite${S.creatures.length > 1 ? "s" : ""}.`);
         S.creatures = [];
       }
-      if (S.floors === FLOORS) { S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
+      if (S.floors === FLOORS) { fx(S, { t: "liftoff" }); S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
     }
     placeSupports(S);
     // sortilèges de soutien non joués : défaussés

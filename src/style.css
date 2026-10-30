@@ -234,3 +234,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .spell.card .i { margin-top: 2px; }
 .spell.card small.when { color: var(--c); font-weight: 600; }
 .spell.card small.lost { font-size: .72rem; }
+
+/* animations (lot 3) */
+#fx .float.aura { color: var(--soutien); font-size: .78rem; }
+#fx .float.up { color: var(--ink); font-size: .85rem; }
+#fx .nuke { background: radial-gradient(circle, #fff 0%, var(--hot) 60%, transparent 100%); border-radius: 12px; z-index: 4; }

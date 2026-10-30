@@ -26,7 +26,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   };
   const phase = () => page.evaluate(() => (document.querySelector('.ph-head b') || document.querySelector('.ho-card h2') || {}).textContent);
   const shots = {};
-  for (let step = 0; step < 300; step++) {
+  for (let step = 0; step < 800; step++) {
     if (await page.$('.banner.win')) break;
     if (await click('[data-a="local"]')) continue;
     if (await click('[data-a="reveal"]')) continue;
