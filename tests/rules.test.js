@@ -258,5 +258,20 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   S.upgrades.soutien.r2 = "C"; S.creatures.push({ id: 90, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2 });
   ok(SF.viewFor(S, "essaim").tiles["0,2"].name === "Piège", "Clairvoyance : la tuile camouflée est visible pour l'essaim");
 }
+// 26. événements visuels (animations) : produits seulement à la demande, et filtrés pour l'essaim
+{
+  const S = fresh(); SF.attackerDraw(S);
+  SF.apply(S, "essaim", "endDeploy");
+  ok(!("fx" in S), "sans demande, le moteur ne garde aucun événement dans l'état");
+  const T = fresh(); T.tiles["1,2"] = SF.tileStats("Muraille", 1, 2); T.tiles["0,2"] = SF.tileStats("Piège", 0, 2);
+  const c = { id: 50, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(c);
+  T.phase = "A_attack"; T.fx = [];
+  SF.apply(T, "essaim", "act", { id: 50 });
+  ok(T.fx.some(e => e.t === "move") && T.fx.some(e => e.t === "hit" && e.k === "0,2"), "déplacement (C3) puis attaque du piège en C2");
+  ok(T.fx.some(e => e.t === "dmg" && e.id === 50) && T.fx.some(e => e.t === "die" && e.id === 50), "piège et Épines : dégâts puis mort de la créature");
+  const hidden = SF.fxFor(T, "essaim", [{ t: "hit", id: null, k: "1,2", n: 1, hp: 3 }]);
+  ok(hidden[0].hp === null && hidden[0].n === null, "PV d'une tuile camouflée encore cachée non transmis à l'essaim");
+  ok(SF.fxFor(T, "colonie", [{ t: "hit", id: null, k: "1,2", n: 1, hp: 3 }])[0].hp === 3, "la colonie reçoit les PV de ses tuiles");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

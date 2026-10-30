@@ -130,6 +130,9 @@ const SF = (() => {
   let RNG = Math.random;
   const setRng = f => { RNG = f; };
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(RNG() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  // Événements visuels (animations) : S.fx n'existe que pendant une action, créé et vidé par l'appelant
+  // (interface locale ou serveur). Purement descriptif : n'a aucun effet sur les règles.
+  const fx = (S, e) => { if (S.fx) S.fx.push(e); };
   const log = (S, who, msg) => { S.log.unshift({ r: S.round, who, msg }); if (S.log.length > 250) S.log.pop(); };
 
   // ------------------------------------------------------------------ mise en place
@@ -250,6 +253,7 @@ const SF = (() => {
     delete S.tiles[k];
     if (t.name !== "Mur de départ") S.tileDiscard.push(t.name);
     S.biomass += 1;
+    fx(S, { t: "tileDown", k });
     log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +1 biomasse.`);
     checkSupportsFall(S);
   }
@@ -259,6 +263,7 @@ const SF = (() => {
         log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe : +1 biomasse.`);
         delete S.supports[sk];
         S.biomass += 1;
+        fx(S, { t: "tileDown", k: sk });
       }
     }
   }
@@ -300,6 +305,7 @@ const SF = (() => {
     const dead = S.creatures.filter(c => c.hp + bonusHp(S, c) <= 0);
     for (const c of dead) {
       S.creatures.splice(S.creatures.indexOf(c), 1);
+      fx(S, { t: "die", id: c.id });
       log(S, "colonie", `${c.name} est détruit.`);
       if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "C" && !S.reincUsed) {
         S.reincUsed = true;
@@ -317,6 +323,7 @@ const SF = (() => {
   }
   function damageCreature(S, c, n, why) {
     c.hp -= n;
+    fx(S, { t: "dmg", id: c.id, n, hp: c.hp + bonusHp(S, c) });
     log(S, "colonie", `${c.name} subit ${n} dégât${n > 1 ? "s" : ""}${why ? " (" + why + ")" : ""}.`);
   }
   // cible imposée par Protection puis Leurre ; renvoie null si la créature est intouchable (Furtivité)
@@ -357,6 +364,7 @@ const SF = (() => {
     if (c.acted) return;
     c.acted = true;
     const w = walk(S, c), from = cellName(c.u, c.k);
+    if (c.u !== w.stand[0] || c.k !== w.stand[1]) fx(S, { t: "move", id: c.id, lane: c.lane, from: [c.u, c.k], to: [w.stand[0], w.stand[1]] });
     c.u = w.stand[0]; c.k = w.stand[1];
     const to = cellName(c.u, c.k), tgt = w.target === "fusee" ? "la fusée" : `${cellName(...toLocal(c.lane, ...parse(w.target)))}`;
     log(S, "essaim", `${c.name} (lane ${LANE_NAME[c.lane]}) : ${from === to ? "reste en " + from : from + " → " + to}, devant ${tgt}.`);
@@ -369,6 +377,7 @@ const SF = (() => {
     const dmg = effAtq(S, c);
     if (target === "fusee") {
       S.workersBase -= 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
+      fx(S, { t: "rocket", id: c.id });
       log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
       if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
       return;
@@ -388,18 +397,21 @@ const SF = (() => {
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
     }
     if (S.stase.includes(lane)) {
+      fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
       log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
     } else {
       const loss = t.ren ? Math.floor(dmg / t.ren) : dmg;
       const capacity = t.ren ? t.hp * t.ren : t.hp;
       const excess = dmg - capacity;
       t.hp -= loss;
+      fx(S, { t: "hit", id: c.id, k: tk, n: Math.min(loss, t.hp + loss), hp: Math.max(0, t.hp) });
       log(S, "essaim", `${c.name} inflige ${dmg} à ${t.name} (−${Math.min(loss, t.hp + loss)} PV).`);
       if (primary && caseMates(S, c).some(o => o.name === "Sporeur")) {
         for (const [a, b] of neighbors(x, y)) {
           const nk = key(a, b), nt = S.tiles[nk];
           if (nt && !S.stase.includes(cellLane(a, b))) {
             nt.hp -= nt.ren ? Math.floor(1 / nt.ren) : 1;
+            fx(S, { t: "hit", id: null, k: nk, n: nt.ren ? 0 : 1, hp: Math.max(0, nt.hp) });
             if (nt.hp <= 0) destroyTile(S, nk, "spores");
           }
         }
@@ -412,6 +424,7 @@ const SF = (() => {
           const w = walk(S, ghost);
           if (w.target === "fusee") {
             S.workersBase -= 1;
+            fx(S, { t: "rocket", id: c.id });
             log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
             if (S.workersBase <= 0) S.winner = "essaim";
           } else hitTile(S, c, w.target, excess, false);
@@ -460,6 +473,7 @@ const SF = (() => {
     S.handA.splice(i, 1);
     const c = makeCreature(S, card.name, lane, u);
     S.creatures.push(c);
+    fx(S, { t: "deploy", id: c.id });
     log(S, "essaim", `${card.name} déployé${card.free ? " gratuitement" : ""} en lane ${LANE_NAME[lane]}, colonne ${COLS[u + 2]}.`);
     if (card.name === "Sapeur" && S.chantiers[lane].length) {
       const ch = S.chantiers[lane].shift();
@@ -644,6 +658,7 @@ const SF = (() => {
     if (!c || !supportTargets(S, sk).includes(c)) return false;
     const t = resolveTarget(S, c);
     S.firedSupports.push(sk);
+    fx(S, { t: "shot", sk, id: t.id });
     damageCreature(S, t, turretDmg(S, lvl), `tourelle de niveau ${lvl}`);
     killCheck(S);
     return true;
@@ -857,7 +872,19 @@ const SF = (() => {
     return V;
   }
 
+  // événements visuels envoyés à un camp : les PV d'une tuile camouflée encore cachée ne sont pas transmis à l'essaim
+  function fxFor(S, side, events) {
+    return events.map(e => {
+      if (side === "essaim" && e.t === "hit") {
+        const t = S.tiles[e.k];
+        if (t && t.camo && !t.revealed && !clairvoyance(S)) return { ...e, n: null, hp: null };
+      }
+      return e;
+    });
+  }
+
   return {
+    fxFor,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

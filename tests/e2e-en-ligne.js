@@ -18,6 +18,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await ctx.addInitScript(POLL => { window.SF_POLL_MS = POLL; }, process.env.E2E_URL ? 400 : 150);
     const page = await ctx.newPage();
     page.on('pageerror', e => errs.push(side + ' : ' + e.message));
+    page.on('console', m => { if (m.type() === 'error' && m.text().startsWith('animation')) errs.push(side + ' : ' + m.text()); });
+    await page.addInitScript((() => { window.__fx = {}; new MutationObserver(ms => { for (const m of ms) if (m.target.id === 'fx') for (const n of m.addedNodes) if (n.classList) { const c = n.classList.contains('ghost') ? 'déplacement' : n.classList.contains('shot') ? 'tir' : n.classList.contains('turn-banner') ? 'bandeau' : n.classList.contains('float') ? 'chiffre' : 'autre'; window.__fx[c] = (window.__fx[c] || 0) + 1; } }).observe(document, { childList: true, subtree: true }); }));
     // contrôle anti-triche : chaque réponse du serveur reçue par ce camp ne contient rien de caché
     page.on('response', async res => {
       if (!res.url().includes('/api/')) return;
@@ -38,8 +40,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     await page.goto(URL0);
     return page;
   }
-  const idle = async page => { for (let i = 0; i < 100; i++) { if ((await page.evaluate(() => document.body.dataset.busy)) !== '1') return; await sleep(20); } };
+  const idle = async page => { for (let i = 0; i < 600; i++) { if ((await page.evaluate(() => document.body.dataset.busy !== '1' && document.body.dataset.anim !== '1'))) return; await sleep(20); } };
   const click = async (page, sel) => {
+    await idle(page);
     const el = await page.$(sel); if (!el) return false;
     await el.evaluate(e => e.scrollIntoView({ block: 'center' }));
     const top = await el.evaluate(e => { const r = e.getBoundingClientRect(); const h = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return h === e || e.contains(h); });
@@ -95,7 +98,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await sleep(400);
   const fin = await pE.evaluate(() => (document.querySelector('.banner.win b') || {}).textContent || 'en cours');
   const finC = await pC.evaluate(() => (document.querySelector('.banner.win b') || {}).textContent || 'en cours');
-  const ok = !errs.length && !leaks.length && !covered && started && pre === code && resumed === true && fin !== 'en cours' && fin === finC;
+  const fxE = await pE.evaluate(() => window.__fx), fxC = await pC.evaluate(() => window.__fx);
+  console.log('animations jouées — essaim :', JSON.stringify(fxE), '| colonie :', JSON.stringify(fxC));
+  const ok = fxE['déplacement'] > 0 && fxC['déplacement'] > 0 && fxC['bandeau'] > 0 && fxE['bandeau'] > 0 && !errs.length && !leaks.length && !covered && started && pre === code && resumed === true && fin !== 'en cours' && fin === finC;
   console.log('erreurs :', errs.length ? errs : 'aucune', '| fuites :', leaks.length ? [...new Set(leaks)] : 'aucune', '| boutons masqués :', covered,
     '| reprise après rechargement :', resumed, '| fin (essaim / colonie) :', fin, '/', finC, '| phases vues :', Object.keys(seen).join(', '));
   await browser.close(); if (server) server.close();
