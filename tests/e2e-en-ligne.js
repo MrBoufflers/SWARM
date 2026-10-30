@@ -19,7 +19,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const page = await ctx.newPage();
     page.on('pageerror', e => errs.push(side + ' : ' + e.message));
     page.on('console', m => { if (m.type() === 'error' && m.text().startsWith('animation')) errs.push(side + ' : ' + m.text()); });
-    await page.addInitScript((() => { window.__fx = {}; new MutationObserver(ms => { for (const m of ms) if (m.target.id === 'fx') for (const n of m.addedNodes) if (n.classList) { const c = n.classList.contains('ghost') ? 'déplacement' : n.classList.contains('shot') ? 'tir' : n.classList.contains('turn-banner') ? 'bandeau' : n.classList.contains('float') ? 'chiffre' : 'autre'; window.__fx[c] = (window.__fx[c] || 0) + 1; } }).observe(document, { childList: true, subtree: true }); }));
+    await page.addInitScript((() => { window.__fx = {}; new MutationObserver(ms => { for (const m of ms) if (m.target.id === 'fx') for (const n of m.addedNodes) if (n.classList) { const c = n.classList.contains('ghost') ? 'déplacement' : n.classList.contains('shot') ? 'tir' : n.classList.contains('spell-banner') ? 'sortilège' : n.classList.contains('turn-banner') ? 'bandeau' : n.classList.contains('float') ? 'chiffre' : 'autre'; window.__fx[c] = (window.__fx[c] || 0) + 1; } }).observe(document, { childList: true, subtree: true }); }));
     // contrôle anti-triche : chaque réponse du serveur reçue par ce camp ne contient rien de caché
     page.on('response', async res => {
       if (!res.url().includes('/api/')) return;

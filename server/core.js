@@ -36,7 +36,9 @@ const asInt = v => (v === undefined || v === null || v === "" ? undefined : Numb
 const out = (status, json) => ({ status, json });
 const err = (status, error) => out(status, { error });
 
-async function handle(store, method, route, query, body) {
+async function handle(rawStore, method, route, query, body) {
+  // parties enregistrées avec d'anciennes règles : mises à jour à la lecture (SF.migrate)
+  const store = { ...rawStore, async get(code) { const r = await rawStore.get(code); if (r && r.data && r.data.S) SF.migrate(r.data.S); return r; } };
   body = body && typeof body === "object" ? body : {};
   query = query || {};
   if (method === "POST" && route === "create") {
