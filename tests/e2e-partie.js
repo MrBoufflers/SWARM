@@ -37,7 +37,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     if (ph === 'Déploiement') { if (!(await page.$('.ccard.sel'))) { if (await click('[data-a="card"]:not([disabled])') && await click('[data-a="deployAt"]')) continue; } await click('[data-a="endDeploy"]'); continue; }
     if (ph === 'Améliorations') { await click('[data-a="invest"][data-n="99"]'); await click('[data-a="toAttacks"]'); continue; }
     if (ph === 'Réaction de la colonie') { if (await click('[data-a="spell"]')) { if (!(await click('[data-a="spellArg"]'))) await click('[data-a="spellCancel"]'); } await click('[data-a="reactDone"]'); continue; }
-    if (ph === 'Attaques') { if (await click('[data-a="mobTarget"]')) continue; if (await click('[data-a="act"]')) continue; await click('[data-a="endA"]'); continue; }
+    if (ph === 'Attaques') { if (await click('[data-a="ordGo"]')) continue; if (await click('[data-a="act"]')) continue; await click('[data-a="endA"]'); continue; }
     if (ph === 'Tour de la colonie') {
       if (!(await page.$('.tcard.sel'))) { if (await click('[data-a="tile"]:not([disabled])') && await click('[data-a="startCh"]')) continue; }
       for (let i = 0; i < 4; i++) { await calm(); const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; await bs[i].click(); await new Promise(r => setTimeout(r, 20)); }

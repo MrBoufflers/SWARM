@@ -16,6 +16,9 @@ Repris du prototype jouable et validés par Oni :
 - **Fusée** : un étage coûte 3, 4, 5 puis 6 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
+- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc, et si la tuile tombe, le bloc suit.
+- **Paliers de l'essaim** : décalés de +3 (départ 3, puis 7, 10, 13 et 16 de biomasse).
+- **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine. **Raid** devient **Percée** (aggro, rang 2) : les aggros gagnent la percée.
 
 ## Le jeu en bref
 
@@ -133,7 +136,7 @@ Remettez les cartes non jouées dans leurs pioches et mélangez.
 
 ### 6. Fin de tour : attaques
 
-La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis, dans l'ordre de votre choix, **chaque créature se déplace puis attaque, l'une après l'autre** (voir Déplacement et combat). Les créatures posées ce tour attaquent aussi.
+La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis **chaque case avance d'un bloc et ses créatures attaquent** (voir Déplacement et combat), les cases les plus proches de la fusée d'abord. Les créatures posées ce tour attaquent aussi.
 
 ## Déplacement et combat
 
@@ -152,12 +155,16 @@ Exemple depuis la colonne A : A3 → B3 → B2 → C2 → C1 → fusée. Depuis 
 
 Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coin de support, donc la créature de la colonne A fait d'abord un pas de côté vers B3.
 
-### Déplacer puis attaquer
+### Déplacer puis attaquer : les blocs
 
-1. **Déplacement** : la créature avance sur son chemin en traversant librement les cases vides, jusqu'à la première tuile (ou jusqu'à la fusée).
-2. **Attaque** : elle inflige son ATQ, plus les bonus des auras des soutiens présents sur sa case, à cette tuile. Les soutiens n'attaquent jamais : ils avancent avec l'essaim, s'arrêtent devant la tuile et ne subissent donc pas d'Épines.
+Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 
-Les créatures agissent **une par une**, dans l'ordre choisi par l'essaim : une créature qui joue après une autre peut donc traverser un mur que la précédente vient de détruire. Une créature dotée de **Mobilité** choisit sa cible parmi toutes les tuiles de sa lane au lieu de suivre l'escalier.
+1. **Ordre** : dans une lane, les cases les plus proches de la fusée agissent d'abord ; un bloc qui arrive sur une case déjà occupée fusionne avec elle.
+2. **Déplacement** : le bloc avance sur son chemin en traversant librement les cases vides, jusqu'à la première tuile (ou jusqu'à la fusée).
+3. **Attaque** : les créatures du bloc frappent **une par une, dans l'ordre choisi par l'essaim**. Chacune inflige son ATQ, plus les bonus des auras des soutiens de sa case. Les soutiens n'attaquent jamais : ils avancent avec le bloc et ne subissent donc pas d'Épines.
+4. **Le bloc suit** : si la tuile tombe, tout le bloc avance jusqu'à la tuile suivante, et les créatures qui n'ont pas encore frappé frappent celle-ci.
+
+**Mobilité** : avant les attaques, une créature qui a la Mobilité peut, une fois par tour, quitter sa case pour l'entrée d'une **lane voisine**, plafond de population respecté.
 
 ### Dégâts sur une tuile
 
@@ -359,10 +366,10 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Férocité | +1 ATQ |
-| 1 | Côté B | Mobilité | choisit sa cible parmi toutes les tuiles de sa lane au lieu de suivre l'escalier |
+| 1 | Côté B | Mobilité | une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté) |
 | 2 | Côté A (après Férocité) | Carnage | +2 ATQ (total +3) |
 | 2 | Centre | Déploiement | à chaque tour, piochez 2 cartes de niveau 1 supplémentaires et déployez-les gratuitement, plafond de population respecté † |
-| 2 | Côté B (après Mobilité) | Raid | une fois par tour, avant son déplacement, une créature aggro peut passer dans une lane voisine (plafond de population respecté) |
+| 2 | Côté B (après Mobilité) | Percée | les créatures aggro gagnent la **percée** |
 
 #### Tank
 
@@ -395,10 +402,10 @@ Les chiffres de référence des deux camps, à garder sous la main.
 | Palier | Biomasse | Cartes piochées (N1 / N2 / N3) | Plafond par lane |
 | --- | --- | --- | --- |
 | 1 | départ (3) | 3 / 0 / 0 | 1 |
-| 2 | 4 et plus | 3 / 2 / 0 | 2 |
-| 3 | 7 et plus | 4 / 2 / 1 | 3 |
-| 4 | 10 et plus | 4 / 3 / 2 | 4 |
-| 5 | 13 et plus | 4 / 3 / 3 | 5 |
+| 2 | 7 et plus | 3 / 2 / 0 | 2 |
+| 3 | 10 et plus | 4 / 2 / 1 | 3 |
+| 4 | 13 et plus | 4 / 3 / 2 | 4 |
+| 5 | 16 et plus | 4 / 3 / 3 | 5 |
 
 Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalogue.
 
@@ -419,7 +426,7 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | 3. Déployer | 3. Affecter les travailleurs |
 | 4. Réserve et améliorations | 4. Tirs |
 | 5. Défausse | 5. Chantiers, débordement, fusée |
-| 6. Sorts offensifs de la colonie, puis attaques une par une | 6. Supports, pioche de tuiles, pioche de sorts |
+| 6. Sorts offensifs de la colonie, puis attaques bloc par bloc | 6. Supports, pioche de tuiles, pioche de sorts |
 
 ## Points provisoires de cette version
 

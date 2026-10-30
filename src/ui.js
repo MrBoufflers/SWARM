@@ -19,7 +19,7 @@
   // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
   let NET = null;
   let busy = false;
-  let UI = { sel: null, selCreature: null, spell: null, picks: [], support: null, mob: null, help: false, recoHand: null };
+  let UI = { sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], help: false, recoHand: null };
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
@@ -27,7 +27,7 @@
     A_deploy: ["essaim", "Déploiement", "Choisissez une carte, puis une case d'entrée (bord du plateau) dans une lane. Vous pouvez aussi investir votre budget dans une amélioration (panneau Essaim). Le budget non dépensé ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
-    A_attack: ["essaim", "Attaques", "Chaque créature se déplace puis attaque, une par une, dans l'ordre de votre choix."],
+    A_attack: ["essaim", "Attaques", "Chaque case avance d'un bloc puis ses créatures attaquent, dans l'ordre de votre choix ; les cases les plus proches de la fusée d'abord."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs."],
     D_fire: ["colonie", "Tirs des supports", "Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
@@ -43,7 +43,7 @@
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
   function newGame() { MODE = "local"; S = SF.newGame(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
-  const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, mob: null, help: false, recoHand: null });
+  const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], help: false, recoHand: null });
   function setPhaseHandoff() { // passe la main si le joueur actif change
     const w = who();
     if (S.view !== w) { S.handoff = w; UI = { ...resetUI(), help: UI.help }; }
@@ -132,15 +132,18 @@
       body = spellBox("off");
       acts = `<button data-a="reactDone" class="primary">Terminer la réaction</button>`;
     } else if (ph === "A_attack") {
-      if (UI.mob) {
-        const c = S.creatures.find(o => o.id === UI.mob);
-        body = `<p class="hint">${E(c.name)} a la Mobilité : choisissez sa cible dans la lane ${SF.LANE_NAME[c.lane]}.</p><div class="choices">` +
-          SF.laneTiles(S, c.lane).map(k => `<button data-a="mobTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") +
-          `<button data-a="mobTarget" data-k="" class="primary">Cible normale</button></div>`;
+      const ready = SF.readyCases(S), crOf = k => S.creatures.filter(c => SF.posKey(c) === k && !c.acted);
+      const blockTxt = k => { const cs = crOf(k); return `${posTxt(cs[0])} : ${cs.map(c => c.name + (SF.attacks(c) ? "" : " (avance)")).join(", ")}`; };
+      if (UI.blk && ready.includes(UI.blk)) { // choix de l'ordre d'attaque dans le bloc
+        const att = crOf(UI.blk).filter(SF.attacks);
+        body = `<p class="hint">Bloc ${E(blockTxt(UI.blk))}. Touchez les créatures dans l'ordre où elles attaqueront (les autres suivront).</p><div class="choices">` +
+          att.map(c => { const n = UI.ord.indexOf(c.id); return `<button data-a="ordPick" data-id="${c.id}" class="${n >= 0 ? "on" : ""}">${n >= 0 ? (n + 1) + ". " : ""}${E(c.name)} · ATQ ${SF.effAtq(S, c)} · ${c.hp + SF.bonusHp(S, c)} PV</button>`; }).join("") + `</div>`;
+        acts = `<button data-a="ordGo" class="primary">Attaquer</button><button data-a="ordCancel">Annuler</button>`;
       } else {
-        const order = SF.attackOrder(S);
-        body = order.length ? `<div class="choices">` + order.map(c => `<button data-a="act" data-id="${c.id}">${E(c.name)} · ${posTxt(c)}${SF.attacks(c) ? "" : " · avance"}</button>`).join("") + `</div>` : `<p class="hint">Toutes les créatures ont agi.</p>`;
-        acts = (order.length ? `<button data-a="actAll">Tout résoudre (les plus avancées d'abord)</button>` : "") + `<button data-a="endA" class="primary"${order.length ? " disabled" : ""}>Fin du tour de l'essaim</button>`;
+        const waiting = [...new Set(S.creatures.filter(c => !c.acted).map(SF.posKey))].filter(k => !ready.includes(k));
+        body = ready.length ? `<p class="hint">Chaque case avance d'un bloc ; dans une lane, les cases les plus proches de la fusée agissent d'abord.</p><div class="choices">` + ready.map(k => `<button data-a="act" data-k="${k}">${E(blockTxt(k))}</button>`).join("") + `</div>` +
+          (waiting.length ? `<p class="small">En attente : ${waiting.map(k => E(blockTxt(k))).join(" · ")}</p>` : "") : `<p class="hint">Toutes les créatures ont agi.</p>`;
+        acts = (ready.length ? `<button data-a="actAll">Tout résoudre (les plus avancées d'abord)</button>` : "") + `<button data-a="endA" class="primary"${ready.length ? " disabled" : ""}>Fin du tour de l'essaim</button>`;
       }
     } else if (ph === "D_main") {
       body = spellBox("sup") + (UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
@@ -310,9 +313,9 @@
         ["mobilite", "furtivite"].map(v => `<button data-a="instinct" data-id="${c.id}" data-v="${v}" class="${c.instinct === v ? "on" : ""}">${v === "mobilite" ? "Mobilité" : "Furtivité"}</button>`).join("") +
         mates.map(m => `<button data-a="instTarget" data-id="${c.id}" data-v="${m.id}" class="${c.instinctTarget === m.id ? "on" : ""}">→ ${E(m.name)}</button>`).join("") + `</div>`;
     }
-    if (S.view === "essaim" && S.phase === "A_upgrade" && b.type === "aggro" && S.upgrades.aggro.r2 === "B" && !S.raidUsed) {
+    if (S.view === "essaim" && S.phase === "A_upgrade" && SF.hasMobility(S, c) && !c.mobUsed) {
       const i = SF.LANES.indexOf(c.lane);
-      actions += `<div class="choices"><span class="lab">Raid :</span>${[SF.LANES[(i + 1) % 4], SF.LANES[(i + 3) % 4]].map(l => `<button data-a="raid" data-id="${c.id}" data-v="${l}">Vers ${SF.LANE_NAME[l]}</button>`).join("")}</div>`;
+      actions += `<div class="choices"><span class="lab">Mobilité :</span>${[SF.LANES[(i + 1) % 4], SF.LANES[(i + 3) % 4]].map(l => `<button data-a="moveLane" data-id="${c.id}" data-v="${l}"${SF.laneCount(S, l) >= SF.capOf(S) ? " disabled" : ""}>Vers ${SF.LANE_NAME[l]}</button>`).join("")}</div>`;
     }
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
       <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${posTxt(c)}</p>
@@ -404,7 +407,7 @@
     return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
       <h2>Règles en bref</h2>
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
-      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 4 · 7 · 10 · 13 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque créature se déplace case par case, sans diagonale, et attaque la première tuile ou la fusée (une attaque contre la fusée tue un seul travailleur). Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite rapporte autant de biomasse que sa durée de construction (1, 2 ou 3 ; 1 pour une haie de départ) ; un support qui tombe, 1.</p>
+      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 7 · 10 · 13 · 16 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance d'un bloc, case par case, sans diagonale, jusqu'à la première tuile ou la fusée (les plus proches de la fusée d'abord) ; ses créatures attaquent dans l'ordre choisi, et si la tuile tombe, tout le bloc avance jusqu'à la suivante (une attaque contre la fusée tue un seul travailleur). Mobilité : une fois par tour, une aggro peut passer à l'entrée d'une lane voisine. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite rapporte autant de biomasse que sa durée de construction (1, 2 ou 3 ; 1 pour une haie de départ) ; un support qui tombe, 1.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, puis 4, 5 et 6 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
       <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent en fin de tour de la colonie sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
@@ -446,24 +449,25 @@
       case "pickHand": { const i = Number(d.i); UI.picks = UI.picks.includes(i) ? UI.picks.filter(p => p !== i) : [...UI.picks, i]; break; }
       case "recoHand": UI.recoHand = Number(d.i); break;
       case "support": UI.support = UI.support === d.k ? null : d.k; break;
-      case "act": {
-        const c = S.creatures.find(o => o.id === Number(d.id));
-        if (!c) break;
-        if (SF.hasMobility(S, c) && SF.laneTiles(S, c.lane).length > 1) { UI.mob = c.id; break; }
-        return play("act", { id: c.id });
+      case "act": { // une case (bloc) : choix de l'ordre si au moins 2 créatures attaquent
+        const att = S.creatures.filter(c => SF.posKey(c) === d.k && !c.acted && SF.attacks(c));
+        if (att.length >= 2) { UI.blk = d.k; UI.ord = []; break; }
+        return play("act", { key: d.k });
       }
+      case "ordPick": { const id = Number(d.id); UI.ord = UI.ord.includes(id) ? UI.ord.filter(x => x !== id) : [...UI.ord, id]; break; }
+      case "ordCancel": UI.blk = null; UI.ord = []; break;
+      case "ordGo": { const key = UI.blk, order = UI.ord; UI.blk = null; UI.ord = []; if (key) return play("act", { key, order }); break; }
       // actions de jeu
       case "famine": return play("famine", { play: d.v === "1" });
       case "draw": return play("draw");
       case "deployAt": if (UI.sel) return play("deploy", { uid: UI.sel, lane: d.l, u: Number(d.u) }, () => { UI.sel = null; }); break;
       case "endDeploy": UI.sel = null; return play("endDeploy");
       case "invest": return play("invest", { t: d.t, s: d.s, n: Number(d.n) });
-      case "raid": return play("raid", { id: Number(d.id), lane: d.v });
+      case "moveLane": return play("moveLane", { id: Number(d.id), lane: d.v });
       case "instinct": return play("instinct", { id: Number(d.id), v: d.v });
       case "instTarget": return play("instTarget", { id: Number(d.id), v: Number(d.v) });
       case "toAttacks": return play("toAttacks");
       case "reactDone": UI.spell = null; return play("reactDone");
-      case "mobTarget": { const id = UI.mob; UI.mob = null; return play("act", { id, target: d.k || null }); }
       case "actAll": return play("actAll");
       case "endA": return play("endA");
       case "startCh": if (UI.sel !== null) return play("startCh", { i: UI.sel, lane: d.l }, () => { UI.sel = null; }); break;
@@ -576,13 +580,13 @@
     b.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }], { duration: FX.skip ? 1 : 1400, fill: "forwards" }).finished.then(() => b.remove(), () => b.remove());
   }
   const STEP = {
-    async move(e) {
-      const g = ghost(e.id); if (!g) return;
+    async move(e) { // tout le bloc glisse ensemble, case par case
+      const gs = (e.ids || [e.id]).map(ghost).filter(Boolean); if (!gs.length) return;
       let [u, k] = e.from;
       for (let i = 0; i < 12 && !(u === e.to[0] && k === e.to[1]); i++) {
         [u, k] = SF.nextStep(u, k);
         const c = cellAt(SF.toGlobal(e.lane, u, k).join(","));
-        if (c) { const b = box(c); await glide(g, b.cx, b.cy, 130); }
+        if (c) { const b = box(c); await Promise.all(gs.map((g, j) => glide(g, b.cx + (j - (gs.length - 1) / 2) * 8, b.cy, 130))); }
       }
     },
     async hit(e) {
