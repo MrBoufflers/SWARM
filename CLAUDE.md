@@ -53,7 +53,7 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
    - à la colonie, ne jamais envoyer : `handA` (main de l'essaim) ;
    - à personne : l'ordre des pioches (`piles`, `tileDeck`, `spellDeck`, défausses) — envoyer seulement les nombres ;
    - le journal (`S.log`) est commun : il évite déjà de nommer les tuiles camouflées (`pubName`) — à garder ainsi.
-4. **Fenêtres de réaction** : aujourd'hui `A_famine` / `A_react` ne s'ouvrent que si la colonie tient le bon sortilège, ce qui révèle qu'elle en a un. En ligne, garder ce comportement tant qu'Oni n'a pas décidé autrement, mais **le signaler** à Oni.
+4. **Fenêtres de réaction** : `A_famine` / `A_react` ne s'ouvrent que si la colonie tient le bon sortilège. **Validé par Oni (30/10/2026) : on garde ce comportement en ligne** (l'essaim ne voit pas quelle carte la colonie tient).
 5. **Reconnexion** : jeton par joueur conservé dans le navigateur ; une partie survit à un rechargement de page.
 6. **Garder le mode local (hot-seat)** fonctionnel.
 7. L'état d'interface (`UI.sel`, carte choisie, etc.) reste local au client.
@@ -64,7 +64,7 @@ Hébergement suggéré (à confirmer avec Oni) : un petit serveur Node + WebSock
 
 Marqués † dans le livret, ou repérés pendant la conception :
 
-- **Incohérence livret ↔ jeu** : la section « Tour de l'essaim · 4. Améliorations » du livret décrit encore l'ancien système (budget restant → réserve → achat à 8 / 16). Le jeu implémente le système validé ensuite : investir des points dans un nœud précis, payable en plusieurs fois (`invest`), commencer à investir dans un nœud ferme l'autre choix du même rang. Le livret est à mettre à jour.
+- **Livret ↔ jeu (décidé par Oni le 30/10/2026 : le jeu fait foi)** : améliorations payables en plusieurs fois (`invest`) et Brouillage joué dans la fenêtre de réaction, sur une créature déployée ce tour. `docs/regles-v0.3.md` est corrigé ; le livret de référence (document Claude d'Oni) reste à reporter.
 - Colosse 3 ATQ / 7 PV (Oni avait écrit 7/3) ; coûts des aggros et tanks (3 / 4 / 7) ; nombre d'exemplaires des soutiens.
 - Nom « Déploiement » utilisé à la fois pour une amélioration aggro et pour une étape du tour.
 - Cadence (+2 points) fait désormais exactement la même chose qu'Effort.
