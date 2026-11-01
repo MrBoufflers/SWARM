@@ -12,7 +12,7 @@ Repris du prototype jouable et validés par Oni :
 - **Mise en place** : 16 **Haies d'épines de départ** (1 PV, Épines 1, face visible) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruite, une haie de départ est retirée du jeu.
 - **Épines** : Haies de départ, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
 - **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 54 forteresses.
-- **Piège** : 3 dégâts (au lieu de 2).
+- **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
 - **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
@@ -173,7 +173,7 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque.
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Haies d'épines de départ, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
-- **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature (un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus).
+- **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - **Bouclier X** : chaque attaque contre la tuile inflige X dégâts de moins (percée et spores comprises).
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Une Haie d'épines de départ détruite est retirée du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
@@ -277,7 +277,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par support de niveau 2 dans les 8 cases autour, +1 par Avant-poste voisin ; tout se cumule).
 - **Bouclier X** : chaque attaque contre cette tuile inflige X dégâts de moins.
 - **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
-- **Percée** : les dégâts en trop après la destruction d'une tuile passent à la tuile suivante sur le chemin ; s'ils atteignent la fusée, ils retirent un seul travailleur †.
+- **Percée** : les dégâts en trop après la destruction d'une tuile passent **seulement à la case suivante** du chemin : un bâtiment les subit, la fusée perd un seul travailleur †, une case vide les perd. Ils ne vont jamais plus loin.
 - **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement, le Dortoir et les Avant-postes ; les Haies d'épines de départ sont posées face visible †.
 
 ### Barème de points
@@ -334,7 +334,7 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 | Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | — | Face visible ; +2 PV si posé dans la lane de son point cardinal (4 PV) ; **Aura d'épines** : +1 Épines à chaque bâtiment des 8 cases autour | 3 | 1 de chaque |
 | Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | **1** | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
 | Réduit † | 2 | 5 − couronne (4 / 3 / 2) | **1** | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
-| Piège | 2 | 2 | — | Camouflé ; **3 dégâts** à la créature qui le révèle en l'attaquant | 4 | 3 |
+| Piège | 2 | 2 | — | Camouflé ; **3 dégâts** à la créature qui le révèle en l'attaquant, avant qu'elle frappe | 4 | 3 |
 
 - **Total des technologies possibles** : 13 (3 Antennes, 2 Laboratoires, 1 Observatoire, 3 Archives).
 - **Total des travailleurs bonus possibles** : 6 temporaires (3 Baraquements, 3 Dortoirs), aucun permanent.

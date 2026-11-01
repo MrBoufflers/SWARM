@@ -313,7 +313,7 @@ const SF = (() => {
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
-    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant.",
+    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe.",
     "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
     "Égide": "Camouflée. Bouclier 2 : chaque attaque contre elle inflige 2 dégâts de moins.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
@@ -746,8 +746,12 @@ const SF = (() => {
       t.revealed = true;
       fx(S, { t: "reveal", k: tk, trap: !!t.trap });
       if (t.trap) {
-        if (!clairvoyance(S)) damageCreature(S, c, TRAP_DMG, "piège");
         log(S, "essaim", "Un piège est révélé.");
+        // le piège blesse la créature AVANT qu'elle frappe : si elle en meurt, elle n'inflige rien (Oni, 01/11/2026)
+        if (!clairvoyance(S)) {
+          damageCreature(S, c, TRAP_DMG, "piège");
+          if (c.hp + bonusHp(S, c) <= 0) { log(S, "essaim", `${c.name} meurt dans le piège avant de frapper.`); return; }
+        }
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
     }
     if (S.stase.includes(lane)) {
@@ -774,16 +778,20 @@ const SF = (() => {
       }
       if (t.hp <= 0) {
         destroyTile(S, tk, "", c);
-        if (excess > 0 && hasPercee(S, c)) {
-          const [lu, lk] = toLocal(lane, x, y);
-          const ghost = { ...c, u: lu, k: lk };
-          const w = walk(S, ghost);
-          if (w.target === "fusee") {
+        // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE du chemin, sans aller plus loin :
+        // un bâtiment les subit, la fusée perd 1 travailleur, une case vide les perd. Pas d'enchaînement.
+        if (primary && excess > 0 && hasPercee(S, c)) {
+          const [nu, nk] = nextStep(...toLocal(lane, x, y));
+          if (nk === 0) {
             S.workersBase -= 1;
             fx(S, { t: "rocket", id: c.id });
             log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
             if (S.workersBase <= 0) S.winner = "essaim";
-          } else hitTile(S, c, w.target, excess, false);
+          } else {
+            const next = key(...toGlobal(lane, nu, nk));
+            if (S.tiles[next]) hitTile(S, c, next, excess, false);
+            else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case suivante est vide.`);
+          }
         }
       }
     }
@@ -1587,7 +1595,7 @@ if (typeof module !== "undefined") module.exports = SF;
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque ou par Vision / Clairvoyance.");
-    if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant. Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
+    if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour).`);
     return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
       <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : " · sans Épines"}</span>${caps.join("")}`;
