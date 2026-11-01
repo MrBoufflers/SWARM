@@ -18,7 +18,8 @@ const SF = (() => {
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
     "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "instinct", capName: "Aura Instinct", capText: "Une autre créature de sa case gagne Mobilité ou Furtivité, au choix." },
-    "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit une tuile en chantier dans l'atelier de sa lane." },
+    // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
+    "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
     "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât." },
   };
   const PILES = {
@@ -303,7 +304,8 @@ const SF = (() => {
     const gain = 1 + butin;
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
-    log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse${butin ? " (Aura Butin)" : ""}.`);
+    const nm = t.camo && !t.revealed ? "Une tuile camouflée" : t.name; // ne pas nommer une tuile camouflée jamais révélée
+    log(S, "essaim", `${nm} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse${butin ? " (Aura Butin)" : ""}.`);
     checkSupportsFall(S);
   }
   function checkSupportsFall(S) {
@@ -583,21 +585,22 @@ const SF = (() => {
     const cost = card.free ? 0 : CREATURES[card.name].cost;
     return S.phase === "A_deploy" && cost <= S.budget && laneCount(S, lane) < capOf(S);
   }
-  function deploy(S, uid, lane, u) {
+  function deploy(S, uid, lane, u, target) {
     const i = S.handA.findIndex(c => c.uid === uid); if (i < 0) return false;
     const card = S.handA[i];
     if (!canDeploy(S, card, lane)) return false;
+    // Sapeur : s'il y a des bâtiments dans sa lane, il faut en désigner un (target)
+    if (card.name === "Sapeur" && laneTiles(S, lane).length && !laneTiles(S, lane).includes(target)) return false;
     S.budget -= card.free ? 0 : CREATURES[card.name].cost;
     S.handA.splice(i, 1);
     const c = makeCreature(S, card.name, lane, u);
     S.creatures.push(c);
     fx(S, { t: "deploy", id: c.id });
     log(S, "essaim", `${card.name} déployé${card.free ? " gratuitement" : ""} en lane ${LANE_NAME[lane]}, colonne ${COLS[u + 2]}.`);
-    if (card.name === "Sapeur" && S.chantiers[lane].length) {
-      const ch = S.chantiers[lane].shift();
-      fx(S, { t: "sabotage", lane });
-      S.tileDiscard.push(ch.tile);
-      log(S, "essaim", `Sabotage : le chantier de la lane ${LANE_NAME[lane]} est détruit (${pubName(ch.tile)}).`);
+    if (card.name === "Sapeur" && target && S.tiles[target]) {
+      fx(S, { t: "sapeur", k: target });
+      log(S, "essaim", `Sabotage : le Sapeur détruit un bâtiment de la lane ${LANE_NAME[lane]}.`);
+      destroyTile(S, target, "sabotage", c);
     }
     if (card.name === "Œil-sonde") revealLane(S, lane);
     if (card.name === "Catalyseur") { const m = caseMates(S, c); c.instinctTarget = m.length ? m[0].id : null; }
@@ -903,9 +906,9 @@ const SF = (() => {
   function migrate(S) {
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.name = START_WALL; t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
-      if (t.start) t.ep = 1;
-      if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
+      if (t.start) t.ep = 1; // haie de départ : Épines 1 (pas celles de la Haie d'épines de la pioche)
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
+      if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
     }
     if (S.invest && S.upgrades) for (const [key, got] of Object.entries(S.invest)) {
       const [type, slot] = key.split(":");
@@ -945,7 +948,7 @@ const SF = (() => {
       return true;
     } },
     draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } },
-    deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && deploy(S, a.uid, a.lane, a.u) },
+    deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && deploy(S, a.uid, a.lane, a.u, a.target) },
     endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); return true; } },
     invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
     moveLane: { phase: ["A_upgrade"], run: (S, a) => isInt(a.id) && isLane(a.lane) && moveLane(S, a.id, a.lane) },

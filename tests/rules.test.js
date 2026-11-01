@@ -555,5 +555,25 @@ const fresh = () => {
   r = P(T => { T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); });
   ok(!r.T.tiles["0,1"] && r.lost === 1, "Percée : C1 détruite, la case suivante est la fusée → −1 travailleur");
 }
+// 44. mise à jour automatique (SF.migrate) : les haies de départ gardent Épines 1 (bug signalé par Oni, 01/11/2026)
+{
+  const S = SF.newGame(); const before = Object.keys(S.tiles).map(k => SF.epinesOf(S, k)).join();
+  SF.migrate(S); SF.migrate(S);
+  ok(Object.values(S.tiles).every(t => t.ep === 1) && Object.keys(S.tiles).map(k => SF.epinesOf(S, k)).join() === before, "après migrate (deux fois) : haies de départ toujours à Épines 1, rien ne change");
+}
+// 45. Sapeur : à son déploiement, détruit un bâtiment au choix de sa lane (Oni, 01/11/2026)
+{
+  const S = fresh(); S.phase = "A_deploy"; S.budget = 10; S.supports = {};
+  S.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
+  S.chantiers.N.push({ tile: "Palissade", left: 1, fresh: false });
+  S.handA = [{ name: "Sapeur", free: false, uid: 801 }, { name: "Sapeur", free: false, uid: 802 }];
+  ok(SF.apply(S, "essaim", "deploy", { uid: 801, lane: "N", u: 0 }) !== "", "Sapeur sans cible alors que sa lane a des bâtiments : refusé");
+  ok(SF.apply(S, "essaim", "deploy", { uid: 801, lane: "N", u: 0, target: "1,0" }) !== "", "cible hors de sa lane : refusée");
+  const b = S.biomass;
+  ok(SF.apply(S, "essaim", "deploy", { uid: 801, lane: "N", u: 0, target: "0,2" }) === "" && !S.tiles["0,2"] && S.biomass === b + 1, "Sapeur déployé : la Muraille choisie est détruite (+1 biomasse)");
+  ok(S.chantiers.N.length === 1 && S.log.every(l => !l.msg.includes("Muraille")), "le chantier n'est plus touché, et la tuile camouflée n'est pas nommée");
+  delete S.tiles["0,1"]; S.budget = 10; S.biomass = 9;
+  ok(SF.apply(S, "essaim", "deploy", { uid: 802, lane: "N", u: 1 }) === "", "lane sans bâtiment : le Sapeur se déploie sans cible");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
