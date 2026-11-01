@@ -1,27 +1,26 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-10-30 · @Oni
+2026-11-01 · @Oni
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
-## Changements du 30 octobre 2026
+## Changements depuis la v0.3 d'origine (30 octobre – 1er novembre 2026)
 
 Repris du prototype jouable et validés par Oni :
 
 - **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
-- **Haies d'épines de départ** : les 4 tuiles de départ (anciens murs de départ) sont des Haies d'épines à **1 PV** et **Épines 1**, posées face visible ; détruites, elles sont retirées du jeu.
-- **Épines** : seules les haies de départ (1), la Haie d'épines et le Mur hérissé (2, au lieu de 3) en ont ; le support de niveau 2 donne +1 seulement aux tuiles à Épines.
-- **Biomasse** : une tuile détruite rapporte sa **durée de construction** (1, 2 ou 3) ; un support qui tombe, 1.
-- **Améliorations** : payables en plusieurs fois, **6** biomasse au rang 1 et **12** au rang 2 (au lieu de 8 / 16).
-- **Fusée** : un étage coûte 3, 4, 5 puis 6 points selon le palier atteint.
+- **Mise en place** : 16 **Haies d'épines de départ** (1 PV, Épines 1, face visible) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruite, une haie de départ est retirée du jeu.
+- **Épines** : Haies de départ, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 qui touche la tuile, +1 par Avant-poste dans les 8 cases autour (**Aura d'épines**).
+- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 54 forteresses.
+- **Piège** : 3 dégâts (au lieu de 2).
+- **Biomasse** : 1 par tuile détruite ou support tombé.
+- **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
-- **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
-- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc, et si la tuile tombe, le bloc suit pour les créatures qui doivent encore frapper (jamais après la dernière attaque).
-- **Tirs des tourelles** : à la toute fin du tour de la colonie, après la construction, l'apparition des nouveaux supports et la fusée.
-- **Famine** : le budget de l'essaim baisse de **5** (au lieu de 2).
-- **Déploiement** (aggro, centre du rang 2) : les 2 cartes gratuites sont piochées avant la pioche normale.
-- **Paliers de l'essaim** : départ 3, puis 6, 9, 12 et 15 de biomasse (au lieu de 4, 7, 10 et 13).
-- **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine. **Raid** devient **Essaim agrandi** (aggro, rang 2) : +3 au plafond de population de chaque lane.
+- **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : budget de l'essaim −5 (au lieu de −2). **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
+- **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
+- **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux.
+- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; le bloc n'avance qu'avant une attaque.
+- **Essaim** : paliers à 3 (départ), 6, 9, 12 et 15 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
 ## Le jeu en bref
 
@@ -43,8 +42,8 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 | --- | --- | --- |
 | Fusée | 1 socle + 12 étages | les étages s'empilent sur le socle |
 | Plateau des ateliers | 1 | 4 ateliers (un par lane) de 2 emplacements de chantier |
-| Haies d'épines de départ | 4 | 1 PV, Épines 1 |
-| Forteresses (tuiles de construction) | 44 | 15 sortes, voir le Catalogue |
+| Haies d'épines de départ | 16 | 1 PV, Épines 1 |
+| Forteresses (tuiles de construction) | 54 | 18 sortes, voir le Catalogue |
 | Tuiles support | 12 | 4 de niveau 1, 4 de niveau 2, 4 de niveau 3 |
 | Cartes sortilège | 26 | 15 offensives, 11 de soutien, voir le Catalogue |
 | Pions travailleur | 24 |  |
@@ -64,7 +63,7 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 
 ## Mise en place
 
-La colonie démarre retranchée dans un carré de 3 × 3 cases autour de sa fusée ; l'essaim démarre avec 3 de biomasse.
+La colonie démarre retranchée dans un carré de 5 × 5 cases autour de sa fusée (couronnes 1 et 2) ; l'essaim démarre avec 3 de biomasse.
 
 ### Le plateau
 
@@ -72,15 +71,15 @@ La fusée occupe la case centrale. Autour d'elle s'étendent **4 lanes** (Nord, 
 
 *[schéma non exporté — voir le livret en ligne]*
 
-Le carré de départ correspond à la couronne 1 : chaque lane s'étendra ensuite vers l'extérieur.
+Le carré de départ couvre les couronnes 1 et 2 : chaque lane s'étendra ensuite en couronne 3.
 
 ### Colonie
 
 1. Placez le socle de la fusée au centre, sans étage.
-2. Posez les 4 **Haies d'épines de départ** sur les 4 cases de la couronne 1, face visible (1 PV et Épines 1).
-3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1.
+2. Posez les 16 **Haies d'épines de départ** sur toutes les cases des couronnes 1 et 2 (4 + 12), face visible (1 PV et Épines 1).
+3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1 et 4 **supports de niveau 2** sur les 4 coins de la couronne 2.
 4. Prenez **3 travailleurs**.
-5. Mélangez les 44 forteresses en une pioche. Piochez-en **4** : c'est votre main.
+5. Mélangez les 54 forteresses en une pioche. Piochez-en **4** : c'est votre main.
 6. Mélangez les 26 cartes sortilège en une pioche.
 
 ### Essaim
@@ -107,7 +106,7 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 ### 1. Budget
 
-Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite rapporte autant de biomasse que sa **durée de construction** (1, 2 ou 3 ; 1 pour une haie de départ), un support qui tombe rapporte **1**. Si la colonie a joué **Famine**, retirez 5 du budget de ce tour.
+Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite ou un support qui tombe rapporte **1 biomasse**. Si la colonie a joué **Famine**, retirez 5 du budget de ce tour.
 
 ### 2. Pioche
 
@@ -173,9 +172,10 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Seules les **Haies d'épines de départ** (Épines 1), les **Haies d'épines** construites et le **Mur hérissé** (Épines 2) ont des Épines ; un support de niveau 2 ajoute **+1 Épines** aux tuiles à Épines qui le touchent.
-- **Piège** : la première attaque le retourne face visible et inflige 2 dégâts à la créature.
-- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne autant de biomasse que sa **durée de construction** : **1**, **2** ou **3**. Une Haie d'épines de départ détruite rapporte **1** et est retirée du jeu (elle ne va pas dans la défausse).
+- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Haies d'épines de départ, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 qui touche la tuile par un côté, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
+- **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature (un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus).
+- **Bouclier X** : chaque attaque contre la tuile inflige X dégâts de moins (percée et spores comprises).
+- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Une Haie d'épines de départ détruite est retirée du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
 
 ### Supports
@@ -211,7 +211,7 @@ Rien n'oblige à remplir une couronne avant d'ouvrir la suivante. Une tuile en c
 
 ### 3. Affecter les travailleurs
 
-Chaque travailleur fournit **1 point de construction**. Vos travailleurs comprennent vos travailleurs de base et les bonus en jeu (Baraquement, support de niveau 3) ; un travailleur gagné grâce à un Dortoir devient un travailleur de base. Placez chaque point :
+Chaque travailleur fournit **1 point de construction**. Vos travailleurs comprennent vos travailleurs de base et les bonus en jeu (Baraquement, Dortoir, support de niveau 3). Placez chaque point :
 
 - sur une **lane** : il avancera le chantier de cette lane ;
 - ou sur la **fusée**.
@@ -227,13 +227,13 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 
 ### Les forteresses
 
-Les 44 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
+Les 54 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
 
 ## La fusée et ses paliers
 
 La fusée compte 12 étages, de plus en plus chers ; chaque étage achevé rapporte un travailleur, et les étages 3, 6 et 9 débloquent un bonus majeur.
 
-- Un étage coûte **3 points de construction** pour les étages 1 à 3, **4** pour les étages 4 à 6, **5** pour les étages 7 à 9 et **6** pour les étages 10 à 12. Chaque fois que la fusée accumule le coût de l'étage suivant, ajoutez-le. Les points en trop restent acquis pour l'étage suivant.
+- Un étage coûte **2 points de construction** pour les étages 1 à 3, **3** pour les étages 4 à 6, **4** pour les étages 7 à 9 et **5** pour les étages 10 à 12. Chaque fois que la fusée accumule le coût de l'étage suivant, ajoutez-le. Les points en trop restent acquis pour l'étage suivant.
 - Chaque étage achevé : **+1 travailleur** de base.
 
 | Étage | Bonus |
@@ -249,11 +249,11 @@ Chaque palier (étages 3, 6 et 9) donne aussi **+1 tuile en main** (4, puis 5, 6
 
 La colonie pioche ses sorts en fin de tour selon ses technologies ; ils sont gratuits, et leur type dit quand les jouer.
 
-- **Technologies** = somme des technologies des forteresses en jeu (Antenne, Laboratoire, Observatoire), plus 2 après l'étage 3 de la fusée.
+- **Technologies** = somme des technologies des forteresses en jeu (Antenne, Laboratoire, Observatoire, Archives), plus 2 après l'étage 3 de la fusée. Elles ne servent qu'à la pioche : en perdre ne fait pas perdre de sortilèges.
 - **Pioche** en fin de tour de la colonie : 3 technologies → 1 sortilège, 6 → 2, 9 → 3.
 - **Offensifs** : à jouer pendant le tour suivant de l'essaim, avant ses attaques (Famine au début de son tour, les autres juste avant ses attaques).
 - **Soutien** : à jouer au début du tour suivant de la colonie.
-- Un sortilège non joué dans sa fenêtre est défaussé †.
+- Un sortilège non joué **reste en main** tant qu'il n'est pas joué, sans limite de main.
 
 Les 26 sortilèges et leurs effets sont décrits dans le Catalogue.
 
@@ -274,15 +274,17 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Zones** : une **case** ; une **lane** (toutes ses cases) ; une **couronne** (toutes les cases de même couronne, sur les 4 lanes).
 - **Aura** : effet d'un soutien sur les autres créatures de sa case. Deux auras **du même nom** ne se cumulent pas ; deux auras de noms différents se cumulent.
 - **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque. Seules les Haies d'épines de départ (1), les Haies d'épines construites et le Mur hérissé (2) en ont.
+- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par support de niveau 2 qui la touche, +1 par Avant-poste voisin ; tout se cumule).
+- **Bouclier X** : chaque attaque contre cette tuile inflige X dégâts de moins.
+- **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
 - **Percée** : les dégâts en trop après la destruction d'une tuile passent à la tuile suivante sur le chemin ; s'ils atteignent la fusée, ils retirent un seul travailleur †.
-- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, le Baraquement et le Dortoir ; les Haies d'épines de départ sont posées face visible †.
+- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement et le Dortoir ; les Haies d'épines de départ sont posées face visible †.
 
 ### Barème de points
 
 | Élément | Budget | Coûts du barème |
 | --- | --- | --- |
-| Aggro et tank N1 / N2 / N3 | PV + ATQ = 4 / 7 / 10 | une seule créature par niveau, identique pour tous les exemplaires |
+| Aggro et tank N1 / N2 / N3 | PV + ATQ = 4 / 7 / 10 (barème d'origine) † | une seule créature par niveau ; depuis le 01/11/2026, aggros à 1 PV et tanks à 1 ATQ à tous les niveaux : barème à revoir |
 | Soutien N1 / N2 / N3 | 0 ATQ ; PV = 2 / 5 / 8 | n'attaquent pas (+1 / +3 / +5 PV pour compenser), en échange d'une capacité, plus forte à chaque niveau |
 | Forteresse | 2 points par tour de construction | 1 PV = 1 ; Épines 1 gratuite (de base), chaque Épines en plus = 1 ; Renforcé X = X ; +1 technologie = 1 ; travailleur temporaire = 1 ; travailleur permanent = 5 ; +2 PV sous condition = 1 |
 
@@ -293,11 +295,11 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Créature | Type | Niv. | Coût † | PV | ATQ | Capacité | Ex. |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Écorcheur | Aggro | 1 | 3 | 1 | 3 | — | 6 |
-| Ravageur | Aggro | 2 | 4 | 2 | 5 | — | 6 |
-| Massacreur | Aggro | 3 | 7 | 3 | 7 | — | 6 |
+| Ravageur | Aggro | 2 | 4 | 1 | 5 | — | 6 |
+| Massacreur | Aggro | 3 | 7 | 1 | 7 | — | 6 |
 | Carapace | Tank | 1 | 3 | 3 | 1 | — | 6 |
-| Béhémoth | Tank | 2 | 4 | 5 | 2 | — | 6 |
-| Colosse | Tank | 3 | 7 | 7 † | 3 † | — | 6 |
+| Béhémoth | Tank | 2 | 4 | 5 | 1 | — | 6 |
+| Colosse | Tank | 3 | 7 | 7 | 1 | — | 6 |
 | Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : révèle les tuiles camouflées de sa lane | 2 |
 | Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV | 2 |
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
@@ -311,7 +313,7 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 
 ### Forteresses
 
-44 tuiles de construction, toutes plafonnées à 4 PV. Seules la Haie d'épines et le Mur hérissé ont des Épines (2). La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis la suppression des Épines de base †. Un support de niveau 2 ajoute +1 Épines aux tuiles à Épines qui le touchent.
+54 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 qui touche la tuile et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -321,18 +323,21 @@ Le Sapeur est la seule exception à la règle « une tuile en chantier n'est pas
 | Bastion | 3 | 3 | — | Camouflé ; Renforcé 3 | 6 | 2 |
 | Haie d'épines | 1 | 1 | **2** | Camouflée | 2 | 3 |
 | Mur hérissé | 2 | 2 | **2** | Camouflé | 4 | 2 |
+| Ronceraie | 3 | 2 | **2** | Camouflée ; Renforcé 2 | † | 3 |
+| Égide | 2 | 3 | — | Camouflée ; **Bouclier 2** : chaque attaque contre elle inflige 2 dégâts de moins | † | 3 |
 | Antenne | 1 | 1 | — | +1 technologie | 2 | 3 |
 | Laboratoire | 2 | 2 | — | +2 technologies | 4 | 2 |
 | Observatoire | 3 | 3 | — | +3 technologies | 6 | 1 |
-| Baraquement | 1 | 1 | — | +1 travailleur **temporaire** : tant que la tuile tient | 2 | 3 |
-| Dortoir | 3 | 1 | — | +1 travailleur **permanent** : gagné à la construction, conservé même si la tuile tombe | 6 | 2 |
-| Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | — | Camouflé ; +2 PV si posé dans la lane de son point cardinal (4 PV) | 3 | 1 de chaque |
-| Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | — | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
-| Réduit † | 2 | 5 − couronne (4 / 3 / 2) | — | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
-| Piège | 2 | 2 | — | Camouflé ; 2 dégâts à la créature qui le révèle en l'attaquant | 4 | 3 |
+| Archives | 2 | 3 | — | +1 technologie | † | 3 |
+| Baraquement | 1 | 1 | **1** | +1 travailleur **temporaire** : tant que la tuile tient | 2 | 3 |
+| Dortoir | 3 | 3 | — | **Bouclier 2** ; +1 travailleur **temporaire** : tant que la tuile tient | † | 3 |
+| Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | — | Camouflé ; +2 PV si posé dans la lane de son point cardinal (4 PV) ; **Aura d'épines** : +1 Épines à chaque bâtiment des 8 cases autour | 3 | 1 de chaque |
+| Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | **1** | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
+| Réduit † | 2 | 5 − couronne (4 / 3 / 2) | **1** | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
+| Piège | 2 | 2 | — | Camouflé ; **3 dégâts** à la créature qui le révèle en l'attaquant | 4 | 3 |
 
-- **Total des technologies possibles** : 10 (3 Antennes, 2 Laboratoires, 1 Observatoire).
-- **Total des travailleurs bonus possibles** : 3 temporaires et 2 permanents.
+- **Total des technologies possibles** : 13 (3 Antennes, 2 Laboratoires, 1 Observatoire, 3 Archives).
+- **Total des travailleurs bonus possibles** : 6 temporaires (3 Baraquements, 3 Dortoirs), aucun permanent.
 
 ### Sortilèges
 
@@ -361,7 +366,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 - **Choix exclusifs** : commencer à investir dans une amélioration ferme les autres du même rang.
 - **Prérequis** : un côté du rang 2 demande le même côté au rang 1. Le **centre** est accessible depuis l'un ou l'autre côté.
 - **Cartes** : le rang 1 ajoute toutes les cartes de niveau 2 du type à leur pioche ; le rang 2, toutes celles de niveau 3.
-- **Cumul** : les bonus des deux rangs s'additionnent (+1 puis +2 ATQ donnent +3 ATQ ; +2 puis +4 PV donnent +6 PV).
+- **Cumul** : les bonus des deux rangs s'additionnent (+1 puis +2 ATQ donnent +3 ATQ ; +1 puis +2 PV donnent +3 PV).
 - L'effet s'applique à toutes les créatures du type, y compris celles déjà en jeu.
 
 #### Aggro
@@ -378,9 +383,9 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
-| 1 | Côté A | Carapace épaisse | +2 PV |
+| 1 | Côté A | Carapace épaisse | +1 PV |
 | 1 | Côté B | Protection | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place |
-| 2 | Côté A (après Carapace épaisse) | Blindage | +4 PV (total +6) |
+| 2 | Côté A (après Carapace épaisse) | Blindage | +2 PV (total +3) |
 | 2 | Centre | Réincarnation | une fois par tour, quand un tank meurt, redéployez-le gratuitement au début de votre prochain tour, PV pleins, à l'entrée de sa lane |
 | 2 | Côté B (après Protection) | Masse vivante | +1 PV par autre créature sur sa case, tant qu'elle y reste |
 
@@ -417,7 +422,7 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | Niveau | Couronne | Effet † |
 | --- | --- | --- |
 | 1 | 1 | tourelle : 1 dégât par tour, +1 aux étages 3, 6 et 9 de la fusée |
-| 2 | 2 | tourelle : 2 dégâts par tour ; +1 Épines aux tuiles à Épines qui le touchent |
+| 2 | 2 | tourelle : 2 dégâts par tour ; +1 Épines à chaque tuile qui le touche |
 | 3 | 3 | pas de tir ; +2 travailleur tant qu'il tient |
 
 ### Résumé du tour
@@ -438,12 +443,13 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 ### Nouveau contenu v0.3
 
 - [ ] **Coûts des aggros et des tanks** : tu ne les as pas donnés ; j'ai gardé 3 / 4 / 7 selon le niveau. Avec des stats de 4 / 7 / 10 points, le niveau 3 rapporte moins de stats par biomasse que le niveau 2.
-- [ ] **Colosse (tank niveau 3)** : ton message indique 7 / 3, soit 7 ATQ et 3 PV, exactement comme l'aggro niveau 3. J'ai supposé une inversion et noté 3 ATQ / 7 PV.
+- [x] **Colosse (tank niveau 3)** : 7 PV / 1 ATQ (tous les tanks à 1 ATQ, décidé le 01/11/2026).
 - [ ] **Soutiens** : 2 exemplaires de chaque carte de niveau 1 et 2, 3 de chaque carte de niveau 3, pour arriver à 6 par niveau comme les autres types.
 - [ ] **Aura Instinct** (Catalyseur) : la capacité accordée est au choix Mobilité ou Furtivité.
 - [ ] **Nom « Déploiement »** : c'est aussi le nom de l'étape 3 du tour de l'essaim. Renommer l'un des deux ?
 - [ ] **Déploiement** (centre de l'arbre aggro) : les 2 cartes viennent de la pioche de niveau 1 et respectent le plafond de population.
-- [x] **Haies d'épines de départ** (anciens murs de départ) : 1 PV, Épines 1, retirées du jeu quand elles sont détruites (décidé le 30/10/2026).
+- [x] **Haies d'épines de départ** (anciens murs de départ) : 1 PV, Épines 1, sur les couronnes 1 et 2, retirées du jeu quand elles sont détruites (décidé les 30/10 et 01/11/2026).
+- [ ] **Barème des créatures** : aggros à 1 PV et tanks à 1 ATQ à tous les niveaux ; le barème PV + ATQ = 4 / 7 / 10 ne tient plus.
 - [ ] **Barème des forteresses** : la colonne « Points » comptait une Épines 1 gratuite pour toutes les tuiles ; à recalculer depuis sa suppression.
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
 - [ ] **Brouillage** : la biomasse dépensée pour la carte annulée est perdue.
@@ -457,7 +463,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] Une créature qui atteint la fusée y reste et frappe à chaque tour.
 - [ ] Un bâtiment achevé se pose sur une case de la lane de son chantier qui touche une tuile, un support ou la fusée ; la case est choisie à la fin de la construction.
 - [x] Ordre de fin de tour de la colonie : chantiers (avancement puis pose des bâtiments achevés), supports, fusée, **tirs**, pioches (décidé le 30/10/2026).
-- [ ] Sortilèges non joués défaussés.
+- [x] Sortilèges non joués : gardés en main tant qu'ils ne sont pas joués, sans limite (décidé le 01/11/2026).
 - [ ] Étage 3 : « +2 technologies » compte pour la pioche de sortilèges.
 - [ ] Un support tombé réapparaît gratuitement quand ses 2 murs côté fusée sont rebâtis.
 - [ ] Lecture des PV : le bord tourné vers la fusée indique les PV restants.

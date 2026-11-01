@@ -21,36 +21,45 @@ def inline(t):
 
 # ---------------------------------------------------------------- schémas (SVG)
 def svg_depart():
-    cell, gap, x0, y0 = 86, 8, 40, 44
-    def box(i, j, kind):
+    cell, gap, x0, y0 = 62, 6, 40, 44
+    def kind(i, j):  # i, j de 0 à 4 ; centre (2, 2)
+        x, y = j - 2, 2 - i
+        r = max(abs(x), abs(y))
+        if r == 0:
+            return "fusee"
+        if abs(x) == abs(y):
+            return "sup1" if r == 1 else "sup2"
+        return "haie"
+    def box(i, j):
+        k = kind(i, j)
         x, y = x0 + j * (cell + gap), y0 + i * (cell + gap)
-        fill, stroke = {"sup": ("#ececea", "#c9c9c5"), "haie": ("#fbe6dc", "#e07a4f"), "fusee": ("#e3edf8", "#3a78c2")}[kind]
-        label = {"sup": ("Tourelle", "niveau 1"), "haie": ("Haie d'épines", "1 PV · Épines 1"), "fusee": ("Fusée", "")}[kind]
-        out = f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="7" fill="{fill}" stroke="{stroke}" stroke-width="{2 if kind == "fusee" else 1.4}"/>'
-        out += f'<text x="{x + cell / 2}" y="{y + cell / 2 - 3}" class="b">{label[0]}</text>'
+        fill, stroke = {"sup1": ("#ececea", "#c9c9c5"), "sup2": ("#dfe9e6", "#8fb5ad"), "haie": ("#fbe6dc", "#e07a4f"), "fusee": ("#e3edf8", "#3a78c2")}[k]
+        label = {"sup1": ("Tourelle", "niveau 1"), "sup2": ("Tourelle", "niveau 2"), "haie": ("Haie", "1 PV"), "fusee": ("Fusée", "")}[k]
+        out = f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="7" fill="{fill}" stroke="{stroke}" stroke-width="{2 if k == "fusee" else 1.4}"/>'
+        out += f'<text x="{x + cell / 2}" y="{y + cell / 2 - 2}" class="b">{label[0]}</text>'
         if label[1]:
             out += f'<text x="{x + cell / 2}" y="{y + cell / 2 + 14}" class="s">{label[1]}</text>'
         return out
-    kinds = [["sup", "haie", "sup"], ["haie", "fusee", "haie"], ["sup", "haie", "sup"]]
-    g = "".join(box(i, j, kinds[i][j]) for i in range(3) for j in range(3))
-    w = 3 * cell + 2 * gap
+    g = "".join(box(i, j) for i in range(5) for j in range(5))
+    w = 5 * cell + 4 * gap
     g += f'<text x="{x0 + w / 2}" y="{y0 - 14}" class="d">NORD</text><text x="{x0 + w / 2}" y="{y0 + w + 26}" class="d">SUD</text>'
     g += f'<text x="{x0 - 18}" y="{y0 + w / 2 + 4}" class="d">O</text><text x="{x0 + w + 18}" y="{y0 + w / 2 + 4}" class="d">E</text>'
-    lx = x0 + w + 60
-    lines = [("t", "À mettre en place"), ("", "Fusée : le socle seul, aucun étage"), ("", "4 Haies d'épines de départ (1 PV, Épines 1),"),
-             ("", "une par lane, face visible"), ("", "4 tourelles de niveau 1 dans les coins"), ("hr", ""),
+    lx = x0 + w + 50
+    lines = [("t", "À mettre en place"), ("", "Fusée : le socle seul, aucun étage"), ("", "16 Haies d'épines de départ (1 PV, Épines 1),"),
+             ("", "couronnes 1 et 2, face visible"), ("", "4 tourelles de niveau 1, 4 de niveau 2"), ("", "Les haies qui touchent une tourelle"),
+             ("", "de niveau 2 ont Épines 2"), ("hr", ""),
              ("", "Colonie : 3 travailleurs, 4 tuiles en main"), ("", "Essaim : 3 de biomasse, pioche de niveau 1"), ("t", "L'essaim joue en premier")]
     y = y0 + 10
-    for kind, txt in lines:
-        if kind == "hr":
-            g += f'<line x1="{lx}" y1="{y - 6}" x2="{lx + 300}" y2="{y - 6}" stroke="#ddd"/>'
+    for kind_, txt in lines:
+        if kind_ == "hr":
+            g += f'<line x1="{lx}" y1="{y - 6}" x2="{lx + 290}" y2="{y - 6}" stroke="#ddd"/>'
             y += 12
             continue
-        g += f'<text x="{lx}" y="{y}" class="{"lt" if kind == "t" else "l"}">{html.escape(txt)}</text>'
+        g += f'<text x="{lx}" y="{y}" class="{"lt" if kind_ == "t" else "l"}">{html.escape(txt)}</text>'
         y += 24
-    return (f'<figure><figcaption class="ft">La colonie démarre retranchée dans un carré de 3 × 3<span>Position de départ, vue de dessus</span></figcaption>'
-            f'<svg viewBox="0 0 700 360" role="img" aria-label="Position de départ">{g}</svg>'
-            f'<figcaption class="fc">position de départ · 4 haies d\'épines, 4 tourelles, la fusée</figcaption></figure>')
+    return (f'<figure><figcaption class="ft">La colonie démarre retranchée dans un carré de 5 × 5<span>Position de départ, vue de dessus</span></figcaption>'
+            f'<svg viewBox="0 0 740 420" role="img" aria-label="Position de départ">{g}</svg>'
+            f'<figcaption class="fc">position de départ · 16 haies d\'épines, 8 tourelles, la fusée</figcaption></figure>')
 
 
 def svg_escalier():
