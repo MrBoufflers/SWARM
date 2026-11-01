@@ -19,7 +19,7 @@
   // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
   let NET = null;
   let busy = false;
-  let UI = { sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], help: false, recoHand: null };
+  let UI = { sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null };
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
@@ -43,7 +43,7 @@
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
   function newGame() { MODE = "local"; S = SF.newGame(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
-  const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], help: false, recoHand: null });
+  const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   function setPhaseHandoff() { // passe la main si le joueur actif change
     const w = who();
     if (S.view !== w) { S.handoff = w; UI = { ...resetUI(), help: UI.help }; }
@@ -122,6 +122,9 @@
       acts = `<button data-a="famine" data-v="1" class="primary">Jouer Famine</button><button data-a="famine" data-v="0">Ne pas jouer</button>`;
     } else if (ph === "A_start") {
       acts = `<button data-a="draw" class="primary">Piocher (palier ${SF.tier(S) + 1})</button>`;
+    } else if (ph === "A_deploy" && UI.sap) {
+      body = `<p class="hint">Sapeur : choisissez le bâtiment à détruire dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
+        SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;
     } else if (ph === "A_deploy") {
       body = UI.sel ? `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez une case d'entrée surlignée.</p>` : "";
       acts = `<button data-a="endDeploy" class="primary">Terminer les déploiements</button>`;
@@ -462,7 +465,14 @@
       // actions de jeu
       case "famine": return play("famine", { play: d.v === "1" });
       case "draw": return play("draw");
-      case "deployAt": if (UI.sel) return play("deploy", { uid: UI.sel, lane: d.l, u: Number(d.u) }, () => { UI.sel = null; }); break;
+      case "deployAt": {
+        if (!UI.sel) break;
+        // Sapeur : choisir d'abord le bâtiment de la lane à détruire
+        if (cardOf(UI.sel).name === "Sapeur" && SF.laneTiles(S, d.l).length) { UI.sap = { uid: UI.sel, lane: d.l, u: Number(d.u) }; break; }
+        return play("deploy", { uid: UI.sel, lane: d.l, u: Number(d.u) }, () => { UI.sel = null; });
+      }
+      case "sapTarget": { const sp = UI.sap; UI.sap = null; if (sp) return play("deploy", { uid: sp.uid, lane: sp.lane, u: sp.u, target: d.k }, () => { UI.sel = null; }); break; }
+      case "sapCancel": UI.sap = null; break;
       case "endDeploy": UI.sel = null; return play("endDeploy");
       case "invest": return play("invest", { t: d.t, s: d.s, n: Number(d.n) });
       case "moveLane": return play("moveLane", { id: Number(d.id), lane: d.v });
@@ -649,6 +659,11 @@
       const cell = cellAt(e.k); if (!cell) return;
       await flip(cell.querySelector(".tile") || cell);
       if (e.trap) float(cell, "Piège !", "cr-dmg");
+    },
+    async sapeur(e) {
+      const c = cellAt(e.k); if (!c) return;
+      flashEl(c, "var(--soutien)"); float(c, "Sabotage", "aura");
+      await wait(300);
     },
     async sabotage(e) {
       const slot = document.querySelector(`.atelier.lane-${e.lane} .slot:not(.empty)`);
