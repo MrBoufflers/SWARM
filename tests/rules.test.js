@@ -425,5 +425,17 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   const iSup = V.fx.findIndex(e => e.t === "supUp"), iFloor = V.fx.findIndex(e => e.t === "floor");
   ok(iSup >= 0 && iFloor >= 0 && iSup < iFloor, "fin de tour : les supports apparaissent avant les étages de la fusée");
 }
+// 36. un bloc n'avance qu'avant une attaque, jamais après la dernière (Oni, 01/11/2026)
+{
+  const S = fresh(); S.phase = "A_attack"; S.supports = {};
+  delete S.tiles["0,1"];
+  S.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); S.tiles["0,2"].hp = 1;
+  S.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
+  const a = { id: 64, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
+  const g = { id: 65, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, acted: false };
+  S.creatures.push(a, g);
+  SF.apply(S, "essaim", "act", { key: SF.posKey(a) });
+  ok(!S.tiles["0,2"] && a.k === 3 && g.k === 3 && S.tiles["0,1"].hp === 4, "le seul attaquant détruit la Palissade : le bloc reste en C3 (il n'avance pas après la dernière attaque)");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

@@ -16,7 +16,7 @@ Repris du prototype jouable et validés par Oni :
 - **Fusée** : un étage coûte 3, 4, 5 puis 6 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
-- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc, et si la tuile tombe, le bloc suit.
+- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc, et si la tuile tombe, le bloc suit pour les créatures qui doivent encore frapper (jamais après la dernière attaque).
 - **Tirs des tourelles** : à la toute fin du tour de la colonie, après la construction, l'apparition des nouveaux supports et la fusée.
 - **Famine** : le budget de l'essaim baisse de **5** (au lieu de 2).
 - **Déploiement** (aggro, centre du rang 2) : les 2 cartes gratuites sont piochées avant la pioche normale.
@@ -165,7 +165,7 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 1. **Ordre** : dans une lane, les cases les plus proches de la fusée agissent d'abord ; un bloc qui arrive sur une case déjà occupée fusionne avec elle.
 2. **Déplacement** : le bloc avance sur son chemin en traversant librement les cases vides, jusqu'à la première tuile (ou jusqu'à la fusée).
 3. **Attaque** : les créatures du bloc frappent **une par une, dans l'ordre choisi par l'essaim**. Chacune inflige son ATQ, plus les bonus des auras des soutiens de sa case. Les soutiens n'attaquent jamais : ils avancent avec le bloc et ne subissent donc pas d'Épines.
-4. **Le bloc suit** : si la tuile tombe, tout le bloc avance jusqu'à la tuile suivante, et les créatures qui n'ont pas encore frappé frappent celle-ci.
+4. **Le bloc suit** : si la tuile tombe et qu'il reste des créatures qui n'ont pas encore frappé, tout le bloc avance jusqu'à la tuile suivante, puis elles la frappent. Un bloc n'avance qu'**avant** une attaque : après la dernière attaque, il reste sur place.
 
 **Mobilité** : avant les attaques, une créature qui a la Mobilité peut, une fois par tour, quitter sa case pour l'entrée d'une **lane voisine**, plafond de population respecté.
 

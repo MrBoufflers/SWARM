@@ -381,7 +381,8 @@ const SF = (() => {
   const attacks = c => CREATURES[c.name].type !== "soutien";
   // ---- blocs (décision d'Oni, 30/10/2026) : toutes les créatures d'une même case avancent ensemble.
   // Dans une lane, les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque dans le bloc ;
-  // quand la tuile visée tombe, tout le bloc avance jusqu'à la tuile suivante et les créatures qui n'ont pas frappé la frappent.
+  // quand la tuile visée tombe, tout le bloc avance jusqu'à la tuile suivante seulement s'il reste une créature qui doit encore
+  // frapper (on n'avance qu'avant une attaque, jamais après la dernière).
   const pathLen = (u, k) => { let n = 0; while (k !== 0 && n < 12) { [u, k] = nextStep(u, k); n++; } return n; };
   const blockAt = (S, key) => S.creatures.filter(c => posKey(c) === key);
   function readyCases(S) {
@@ -429,11 +430,13 @@ const SF = (() => {
     for (const c of seq) {
       if (S.winner) break;
       if (!S.creatures.includes(c)) continue; // tuée entre-temps (Épines, piège)
+      // le bloc n'avance qu'AVANT une attaque (Oni, 01/11/2026) : si la tuile visée est tombée, il avance maintenant,
+      // juste avant que cette créature frappe ; après la dernière attaque, il reste sur place
+      if (target !== "fusee" && !S.tiles[target]) target = advance();
       auraFx(S, c);
       if (target === "fusee") { hitRocket(S, c); continue; }
       hitTile(S, c, target, effAtq(S, c), true);
       killCheck(S);
-      if (!S.tiles[target] && S.creatures.some(o => posKey(o) === posKey(pos))) target = advance();
     }
     return true;
   }
