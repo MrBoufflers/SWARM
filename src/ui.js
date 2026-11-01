@@ -209,7 +209,7 @@
     const when = s === "Famine" ? "Offensif · au début du tour de l'essaim, avant qu'il calcule son budget"
       : sp.kind === "off" ? "Offensif · pendant le tour de l'essaim, juste avant ses attaques"
       : "Soutien · pendant votre tour, avant de passer aux tirs";
-    return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Non joué dans sa fenêtre : défaussé.</small></span></div>`;
+    return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Reste en main tant qu'il n'est pas joué.</small></span></div>`;
   }
   const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
   const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", leurre: "leurre", percee: "percee", instinct: "instinct", sabotage: "sabotage", spores: "spores" }[c] || "aura");
