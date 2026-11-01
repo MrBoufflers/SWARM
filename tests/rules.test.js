@@ -138,8 +138,8 @@ const fresh = () => {
 // 14. Camouflage : toutes les forteresses sauf Antenne, Laboratoire, Observatoire, Baraquement, Dortoir
 {
   const S = fresh(); SF.attackerDraw(S);
-  for (const n of Object.keys(SF.TILES).filter(n => !["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives"].includes(n))) ok(!SF.tileStats(n, 0, 2).revealed && SF.tileStats(n, 0, 2).camo === 1, n + " posé camouflé");
-  for (const n of ["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives"]) ok(SF.tileStats(n, 0, 2).revealed && !SF.tileStats(n, 0, 2).camo, n + " posé face visible");
+  for (const n of Object.keys(SF.TILES).filter(n => !["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives", "Avant-poste du Nord", "Avant-poste de l'Est", "Avant-poste du Sud", "Avant-poste de l'Ouest"].includes(n))) ok(!SF.tileStats(n, 0, 2).revealed && SF.tileStats(n, 0, 2).camo === 1, n + " posé camouflé");
+  for (const n of ["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives", "Avant-poste du Nord", "Avant-poste de l'Est", "Avant-poste du Sud", "Avant-poste de l'Ouest"]) ok(SF.tileStats(n, 0, 2).revealed && !SF.tileStats(n, 0, 2).camo, n + " posé face visible");
   S.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
   const c = { id: 950, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, new: true, acted: false };
   S.creatures.push(c); SF.act(S, c);
@@ -504,7 +504,13 @@ const fresh = () => {
   ok(SF.epinesOf(S, "1,2") === 2, "deux Avant-postes voisins : +1 chacun (Épines 2)");
   S.supports["2,2"] = 2; // coin de support de niveau 2 qui touche (1,2) par un côté
   ok(SF.epinesOf(S, "1,2") === 3, "tout se cumule : +1 du support de niveau 2 (Épines 3)");
-  ok(SF.epinesOf(S, "1,2", true) === 1, "côté essaim, l'aura d'Avant-postes encore cachés n'est pas affichée (seul le support compte)");
+  ok(SF.epinesOf(S, "1,2", true) === 3 && !S.tiles["0,3"].camo, "Avant-postes posés face visible : l'essaim voit aussi leur aura (Épines 3)");
+  const U = fresh(); U.supports = { "2,2": 2 };
+  U.tiles["1,3"] = SF.tileStats("Muraille", 1, 3); U.tiles["3,1"] = SF.tileStats("Muraille", 3, 1); U.tiles["2,3"] = SF.tileStats("Muraille", 2, 3);
+  ok(SF.epinesOf(U, "1,3") === 1 && SF.epinesOf(U, "3,1") === 1 && SF.epinesOf(U, "2,3") === 1, "support de niveau 2 : +1 Épines aux bâtiments des 8 cases autour (diagonales comprises)");
+  const old = { tiles: { "0,3": { name: "Avant-poste du Nord", camo: 1, revealed: false, ep: 0 } }, tileDiscard: [], tileDeck: [], hand: [] };
+  SF.migrate(old);
+  ok(old.tiles["0,3"].revealed && !old.tiles["0,3"].camo, "partie en cours : un Avant-poste caché est retourné face visible");
   const R = SF.TILES["Ronceraie"];
   ok(R.d === 3 && R.pv === 2 && R.ren === 2 && R.ep === 2 && R.camo && R.n === 3, "Ronceraie : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 ex.");
   ok(SF.TRAP_DMG === 3, "Piège : 3 dégâts");
