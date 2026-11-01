@@ -80,7 +80,7 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 - **Piège** : 3 dégâts (`SF.TRAP_DMG`, avant 2) ; un piège déjà vu (Vision, Clairvoyance) ne se déclenche plus.
 - **Fusée** : coût d'un étage 2 points (étages 1-3), 3 (4-6), 4 (7-9), 5 (10-12) — `SF.floorCost(S)` (01/11 ; d'abord 3 / 4 / 5 / 6). Les points en trop passent à l'étage suivant.
 - **Sortilèges** (01/11) : un sortilège non joué reste en main tant qu'il n'est pas joué, offensif comme de soutien, sans limite (avant : défaussé à la fin de sa fenêtre).
-- **Créatures** (01/11) : aggros à 1 PV à tous les niveaux ; tanks à 1 ATQ à tous les niveaux. Carapace épaisse +1 PV, Blindage +2 PV (avant +2 / +4).
+- **Créatures** (01/11) : aggros à 1 PV à tous les niveaux ; tanks à 1 ATQ à tous les niveaux. Carapace épaisse +1 PV, Blindage +2 PV (avant +2 / +4). **Phéromone** : Aura Leurre supprimée, remplacée par l'**Aura Butin** (nom provisoire) : quand une autre créature de sa case détruit un bâtiment (attaque, percée, spores), +1 biomasse en plus ; non cumulable (`destroyTile(S, k, why, by)`).
 - **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
 - **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).
 - **Biomasse** : 1 par tuile détruite ou support tombé (règle d'origine ; du 30/10 au 01/11, une tuile rapportait sa durée de construction).

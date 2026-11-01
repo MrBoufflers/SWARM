@@ -14,7 +14,8 @@ const SF = (() => {
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Révèle les tuiles camouflées de sa lane." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
-    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "leurre", capName: "Aura Leurre", capText: "Une tourelle ou un sortilège qui vise une créature de sa case doit viser celle qui a le plus de PV." },
+    // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
+    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
     "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "instinct", capName: "Aura Instinct", capText: "Une autre créature de sa case gagne Mobilité ou Furtivité, au choix." },
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit une tuile en chantier dans l'atelier de sa lane." },
@@ -291,15 +292,18 @@ const SF = (() => {
     }
     return e;
   }
-  function destroyTile(S, k, why) {
+  // by : la créature dont l'attaque a détruit la tuile (attaque, percée ou spores), pour l'Aura Butin de la Phéromone
+  function destroyTile(S, k, why, by) {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
     if (!t.start) S.tileDiscard.push(t.name);
     // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
-    const gain = 1;
+    // Aura Butin (Phéromone sur la case de la créature) : +1 en plus, non cumulable avec une autre Phéromone (Oni, 01/11/2026)
+    const butin = by && caseMates(S, by).some(o => o.name === "Phéromone") ? 1 : 0;
+    const gain = 1 + butin;
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
-    log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);
+    log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse${butin ? " (Aura Butin)" : ""}.`);
     checkSupportsFall(S);
   }
   function checkSupportsFall(S) {
@@ -373,7 +377,7 @@ const SF = (() => {
     fx(S, { t: "dmg", id: c.id, n, hp: c.hp + bonusHp(S, c) });
     log(S, "colonie", `${c.name} subit ${n} dégât${n > 1 ? "s" : ""}${why ? " (" + why + ")" : ""}.`);
   }
-  // cible imposée par Protection puis Leurre ; renvoie null si la créature est intouchable (Furtivité)
+  // cible imposée par Protection ; renvoie null si la créature est intouchable (Furtivité)
   function resolveTarget(S, c) {
     const mates = caseMates(S, c);
     if (isStealthy(S, c) && mates.some(o => !isStealthy(S, o))) return null;
@@ -381,12 +385,6 @@ const SF = (() => {
     if (CREATURES[t.name].type !== "tank" && S.upgrades.tank.r1 === "B") {
       const tank = mates.find(o => CREATURES[o.name].type === "tank");
       if (tank) t = tank;
-    }
-    const group = [t, ...caseMates(S, t)];
-    if (group.some(o => o.name === "Phéromone")) {
-      const visible = group.filter(o => !(isStealthy(S, o) && group.some(p => !isStealthy(S, p))));
-      visible.sort((a, b) => (b.hp + bonusHp(S, b)) - (a.hp + bonusHp(S, a)) || a.id - b.id);
-      t = visible[0] || t;
     }
     return t;
   }
@@ -517,12 +515,12 @@ const SF = (() => {
             const sp = Math.max(0, 1 - (nt.shield || 0)), spLoss = nt.ren ? Math.floor(sp / nt.ren) : sp;
             nt.hp -= spLoss;
             fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
-            if (nt.hp <= 0) destroyTile(S, nk, "spores");
+            if (nt.hp <= 0) destroyTile(S, nk, "spores", c);
           }
         }
       }
       if (t.hp <= 0) {
-        destroyTile(S, tk);
+        destroyTile(S, tk, "", c);
         if (excess > 0 && hasPercee(S, c)) {
           const [lu, lk] = toLocal(lane, x, y);
           const ghost = { ...c, u: lu, k: lk };

@@ -212,7 +212,7 @@
     return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Reste en main tant qu'il n'est pas joué.</small></span></div>`;
   }
   const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
-  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", leurre: "leurre", percee: "percee", instinct: "instinct", sabotage: "sabotage", spores: "spores" }[c] || "aura");
+  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", butin: "biomasse", percee: "percee", instinct: "instinct", sabotage: "sabotage", spores: "spores" }[c] || "aura");
   const cardOf = uid => S.handA.find(c => c.uid === uid) || { name: "?" };
   function posTxt(c) { return c.k === 4 ? `entrée ${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}` : `${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}${c.k}`; }
   function tileLabel(k) {
