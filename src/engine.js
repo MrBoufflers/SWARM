@@ -60,7 +60,7 @@ const SF = (() => {
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
-    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant.",
+    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe.",
     "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
     "Égide": "Camouflée. Bouclier 2 : chaque attaque contre elle inflige 2 dégâts de moins.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
@@ -493,8 +493,12 @@ const SF = (() => {
       t.revealed = true;
       fx(S, { t: "reveal", k: tk, trap: !!t.trap });
       if (t.trap) {
-        if (!clairvoyance(S)) damageCreature(S, c, TRAP_DMG, "piège");
         log(S, "essaim", "Un piège est révélé.");
+        // le piège blesse la créature AVANT qu'elle frappe : si elle en meurt, elle n'inflige rien (Oni, 01/11/2026)
+        if (!clairvoyance(S)) {
+          damageCreature(S, c, TRAP_DMG, "piège");
+          if (c.hp + bonusHp(S, c) <= 0) { log(S, "essaim", `${c.name} meurt dans le piège avant de frapper.`); return; }
+        }
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
     }
     if (S.stase.includes(lane)) {
@@ -521,16 +525,20 @@ const SF = (() => {
       }
       if (t.hp <= 0) {
         destroyTile(S, tk, "", c);
-        if (excess > 0 && hasPercee(S, c)) {
-          const [lu, lk] = toLocal(lane, x, y);
-          const ghost = { ...c, u: lu, k: lk };
-          const w = walk(S, ghost);
-          if (w.target === "fusee") {
+        // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE du chemin, sans aller plus loin :
+        // un bâtiment les subit, la fusée perd 1 travailleur, une case vide les perd. Pas d'enchaînement.
+        if (primary && excess > 0 && hasPercee(S, c)) {
+          const [nu, nk] = nextStep(...toLocal(lane, x, y));
+          if (nk === 0) {
             S.workersBase -= 1;
             fx(S, { t: "rocket", id: c.id });
             log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
             if (S.workersBase <= 0) S.winner = "essaim";
-          } else hitTile(S, c, w.target, excess, false);
+          } else {
+            const next = key(...toGlobal(lane, nu, nk));
+            if (S.tiles[next]) hitTile(S, c, next, excess, false);
+            else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case suivante est vide.`);
+          }
         }
       }
     }

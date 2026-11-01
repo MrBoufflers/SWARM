@@ -286,7 +286,7 @@
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque ou par Vision / Clairvoyance.");
-    if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant. Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
+    if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour).`);
     return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
       <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : " · sans Épines"}</span>${caps.join("")}`;

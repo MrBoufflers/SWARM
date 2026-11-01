@@ -44,7 +44,7 @@ const fresh = () => {
   S.creatures.push({ id: 902, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, new: true, acted: false });
   SF.act(S, S.creatures[0]);
   const c = S.creatures[0];
-  ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 1, "piège révélé, 2 → 1 PV");
+  ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 2, "piège révélé ; la Carapace meurt avant de frapper : le piège garde ses 2 PV");
   ok(!c, "Carapace (3 PV) : 3 dégâts du piège, détruite");
 }
 // 5. un support tombe quand tous les murs qui le touchent ont disparu
@@ -274,7 +274,7 @@ const fresh = () => {
   const c = { id: 50, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(c);
   T.phase = "A_attack"; T.fx = [];
   SF.apply(T, "essaim", "act", { key: SF.posKey(c) });
-  ok(T.fx.some(e => e.t === "move") && T.fx.some(e => e.t === "hit" && e.k === "0,2"), "déplacement (C3) puis attaque du piège en C2");
+  ok(T.fx.some(e => e.t === "move") && T.fx.some(e => e.t === "reveal" && e.k === "0,2") && !T.fx.some(e => e.t === "hit" && e.k === "0,2"), "déplacement (C3), piège révélé en C2, l'Écorcheur meurt avant de frapper");
   ok(T.fx.some(e => e.t === "dmg" && e.id === 50) && T.fx.some(e => e.t === "die" && e.id === 50), "piège et Épines : dégâts puis mort de la créature");
   const hidden = SF.fxFor(T, "essaim", [{ t: "hit", id: null, k: "1,2", n: 1, hp: 3 }]);
   ok(hidden[0].hp === null && hidden[0].n === null, "PV d'une tuile camouflée encore cachée non transmis à l'essaim");
@@ -535,6 +535,25 @@ const fresh = () => {
   const S = fresh(); const a = { id: 1, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 }, big = { id: 2, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5 }, ph = { id: 3, name: "Phéromone", lane: "N", u: 0, k: 4, hp: 5 };
   S.creatures.push(a, big, ph);
   ok(SF.resolveTarget(S, a) === a && SF.CREATURES["Phéromone"].capName === "Aura Butin", "plus de Leurre : un tir sur l'Écorcheur le vise bien lui");
+}
+// 43. Piège avant l'attaque ; Percée limitée à la case suivante (Oni, 01/11/2026)
+{
+  const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
+  const t = { id: 99, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(t); SF.act(S, t);
+  ok(t.hp === 2 && S.tiles["0,1"].hp === 1, "Béhémoth (5 PV) survit au piège (−3) puis frappe (1 ATQ : 2 → 1 PV)");
+  const P = (setup) => {
+    const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k];
+    setup(T);
+    const m = { id: 100, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(m);
+    T.creatures.push({ id: 101, name: "Perforeur", lane: "N", u: 0, k: 4, hp: 5, acted: false }); // Aura Percée
+    const w = T.workersBase; SF.actCase(T, SF.posKey(m), [100]); return { T, lost: w - T.workersBase };
+  };
+  let r = P(T => { T.tiles["0,3"] = SF.tileStats("Palissade", 0, 3); T.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); });
+  ok(!r.T.tiles["0,3"] && !r.T.tiles["0,2"] && r.T.tiles["0,1"] && r.T.tiles["0,1"].hp === 2, "Percée : 7 → C3 (2 PV) détruite, 5 en trop sur C2 (détruite), pas plus loin : C1 intacte");
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Palissade", 0, 3); T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); });
+  ok(r.T.tiles["0,1"].hp === 2 && r.lost === 0, "Percée : case suivante (C2) vide → dégâts en trop perdus, même s'il y a un bâtiment plus loin");
+  r = P(T => { T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); });
+  ok(!r.T.tiles["0,1"] && r.lost === 1, "Percée : C1 détruite, la case suivante est la fusée → −1 travailleur");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
