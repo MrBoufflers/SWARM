@@ -86,7 +86,7 @@ const SF = (() => {
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
   const FAMINE = 5; // baisse du budget de l'essaim par Famine (décision d'Oni, 30/10/2026 ; avant 2) // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
-  const FLOOR_COSTS = [3, 4, 5, 6];
+  const FLOOR_COSTS = [2, 3, 4, 5]; // Oni, 01/11/2026 (avant 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
   // tuiles de départ : 4 « Haie d'épines » (1 PV, Épines 1, face visible), repérées par start: true ;
   // détruites, elles sont retirées du jeu (pas de défausse) — décisions d'Oni, 30/10/2026 (ancien « Mur de départ », 2 PV)
@@ -157,11 +157,13 @@ const SF = (() => {
       upgrades: { aggro: { r1: null, r2: null }, tank: { r1: null, r2: null }, soutien: { r1: null, r2: null } }, invest: {},
       stase: [], log: [],
     };
-    for (const lane of LANES) {
-      const [x, y] = toGlobal(lane, 0, 1);
+    // haies d'épines de départ : la couronne 1 et toute la couronne 2 (Oni, 01/11/2026) ; les supports de niveau 2 suivent
+    for (const lane of LANES) for (const [u, k] of [[0, 1], [-1, 2], [0, 2], [1, 2]]) {
+      const [x, y] = toGlobal(lane, u, k);
       S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
+    placeSupports(S); // supports de niveau 2 aux coins de la couronne 2 (leurs murs sont posés)
     for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
     shuffle(S.tileDeck);
     for (const [n, s] of Object.entries(SPELLS)) for (let i = 0; i < s.n; i++) S.spellDeck.push(n);

@@ -2,7 +2,14 @@
 const SF = require("../src/engine.js");
 let fails = 0;
 const ok = (cond, msg) => { if (!cond) { fails++; console.log("ÉCHEC :", msg); } else console.log("ok   :", msg); };
-const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
+// Les scénarios ciblés partent de l'ancienne mise en place (haies de la couronne 1 seulement, supports de niveau 1) ;
+// la mise en place actuelle (couronne 2 garnie, Oni 01/11/2026) a son propre test (37) via SF.newGame().
+const fresh = () => {
+  const S = SF.newGame(); S.log = [];
+  for (const k of Object.keys(S.tiles)) if (S.tiles[k].start && SF.ring(...SF.parse(k)) === 2) delete S.tiles[k];
+  for (const k of Object.keys(S.supports)) if (S.supports[k] === 2) delete S.supports[k];
+  return S;
+};
 
 // 1. chemin sans diagonale : A3 → B3 → B2 → C2 → C1 → fusée (lane Nord, colonne A = u -2)
 {
@@ -50,12 +57,12 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   ok(!S.supports["1,1"], "support NE tombé (murs Nord et Est détruits)");
   ok(S.biomass === b0 + 2, "biomasse +1 (mur) +1 (support)");
 }
-// 6. fusée : 3 points par étage, +1 travailleur, palier 3 = +2 technologies
+// 6. fusée : 2 points par étage (étages 1-3), +1 travailleur, palier 3 = +2 technologies
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
-  S.workersBase = 9; S.extraPts = 0;
+  S.workersBase = 6; S.extraPts = 0;
   SF.endDefenderTurn(S);
-  ok(S.floors === 3 && S.workersBase === 12 && SF.tech(S) >= 2, "9 points → 3 étages, +3 travailleurs, +2 technologies");
+  ok(S.floors === 3 && S.workersBase === 9 && SF.tech(S) >= 2, "6 points → 3 étages, +3 travailleurs, +2 technologies");
 }
 // 7. chantier : case valide seulement si elle touche une tuile, un support ou la fusée
 {
@@ -299,11 +306,11 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   const S = fresh();
   const costs = [];
   for (let f = 0; f < 12; f++) { S.floors = f; costs.push(SF.floorCost(S)); }
-  ok(costs.join("") === "333444555666", "coût par étage : " + costs.join(" "));
+  ok(costs.join("") === "222333444555", "coût par étage (2 / 3 / 4 / 5) : " + costs.join(" "));
   const T = fresh(); T.phase = "D_fire"; T.floors = 2; T.rocketPts = 0; T.workersBase = 6;
   T.alloc = { N: 0, E: 0, S: 0, O: 0 }; T.extraPts = 0;
   SF.endDefenderTurn(T);
-  ok(T.floors === 3 && T.rocketPts === 3, "6 points avec 2 étages : étage 3 (3 points), 3 points gardés, pas assez pour l'étage 4 (4 points)");
+  ok(T.floors === 4 && T.rocketPts === 1, "6 points avec 2 étages : étage 3 (2 points), étage 4 (3 points), 1 point gardé");
 }
 // 29. animations du lot 3 : fusée (étage, Nuke, décollage), Vision, améliorations — événements seulement, règles inchangées
 {
@@ -436,6 +443,14 @@ const fresh = () => { const S = SF.newGame(); S.log = []; return S; };
   S.creatures.push(a, g);
   SF.apply(S, "essaim", "act", { key: SF.posKey(a) });
   ok(!S.tiles["0,2"] && a.k === 3 && g.k === 3 && S.tiles["0,1"].hp === 4, "le seul attaquant détruit la Palissade : le bloc reste en C3 (il n'avance pas après la dernière attaque)");
+}
+// 37. mise en place (Oni, 01/11/2026) : haies d'épines de départ sur les couronnes 1 et 2, supports de niveau 1 et 2
+{
+  const S = SF.newGame();
+  const starts = Object.keys(S.tiles).filter(k => S.tiles[k].start);
+  ok(starts.length === 16 && starts.every(k => [1, 2].includes(SF.ring(...SF.parse(k))) && S.tiles[k].hp === 1 && S.tiles[k].ep === 1 && S.tiles[k].revealed), "16 haies d'épines de départ (couronnes 1 et 2), 1 PV, Épines 1, face visible");
+  ok(Object.values(S.supports).filter(l => l === 1).length === 4 && Object.values(S.supports).filter(l => l === 2).length === 4, "4 supports de niveau 1 et 4 de niveau 2 dès le départ");
+  ok(SF.epinesOf(S, "1,2") === 2 && SF.epinesOf(S, "0,2") === 1, "une haie qui touche un support de niveau 2 a Épines 2 (1 + 1), les autres Épines 1");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

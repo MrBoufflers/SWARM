@@ -339,7 +339,7 @@ const SF = (() => {
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
   const FAMINE = 5; // baisse du budget de l'essaim par Famine (décision d'Oni, 30/10/2026 ; avant 2) // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
-  const FLOOR_COSTS = [3, 4, 5, 6];
+  const FLOOR_COSTS = [2, 3, 4, 5]; // Oni, 01/11/2026 (avant 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
   // tuiles de départ : 4 « Haie d'épines » (1 PV, Épines 1, face visible), repérées par start: true ;
   // détruites, elles sont retirées du jeu (pas de défausse) — décisions d'Oni, 30/10/2026 (ancien « Mur de départ », 2 PV)
@@ -410,11 +410,13 @@ const SF = (() => {
       upgrades: { aggro: { r1: null, r2: null }, tank: { r1: null, r2: null }, soutien: { r1: null, r2: null } }, invest: {},
       stase: [], log: [],
     };
-    for (const lane of LANES) {
-      const [x, y] = toGlobal(lane, 0, 1);
+    // haies d'épines de départ : la couronne 1 et toute la couronne 2 (Oni, 01/11/2026) ; les supports de niveau 2 suivent
+    for (const lane of LANES) for (const [u, k] of [[0, 1], [-1, 2], [0, 2], [1, 2]]) {
+      const [x, y] = toGlobal(lane, u, k);
       S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
+    placeSupports(S); // supports de niveau 2 aux coins de la couronne 2 (leurs murs sont posés)
     for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
     shuffle(S.tileDeck);
     for (const [n, s] of Object.entries(SPELLS)) for (let i = 0; i < s.n; i++) S.spellDeck.push(n);
@@ -1623,7 +1625,7 @@ if (typeof module !== "undefined") module.exports = SF;
     return `<h3>${icon("fusee")} Colonie</h3>
       <div class="kv"><span>Travailleurs</span><b>${S.workersBase}${SF.bonusWorkers(S) ? ` + ${SF.bonusWorkers(S)}` : ""}</b></div>
       <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
-      <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 3 points (étages 1 à 3), puis 4, 5 et 6 après les paliers 3 · 6 · 9.</p>
+      <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 2 points (étages 1 à 3), puis 3, 4 et 5 après les paliers 3 · 6 · 9.</p>
       <h4 data-fx="ateliers">Ateliers ${mine && S.phase === "D_main" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>${ateliers}
       <h4 data-fx="tilehand">Main de tuiles</h4>${hand}<h4>Sortilèges</h4>${spells}`;
   }
@@ -1684,7 +1686,7 @@ if (typeof module !== "undefined") module.exports = SF;
       <h2>Règles en bref</h2>
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 6 · 9 · 12 · 15 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance d'un bloc, case par case, sans diagonale, jusqu'à la première tuile ou la fusée (les plus proches de la fusée d'abord) ; ses créatures attaquent dans l'ordre choisi, et si la tuile tombe alors qu'il reste des créatures à faire frapper, tout le bloc avance jusqu'à la suivante (jamais après la dernière attaque) (une attaque contre la fusée tue un seul travailleur). Mobilité : une fois par tour, une aggro peut passer à l'entrée d'une lane voisine. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite rapporte autant de biomasse que sa durée de construction (1, 2 ou 3 ; 1 pour une haie de départ) ; un support qui tombe, 1.</p>
-      <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (3 points par étage, puis 4, 5 et 6 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
+      <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 3, 4 et 5 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
       <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
