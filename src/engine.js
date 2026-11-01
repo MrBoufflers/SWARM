@@ -41,10 +41,11 @@ const SF = (() => {
     "Dortoir": { d: 3, pv: 3, ep: 0, shield: 2, temp: 1, n: 3 },
     // Archives (Oni, 01/11/2026) : 3 PV, +1 technologie, face visible
     "Archives": { d: 2, pv: 3, ep: 0, tech: 1, n: 3 },
-    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, aura: 1, camo: 1, n: 1 },
-    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, aura: 1, camo: 1, n: 1 },
-    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, aura: 1, camo: 1, n: 1 },
-    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, aura: 1, camo: 1, n: 1 },
+    // Avant-postes : posés face visible (Oni, 01/11/2026), avec l'Aura d'épines
+    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, aura: 1, n: 1 },
+    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, aura: 1, n: 1 },
+    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, aura: 1, n: 1 },
+    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, aura: 1, n: 1 },
     "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
     "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
     "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 }, // 3 dégâts quand il se déclenche (Oni, 01/11/2026 ; avant 2)
@@ -270,13 +271,17 @@ const SF = (() => {
     if (pv === "reduit") pv = 5 - r;
     return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, shield: t.shield || 0, camo: t.camo || 0, revealed: !t.camo };
   }
-  // Épines d'une tuile (Oni, 01/11/2026) : ses Épines propres, +1 par support de niveau 2 qui la touche par un côté
+  // Épines d'une tuile (Oni, 01/11/2026) : ses Épines propres, +1 par support de niveau 2 dans les 8 cases autour
   // (pour toute tuile, même sans Épines), +1 par Avant-poste dans les 8 cases autour (« Aura d'épines ») ; tout se cumule.
   // visibleOnly : pour l'affichage côté essaim, ne compte pas l'aura d'un Avant-poste encore caché.
   function epinesOf(S, k, visibleOnly) {
     let e = S.tiles[k].ep || 0;
-    for (const [sk, l] of Object.entries(S.supports)) if (l === 2 && supportWalls(...parse(sk)).includes(k)) e += 1;
     const [x, y] = parse(k), clair = clairvoyance(S);
+    for (const [sk, l] of Object.entries(S.supports)) {
+      if (l !== 2) continue;
+      const [a, b] = parse(sk);
+      if (Math.max(Math.abs(a - x), Math.abs(b - y)) === 1) e += 1;
+    }
     for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
       if (!dx && !dy) continue;
       const o = S.tiles[key(x + dx, y + dy)];
@@ -893,6 +898,7 @@ const SF = (() => {
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.name = START_WALL; t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
       if (t.start) t.ep = 1;
+      if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
     }
     if (S.invest && S.upgrades) for (const [key, got] of Object.entries(S.invest)) {
