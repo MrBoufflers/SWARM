@@ -15,7 +15,7 @@ La colonie gagne quand le 12ᵉ étage est achevé ; l'essaim gagne quand la col
 
 ## Règles
 
-Voir [`docs/regles-v0.3.md`](docs/regles-v0.3.md) (export du livret ; les valeurs marquées † sont encore à valider).
+Voir le livret en PDF [`docs/swarm-steel-livret-v0.3.pdf`](docs/swarm-steel-livret-v0.3.pdf), généré depuis [`docs/regles-v0.3.md`](docs/regles-v0.3.md) avec `npm run livret` (les valeurs marquées † sont encore à valider).
 
 ## Développement
 

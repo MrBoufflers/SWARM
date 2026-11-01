@@ -32,7 +32,7 @@ server/core.js     Serveur du jeu en ligne (lobby, codes, jetons, actions) — s
 server/dev.js      Serveur local (page + /api, parties en mémoire) : `npm run serveur`
 netlify/functions/api.mjs  Le même serveur sur Netlify, état des parties dans Netlify Blobs (store « parties »)
 netlify.toml       Build Netlify : `python3 tools/build.py --site` → site/index.html (dossier ignoré par git, recréé à chaque déploiement)
-docs/regles-v0.3.md  Export du livret de règles (instantané du 30/10/2026), source du PDF
+docs/regles-v0.3.md  Export du livret de règles (à jour au 01/11/2026), source du PDF
 docs/swarm-steel-livret-v0.3.pdf  Livret en PDF, régénéré par `npm run livret` (tools/livret.py → docs/livret.html → tools/livret-pdf.js)
 ```
 
@@ -43,7 +43,7 @@ Le livret de référence est un document Claude d'Oni ; `docs/regles-v0.3.md` en
 - **État** : un seul objet `S`, entièrement sérialisable en JSON (sauvegardé dans `localStorage`, clé `swarm-steel-v03`). Créé par `SF.newGame()`.
 - **Point d'entrée des actions** : `SF.apply(S, camp, type, args)` vérifie le camp (`SF.actor(S)`), la phase et les paramètres, puis appelle les fonctions de règles ; renvoie `""` ou la raison du refus. Table `SF.ACTIONS`. L'interface locale **et** le serveur passent par là. `SF.viewFor(S, camp)` produit la vue filtrée envoyée à un joueur.
 - **Moteur** (`SF`) : fonctions pures qui modifient `S` et renvoient `true/false` selon que l'action est légale. Principales actions :
-  - Essaim : `attackerDraw`, `deploy`, `endDeploy`, `invest` (amélioration payée en plusieurs fois), `raid`, `startAttacks`, `act` (une créature se déplace puis attaque), `endAttackerTurn`.
+  - Essaim : `attackerDraw`, `deploy`, `endDeploy`, `invest` (amélioration payée en plusieurs fois), `moveLane` (Mobilité), `startAttacks`, `actCase` (un bloc avance puis ses créatures attaquent), `endAttackerTurn`.
   - Colonie : `useSpell`, `startChantier(S, i, lane)`, `cancelChantier`, `endDefenderTurn` (construction) → phase `D_place` → `placeTile(S, key)` → fusée, supports → phase `D_fire` : `fire`, `autoFire` → `endColonyTurn`.
   - Hasard : `Math.random` par défaut, remplaçable par `SF.setRng(f)` (utile pour un serveur ou des tests reproductibles).
 - **Phases** (`S.phase`) et camp qui agit (table `PHASE_TXT` dans `ui.js`) : `A_famine` (colonie), `A_start`, `A_deploy`, `A_upgrade` (essaim), `A_react` (colonie), `A_attack` (essaim), `D_main`, `D_fire`, `D_place` (colonie).
@@ -71,13 +71,19 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 
 **Réalisé (30/10/2026), hébergement Netlify choisi par Oni** : pas de WebSocket sur Netlify, donc fonctions + Netlify Blobs + interrogation périodique (toutes les 2 s, seulement quand ce n'est pas le tour du joueur ; écriture conditionnelle sur l'etag contre les collisions). Les parties ne sont jamais supprimées (pas d'expiration pour l'instant).
 
-## Règles modifiées par Oni le 30/10/2026
+## Règles modifiées par Oni (30/10 – 01/11/2026)
 
-- **Épines** : seulement les 4 **Haies d'épines de départ** (anciens « murs de départ » : nom « Haie d'épines », `start: true`, 1 PV, Épines 1, face visible, retirées du jeu quand elles sont détruites), la **Haie d'épines** et le **Mur hérissé** (Épines 2, au lieu de 3). Toutes les autres tuiles : 0. Le support de niveau 2 donne +1 Épines **seulement aux tuiles qui en ont déjà**.
-- **Fusée** : coût d'un étage 3 points (étages 1-3), 4 (4-6), 5 (7-9), 6 (10-12) — `SF.floorCost(S)`. Les points en trop passent à l'étage suivant.
+- **Mise en place** (01/11) : 16 **Haies d'épines de départ** (nom « Haie d'épines », `start: true`, 1 PV, Épines 1, face visible, retirées du jeu quand elles sont détruites) sur toutes les cases des couronnes 1 et 2 ; d'où 4 supports de niveau 1 et 4 de niveau 2 dès le départ (`placeSupports` dans `newGame`). Les tests ciblés gardent l'ancienne mise en place (helper `fresh()`).
+- **Épines** (01/11) : de base 1 pour les haies de départ, Baraquement, Ligne de front, Réduit ; 2 pour Haie d'épines, Mur hérissé, Ronceraie ; 0 sinon. Bonus cumulables (`SF.epinesOf`) : +1 par support de niveau 2 qui touche la tuile par un côté (toute tuile, même sans Épines), +1 par Avant-poste dans les 8 cases autour (« Aura d'épines », `aura: 1`). Côté essaim, l'aura d'un Avant-poste encore caché n'est pas affichée (`epinesOf(S, k, true)`).
+- **Bouclier X** (`shield`) : chaque attaque contre la tuile inflige X dégâts de moins (attaque, percée, spores). Égide et Dortoir : Bouclier 2.
+- **Forteresses** (01/11) : **Égide** (2 tours, 3 PV, Bouclier 2, camouflée, 3 ex.), **Archives** (2 tours, 3 PV, +1 technologie, face visible, 3 ex.), **Ronceraie** (3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 ex.), **Dortoir** revu (3 tours, 3 PV, Bouclier 2, +1 travailleur **temporaire**, 3 ex. ; avant 1 PV, travailleur permanent). Pioche : 54 forteresses. Plus aucun travailleur permanent par bâtiment.
+- **Piège** : 3 dégâts (`SF.TRAP_DMG`, avant 2) ; un piège déjà vu (Vision, Clairvoyance) ne se déclenche plus.
+- **Fusée** : coût d'un étage 2 points (étages 1-3), 3 (4-6), 4 (7-9), 5 (10-12) — `SF.floorCost(S)` (01/11 ; d'abord 3 / 4 / 5 / 6). Les points en trop passent à l'étage suivant.
+- **Sortilèges** (01/11) : un sortilège non joué reste en main tant qu'il n'est pas joué, offensif comme de soutien, sans limite (avant : défaussé à la fin de sa fenêtre).
+- **Créatures** (01/11) : aggros à 1 PV à tous les niveaux ; tanks à 1 ATQ à tous les niveaux. Carapace épaisse +1 PV, Blindage +2 PV (avant +2 / +4).
 - **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
 - **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).
-- **Biomasse** : une tuile détruite rapporte sa **durée de construction** (1 / 2 / 3 ; haie de départ : 1 ; avant : toujours 1) ; un support qui tombe rapporte toujours 1.
+- **Biomasse** : 1 par tuile détruite ou support tombé (règle d'origine ; du 30/10 au 01/11, une tuile rapportait sa durée de construction).
 - **Paliers de l'essaim** : départ 3, puis 6 / 9 / 12 / 15 (à l'origine 4 / 7 / 10 / 13).
 - **Blocs** : toutes les créatures d'une case avancent ensemble (`SF.actCase`, action `act` avec `{key, order}`). Dans une lane, les cases les plus proches de la fusée (chemin le plus court, `pathLen`) agissent d'abord (`SF.readyCases`) ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe **et qu'il reste une créature qui doit frapper**, toute la case avance jusqu'à la suivante juste avant son attaque (un bloc n'avance jamais après la dernière attaque — Oni, 01/11/2026) ; un bloc qui arrive sur une case occupée fusionne avec elle. `SF.act` (une seule créature) ne sert plus qu'aux tests ciblés.
 - **Mobilité** (aggro rang 1, et cible d'Instinct) : une fois par tour **par créature**, en phase Améliorations, passe à l'entrée (colonne C) d'une lane voisine, plafond respecté (action `moveLane`). Remplace l'ancien « choisit sa cible dans la lane ».
@@ -86,14 +92,14 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 - **Déploiement** (aggro C2) : les 2 cartes gratuites de niveau 1 sont piochées **avant** la pioche normale (avant : après, et la pioche normale pouvait vider le niveau 1 → aucune carte gratuite, bug signalé par Oni) ; message dans le journal.
 - **Ordre de fin de tour de la colonie** : action `build` (D_main) → chantiers, pose (D_place, chaque pose fait apparaître les supports), supports, fusée → phase `D_fire` (tirs manuels ou automatiques) → action `endD` → tirs restants, défausse des sorts de soutien, pioches, tour de l'essaim (`SF.endColonyTurn`). Les supports apparus et les paliers atteints pendant le tour comptent pour les tirs. (Avant : tirs d'abord.)
 - Les parties enregistrées avant ces changements sont mises à jour à la lecture (`SF.migrate`, côté navigateur et serveur) ; un nœud déjà assez investi pour le nouveau coût est acquis.
-- Conséquence signalée, à trancher par Oni : la colonne « Points » du barème des forteresses comptait une Épines 1 gratuite pour toutes ; elle est à recalculer.
+- Conséquences signalées, à trancher par Oni : la colonne « Points » du barème des forteresses est à recalculer (Épines 1 gratuite d'origine, nouvelles forteresses sans valeur) ; le barème des créatures (PV + ATQ = 4 / 7 / 10) ne tient plus depuis les aggros à 1 PV et les tanks à 1 ATQ.
 
 ## Points de règles ouverts (ne pas trancher sans Oni)
 
 Marqués † dans le livret, ou repérés pendant la conception :
 
-- **Livret ↔ jeu (décidé par Oni le 30/10/2026 : le jeu fait foi)** : améliorations payables en plusieurs fois (`invest`) et Brouillage joué dans la fenêtre de réaction, sur une créature déployée ce tour. `docs/regles-v0.3.md` est corrigé ; le livret de référence (document Claude d'Oni) reste à reporter.
-- Colosse 3 ATQ / 7 PV (Oni avait écrit 7/3) ; coûts des aggros et tanks (3 / 4 / 7) ; nombre d'exemplaires des soutiens.
+- **Livret ↔ jeu (décidé par Oni : le jeu fait foi)** : `docs/regles-v0.3.md` et le PDF sont à jour au 01/11/2026 ; le livret de référence (document Claude d'Oni) reste à reporter.
+- Coûts des aggros et tanks (3 / 4 / 7) ; nombre d'exemplaires des soutiens.
 - Nom « Déploiement » utilisé à la fois pour une amélioration aggro et pour une étape du tour.
 - Cadence (+2 points) fait désormais exactement la même chose qu'Effort.
 - Aura Griffes : non cumulable avec elle-même, cumulable avec l'Aura Fureur (interprétation).
