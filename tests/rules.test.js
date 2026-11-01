@@ -465,5 +465,20 @@ const fresh = () => {
   SF.apply(S, "colonie", "endD");
   ok(S.spells.includes("Barrage") && S.spells.includes("Effort"), "fin du tour de la colonie : Effort (soutien) reste aussi en main, même sans technologies");
 }
+// 39. tanks à 1 ATQ et Égide (3 PV, Bouclier 2) — Oni, 01/11/2026
+{
+  ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
+  const E = SF.TILES["Égide"];
+  ok(E && E.pv === 3 && E.shield === 2 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Bouclier 2, 2 tours, camouflée, 3 exemplaires, sans Épines");
+  ok(SF.newGame().tileDeck.length + 4 === 47, "pioche de forteresses : 47 tuiles (44 + 3 Égides, main de 4 comprise)");
+  const hit = (name, atq) => {
+    const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Égide", 0, 1);
+    const c = { id: 96, name, lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
+    return S.tiles["0,1"] ? S.tiles["0,1"].hp : 0;
+  };
+  ok(hit("Écorcheur") === 2, "Écorcheur (3 ATQ) contre l'Égide : 3 − 2 = 1 dégât (3 → 2 PV)");
+  ok(hit("Carapace") === 3, "Carapace (1 ATQ) contre l'Égide : aucun dégât");
+  ok(hit("Massacreur") === 0, "Massacreur (7 ATQ) : 7 − 2 = 5 dégâts, l'Égide (3 PV) tombe");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
