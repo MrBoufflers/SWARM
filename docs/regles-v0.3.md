@@ -18,7 +18,7 @@ Repris du prototype jouable et validés par Oni :
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : budget de l'essaim −5 (au lieu de −2). **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
-- **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux.
+- **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment).
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; le bloc n'avance qu'avant une attaque.
 - **Essaim** : paliers à 3 (départ), 6, 9, 12 et 15 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
@@ -303,7 +303,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : révèle les tuiles camouflées de sa lane | 2 |
 | Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV | 2 |
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
-| Phéromone | Soutien | 2 | 3 | 5 | 0 | **Aura Leurre** : une tourelle ou un sortilège qui vise une créature de sa case doit viser, parmi elles, celle qui a le plus de PV | 2 |
+| Phéromone | Soutien | 2 | 3 | 5 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus ; non cumulable | 2 |
 | Perforeur | Soutien | 2 | 3 | 5 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
 | Catalyseur | Soutien | 2 | 3 | 5 | 0 | **Aura Instinct** : une autre créature de sa case, au choix, gagne une capacité supplémentaire : Mobilité ou Furtivité † | 2 |
 | Sapeur | Soutien | 3 | 5 | 8 | 0 | **Sabotage** : quand il est déployé, détruisez une tuile en chantier dans l'atelier de sa lane (elle est défaussée) | 3 |

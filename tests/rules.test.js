@@ -520,5 +520,21 @@ const fresh = () => {
   const c = { id: 97, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(c); SF.act(T, c);
   ok(c.hp === 3, "Piège vu par la Vision d'un Œil-sonde : il ne se déclenche plus");
 }
+// 42. Phéromone : Aura Butin (remplace l'Aura Leurre) — Oni, 01/11/2026
+{
+  const run = mates => {
+    const S = fresh(); S.supports = {};
+    const c = { id: 98, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; S.creatures.push(c);
+    mates.forEach((n, i) => S.creatures.push({ id: 120 + i, name: n, lane: "N", u: 0, k: 4, hp: 5, acted: false }));
+    const b = S.biomass; SF.actCase(S, SF.posKey(c), [98]); // le bloc avance ; l'Écorcheur détruit la haie de départ (1 PV) en C1
+    return S.biomass - b;
+  };
+  ok(run([]) === 1, "sans Phéromone : +1 biomasse");
+  ok(run(["Phéromone"]) === 2, "Phéromone sur la case de la créature qui détruit : +1 en plus (+2)");
+  ok(run(["Phéromone", "Phéromone"]) === 2, "deux Phéromones : non cumulable (+2)");
+  const S = fresh(); const a = { id: 1, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 }, big = { id: 2, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5 }, ph = { id: 3, name: "Phéromone", lane: "N", u: 0, k: 4, hp: 5 };
+  S.creatures.push(a, big, ph);
+  ok(SF.resolveTarget(S, a) === a && SF.CREATURES["Phéromone"].capName === "Aura Butin", "plus de Leurre : un tir sur l'Écorcheur le vise bien lui");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
