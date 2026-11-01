@@ -289,18 +289,20 @@ const SF = (() => {
     "Antenne": { d: 1, pv: 1, ep: 0, tech: 1, n: 3 },
     "Laboratoire": { d: 2, pv: 2, ep: 0, tech: 2, n: 2 },
     "Observatoire": { d: 3, pv: 3, ep: 0, tech: 3, n: 1 },
-    "Baraquement": { d: 1, pv: 1, ep: 0, temp: 1, n: 3 },
+    "Baraquement": { d: 1, pv: 1, ep: 1, temp: 1, n: 3 }, // Épines 1 (Oni, 01/11/2026)
     // Dortoir (Oni, 01/11/2026 ; avant 1 PV, travailleur permanent, 2 ex.) : 3 PV, Bouclier 2, +1 travailleur temporaire
     "Dortoir": { d: 3, pv: 3, ep: 0, shield: 2, temp: 1, n: 3 },
     // Archives (Oni, 01/11/2026) : 3 PV, +1 technologie, face visible
     "Archives": { d: 2, pv: 3, ep: 0, tech: 1, n: 3 },
-    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, camo: 1, n: 1 },
-    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, camo: 1, n: 1 },
-    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, camo: 1, n: 1 },
-    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, camo: 1, n: 1 },
-    "Ligne de front": { d: 2, pv: "front", ep: 0, camo: 1, n: 2 },
-    "Réduit": { d: 2, pv: "reduit", ep: 0, camo: 1, n: 2 },
-    "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 },
+    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
+    "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
+    "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 }, // 3 dégâts quand il se déclenche (Oni, 01/11/2026 ; avant 2)
+    // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
+    "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 2, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Bouclier 2 = chaque attaque contre elle inflige 2 dégâts de moins
     "Égide": { d: 2, pv: 3, ep: 0, shield: 2, camo: 1, n: 3 },
   };
@@ -309,7 +311,8 @@ const SF = (() => {
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
-    "Piège": "Camouflé. 2 dégâts à la créature qui le révèle en l'attaquant.",
+    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant.",
+    "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
     "Égide": "Camouflée. Bouclier 2 : chaque attaque contre elle inflige 2 dégâts de moins.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Bouclier 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie.",
@@ -345,6 +348,7 @@ const SF = (() => {
       B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
+  const TRAP_DMG = 3; // dégâts du Piège (Oni, 01/11/2026 ; avant 2)
   const FAMINE = 5; // baisse du budget de l'essaim par Famine (décision d'Oni, 30/10/2026 ; avant 2) // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [2, 3, 4, 5]; // Oni, 01/11/2026 (avant 3 / 4 / 5 / 6)
@@ -519,10 +523,20 @@ const SF = (() => {
     if (pv === "reduit") pv = 5 - r;
     return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, shield: t.shield || 0, camo: t.camo || 0, revealed: !t.camo };
   }
-  function epinesOf(S, k) {
-    let e = S.tiles[k].ep;
-    // support de niveau 2 : +1 Épines, seulement aux tuiles qui ont déjà des Épines (décision d'Oni, 30/10/2026)
-    if (e > 0 && Object.entries(S.supports).some(([sk, l]) => l === 2 && supportWalls(...parse(sk)).includes(k))) e += 1;
+  // Épines d'une tuile (Oni, 01/11/2026) : ses Épines propres, +1 par support de niveau 2 qui la touche par un côté
+  // (pour toute tuile, même sans Épines), +1 par Avant-poste dans les 8 cases autour (« Aura d'épines ») ; tout se cumule.
+  // visibleOnly : pour l'affichage côté essaim, ne compte pas l'aura d'un Avant-poste encore caché.
+  function epinesOf(S, k, visibleOnly) {
+    let e = S.tiles[k].ep || 0;
+    for (const [sk, l] of Object.entries(S.supports)) if (l === 2 && supportWalls(...parse(sk)).includes(k)) e += 1;
+    const [x, y] = parse(k), clair = clairvoyance(S);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      if (!dx && !dy) continue;
+      const o = S.tiles[key(x + dx, y + dy)];
+      if (!o || !TILES[o.name] || !TILES[o.name].aura) continue;
+      if (visibleOnly && o.camo && !o.revealed && !clair) continue;
+      e += 1;
+    }
     return e;
   }
   function destroyTile(S, k, why) {
@@ -729,7 +743,7 @@ const SF = (() => {
       t.revealed = true;
       fx(S, { t: "reveal", k: tk, trap: !!t.trap });
       if (t.trap) {
-        if (!clairvoyance(S)) damageCreature(S, c, 2, "piège");
+        if (!clairvoyance(S)) damageCreature(S, c, TRAP_DMG, "piège");
         log(S, "essaim", "Un piège est révélé.");
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
     }
@@ -1268,7 +1282,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor, migrate, FAMINE, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, FAMINE, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
@@ -1542,7 +1556,7 @@ if (typeof module !== "undefined") module.exports = SF;
       if (t) {
         if (hiddenTrap(t)) inner = `<div class="tile hidden"><b>?</b><small>camouflée</small></div>`;
         else {
-          const ep = SF.epinesOf(S, k);
+          const ep = SF.epinesOf(S, k, S.view === "essaim");
           inner = `<div class="tile${t.camo && !t.revealed ? " trap" : ""}" title="${t.camo && !t.revealed ? "Camouflée : l'essaim ne la voit pas" : ""}"><span class="tn">${E(short(t.name))}</span><b class="hp">${t.hp}<small>/${t.max}</small></b>
             <span class="tb">${ep ? icon("epines") + ep : ""}${t.shield ? icon("bouclier") + t.shield : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
         }
@@ -1559,6 +1573,7 @@ if (typeof module !== "undefined") module.exports = SF;
     const pv = t.pv === "ap" ? `2 (4 en lane ${L[t.dir]})` : t.pv === "front" ? "2 à 4" : t.pv === "reduit" ? "2 à 4" : t.pv;
     const caps = [];
     const cap = (ic, n, txt) => caps.push(`<span class="capline">${icon(ic)}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`);
+    if (t.aura) cap("epines", "Aura d'épines", "+1 Épines à chaque bâtiment des 8 cases autour (cumulable).");
     if (t.pv === "ap") cap("cardinal", "Avant-poste", `+2 PV si posé dans la lane ${L[t.dir]} (4 PV), sinon 2 PV.`);
     if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
     if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
@@ -1568,8 +1583,8 @@ if (typeof module !== "undefined") module.exports = SF;
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque ou par Vision / Clairvoyance.");
-    if (t.trap) cap("piege", "Piège", "2 dégâts à la créature qui le révèle en l'attaquant. Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.");
-    if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 si la tuile touche un support de niveau 2).`);
+    if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant. Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
+    if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par support de niveau 2 qui la touche, +1 par Avant-poste voisin).`);
     return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
       <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : " · sans Épines"}</span>${caps.join("")}`;
   }
@@ -1693,7 +1708,7 @@ if (typeof module !== "undefined") module.exports = SF;
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 6 · 9 · 12 · 15 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance d'un bloc, case par case, sans diagonale, jusqu'à la première tuile ou la fusée (les plus proches de la fusée d'abord) ; ses créatures attaquent dans l'ordre choisi, et si la tuile tombe alors qu'il reste des créatures à faire frapper, tout le bloc avance jusqu'à la suivante (jamais après la dernière attaque) (une attaque contre la fusée tue un seul travailleur). Mobilité : une fois par tour, une aggro peut passer à l'entrée d'une lane voisine. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 3, 4 et 5 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Seules les Haies d'épines de départ (1 PV, Épines 1), les Haies d'épines construites et le Mur hérissé (Épines 2) ont des Épines : dégâts à la créature qui les attaque (+1 si elles touchent un support de niveau 2). Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Haies de départ, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 qui touche la tuile et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }

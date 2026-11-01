@@ -36,18 +36,20 @@ const SF = (() => {
     "Antenne": { d: 1, pv: 1, ep: 0, tech: 1, n: 3 },
     "Laboratoire": { d: 2, pv: 2, ep: 0, tech: 2, n: 2 },
     "Observatoire": { d: 3, pv: 3, ep: 0, tech: 3, n: 1 },
-    "Baraquement": { d: 1, pv: 1, ep: 0, temp: 1, n: 3 },
+    "Baraquement": { d: 1, pv: 1, ep: 1, temp: 1, n: 3 }, // Épines 1 (Oni, 01/11/2026)
     // Dortoir (Oni, 01/11/2026 ; avant 1 PV, travailleur permanent, 2 ex.) : 3 PV, Bouclier 2, +1 travailleur temporaire
     "Dortoir": { d: 3, pv: 3, ep: 0, shield: 2, temp: 1, n: 3 },
     // Archives (Oni, 01/11/2026) : 3 PV, +1 technologie, face visible
     "Archives": { d: 2, pv: 3, ep: 0, tech: 1, n: 3 },
-    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, camo: 1, n: 1 },
-    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, camo: 1, n: 1 },
-    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, camo: 1, n: 1 },
-    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, camo: 1, n: 1 },
-    "Ligne de front": { d: 2, pv: "front", ep: 0, camo: 1, n: 2 },
-    "Réduit": { d: 2, pv: "reduit", ep: 0, camo: 1, n: 2 },
-    "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 },
+    "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, aura: 1, camo: 1, n: 1 },
+    "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
+    "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
+    "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 }, // 3 dégâts quand il se déclenche (Oni, 01/11/2026 ; avant 2)
+    // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
+    "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 2, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Bouclier 2 = chaque attaque contre elle inflige 2 dégâts de moins
     "Égide": { d: 2, pv: 3, ep: 0, shield: 2, camo: 1, n: 3 },
   };
@@ -56,7 +58,8 @@ const SF = (() => {
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
-    "Piège": "Camouflé. 2 dégâts à la créature qui le révèle en l'attaquant.",
+    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant.",
+    "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
     "Égide": "Camouflée. Bouclier 2 : chaque attaque contre elle inflige 2 dégâts de moins.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Bouclier 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie.",
@@ -92,6 +95,7 @@ const SF = (() => {
       B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
+  const TRAP_DMG = 3; // dégâts du Piège (Oni, 01/11/2026 ; avant 2)
   const FAMINE = 5; // baisse du budget de l'essaim par Famine (décision d'Oni, 30/10/2026 ; avant 2) // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [2, 3, 4, 5]; // Oni, 01/11/2026 (avant 3 / 4 / 5 / 6)
@@ -266,10 +270,20 @@ const SF = (() => {
     if (pv === "reduit") pv = 5 - r;
     return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, shield: t.shield || 0, camo: t.camo || 0, revealed: !t.camo };
   }
-  function epinesOf(S, k) {
-    let e = S.tiles[k].ep;
-    // support de niveau 2 : +1 Épines, seulement aux tuiles qui ont déjà des Épines (décision d'Oni, 30/10/2026)
-    if (e > 0 && Object.entries(S.supports).some(([sk, l]) => l === 2 && supportWalls(...parse(sk)).includes(k))) e += 1;
+  // Épines d'une tuile (Oni, 01/11/2026) : ses Épines propres, +1 par support de niveau 2 qui la touche par un côté
+  // (pour toute tuile, même sans Épines), +1 par Avant-poste dans les 8 cases autour (« Aura d'épines ») ; tout se cumule.
+  // visibleOnly : pour l'affichage côté essaim, ne compte pas l'aura d'un Avant-poste encore caché.
+  function epinesOf(S, k, visibleOnly) {
+    let e = S.tiles[k].ep || 0;
+    for (const [sk, l] of Object.entries(S.supports)) if (l === 2 && supportWalls(...parse(sk)).includes(k)) e += 1;
+    const [x, y] = parse(k), clair = clairvoyance(S);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      if (!dx && !dy) continue;
+      const o = S.tiles[key(x + dx, y + dy)];
+      if (!o || !TILES[o.name] || !TILES[o.name].aura) continue;
+      if (visibleOnly && o.camo && !o.revealed && !clair) continue;
+      e += 1;
+    }
     return e;
   }
   function destroyTile(S, k, why) {
@@ -476,7 +490,7 @@ const SF = (() => {
       t.revealed = true;
       fx(S, { t: "reveal", k: tk, trap: !!t.trap });
       if (t.trap) {
-        if (!clairvoyance(S)) damageCreature(S, c, 2, "piège");
+        if (!clairvoyance(S)) damageCreature(S, c, TRAP_DMG, "piège");
         log(S, "essaim", "Un piège est révélé.");
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
     }
@@ -1015,7 +1029,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor, migrate, FAMINE, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, FAMINE, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

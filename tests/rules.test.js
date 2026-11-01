@@ -45,7 +45,7 @@ const fresh = () => {
   SF.act(S, S.creatures[0]);
   const c = S.creatures[0];
   ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 1, "piège révélé, 2 → 1 PV");
-  ok(c && c.hp === 1, "Carapace : 2 dégâts du piège, pas d'Épines (3 → 1 PV)");
+  ok(!c, "Carapace (3 PV) : 3 dégâts du piège, détruite");
 }
 // 5. un support tombe quand tous les murs qui le touchent ont disparu
 {
@@ -283,7 +283,7 @@ const fresh = () => {
 // 27. Épines (décision d'Oni, 30/10/2026) : seulement les Haies d'épines de départ (1), la Haie d'épines et le Mur hérissé (2)
 {
   const withEp = Object.keys(SF.TILES).filter(n => SF.TILES[n].ep > 0).sort();
-  ok(withEp.join() === ["Haie d'épines", "Mur hérissé"].sort().join() && SF.TILES["Haie d'épines"].ep === 2 && SF.TILES["Mur hérissé"].ep === 2, "seules la Haie d'épines et le Mur hérissé ont des Épines (2)");
+  ok(withEp.join() === ["Baraquement", "Haie d'épines", "Ligne de front", "Mur hérissé", "Réduit", "Ronceraie"].sort().join() && SF.TILES["Haie d'épines"].ep === 2 && SF.TILES["Mur hérissé"].ep === 2 && SF.TILES["Réduit"].ep === 1, "tuiles à Épines : Baraquement, Ligne de front, Réduit (1) ; Haie d'épines, Mur hérissé, Ronceraie (2)");
   const S = fresh();
   ok(["0,1", "1,0", "0,-1", "-1,0"].every(k => S.tiles[k].name === "Haie d'épines" && S.tiles[k].start && S.tiles[k].ep === 1 && S.tiles[k].hp === 1 && S.tiles[k].max === 1 && S.tiles[k].revealed), "les 4 Haies d'épines de départ : 1 PV, Épines 1, face visible");
   // support de niveau 2 en (1,2) / (-1,2)… : il touche les murs (0,2) et (1,1) côté fusée
@@ -291,7 +291,7 @@ const fresh = () => {
   S.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
   const touching = SF.supportWalls(1, 2);
   const tk = touching.find(k => k === "0,2");
-  ok(!tk || SF.epinesOf(S, "0,2") === 0, "support de niveau 2 : pas d'Épines ajoutées à une Muraille (0 Épines)");
+  ok(!tk || SF.epinesOf(S, "0,2") === 1, "support de niveau 2 : +1 Épines à toute tuile qui le touche, même une Muraille (0 → 1)");
   S.tiles["0,2"] = SF.tileStats("Haie d'épines", 0, 2);
   ok(!tk || SF.epinesOf(S, "0,2") === 3, "support de niveau 2 : +1 à une Haie d'épines (2 → 3)");
   const old = { tiles: { "0,1": { name: "Mur de départ", ep: 1 }, "0,2": { name: "Muraille", ep: 1 } }, tileDiscard: ["Mur de départ", "Muraille"], tileDeck: [], hand: [] };
@@ -470,7 +470,7 @@ const fresh = () => {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
   ok(E && E.pv === 3 && E.shield === 2 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Bouclier 2, 2 tours, camouflée, 3 exemplaires, sans Épines");
-  ok(SF.newGame().tileDeck.length + 4 === 51, "pioche de forteresses : 51 tuiles (44 + 3 Égides + 1 Dortoir + 3 Archives, main de 4 comprise)");
+  ok(SF.newGame().tileDeck.length + 4 === 54, "pioche de forteresses : 54 tuiles (44 + 3 Égides + 1 Dortoir + 3 Archives + 3 Ronceraies, main de 4 comprise)");
   const hit = (name, atq) => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Égide", 0, 1);
     const c = { id: 96, name, lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
@@ -493,6 +493,26 @@ const fresh = () => {
   S.upgrades.tank.r1 = "A"; const m1 = SF.maxHp(S, "Carapace"); S.upgrades.tank.r2 = "A";
   ok(m1 === 4 && SF.maxHp(S, "Carapace") === 6, "Carapace épaisse +1 PV (3 → 4), Blindage +2 PV (→ 6, total +3)");
   ok(["Écorcheur", "Ravageur", "Massacreur"].every(n => SF.CREATURES[n].pv === 1), "aggros : 1 PV à tous les niveaux");
+}
+// 41. Aura d'épines des Avant-postes, Ronceraie, Piège à 3 dégâts (Oni, 01/11/2026)
+{
+  const S = fresh(); S.supports = {};
+  S.tiles["1,2"] = SF.tileStats("Muraille", 1, 2);
+  S.tiles["0,3"] = SF.tileStats("Avant-poste du Nord", 0, 3);     // diagonale de (1,2)
+  ok(SF.epinesOf(S, "1,2") === 1, "Muraille en diagonale d'un Avant-poste : Épines 1 (8 cases autour)");
+  S.tiles["2,3"] = SF.tileStats("Avant-poste de l'Est", 2, 3);    // autre diagonale
+  ok(SF.epinesOf(S, "1,2") === 2, "deux Avant-postes voisins : +1 chacun (Épines 2)");
+  S.supports["2,2"] = 2; // coin de support de niveau 2 qui touche (1,2) par un côté
+  ok(SF.epinesOf(S, "1,2") === 3, "tout se cumule : +1 du support de niveau 2 (Épines 3)");
+  ok(SF.epinesOf(S, "1,2", true) === 1, "côté essaim, l'aura d'Avant-postes encore cachés n'est pas affichée (seul le support compte)");
+  const R = SF.TILES["Ronceraie"];
+  ok(R.d === 3 && R.pv === 2 && R.ren === 2 && R.ep === 2 && R.camo && R.n === 3, "Ronceraie : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 ex.");
+  ok(SF.TRAP_DMG === 3, "Piège : 3 dégâts");
+  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
+  T.handA = [{ name: "Œil-sonde", free: true, uid: 990 }]; T.phase = "A_deploy"; T.budget = 0;
+  SF.deploy(T, 990, "N", 1);
+  const c = { id: 97, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(c); SF.act(T, c);
+  ok(c.hp === 3, "Piège vu par la Vision d'un Œil-sonde : il ne se déclenche plus");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
