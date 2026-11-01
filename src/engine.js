@@ -649,9 +649,7 @@ const SF = (() => {
       const v = soinValue(S, c), m = maxHp(S, c.name);
       if (v && c.hp < m) { const before = c.hp; c.hp = Math.min(m, c.hp + v); fx(S, { t: "cheal", id: c.id, n: c.hp - before, hp: c.hp + bonusHp(S, c) }); log(S, "essaim", `${c.name} regagne ${v} PV.`); }
     }
-    // sortilèges offensifs non joués : défaussés
-    const off = S.spells.filter(s => SPELLS[s].kind === "off");
-    if (off.length) { S.spellDiscard.push(...off); S.spells = S.spells.filter(s => SPELLS[s].kind !== "off"); log(S, "colonie", `${off.length} sortilège${off.length > 1 ? "s" : ""} offensif${off.length > 1 ? "s" : ""} non joué${off.length > 1 ? "s" : ""} défaussé${off.length > 1 ? "s" : ""}.`); }
+    // sortilèges non joués : ils restent en main jusqu'à ce qu'ils soient joués (Oni, 01/11/2026 ; avant : défaussés)
     S.stase = [];
     startDefenderTurn(S);
   }
@@ -849,9 +847,7 @@ const SF = (() => {
   }
   function endColonyTurn(S) {
     autoFire(S); // tirs restants (automatiques)
-    // sortilèges de soutien non joués : défaussés
-    const sup = S.spells.filter(s => SPELLS[s].kind === "sup");
-    if (sup.length) { S.spellDiscard.push(...sup); S.spells = S.spells.filter(s => SPELLS[s].kind !== "sup"); }
+    // sortilèges de soutien non joués : gardés en main (Oni, 01/11/2026)
     drawTiles(S);
     const n = spellsPerTurn(S);
     for (let i = 0; i < n; i++) {

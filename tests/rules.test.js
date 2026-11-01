@@ -452,5 +452,18 @@ const fresh = () => {
   ok(Object.values(S.supports).filter(l => l === 1).length === 4 && Object.values(S.supports).filter(l => l === 2).length === 4, "4 supports de niveau 1 et 4 de niveau 2 dès le départ");
   ok(SF.epinesOf(S, "1,2") === 2 && SF.epinesOf(S, "0,2") === 1, "une haie qui touche un support de niveau 2 a Épines 2 (1 + 1), les autres Épines 1");
 }
+// 38. sortilèges non joués : gardés en main tant qu'ils ne sont pas joués, offensifs comme de soutien (Oni, 01/11/2026)
+{
+  const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S);
+  S.spells = ["Barrage", "Effort"];
+  SF.apply(S, "essaim", "toAttacks");
+  ok(S.phase === "A_react" && SF.apply(S, "colonie", "reactDone") === "", "fenêtre de réaction passée sans jouer Barrage");
+  SF.apply(S, "essaim", "endA");
+  ok(S.spells.includes("Barrage") && S.spells.includes("Effort"), "fin du tour de l'essaim : Barrage (offensif) reste en main");
+  S.techBonus = 0; // plus de technologies : la main ne change pas
+  SF.apply(S, "colonie", "build"); while (S.phase === "D_place") SF.apply(S, "colonie", "placeAt", { k: SF.placeTargets(S)[0] });
+  SF.apply(S, "colonie", "endD");
+  ok(S.spells.includes("Barrage") && S.spells.includes("Effort"), "fin du tour de la colonie : Effort (soutien) reste aussi en main, même sans technologies");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
