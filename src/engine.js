@@ -7,8 +7,9 @@ const SF = (() => {
     "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 2, atq: 5 },
     "Massacreur": { type: "aggro", lvl: 3, cost: 7, pv: 3, atq: 7 },
     "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 3, atq: 1 },
-    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 2 },
-    "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 3 },
+    // tous les tanks à 1 ATQ (Oni, 01/11/2026 ; avant Béhémoth 2, Colosse 3)
+    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 1 },
+    "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Révèle les tuiles camouflées de sa lane." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
@@ -43,6 +44,8 @@ const SF = (() => {
     "Ligne de front": { d: 2, pv: "front", ep: 0, camo: 1, n: 2 },
     "Réduit": { d: 2, pv: "reduit", ep: 0, camo: 1, n: 2 },
     "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 },
+    // Égide (Oni, 01/11/2026) : Bouclier 2 = chaque attaque contre elle inflige 2 dégâts de moins
+    "Égide": { d: 2, pv: 3, ep: 0, shield: 2, camo: 1, n: 3 },
   };
   const TILE_TEXT = {
     "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
@@ -50,6 +53,7 @@ const SF = (() => {
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
     "Piège": "Camouflé. 2 dégâts à la créature qui le révèle en l'attaquant.",
+    "Égide": "Camouflée. Bouclier 2 : chaque attaque contre elle inflige 2 dégâts de moins.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "+1 travailleur permanent, gagné à la construction.",
   };
@@ -256,7 +260,7 @@ const SF = (() => {
     if (pv === "ap") pv = lane === t.dir ? 4 : 2;
     if (pv === "front") pv = 1 + r;
     if (pv === "reduit") pv = 5 - r;
-    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, camo: t.camo || 0, revealed: !t.camo };
+    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, shield: t.shield || 0, camo: t.camo || 0, revealed: !t.camo };
   }
   function epinesOf(S, k) {
     let e = S.tiles[k].ep;
@@ -477,18 +481,20 @@ const SF = (() => {
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
       log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
     } else {
+      if (t.shield) dmg = Math.max(0, dmg - t.shield); // Bouclier X : X dégâts de moins par attaque
       const loss = t.ren ? Math.floor(dmg / t.ren) : dmg;
       const capacity = t.ren ? t.hp * t.ren : t.hp;
       const excess = dmg - capacity;
       t.hp -= loss;
       fx(S, { t: "hit", id: c.id, k: tk, n: Math.min(loss, t.hp + loss), hp: Math.max(0, t.hp) });
-      log(S, "essaim", `${c.name} inflige ${dmg} à ${t.name} (−${Math.min(loss, t.hp + loss)} PV).`);
+      log(S, "essaim", `${c.name} inflige ${dmg}${t.shield ? ` (bouclier −${t.shield})` : ""} à ${t.name} (−${Math.min(loss, t.hp + loss)} PV).`);
       if (primary && caseMates(S, c).some(o => o.name === "Sporeur")) {
         for (const [a, b] of neighbors(x, y)) {
           const nk = key(a, b), nt = S.tiles[nk];
           if (nt && !S.stase.includes(cellLane(a, b))) {
-            nt.hp -= nt.ren ? Math.floor(1 / nt.ren) : 1;
-            fx(S, { t: "hit", id: null, k: nk, n: nt.ren ? 0 : 1, hp: Math.max(0, nt.hp) });
+            const sp = Math.max(0, 1 - (nt.shield || 0)), spLoss = nt.ren ? Math.floor(sp / nt.ren) : sp;
+            nt.hp -= spLoss;
+            fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
             if (nt.hp <= 0) destroyTile(S, nk, "spores");
           }
         }
@@ -988,7 +994,7 @@ const SF = (() => {
       for (const p of V.toPlace) p.tile = hideName(p.tile);
       if (!clairvoyance(S)) for (const k of Object.keys(V.tiles)) {
         const t = V.tiles[k];
-        if (t.camo && !t.revealed) V.tiles[k] = { name: null, camo: 1, revealed: false, hidden: true, hp: null, max: null, ep: 0, ren: 0, tech: 0, temp: 0, trap: 0 };
+        if (t.camo && !t.revealed) V.tiles[k] = { name: null, camo: 1, revealed: false, hidden: true, hp: null, max: null, ep: 0, ren: 0, tech: 0, temp: 0, trap: 0, shield: 0 };
       }
     }
     return V;

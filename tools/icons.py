@@ -28,6 +28,8 @@ ICONS = {
                '<path d="M2 20H22M3 20L6 11L9 20M9 20L12 4.5L15 20M15 20L18 11L21 20"/>'),
     "renforce": ("Renforcé X : 1 PV perdu par tranche de X dégâts",
                  '<path d="M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z"/>'),
+    "bouclier": ("Bouclier X : chaque attaque contre la tuile inflige X dégâts de moins",
+                 '<path d="M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z"/><path d="M8.5 12H15.5"/>'),
     "temp": ("Travailleur temporaire (tant que la tuile tient)",
              '<circle cx="9" cy="8.5" r="3.4"/><path d="M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4M15 13H21M15 21H21M16 13C16 16 18 16.5 18 17C18 17.5 16 18 16 21M20 13C20 16 18 16.5 18 17C18 17.5 20 18 20 21"/>'),
     "perm": ("Travailleur permanent (conservé si la tuile tombe)",
