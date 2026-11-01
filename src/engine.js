@@ -4,8 +4,9 @@ const SF = (() => {
   // ------------------------------------------------------------------ données
   const CREATURES = {
     "Écorcheur": { type: "aggro", lvl: 1, cost: 3, pv: 1, atq: 3 },
-    "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 2, atq: 5 },
-    "Massacreur": { type: "aggro", lvl: 3, cost: 7, pv: 3, atq: 7 },
+    // aggros : toujours 1 PV, quel que soit le niveau (Oni, 01/11/2026 ; avant Ravageur 2, Massacreur 3)
+    "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 1, atq: 5 },
+    "Massacreur": { type: "aggro", lvl: 3, cost: 7, pv: 1, atq: 7 },
     "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 3, atq: 1 },
     // tous les tanks à 1 ATQ (Oni, 01/11/2026 ; avant Béhémoth 2, Colosse 3)
     "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 1 },
@@ -36,7 +37,10 @@ const SF = (() => {
     "Laboratoire": { d: 2, pv: 2, ep: 0, tech: 2, n: 2 },
     "Observatoire": { d: 3, pv: 3, ep: 0, tech: 3, n: 1 },
     "Baraquement": { d: 1, pv: 1, ep: 0, temp: 1, n: 3 },
-    "Dortoir": { d: 3, pv: 1, ep: 0, perm: 1, n: 2 },
+    // Dortoir (Oni, 01/11/2026 ; avant 1 PV, travailleur permanent, 2 ex.) : 3 PV, Bouclier 2, +1 travailleur temporaire
+    "Dortoir": { d: 3, pv: 3, ep: 0, shield: 2, temp: 1, n: 3 },
+    // Archives (Oni, 01/11/2026) : 3 PV, +1 technologie, face visible
+    "Archives": { d: 2, pv: 3, ep: 0, tech: 1, n: 3 },
     "Avant-poste du Nord": { d: 2, pv: "ap", dir: "N", ep: 0, camo: 1, n: 1 },
     "Avant-poste de l'Est": { d: 2, pv: "ap", dir: "E", ep: 0, camo: 1, n: 1 },
     "Avant-poste du Sud": { d: 2, pv: "ap", dir: "S", ep: 0, camo: 1, n: 1 },
@@ -55,7 +59,7 @@ const SF = (() => {
     "Piège": "Camouflé. 2 dégâts à la créature qui le révèle en l'attaquant.",
     "Égide": "Camouflée. Bouclier 2 : chaque attaque contre elle inflige 2 dégâts de moins.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
-    "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "+1 travailleur permanent, gagné à la construction.",
+    "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Bouclier 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie.",
   };
   const SPELLS = {
     "Frappe orbitale": { kind: "off", n: 3, text: "4 dégâts à 1 créature." },
@@ -80,8 +84,8 @@ const SF = (() => {
     aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté)."],
       A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
-    tank: { A1: ["Carapace épaisse", "+2 PV."], B1: ["Protection", "Les tirs visant une créature non tank de sa case visent ce tank."],
-      A2: ["Blindage", "+4 PV (total +6)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
+    tank: { A1: ["Carapace épaisse", "+1 PV."], B1: ["Protection", "Les tirs visant une créature non tank de sa case visent ce tank."],
+      A2: ["Blindage", "+2 PV (total +3)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
     soutien: { A1: ["Mue", "+1 PV et Furtivité."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
@@ -214,7 +218,7 @@ const SF = (() => {
   function bonusHp(S, c) { return CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "B" ? caseMates(S, c).length : 0; }
   function maxHp(S, name) {
     const b = CREATURES[name]; let m = b.pv;
-    if (b.type === "tank") { if (S.upgrades.tank.r1 === "A") m += 2; if (S.upgrades.tank.r2 === "A") m += 4; }
+    if (b.type === "tank") { if (S.upgrades.tank.r1 === "A") m += 1; if (S.upgrades.tank.r2 === "A") m += 2; } // Oni, 01/11/2026 (avant +2 / +4)
     if (b.type === "soutien" && S.upgrades.soutien.r1 === "A") m += 1;
     return m;
   }
@@ -272,9 +276,8 @@ const SF = (() => {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
     if (!t.start) S.tileDiscard.push(t.name);
-    // biomasse gagnée = durée de construction de la tuile : 1, 2 ou 3 (décision d'Oni, 30/10/2026 ; avant : toujours 1).
-    // Haies de départ : 1 (comme une Haie d'épines). Supports : toujours 1.
-    const gain = !t.start && TILES[t.name] ? TILES[t.name].d : 1;
+    // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
+    const gain = 1;
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
     log(S, "essaim", `${t.name} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);

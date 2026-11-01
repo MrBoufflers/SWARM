@@ -138,8 +138,8 @@ const fresh = () => {
 // 14. Camouflage : toutes les forteresses sauf Antenne, Laboratoire, Observatoire, Baraquement, Dortoir
 {
   const S = fresh(); SF.attackerDraw(S);
-  for (const n of Object.keys(SF.TILES).filter(n => !["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir"].includes(n))) ok(!SF.tileStats(n, 0, 2).revealed && SF.tileStats(n, 0, 2).camo === 1, n + " posé camouflé");
-  for (const n of ["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir"]) ok(SF.tileStats(n, 0, 2).revealed && !SF.tileStats(n, 0, 2).camo, n + " posé face visible");
+  for (const n of Object.keys(SF.TILES).filter(n => !["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives"].includes(n))) ok(!SF.tileStats(n, 0, 2).revealed && SF.tileStats(n, 0, 2).camo === 1, n + " posé camouflé");
+  for (const n of ["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives"]) ok(SF.tileStats(n, 0, 2).revealed && !SF.tileStats(n, 0, 2).camo, n + " posé face visible");
   S.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
   const c = { id: 950, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, new: true, acted: false };
   S.creatures.push(c); SF.act(S, c);
@@ -351,7 +351,7 @@ const fresh = () => {
     return S.tiles[k] ? "intacte" : S.biomass - b;
   };
   const g = [gain("Palissade"), gain("Muraille"), gain("Rempart"), gain("Muraille", "0,3")];
-  ok(g.join() === "1,2,3,2", "Palissade (durée 1) / Muraille (2) / Rempart (3) : +" + g.slice(0, 3).join(" / +") + " ; la couronne ne compte pas (Muraille en couronne 3 : +" + g[3] + ")");
+  ok(g.join() === "1,1,1,1", "toute tuile détruite rapporte 1 biomasse (Palissade, Muraille, Rempart, Muraille en couronne 3 : +" + g.join(" / +") + ")");
   const S = fresh(); S.supports = {}; const b = S.biomass, n = S.tileDiscard.length;
   const c = { id: 82, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
   ok(!S.tiles["0,1"] && S.biomass - b === 1 && S.tileDiscard.length === n, "haie de départ détruite : +1 biomasse, retirée du jeu (pas de défausse)");
@@ -470,7 +470,7 @@ const fresh = () => {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
   ok(E && E.pv === 3 && E.shield === 2 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Bouclier 2, 2 tours, camouflée, 3 exemplaires, sans Épines");
-  ok(SF.newGame().tileDeck.length + 4 === 47, "pioche de forteresses : 47 tuiles (44 + 3 Égides, main de 4 comprise)");
+  ok(SF.newGame().tileDeck.length + 4 === 51, "pioche de forteresses : 51 tuiles (44 + 3 Égides + 1 Dortoir + 3 Archives, main de 4 comprise)");
   const hit = (name, atq) => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Égide", 0, 1);
     const c = { id: 96, name, lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
@@ -479,6 +479,20 @@ const fresh = () => {
   ok(hit("Écorcheur") === 2, "Écorcheur (3 ATQ) contre l'Égide : 3 − 2 = 1 dégât (3 → 2 PV)");
   ok(hit("Carapace") === 3, "Carapace (1 ATQ) contre l'Égide : aucun dégât");
   ok(hit("Massacreur") === 0, "Massacreur (7 ATQ) : 7 − 2 = 5 dégâts, l'Égide (3 PV) tombe");
+}
+// 40. Dortoir, Archives, améliorations des tanks, PV des aggros (Oni, 01/11/2026)
+{
+  const D = SF.TILES["Dortoir"], A = SF.TILES["Archives"];
+  ok(D.d === 3 && D.pv === 3 && D.shield === 2 && D.temp === 1 && !D.perm && D.n === 3 && !D.camo, "Dortoir : 3 tours, 3 PV, Bouclier 2, +1 travailleur temporaire, 3 ex., face visible");
+  ok(A.d === 2 && A.pv === 3 && A.tech === 1 && A.n === 3 && !A.camo && A.ep === 0, "Archives : 2 tours, 3 PV, +1 technologie, 3 ex., face visible");
+  const S = fresh(); const w = SF.bonusWorkers(S), t = SF.tech(S);
+  S.tiles["0,2"] = SF.tileStats("Dortoir", 0, 2); S.tiles["0,-2"] = SF.tileStats("Archives", 0, -2);
+  ok(SF.bonusWorkers(S) === w + 1 && SF.tech(S) === t + 1, "Dortoir en jeu : +1 travailleur ; Archives : +1 technologie");
+  delete S.tiles["0,2"];
+  ok(SF.bonusWorkers(S) === w, "Dortoir détruit : le travailleur est perdu (temporaire)");
+  S.upgrades.tank.r1 = "A"; const m1 = SF.maxHp(S, "Carapace"); S.upgrades.tank.r2 = "A";
+  ok(m1 === 4 && SF.maxHp(S, "Carapace") === 6, "Carapace épaisse +1 PV (3 → 4), Blindage +2 PV (→ 6, total +3)");
+  ok(["Écorcheur", "Ravageur", "Massacreur"].every(n => SF.CREATURES[n].pv === 1), "aggros : 1 PV à tous les niveaux");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
