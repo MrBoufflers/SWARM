@@ -285,7 +285,7 @@ const fresh = () => {
   const withEp = Object.keys(SF.TILES).filter(n => SF.TILES[n].ep > 0).sort();
   ok(withEp.join() === ["Baraquement", "Haie d'épines", "Ligne de front", "Mur hérissé", "Réduit", "Ronceraie"].sort().join() && SF.TILES["Haie d'épines"].ep === 2 && SF.TILES["Mur hérissé"].ep === 2 && SF.TILES["Réduit"].ep === 1, "tuiles à Épines : Baraquement, Ligne de front, Réduit (1) ; Haie d'épines, Mur hérissé, Ronceraie (2)");
   const S = fresh();
-  ok(["0,1", "1,0", "0,-1", "-1,0"].every(k => S.tiles[k].name === "Haie d'épines" && S.tiles[k].start && S.tiles[k].ep === 1 && S.tiles[k].hp === 1 && S.tiles[k].max === 1 && S.tiles[k].revealed), "les 4 Haies d'épines de départ : 1 PV, Épines 1, face visible");
+  ok(["0,1", "1,0", "0,-1", "-1,0"].every(k => S.tiles[k].name === "Barbelé" && S.tiles[k].start && S.tiles[k].ep === 1 && S.tiles[k].hp === 1 && S.tiles[k].max === 1 && S.tiles[k].revealed), "les Barbelés de départ (couronne 1) : 1 PV, Épines 1, face visible");
   // support de niveau 2 en (1,2) / (-1,2)… : il touche les murs (0,2) et (1,1) côté fusée
   S.supports["1,2"] = 2;
   S.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
@@ -296,10 +296,10 @@ const fresh = () => {
   ok(!tk || SF.epinesOf(S, "0,2") === 3, "support de niveau 2 : +1 à une Haie d'épines (2 → 3)");
   const old = { tiles: { "0,1": { name: "Mur de départ", ep: 1 }, "0,2": { name: "Muraille", ep: 1 } }, tileDiscard: ["Mur de départ", "Muraille"], tileDeck: [], hand: [] };
   SF.migrate(old);
-  ok(old.tiles["0,1"].name === "Haie d'épines" && old.tiles["0,1"].start && old.tiles["0,2"].ep === 0 && old.tileDiscard.join() === "Muraille", "ancienne partie : Mur de départ devenu Haie d'épines de départ, Épines mises à jour");
+  ok(old.tiles["0,1"].name === "Barbelé" && old.tiles["0,1"].start && old.tiles["0,2"].ep === 0 && old.tileDiscard.join() === "Muraille", "ancienne partie : Mur de départ devenu Barbelé, Épines mises à jour");
   const old2 = { tiles: { "0,1": { name: "Haie de départ", ep: 1, hp: 2, max: 2 } }, tileDiscard: [], tileDeck: [], hand: [] };
   SF.migrate(old2);
-  ok(old2.tiles["0,1"].name === "Haie d'épines" && old2.tiles["0,1"].hp === 1 && old2.tiles["0,1"].max === 1, "partie d'hier : Haie de départ (2 PV) ramenée à 1 PV");
+  ok(old2.tiles["0,1"].name === "Barbelé" && old2.tiles["0,1"].hp === 1 && old2.tiles["0,1"].max === 1, "partie d'hier : Haie de départ (2 PV) ramenée à 1 PV");
 }
 // 28. fusée : coût d'un étage 3 / 4 / 5 / 6 selon le palier (étages 1-3, 4-6, 7-9, 10-12)
 {
@@ -448,7 +448,7 @@ const fresh = () => {
 {
   const S = SF.newGame();
   const starts = Object.keys(S.tiles).filter(k => S.tiles[k].start);
-  ok(starts.length === 16 && starts.every(k => [1, 2].includes(SF.ring(...SF.parse(k))) && S.tiles[k].hp === 1 && S.tiles[k].ep === 1 && S.tiles[k].revealed), "16 haies d'épines de départ (couronnes 1 et 2), 1 PV, Épines 1, face visible");
+  ok(starts.length === 16 && starts.every(k => [1, 2].includes(SF.ring(...SF.parse(k))) && S.tiles[k].hp === 1 && S.tiles[k].ep === 1 && S.tiles[k].revealed), "16 Barbelés de départ (couronnes 1 et 2), 1 PV, Épines 1, face visible");
   ok(Object.values(S.supports).filter(l => l === 1).length === 4 && Object.values(S.supports).filter(l => l === 2).length === 4, "4 supports de niveau 1 et 4 de niveau 2 dès le départ");
   ok(SF.epinesOf(S, "1,2") === 2 && SF.epinesOf(S, "0,2") === 1, "une haie qui touche un support de niveau 2 a Épines 2 (1 + 1), les autres Épines 1");
 }
@@ -574,6 +574,14 @@ const fresh = () => {
   ok(S.chantiers.N.length === 1 && S.log.every(l => !l.msg.includes("Muraille")), "le chantier n'est plus touché, et la tuile camouflée n'est pas nommée");
   delete S.tiles["0,1"]; S.budget = 10; S.biomass = 9;
   ok(SF.apply(S, "essaim", "deploy", { uid: 802, lane: "N", u: 1 }) === "", "lane sans bâtiment : le Sapeur se déploie sans cible");
+}
+// 46. tuiles de départ renommées « Barbelé » (Oni, 02/11/2026) ; une partie avec des « Haie d'épines » de départ est renommée
+{
+  const S = SF.newGame();
+  ok(Object.values(S.tiles).every(t => t.name === "Barbelé" && t.start), "nouvelle partie : 16 Barbelés");
+  const old = { tiles: { "0,1": { name: "Haie d'épines", start: true, ep: 2, hp: 1, max: 1 }, "0,3": { name: "Haie d'épines", ep: 2, hp: 1, max: 1, camo: 1 } }, tileDiscard: [], tileDeck: [], hand: [] };
+  SF.migrate(old);
+  ok(old.tiles["0,1"].name === "Barbelé" && old.tiles["0,1"].ep === 1 && old.tiles["0,3"].name === "Haie d'épines" && old.tiles["0,3"].ep === 2, "partie en cours : la haie de départ devient Barbelé (Épines 1), une Haie d'épines construite reste telle quelle");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

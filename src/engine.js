@@ -103,9 +103,9 @@ const SF = (() => {
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [2, 3, 4, 5]; // Oni, 01/11/2026 (avant 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
-  // tuiles de départ : 4 « Haie d'épines » (1 PV, Épines 1, face visible), repérées par start: true ;
-  // détruites, elles sont retirées du jeu (pas de défausse) — décisions d'Oni, 30/10/2026 (ancien « Mur de départ », 2 PV)
-  const START_WALL = "Haie d'épines";
+  // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
+  // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).
+  const START_WALL = "Barbelé";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -901,12 +901,13 @@ const SF = (() => {
   }
   function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
 
-  // Parties enregistrées avant le 30/10/2026 : « Mur de départ » / « Haie de départ » deviennent des Haies d'épines
+  // Parties enregistrées avec d'anciennes règles : les tuiles de départ (« Mur de départ », « Haie de départ »,
+  // « Haie d'épines » marquée start) deviennent des Barbelés
   // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
     for (const t of Object.values(S.tiles || {})) {
-      if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.name = START_WALL; t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
-      if (t.start) t.ep = 1; // haie de départ : Épines 1 (pas celles de la Haie d'épines de la pioche)
+      if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
+      if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
       if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
     }

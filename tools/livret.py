@@ -34,7 +34,7 @@ def svg_depart():
         k = kind(i, j)
         x, y = x0 + j * (cell + gap), y0 + i * (cell + gap)
         fill, stroke = {"sup1": ("#ececea", "#c9c9c5"), "sup2": ("#dfe9e6", "#8fb5ad"), "haie": ("#fbe6dc", "#e07a4f"), "fusee": ("#e3edf8", "#3a78c2")}[k]
-        label = {"sup1": ("Tourelle", "niveau 1"), "sup2": ("Tourelle", "niveau 2"), "haie": ("Haie", "1 PV"), "fusee": ("Fusée", "")}[k]
+        label = {"sup1": ("Tourelle", "niveau 1"), "sup2": ("Tourelle", "niveau 2"), "haie": ("Barbelé", "1 PV"), "fusee": ("Fusée", "")}[k]
         out = f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="7" fill="{fill}" stroke="{stroke}" stroke-width="{2 if k == "fusee" else 1.4}"/>'
         out += f'<text x="{x + cell / 2}" y="{y + cell / 2 - 2}" class="b">{label[0]}</text>'
         if label[1]:
@@ -45,8 +45,8 @@ def svg_depart():
     g += f'<text x="{x0 + w / 2}" y="{y0 - 14}" class="d">NORD</text><text x="{x0 + w / 2}" y="{y0 + w + 26}" class="d">SUD</text>'
     g += f'<text x="{x0 - 18}" y="{y0 + w / 2 + 4}" class="d">O</text><text x="{x0 + w + 18}" y="{y0 + w / 2 + 4}" class="d">E</text>'
     lx = x0 + w + 50
-    lines = [("t", "À mettre en place"), ("", "Fusée : le socle seul, aucun étage"), ("", "16 Haies d'épines de départ (1 PV, Épines 1),"),
-             ("", "couronnes 1 et 2, face visible"), ("", "4 tourelles de niveau 1, 4 de niveau 2"), ("", "Les haies qui touchent une tourelle"),
+    lines = [("t", "À mettre en place"), ("", "Fusée : le socle seul, aucun étage"), ("", "16 Barbelés (1 PV, Épines 1),"),
+             ("", "couronnes 1 et 2, face visible"), ("", "4 tourelles de niveau 1, 4 de niveau 2"), ("", "Les Barbelés qui touchent une tourelle"),
              ("", "de niveau 2 ont Épines 2"), ("hr", ""),
              ("", "Colonie : 3 travailleurs, 4 tuiles en main"), ("", "Essaim : 3 de biomasse, pioche de niveau 1"), ("t", "L'essaim joue en premier")]
     y = y0 + 10
@@ -59,7 +59,7 @@ def svg_depart():
         y += 24
     return (f'<figure><figcaption class="ft">La colonie démarre retranchée dans un carré de 5 × 5<span>Position de départ, vue de dessus</span></figcaption>'
             f'<svg viewBox="0 0 740 420" role="img" aria-label="Position de départ">{g}</svg>'
-            f'<figcaption class="fc">position de départ · 16 haies d\'épines, 8 tourelles, la fusée</figcaption></figure>')
+            f'<figcaption class="fc">position de départ · 16 barbelés, 8 tourelles, la fusée</figcaption></figure>')
 
 
 def svg_escalier():
