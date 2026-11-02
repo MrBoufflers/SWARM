@@ -470,7 +470,7 @@ const fresh = () => {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
   ok(E && E.pv === 3 && E.shield === 2 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Bouclier 2, 2 tours, camouflée, 3 exemplaires, sans Épines");
-  ok(SF.newGame().tileDeck.length + 4 === 53, "pioche de forteresses : 53 tuiles (main de 4 comprise)");
+  ok(SF.newGame().tileDeck.length + 4 === 54, "pioche de forteresses : 54 tuiles (main de 4 comprise)");
   ok(["Antenne", "Laboratoire", "Observatoire", "Archives"].every(n => SF.TILES[n].tech && SF.TILES[n].n === 3), "3 exemplaires de chaque bâtiment à technologies (Oni, 02/11/2026)");
   const hit = (name, atq) => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Égide", 0, 1);
@@ -601,7 +601,7 @@ const fresh = () => {
 }
 // 48. Muraille et Palissade à 4 ex., Feu nourri, support de niveau 3 à +3 travailleurs (Oni, 02/11/2026)
 {
-  ok(SF.TILES["Muraille"].n === 4 && SF.TILES["Palissade"].n === 4, "Muraille et Palissade : 4 exemplaires chacune");
+  ok(SF.TILES["Muraille"].n === 3 && SF.TILES["Palissade"].n === 3, "Muraille et Palissade : 3 exemplaires chacune");
   ok(SF.SPELLS["Feu nourri"] && SF.SPELLS["Feu nourri"].kind === "sup" && SF.SPELLS["Feu nourri"].n === 2, "Feu nourri : sort de soutien, 2 exemplaires (pioche de 28 sorts)");
   const mk = () => {
     const S = fresh(); S.phase = "D_main";
@@ -631,6 +631,23 @@ const fresh = () => {
   ok(T.tiles["0,1"].hp === 4, "Rempart frappé pour 1 (moins que 2) : aucun PV perdu");
   ok([3, 6, 7, 15].map(SF.famineBudget).join() === "1,3,3,7", "Famine : budget = biomasse ÷ 2 arrondie à l'inférieur (3→1, 6→3, 7→3, 15→7)");
   ok(["Œil-sonde", "Glaneur", "Hurleur"].every(n => SF.CREATURES[n].pv === 2) && ["Sapeur", "Sporeur"].every(n => SF.CREATURES[n].pv === 6), "soutiens : 2 PV (niveau 1), 4 (niveau 2), 6 (niveau 3)");
+}
+// 50. Siphon : révélé par une attaque, −3 biomasse à l'essaim (jamais sous 3) ; pas s'il a été vu avant (Oni, 02/11/2026)
+{
+  const T = SF.TILES["Siphon"];
+  ok(T && T.d === 2 && T.pv === 2 && T.siphon === 3 && T.camo && T.n === 3, "Siphon : 2 tours, 2 PV, camouflé, 3 exemplaires");
+  const hit = (bio, setup) => {
+    const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Siphon", 0, 1); S.biomass = bio;
+    const c = { id: 160, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; S.creatures.push(c);
+    if (setup) setup(S);
+    SF.act(S, c); return { S, c };
+  };
+  let r = hit(10);
+  ok(r.S.biomass === 7 && r.S.tiles["0,1"].hp === 1 && r.c.hp === 3, "révélé par l'attaque d'une Carapace : biomasse 10 → 7, puis la Carapace frappe (2 → 1 PV), sans être blessée");
+  r = hit(4);
+  ok(r.S.biomass === 3, "biomasse 4 : elle ne descend pas sous 3");
+  r = hit(10, S => { S.tiles["0,1"].revealed = true; });
+  ok(r.S.biomass === 10, "déjà vu (Vision d'un Œil-sonde) : ne se déclenche pas");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

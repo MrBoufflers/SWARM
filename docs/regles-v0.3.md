@@ -11,7 +11,7 @@ Repris du prototype jouable et validés par Oni :
 - **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
 - **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
 - **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
-- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 53 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 4 exemplaires (au lieu de 6).
+- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). **Siphon** (2 PV, piège qui retire 3 biomasse à l'essaim). Pioche : 54 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 3 exemplaires (au lieu de 6).
 - **Renforcé** : une tuile renforcée ne perd jamais plus d'1 PV par attaque.
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
@@ -45,7 +45,7 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 | Fusée | 1 socle + 12 étages | les étages s'empilent sur le socle |
 | Plateau des ateliers | 1 | 4 ateliers (un par lane) de 2 emplacements de chantier |
 | Barbelés | 16 | 1 PV, Épines 1 |
-| Forteresses (tuiles de construction) | 53 | 18 sortes, voir le Catalogue |
+| Forteresses (tuiles de construction) | 54 | 19 sortes, voir le Catalogue |
 | Tuiles support | 12 | 4 de niveau 1, 4 de niveau 2, 4 de niveau 3 |
 | Cartes sortilège | 28 | 15 offensives, 13 de soutien, voir le Catalogue |
 | Pions travailleur | 24 |  |
@@ -81,7 +81,7 @@ Le carré de départ couvre les couronnes 1 et 2 : chaque lane s'étendra ensuit
 2. Posez les 16 **Barbelés** sur toutes les cases des couronnes 1 et 2 (4 + 12), face visible (1 PV et Épines 1).
 3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1 et 4 **supports de niveau 2** sur les 4 coins de la couronne 2.
 4. Prenez **3 travailleurs**.
-5. Mélangez les 53 forteresses en une pioche. Piochez-en **4** : c'est votre main.
+5. Mélangez les 54 forteresses en une pioche. Piochez-en **4** : c'est votre main.
 6. Mélangez les 28 cartes sortilège en une pioche.
 
 ### Essaim
@@ -177,6 +177,7 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
 - **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - **Bouclier X** : chaque attaque contre la tuile inflige X dégâts de moins (percée et spores comprises).
+- **Siphon** : la première attaque le retourne face visible et l'essaim perd **3 biomasse** ; sa biomasse ne descend jamais sous 3. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Un Barbelé détruit est retiré du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
 
@@ -229,7 +230,7 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 
 ### Les forteresses
 
-Les 53 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
+Les 54 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
 
 ## La fusée et ses paliers
 
@@ -313,12 +314,12 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Forteresses
 
-53 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 dans les 8 cases autour et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
+54 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 dans les 8 cases autour et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
-| Palissade | 1 | 2 | — | Camouflé | 2 | 4 |
-| Muraille | 2 | 4 | — | Camouflé | 4 | 4 |
+| Palissade | 1 | 2 | — | Camouflé | 2 | 3 |
+| Muraille | 2 | 4 | — | Camouflé | 4 | 3 |
 | Rempart | 3 | 4 | — | Camouflé ; Renforcé 2 | 6 | 3 |
 | Bastion | 3 | 3 | — | Camouflé ; Renforcé 3 | 6 | 2 |
 | Haie d'épines | 1 | 1 | **2** | Camouflée | 2 | 3 |
@@ -335,6 +336,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | **1** | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
 | Réduit † | 2 | 5 − couronne (4 / 3 / 2) | **1** | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
 | Piège | 2 | 2 | — | Camouflé ; **3 dégâts** à la créature qui le révèle en l'attaquant, avant qu'elle frappe | 4 | 3 |
+| Siphon | 2 | 2 | — | Camouflé ; révélé par une attaque de l'essaim, il lui retire **3 biomasse** (jamais sous 3) | † | 3 |
 
 - **Total des technologies possibles** : 21 (3 Antennes, 3 Laboratoires, 3 Observatoires, 3 Archives).
 - **Total des travailleurs bonus possibles** : 6 temporaires (3 Baraquements, 3 Dortoirs), aucun permanent.
