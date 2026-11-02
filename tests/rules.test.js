@@ -664,6 +664,11 @@ const fresh = () => {
   ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); T.tiles["1,3"].revealed = true; }, "Sporeur");
   ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && r.T.tiles["1,3"].hp === 1, "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée perd 1 PV");
+  const clair = T => { T.upgrades.soutien.r2 = "C"; }; // Clairvoyance (un soutien est en jeu : le Perforeur / le Sporeur)
+  r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); });
+  ok(!r.T.tiles["0,2"], "Clairvoyance : l'Égide camouflée devient vulnérable à la percée (4 dégâts après bouclier → détruite)");
+  r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); }, "Sporeur");
+  ok(r.T.tiles["1,3"].hp === 1, "Clairvoyance : la Palissade camouflée voisine subit les spores");
 }
 // 52. Déplacement : une case par tour, deux avec la Mobilité ; au contact, attaque aussitôt (Oni, 02/11/2026)
 {
