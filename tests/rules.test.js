@@ -368,9 +368,9 @@ const fresh = () => {
   delete S.tiles["0,1"];
   S.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); S.tiles["0,2"].hp = 1; // tombe au premier coup
   S.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
-  const a = { id: 60, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
-  const b = { id: 61, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false };
-  const g = { id: 62, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, acted: false };
+  const a = { id: 60, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 1, acted: false }; // au contact de la Palissade
+  const b = { id: 61, name: "Carapace", lane: "N", u: 0, k: 3, hp: 3, acted: false };
+  const g = { id: 62, name: "Glaneur", lane: "N", u: 0, k: 3, hp: 2, acted: false };
   const back = { id: 63, name: "Écorcheur", lane: "N", u: -2, k: 4, hp: 1, acted: false }; // plus loin de la fusée (A)
   S.creatures.push(a, b, g, back);
   const key = SF.posKey(a);
@@ -378,23 +378,19 @@ const fresh = () => {
   ok(SF.apply(S, "essaim", "act", { key: SF.posKey(back) }) !== "", "la case de la colonne A doit attendre");
   S.fx = [];
   ok(SF.apply(S, "essaim", "act", { key, order: [61, 60] }) === "", "le bloc agit, la Carapace frappe d'abord (ordre choisi)");
-  ok(!S.tiles["0,2"] && [a, b, g].every(c => c.k === 2 && c.u === 0) && S.tiles["0,1"].hp === 4 - 3, "Palissade détruite par la Carapace : tout le bloc avance en C2 ; l'Écorcheur frappe la Muraille (4 → 1)");
+  ok(!S.tiles["0,2"] && [a, b, g].every(c => c.k === 2 && c.u === 0) && S.tiles["0,1"].hp === 4 - 3, "Palissade détruite par la Carapace : le bloc (qui n'avait pas bougé) entre dans la case libérée C2 ; l'Écorcheur frappe la Muraille (4 → 1)");
   ok(S.fx.filter(e => e.t === "move").every(e => e.ids && e.ids.length === 3), "les déplacements concernent les 3 créatures du bloc (soutien compris)");
   ok(SF.readyCases(S).join() === SF.posKey(back), "ensuite seulement, la case de la colonne A peut agir");
 }
-// 33. Mobilité (nouvelle) et Percée (ancien Raid) — décisions d'Oni, 30/10/2026
+// 33. Mobilité (2 cases par tour depuis le 02/11/2026) et Percée (ancien Raid) — décisions d'Oni
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); // phase A_upgrade
   const c = { id: 70, name: "Écorcheur", lane: "N", u: 1, k: 3, hp: 1, acted: false };
   const d = { id: 71, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
   S.creatures.push(c, d);
-  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "E" }) !== "", "sans l'amélioration Mobilité : refusé");
+  ok(!SF.ACTIONS.moveLane && SF.speedOf(S, c) === 1, "plus de changement de lane ; sans l'amélioration : 1 case par tour");
   S.upgrades.aggro.r1 = "B";
-  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "S" }) !== "", "Mobilité : lane opposée refusée (seulement les lanes voisines)");
-  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "E" }) === "" && c.lane === "E" && c.k === 4 && c.u === 0, "Mobilité : passe à l'entrée de la lane Est");
-  ok(SF.apply(S, "essaim", "moveLane", { id: 70, lane: "N" }) !== "", "une seule fois par tour pour cette créature");
-  ok(SF.apply(S, "essaim", "moveLane", { id: 71, lane: "E" }) !== "", "plafond de population de la lane Est (1) respecté");
-  ok(SF.apply(S, "essaim", "moveLane", { id: 71, lane: "O" }) === "", "une autre créature aggro peut aussi changer de lane le même tour");
+  ok(SF.speedOf(S, c) === 2 && SF.speedOf(S, { name: "Carapace" }) === 1, "Mobilité : 2 cases par tour pour les aggros seulement");
   ok(SF.TREES.aggro.B2[0] === "Essaim agrandi" && !SF.hasMobility(S, { name: "Carapace", lane: "N", u: 0, k: 4 }), "le rang 2 côté B s'appelle « Essaim agrandi » ; les tanks n'ont pas la Mobilité");
   const T = fresh(); const before = SF.capOf(T);
   T.upgrades.aggro.r2 = "B";
@@ -525,9 +521,9 @@ const fresh = () => {
 {
   const run = mates => {
     const S = fresh(); S.supports = {};
-    const c = { id: 98, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; S.creatures.push(c);
-    mates.forEach((n, i) => S.creatures.push({ id: 120 + i, name: n, lane: "N", u: 0, k: 4, hp: 5, acted: false }));
-    const b = S.biomass; SF.actCase(S, SF.posKey(c), [98]); // le bloc avance ; l'Écorcheur détruit la haie de départ (1 PV) en C1
+    const c = { id: 98, name: "Écorcheur", lane: "N", u: 0, k: 2, hp: 1, acted: false }; S.creatures.push(c);
+    mates.forEach((n, i) => S.creatures.push({ id: 120 + i, name: n, lane: "N", u: 0, k: 2, hp: 5, acted: false }));
+    const b = S.biomass; SF.actCase(S, SF.posKey(c), [98]); // au contact : l'Écorcheur détruit la haie de départ (1 PV) en C1
     return S.biomass - b;
   };
   ok(run([]) === 1, "sans Phéromone : +1 biomasse");
@@ -542,18 +538,18 @@ const fresh = () => {
   const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
   const t = { id: 99, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(t); SF.act(S, t);
   ok(t.hp === 2 && S.tiles["0,1"].hp === 1, "Béhémoth (5 PV) survit au piège (−3) puis frappe (1 ATQ : 2 → 1 PV)");
-  const P = (setup) => {
+  const P = (setup, k = 4) => {
     const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k];
     setup(T); for (const k of Object.keys(T.tiles)) T.tiles[k].revealed = true; // tuiles déjà retournées (une tuile camouflée ne subit pas la percée)
-    const m = { id: 100, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(m);
-    T.creatures.push({ id: 101, name: "Perforeur", lane: "N", u: 0, k: 4, hp: 5, acted: false }); // Aura Percée
+    const m = { id: 100, name: "Massacreur", lane: "N", u: 0, k, hp: 1, acted: false }; T.creatures.push(m);
+    T.creatures.push({ id: 101, name: "Perforeur", lane: "N", u: 0, k, hp: 5, acted: false }); // Aura Percée
     const w = T.workersBase; SF.actCase(T, SF.posKey(m), [100]); return { T, lost: w - T.workersBase };
   };
   let r = P(T => { T.tiles["0,3"] = SF.tileStats("Palissade", 0, 3); T.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); });
   ok(!r.T.tiles["0,3"] && !r.T.tiles["0,2"] && r.T.tiles["0,1"] && r.T.tiles["0,1"].hp === 2, "Percée : 7 → C3 (2 PV) détruite, 5 en trop sur C2 (détruite), pas plus loin : C1 intacte");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Palissade", 0, 3); T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); });
   ok(r.T.tiles["0,1"].hp === 2 && r.lost === 0, "Percée : case suivante (C2) vide → dégâts en trop perdus, même s'il y a un bâtiment plus loin");
-  r = P(T => { T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); });
+  r = P(T => { T.tiles["0,1"] = SF.tileStats("Palissade", 0, 1); }, 2);
   ok(!r.T.tiles["0,1"] && r.lost === 1, "Percée : C1 détruite, la case suivante est la fusée → −1 travailleur");
 }
 // 44. mise à jour automatique (SF.migrate) : les haies de départ gardent Épines 1 (bug signalé par Oni, 01/11/2026)
@@ -588,13 +584,13 @@ const fresh = () => {
 {
   const run = withCat => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mur hérissé", 0, 1); // Épines 2
-    const c = { id: 130, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; S.creatures.push(c);
-    if (withCat) S.creatures.push({ id: 131, name: "Catalyseur", lane: "N", u: 0, k: 4, hp: 5, acted: false });
+    const c = { id: 130, name: "Carapace", lane: "N", u: 0, k: 2, hp: 3, acted: false }; S.creatures.push(c);
+    if (withCat) S.creatures.push({ id: 131, name: "Catalyseur", lane: "N", u: 0, k: 2, hp: 5, acted: false });
     SF.actCase(S, SF.posKey(c), [130]); return c.hp;
   };
   ok(run(false) === 1 && run(true) === 3, "Carapace contre un Mur hérissé : −2 d'Épines sans Catalyseur, rien avec");
   const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
-  const d = { id: 132, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; T.creatures.push(d, { id: 133, name: "Catalyseur", lane: "N", u: 0, k: 4, hp: 5, acted: false });
+  const d = { id: 132, name: "Béhémoth", lane: "N", u: 0, k: 2, hp: 5, acted: false }; T.creatures.push(d, { id: 133, name: "Catalyseur", lane: "N", u: 0, k: 2, hp: 5, acted: false });
   SF.actCase(T, SF.posKey(d), [132]);
   ok(d.hp === 2, "le piège blesse quand même (3 dégâts : ce ne sont pas des Épines)");
   ok(SF.CREATURES["Catalyseur"].capName === "Aura Cuirasse" && !SF.ACTIONS.instinct && !SF.hasMobility(T, { name: "Carapace", lane: "N", u: 0, k: 4 }), "plus d'Aura Instinct : un tank n'a plus de Mobilité");
@@ -668,6 +664,38 @@ const fresh = () => {
   ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); T.tiles["1,3"].revealed = true; }, "Sporeur");
   ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && r.T.tiles["1,3"].hp === 1, "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée perd 1 PV");
+  const clair = T => { T.upgrades.soutien.r2 = "C"; }; // Clairvoyance (un soutien est en jeu : le Perforeur / le Sporeur)
+  r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); });
+  ok(!r.T.tiles["0,2"], "Clairvoyance : l'Égide camouflée devient vulnérable à la percée (4 dégâts après bouclier → détruite)");
+  r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); }, "Sporeur");
+  ok(r.T.tiles["1,3"].hp === 1, "Clairvoyance : la Palissade camouflée voisine subit les spores");
+}
+// 52. Déplacement : une case par tour, deux avec la Mobilité ; au contact, attaque aussitôt (Oni, 02/11/2026)
+{
+  const setup = () => { const S = fresh(); S.phase = "A_attack"; S.supports = {}; return S; }; // Barbelé en C1 (0,1)
+  const S = setup();
+  const c = { id: 180, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(c); // assez de PV pour survivre aux Épines
+  ok(SF.apply(S, "essaim", "act", { key: SF.posKey(c) }) === "" && c.k === 3 && S.tiles["0,1"].hp === 1, "tour 1 : entrée → C3, pas encore au contact, pas d'attaque");
+  c.acted = false;
+  SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
+  ok(c.k === 2 && !S.tiles["0,1"], "tour 2 : C3 → C2, au contact du Barbelé (couronne 1) : il attaque aussitôt et le détruit");
+  c.acted = false; const w = S.workersBase;
+  SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
+  ok(c.k === 1 && S.workersBase === w - 1, "tour 3 : C2 → C1, au contact de la fusée : −1 travailleur");
+  // après une casse : le bloc qui a déjà bougé ne repart pas
+  const T = setup(); T.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); T.tiles["0,2"].revealed = true; T.tiles["0,2"].hp = 1;
+  const x = { id: 181, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }, y = { id: 182, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
+  T.creatures.push(x, y); SF.apply(T, "essaim", "act", { key: SF.posKey(x), order: [181, 182] });
+  ok(!T.tiles["0,2"] && x.k === 3 && y.k === 3 && T.tiles["0,1"].hp === 1, "entrée → C3 puis Palissade détruite : le bloc a déjà bougé, il reste en C3 et le 2ᵉ Écorcheur ne frappe pas");
+  // Mobilité : les aggros partent devant
+  const U = setup(); U.upgrades.aggro.r1 = "B";
+  const m = { id: 183, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }, t = { id: 184, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false };
+  U.creatures.push(m, t); SF.apply(U, "essaim", "act", { key: SF.posKey(m) });
+  ok(m.k === 2 && t.k === 3 && !U.tiles["0,1"], "Mobilité : l'Écorcheur fait 2 cases (C2) et détruit le Barbelé ; la Carapace ne fait qu'1 case (C3)");
+  const V = setup(); V.upgrades.aggro.r1 = "B"; V.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); V.tiles["0,2"].revealed = true; V.tiles["0,2"].hp = 1;
+  const p = { id: 185, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }, q = { id: 186, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
+  V.creatures.push(p, q); SF.apply(V, "essaim", "act", { key: SF.posKey(p), order: [185, 186] });
+  ok(!V.tiles["0,2"] && p.k === 2 && !V.tiles["0,1"], "Mobilité : 1 case jusqu'au contact, Palissade détruite, le 2ᵉ déplacement fait entrer le bloc en C2, le 2ᵉ Écorcheur détruit le Barbelé");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
