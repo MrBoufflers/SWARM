@@ -31,8 +31,8 @@ const SF = (() => {
   };
   // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
   const TILES = {
-    "Palissade": { d: 1, pv: 2, ep: 0, camo: 1, n: 4 }, // 4 ex. (Oni, 02/11/2026 ; avant 6)
-    "Muraille": { d: 2, pv: 4, ep: 0, camo: 1, n: 4 }, // 4 ex. (Oni, 02/11/2026 ; avant 6)
+    "Palissade": { d: 1, pv: 2, ep: 0, camo: 1, n: 3 }, // 3 ex. (Oni, 02/11/2026 ; avant 6, puis 4)
+    "Muraille": { d: 2, pv: 4, ep: 0, camo: 1, n: 3 }, // 3 ex. (Oni, 02/11/2026 ; avant 6, puis 4)
     "Rempart": { d: 3, pv: 4, ep: 0, ren: 2, camo: 1, n: 3 },
     "Bastion": { d: 3, pv: 3, ep: 0, ren: 3, camo: 1, n: 2 },
     "Haie d'épines": { d: 1, pv: 1, ep: 2, camo: 1, n: 3 },
@@ -53,6 +53,8 @@ const SF = (() => {
     "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
     "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
     "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 }, // 3 dégâts quand il se déclenche (Oni, 01/11/2026 ; avant 2)
+    // Siphon (Oni, 02/11/2026) : piège camouflé ; révélé par une attaque, il retire 3 biomasse à l'essaim (jamais sous 3)
+    "Siphon": { d: 2, pv: 2, ep: 0, siphon: 3, camo: 1, n: 3 },
     // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
     "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 2, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Bouclier 2 = chaque attaque contre elle inflige 2 dégâts de moins
@@ -65,6 +67,7 @@ const SF = (() => {
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
     "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe.",
     "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
+    "Siphon": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 3 biomasse (jamais sous 3).",
     "Égide": "Camouflée. Bouclier 2 : chaque attaque contre elle inflige 2 dégâts de moins.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Bouclier 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie.",
@@ -102,6 +105,7 @@ const SF = (() => {
       B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
+  const MIN_BIOMASS = 3; // la biomasse de l'essaim ne descend jamais sous 3 (Oni, 02/11/2026)
   const TRAP_DMG = 3; // dégâts du Piège (Oni, 01/11/2026 ; avant 2)
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
@@ -276,7 +280,7 @@ const SF = (() => {
     if (pv === "ap") pv = lane === t.dir ? 4 : 2;
     if (pv === "front") pv = 1 + r;
     if (pv === "reduit") pv = 5 - r;
-    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, shield: t.shield || 0, camo: t.camo || 0, revealed: !t.camo };
+    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, siphon: t.siphon || 0, shield: t.shield || 0, camo: t.camo || 0, revealed: !t.camo };
   }
   // Épines d'une tuile (Oni, 01/11/2026) : ses Épines propres, +1 par support de niveau 2 dans les 8 cases autour
   // (pour toute tuile, même sans Épines), +1 par Avant-poste dans les 8 cases autour (« Aura d'épines ») ; tout se cumule.
@@ -502,6 +506,12 @@ const SF = (() => {
           if (c.hp + bonusHp(S, c) <= 0) { log(S, "essaim", `${c.name} meurt dans le piège avant de frapper.`); return; }
         }
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
+      // Siphon : retire de la biomasse à l'essaim, sans jamais la faire passer sous 3 (Oni, 02/11/2026)
+      if (t.siphon && !clairvoyance(S)) {
+        const before = S.biomass; S.biomass = Math.max(MIN_BIOMASS, S.biomass - t.siphon);
+        fx(S, { t: "siphon", k: tk, n: before - S.biomass });
+        log(S, "colonie", `Siphon : l'essaim perd ${before - S.biomass} biomasse (biomasse ${S.biomass}).`);
+      }
     }
     if (S.stase.includes(lane)) {
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
@@ -1040,7 +1050,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor, migrate, famineBudget, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, famineBudget, MIN_BIOMASS, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

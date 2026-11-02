@@ -289,6 +289,7 @@
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque ou par Vision / Clairvoyance.");
+    if (t.siphon) cap("biomasse", "Siphon", `révélé par une attaque de l'essaim, il lui retire ${t.siphon} biomasse (jamais sous ${SF.MIN_BIOMASS}). Ne se déclenche pas s'il a été vu par Vision ou Clairvoyance.`);
     if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour).`);
     return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
@@ -651,6 +652,12 @@
       const cell = cellAt(e.k); if (!cell) return;
       await flip(cell.querySelector(".tile") || cell);
       if (e.trap) float(cell, "Piège !", "cr-dmg");
+    },
+    async siphon(e) {
+      const c = cellAt(e.k), b = document.querySelector('[data-fx="budget"]');
+      if (c) float(c, "−" + e.n + " biomasse", "cr-dmg");
+      if (b) flashEl(b, "var(--off)");
+      await wait(300);
     },
     async sapeur(e) {
       const c = cellAt(e.k); if (!c) return;
