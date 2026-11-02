@@ -583,5 +583,20 @@ const fresh = () => {
   SF.migrate(old);
   ok(old.tiles["0,1"].name === "Barbelé" && old.tiles["0,1"].ep === 1 && old.tiles["0,3"].name === "Haie d'épines" && old.tiles["0,3"].ep === 2, "partie en cours : la haie de départ devient Barbelé (Épines 1), une Haie d'épines construite reste telle quelle");
 }
+// 47. Catalyseur : Aura Cuirasse (pas de dégâts d'Épines sur sa case), remplace l'Aura Instinct (Oni, 02/11/2026)
+{
+  const run = withCat => {
+    const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mur hérissé", 0, 1); // Épines 2
+    const c = { id: 130, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; S.creatures.push(c);
+    if (withCat) S.creatures.push({ id: 131, name: "Catalyseur", lane: "N", u: 0, k: 4, hp: 5, acted: false });
+    SF.actCase(S, SF.posKey(c), [130]); return c.hp;
+  };
+  ok(run(false) === 1 && run(true) === 3, "Carapace contre un Mur hérissé : −2 d'Épines sans Catalyseur, rien avec");
+  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
+  const d = { id: 132, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; T.creatures.push(d, { id: 133, name: "Catalyseur", lane: "N", u: 0, k: 4, hp: 5, acted: false });
+  SF.actCase(T, SF.posKey(d), [132]);
+  ok(d.hp === 2, "le piège blesse quand même (3 dégâts : ce ne sont pas des Épines)");
+  ok(SF.CREATURES["Catalyseur"].capName === "Aura Cuirasse" && !SF.ACTIONS.instinct && !SF.hasMobility(T, { name: "Carapace", lane: "N", u: 0, k: 4 }), "plus d'Aura Instinct : un tank n'a plus de Mobilité");
+}
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

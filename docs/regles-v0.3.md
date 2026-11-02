@@ -18,7 +18,7 @@ Repris du prototype jouable et validés par Oni :
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : budget de l'essaim −5 (au lieu de −2). **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
-- **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier).
+- **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; le bloc n'avance qu'avant une attaque.
 - **Essaim** : paliers à 3 (départ), 6, 9, 12 et 15 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
@@ -305,7 +305,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
 | Phéromone | Soutien | 2 | 3 | 5 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus ; non cumulable | 2 |
 | Perforeur | Soutien | 2 | 3 | 5 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
-| Catalyseur | Soutien | 2 | 3 | 5 | 0 | **Aura Instinct** : une autre créature de sa case, au choix, gagne une capacité supplémentaire : Mobilité ou Furtivité † | 2 |
+| Catalyseur | Soutien | 2 | 3 | 5 | 0 | **Aura Cuirasse** : les créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
 | Sapeur | Soutien | 3 | 5 | 8 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
 | Sporeur | Soutien | 3 | 5 | 8 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât | 3 |
 
@@ -443,7 +443,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Coûts des aggros et des tanks** : tu ne les as pas donnés ; j'ai gardé 3 / 4 / 7 selon le niveau. Avec des stats de 4 / 7 / 10 points, le niveau 3 rapporte moins de stats par biomasse que le niveau 2.
 - [x] **Colosse (tank niveau 3)** : 7 PV / 1 ATQ (tous les tanks à 1 ATQ, décidé le 01/11/2026).
 - [ ] **Soutiens** : 2 exemplaires de chaque carte de niveau 1 et 2, 3 de chaque carte de niveau 3, pour arriver à 6 par niveau comme les autres types.
-- [ ] **Aura Instinct** (Catalyseur) : la capacité accordée est au choix Mobilité ou Furtivité.
+- [x] **Catalyseur** : l'Aura Instinct est remplacée par l'Aura Cuirasse (décidé le 02/11/2026 ; nom provisoire).
 - [ ] **Nom « Déploiement »** : c'est aussi le nom de l'étape 3 du tour de l'essaim. Renommer l'un des deux ?
 - [ ] **Déploiement** (centre de l'arbre aggro) : les 2 cartes viennent de la pioche de niveau 1 et respectent le plafond de population.
 - [x] **Barbelés** (anciens murs puis haies de départ) : 1 PV, Épines 1, sur les couronnes 1 et 2, retirés du jeu quand ils sont détruits (décidé les 30/10, 01/11 et 02/11/2026).

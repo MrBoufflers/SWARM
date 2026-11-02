@@ -215,7 +215,7 @@
     return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Reste en main tant qu'il n'est pas joué.</small></span></div>`;
   }
   const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
-  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", butin: "biomasse", percee: "percee", instinct: "instinct", sabotage: "sabotage", spores: "spores" }[c] || "aura");
+  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", butin: "biomasse", percee: "percee", cuirasse: "renforce", sabotage: "sabotage", spores: "spores" }[c] || "aura");
   const cardOf = uid => S.handA.find(c => c.uid === uid) || { name: "?" };
   function posTxt(c) { return c.k === 4 ? `entrée ${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}` : `${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}${c.k}`; }
   function tileLabel(k) {
@@ -312,12 +312,6 @@
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
     let actions = "";
-    if (S.view === "essaim" && c.name === "Catalyseur" && ["A_deploy", "A_upgrade"].includes(S.phase)) {
-      const mates = SF.caseMates(S, c);
-      actions += `<div class="choices"><span class="lab">Instinct :</span>` +
-        ["mobilite", "furtivite"].map(v => `<button data-a="instinct" data-id="${c.id}" data-v="${v}" class="${c.instinct === v ? "on" : ""}">${v === "mobilite" ? "Mobilité" : "Furtivité"}</button>`).join("") +
-        mates.map(m => `<button data-a="instTarget" data-id="${c.id}" data-v="${m.id}" class="${c.instinctTarget === m.id ? "on" : ""}">→ ${E(m.name)}</button>`).join("") + `</div>`;
-    }
     if (S.view === "essaim" && S.phase === "A_upgrade" && SF.hasMobility(S, c) && !c.mobUsed) {
       const i = SF.LANES.indexOf(c.lane);
       actions += `<div class="choices"><span class="lab">Mobilité :</span>${[SF.LANES[(i + 1) % 4], SF.LANES[(i + 3) % 4]].map(l => `<button data-a="moveLane" data-id="${c.id}" data-v="${l}"${SF.laneCount(S, l) >= SF.capOf(S) ? " disabled" : ""}>Vers ${SF.LANE_NAME[l]}</button>`).join("")}</div>`;
@@ -476,8 +470,6 @@
       case "endDeploy": UI.sel = null; return play("endDeploy");
       case "invest": return play("invest", { t: d.t, s: d.s, n: Number(d.n) });
       case "moveLane": return play("moveLane", { id: Number(d.id), lane: d.v });
-      case "instinct": return play("instinct", { id: Number(d.id), v: d.v });
-      case "instTarget": return play("instTarget", { id: Number(d.id), v: Number(d.v) });
       case "toAttacks": return play("toAttacks");
       case "reactDone": UI.spell = null; return play("reactDone");
       case "actAll": return play("actAll");
