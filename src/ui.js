@@ -284,7 +284,7 @@
     if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
     if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
     if (t.shield) cap("bouclier", `Bouclier ${t.shield}`, `chaque attaque contre elle inflige ${t.shield} dégâts de moins.`);
-    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que par tranche complète de ${t.ren} dégâts d'une même attaque.`);
+    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que si une attaque lui inflige au moins ${t.ren} dégâts, et jamais plus d'1 PV par attaque.`);
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
@@ -394,7 +394,7 @@
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
       <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${t.n.join("/")} · plafond ${SF.capOf(S)}</b></div>
-      <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? ` (Famine −${S.famine})` : ""}</b></div>
+      <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
       <h4>Main</h4>${hand}<h4>Arbres d'amélioration</h4>${trees}`;
@@ -408,7 +408,7 @@
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 6 · 9 · 12 · 15 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance d'un bloc, case par case, sans diagonale, jusqu'à la première tuile ou la fusée (les plus proches de la fusée d'abord) ; ses créatures attaquent dans l'ordre choisi, et si la tuile tombe alors qu'il reste des créatures à faire frapper, tout le bloc avance jusqu'à la suivante (jamais après la dernière attaque) (une attaque contre la fusée tue un seul travailleur). Mobilité : une fois par tour, une aggro peut passer à l'entrée d'une lane voisine. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 3, 4 et 5 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu seulement si une attaque fait au moins X dégâts, jamais plus d'1 PV par attaque. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
@@ -632,7 +632,7 @@
         case "Barrage": await sweep(laneCells(e.lane), "off"); break;
         case "Champ de stase": await sweep(laneCells(e.lane), "stase"); break;
         case "Onde de choc": await sweep(ringCells(e.ring), "off", true); break;
-        case "Famine": { const b = document.querySelector('[data-fx="budget"]'); if (b) { flashEl(b, "var(--off)"); float(b, "−" + SF.FAMINE + " budget", "cr-dmg"); } await wait(300); break; }
+        case "Famine": { const b = document.querySelector('[data-fx="budget"]'); if (b) { flashEl(b, "var(--off)"); float(b, "Budget ÷ 2", "cr-dmg"); } await wait(300); break; }
         case "Effort": case "Cadence": { const h = document.querySelector('[data-fx="ateliers"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "+2 points", "heal"); } await wait(300); break; }
         case "Renouvellement": { const h = document.querySelector('[data-fx="tilehand"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "↻ " + e.n, "heal"); } await wait(300); break; }
         case "Reconversion": { const c = cellAt(e.k); if (c) await flip(c.querySelector(".tile") || c); break; }

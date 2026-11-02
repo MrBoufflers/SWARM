@@ -12,14 +12,15 @@ Repris du prototype jouable et validés par Oni :
 - **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
 - **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
 - **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 53 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 4 exemplaires (au lieu de 6).
+- **Renforcé** : une tuile renforcée ne perd jamais plus d'1 PV par attaque.
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
 - **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
-- **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : budget de l'essaim −5 (au lieu de −2). **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
+- **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : ce tour, le budget de l'essaim est sa biomasse divisée par 2 (arrondie à l'inférieur). **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
 - **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (au lieu de 2).
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
-- **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
+- **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; le bloc n'avance qu'avant une attaque.
 - **Essaim** : paliers à 3 (départ), 6, 9, 12 et 15 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
@@ -107,7 +108,7 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 ### 1. Budget
 
-Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite ou un support qui tombe rapporte **1 biomasse**. Si la colonie a joué **Famine**, retirez 5 du budget de ce tour.
+Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite ou un support qui tombe rapporte **1 biomasse**. Si la colonie a joué **Famine**, votre budget de ce tour est votre biomasse **divisée par 2**, arrondie à l'inférieur.
 
 ### 2. Pioche
 
@@ -172,7 +173,7 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 ### Dégâts sur une tuile
 
 - La tuile pivote d'**un quart de tour par PV perdu**.
-- **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque.
+- **Renforcé X** : la tuile ne perd 1 PV que si une attaque lui inflige au moins X dégâts, et **jamais plus d'1 PV par attaque**.
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
 - **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - **Bouclier X** : chaque attaque contre la tuile inflige X dégâts de moins (percée et spores comprises).
@@ -274,7 +275,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Même case** : les auras et les effets entre créatures ne concernent que les créatures **sur la même case**, jamais toute la lane. Deux créatures qui attendent à l'entrée de la même colonne sont sur la même case.
 - **Zones** : une **case** ; une **lane** (toutes ses cases) ; une **couronne** (toutes les cases de même couronne, sur les 4 lanes).
 - **Aura** : effet d'un soutien sur les autres créatures de sa case. Deux auras **du même nom** ne se cumulent pas ; deux auras de noms différents se cumulent.
-- **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que par tranche complète de X dégâts d'une même attaque.
+- **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que si une attaque lui inflige au moins X dégâts, et jamais de plus d'un cran par attaque.
 - **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par support de niveau 2 dans les 8 cases autour, +1 par Avant-poste voisin ; tout se cumule).
 - **Bouclier X** : chaque attaque contre cette tuile inflige X dégâts de moins.
 - **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
@@ -286,7 +287,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Élément | Budget | Coûts du barème |
 | --- | --- | --- |
 | Aggro et tank N1 / N2 / N3 | PV + ATQ = 4 / 7 / 10 (barème d'origine) † | une seule créature par niveau ; depuis le 01/11/2026, aggros à 1 PV et tanks à 1 ATQ à tous les niveaux : barème à revoir |
-| Soutien N1 / N2 / N3 | 0 ATQ ; PV = 2 / 5 / 8 | n'attaquent pas (+1 / +3 / +5 PV pour compenser), en échange d'une capacité, plus forte à chaque niveau |
+| Soutien N1 / N2 / N3 | 0 ATQ ; PV = 2 / 4 / 6 (depuis le 02/11/2026) | n'attaquent pas (+1 / +3 / +5 PV pour compenser), en échange d'une capacité, plus forte à chaque niveau |
 | Forteresse | 2 points par tour de construction | 1 PV = 1 ; Épines 1 gratuite (de base), chaque Épines en plus = 1 ; Renforcé X = X ; +1 technologie = 1 ; travailleur temporaire = 1 ; travailleur permanent = 5 ; +2 PV sous condition = 1 |
 
 ### Créatures
@@ -304,11 +305,11 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : révèle les tuiles camouflées de sa lane | 2 |
 | Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV | 2 |
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
-| Phéromone | Soutien | 2 | 3 | 5 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus ; non cumulable | 2 |
-| Perforeur | Soutien | 2 | 3 | 5 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
-| Catalyseur | Soutien | 2 | 3 | 5 | 0 | **Aura Cuirasse** : les créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
-| Sapeur | Soutien | 3 | 5 | 8 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
-| Sporeur | Soutien | 3 | 5 | 8 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât | 3 |
+| Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus ; non cumulable | 2 |
+| Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
+| Catalyseur | Soutien | 2 | 3 | 4 | 0 | **Aura Cuirasse** : les créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
+| Sapeur | Soutien | 3 | 5 | 6 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
+| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât | 3 |
 
 ### Forteresses
 
@@ -349,7 +350,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Barrage | Offensif | 1 dégât à chaque créature d'une lane | 2 |
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
 | Champ de stase | Offensif | choisissez une lane : ses tuiles ne subissent aucun dégât ce tour | 2 |
-| Famine | Offensif | à jouer au début du tour de l'essaim : son budget baisse de **5** ce tour (sa biomasse ne change pas) | 2 |
+| Famine | Offensif | à jouer au début du tour de l'essaim : ce tour, son budget est sa biomasse **divisée par 2**, arrondie à l'inférieur (sa biomasse ne change pas) | 2 |
 | Brouillage | Offensif | à jouer avant les attaques, sur une créature déployée ce tour : elle est retirée du plateau, sa carte retourne dans sa pioche (mélangée), la biomasse dépensée est perdue † | 2 |
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |

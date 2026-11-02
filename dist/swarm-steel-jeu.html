@@ -264,17 +264,18 @@ const SF = (() => {
     // tous les tanks à 1 ATQ (Oni, 01/11/2026 ; avant Béhémoth 2, Colosse 3)
     "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 1 },
     "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
+    // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Révèle les tuiles camouflées de sa lane." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
-    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
-    "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
+    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
+    "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
     // Catalyseur (Oni, 02/11/2026) : l'Aura Instinct (Mobilité ou Furtivité à une créature) est remplacée par l'Aura Cuirasse
-    "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les créatures de sa case ne subissent pas les dégâts d'Épines." },
+    "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les créatures de sa case ne subissent pas les dégâts d'Épines." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
-    "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
-    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât." },
+    "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât." },
   };
   const PILES = {
     1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Hurleur", 2]] },
@@ -311,7 +312,7 @@ const SF = (() => {
     "Égide": { d: 2, pv: 3, ep: 0, shield: 2, camo: 1, n: 3 },
   };
   const TILE_TEXT = {
-    "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
+    "Rempart": "Renforcé 2 : perd 1 PV seulement si une attaque fait au moins 2 dégâts, jamais plus d'1 PV par attaque.", "Bastion": "Renforcé 3 : perd 1 PV seulement si une attaque fait au moins 3 dégâts, jamais plus d'1 PV par attaque.",
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
@@ -327,7 +328,7 @@ const SF = (() => {
     "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
     "Champ de stase": { kind: "off", n: 2, text: "Choisissez une lane : ses tuiles ne subissent aucun dégât ce tour." },
-    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : son budget baisse de 5 ce tour." },
+    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : ce tour, son budget est sa biomasse divisée par 2 (arrondie à l'inférieur)." },
     "Brouillage": { kind: "off", n: 2, text: "Annule le déploiement d'une créature posée ce tour ; la carte retourne dans sa pioche, la biomasse est perdue." },
     "Effort": { kind: "sup", n: 3, text: "+2 points de construction ce tour." },
     "Cadence": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
@@ -355,7 +356,8 @@ const SF = (() => {
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
   const TRAP_DMG = 3; // dégâts du Piège (Oni, 01/11/2026 ; avant 2)
-  const FAMINE = 5; // baisse du budget de l'essaim par Famine (décision d'Oni, 30/10/2026 ; avant 2) // coûts des améliorations : 6 / 12 (décision d'Oni, 30/10/2026 ; avant 8 / 16)
+  // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
+  const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
   const FLOOR_COSTS = [2, 3, 4, 5]; // Oni, 01/11/2026 (avant 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
@@ -759,7 +761,8 @@ const SF = (() => {
       log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
     } else {
       if (t.shield) dmg = Math.max(0, dmg - t.shield); // Bouclier X : X dégâts de moins par attaque
-      const loss = t.ren ? Math.floor(dmg / t.ren) : dmg;
+      // Renforcé X : 1 PV par tranche de X dégâts, et jamais plus d'1 PV par attaque (Oni, 02/11/2026)
+      const loss = t.ren ? Math.min(1, Math.floor(dmg / t.ren)) : dmg;
       const capacity = t.ren ? t.hp * t.ren : t.hp;
       const excess = dmg - capacity;
       t.hp -= loss;
@@ -831,7 +834,7 @@ const SF = (() => {
         for (let l = lvl; l >= 1; l--) if (S.piles[l].length) { S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ }); break; }
       }
     }
-    S.budget = Math.max(0, S.biomass - S.famine);
+    S.budget = S.famine ? famineBudget(S.biomass) : S.biomass;
     fx(S, { t: "draw", n: S.handA.length });
     S.phase = "A_deploy";
     log(S, "essaim", `Palier ${tier(S) + 1} : ${S.handA.length} cartes, budget ${S.budget}.`);
@@ -977,7 +980,7 @@ const SF = (() => {
       case "Barrage": { if (!LANES.includes(arg)) return false; for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Champ de stase": { if (!LANES.includes(arg)) return false; S.stase.push(arg); return true; }
-      case "Famine": { if (S.phase !== "A_start") return false; S.famine += FAMINE; return true; }
+      case "Famine": { if (S.phase !== "A_start") return false; S.famine = 1; return true; }
       case "Brouillage": {
         const c = cr(arg); if (!c || !c.new) return false;
         S.creatures.splice(S.creatures.indexOf(c), 1);
@@ -1290,7 +1293,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor, migrate, FAMINE, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, famineBudget, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
@@ -1589,7 +1592,7 @@ if (typeof module !== "undefined") module.exports = SF;
     if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
     if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
     if (t.shield) cap("bouclier", `Bouclier ${t.shield}`, `chaque attaque contre elle inflige ${t.shield} dégâts de moins.`);
-    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que par tranche complète de ${t.ren} dégâts d'une même attaque.`);
+    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que si une attaque lui inflige au moins ${t.ren} dégâts, et jamais plus d'1 PV par attaque.`);
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
@@ -1699,7 +1702,7 @@ if (typeof module !== "undefined") module.exports = SF;
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
       <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${t.n.join("/")} · plafond ${SF.capOf(S)}</b></div>
-      <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? ` (Famine −${S.famine})` : ""}</b></div>
+      <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
       <h4>Main</h4>${hand}<h4>Arbres d'amélioration</h4>${trees}`;
@@ -1713,7 +1716,7 @@ if (typeof module !== "undefined") module.exports = SF;
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
       <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (3 · 6 · 9 · 12 · 15 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (1 / 2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance d'un bloc, case par case, sans diagonale, jusqu'à la première tuile ou la fusée (les plus proches de la fusée d'abord) ; ses créatures attaquent dans l'ordre choisi, et si la tuile tombe alors qu'il reste des créatures à faire frapper, tout le bloc avance jusqu'à la suivante (jamais après la dernière attaque) (une attaque contre la fusée tue un seul travailleur). Mobilité : une fois par tour, une aggro peut passer à l'entrée d'une lane voisine. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 3, 4 et 5 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu par tranche de X dégâts. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu seulement si une attaque fait au moins X dégâts, jamais plus d'1 PV par attaque. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
@@ -1937,7 +1940,7 @@ if (typeof module !== "undefined") module.exports = SF;
         case "Barrage": await sweep(laneCells(e.lane), "off"); break;
         case "Champ de stase": await sweep(laneCells(e.lane), "stase"); break;
         case "Onde de choc": await sweep(ringCells(e.ring), "off", true); break;
-        case "Famine": { const b = document.querySelector('[data-fx="budget"]'); if (b) { flashEl(b, "var(--off)"); float(b, "−" + SF.FAMINE + " budget", "cr-dmg"); } await wait(300); break; }
+        case "Famine": { const b = document.querySelector('[data-fx="budget"]'); if (b) { flashEl(b, "var(--off)"); float(b, "Budget ÷ 2", "cr-dmg"); } await wait(300); break; }
         case "Effort": case "Cadence": { const h = document.querySelector('[data-fx="ateliers"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "+2 points", "heal"); } await wait(300); break; }
         case "Renouvellement": { const h = document.querySelector('[data-fx="tilehand"]'); if (h) { flashEl(h, "var(--sup)"); float(h, "↻ " + e.n, "heal"); } await wait(300); break; }
         case "Reconversion": { const c = cellAt(e.k); if (c) await flip(c.querySelector(".tile") || c); break; }
