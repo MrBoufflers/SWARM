@@ -75,7 +75,8 @@ const fresh = () => {
 {
   const S = fresh();
   const t = b => { S.biomass = b; return SF.tier(S) + 1; };
-  ok([3, 6, 9, 12, 15].map(t).join() === "1,2,3,4,5" && [5, 8, 11, 14].map(t).join() === "1,2,3,4", "paliers : départ 3, puis 6 / 9 / 12 / 15");
+  ok([3, 10, 15, 20, 30].map(t).join() === "1,2,3,4,4" && [9, 14, 19].map(t).join() === "1,2,3", "paliers : départ, puis 10 / 15 / 20 (4 paliers, Oni 02/11/2026)");
+  ok(SF.TIERS.map(r => r.n.join("")).join() === "300,320,421,433", "pioches 3·0·0 / 3·2·0 / 4·2·1 / 4·3·3");
 }
 // 9. Protection : un tir sur une créature non tank de la case d'un tank vise le tank
 {
@@ -181,7 +182,7 @@ const fresh = () => {
 // 18. plafond de population par lane : 1 / 2 / 3 / 4 / 5
 {
   const S = fresh();
-  ok([3, 6, 9, 12, 15].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "1,2,3,4,5", "plafonds 1 / 2 / 3 / 4 / 5 (biomasse 3 / 6 / 9 / 12 / 15)");
+  ok([3, 10, 15, 20].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "2,3,4,5", "plafonds 2 / 3 / 4 / 5 (biomasse départ / 10 / 15 / 20)");
 }
 // 19. Cadence : +2 points
 {

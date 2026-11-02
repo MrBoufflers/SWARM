@@ -23,7 +23,7 @@ Repris du prototype jouable et validés par Oni :
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
-- **Essaim** : paliers à 3 (départ), 6, 9, 12 et 15 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
+- **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 10, 15 et 20 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
 ## Le jeu en bref
 
@@ -413,11 +413,10 @@ Les chiffres de référence des deux camps, à garder sous la main.
 
 | Palier | Biomasse | Cartes piochées (N1 / N2 / N3) | Plafond par lane |
 | --- | --- | --- | --- |
-| 1 | départ (3) | 3 / 0 / 0 | 1 |
-| 2 | 6 et plus | 3 / 2 / 0 | 2 |
-| 3 | 9 et plus | 4 / 2 / 1 | 3 |
-| 4 | 12 et plus | 4 / 3 / 2 | 4 |
-| 5 | 15 et plus | 4 / 3 / 3 | 5 |
+| 1 | départ (3) | 3 / 0 / 0 | 2 |
+| 2 | 10 et plus | 3 / 2 / 0 | 3 |
+| 3 | 15 et plus | 4 / 2 / 1 | 4 |
+| 4 | 20 et plus | 4 / 3 / 3 | 5 |
 
 Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalogue.
 
