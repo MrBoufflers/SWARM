@@ -1,22 +1,23 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-01 · @Oni
+2026-11-02 · @Oni
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
-## Changements depuis la v0.3 d'origine (30 octobre – 1er novembre 2026)
+## Changements depuis la v0.3 d'origine (30 octobre – 2 novembre 2026)
 
 Repris du prototype jouable et validés par Oni :
 
 - **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
 - **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
 - **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
-- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 57 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives).
+- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 53 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 4 exemplaires (au lieu de 6).
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
 - **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : budget de l'essaim −5 (au lieu de −2). **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
+- **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (au lieu de 2).
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; le bloc n'avance qu'avant une attaque.
@@ -43,9 +44,9 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 | Fusée | 1 socle + 12 étages | les étages s'empilent sur le socle |
 | Plateau des ateliers | 1 | 4 ateliers (un par lane) de 2 emplacements de chantier |
 | Barbelés | 16 | 1 PV, Épines 1 |
-| Forteresses (tuiles de construction) | 57 | 18 sortes, voir le Catalogue |
+| Forteresses (tuiles de construction) | 53 | 18 sortes, voir le Catalogue |
 | Tuiles support | 12 | 4 de niveau 1, 4 de niveau 2, 4 de niveau 3 |
-| Cartes sortilège | 26 | 15 offensives, 11 de soutien, voir le Catalogue |
+| Cartes sortilège | 28 | 15 offensives, 13 de soutien, voir le Catalogue |
 | Pions travailleur | 24 |  |
 
 ### Essaim
@@ -79,8 +80,8 @@ Le carré de départ couvre les couronnes 1 et 2 : chaque lane s'étendra ensuit
 2. Posez les 16 **Barbelés** sur toutes les cases des couronnes 1 et 2 (4 + 12), face visible (1 PV et Épines 1).
 3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1 et 4 **supports de niveau 2** sur les 4 coins de la couronne 2.
 4. Prenez **3 travailleurs**.
-5. Mélangez les 57 forteresses en une pioche. Piochez-en **4** : c'est votre main.
-6. Mélangez les 26 cartes sortilège en une pioche.
+5. Mélangez les 53 forteresses en une pioche. Piochez-en **4** : c'est votre main.
+6. Mélangez les 28 cartes sortilège en une pioche.
 
 ### Essaim
 
@@ -227,7 +228,7 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 
 ### Les forteresses
 
-Les 57 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
+Les 53 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
 
 ## La fusée et ses paliers
 
@@ -255,7 +256,7 @@ La colonie pioche ses sorts en fin de tour selon ses technologies ; ils sont gra
 - **Soutien** : à jouer au début du tour suivant de la colonie.
 - Un sortilège non joué **reste en main** tant qu'il n'est pas joué, sans limite de main.
 
-Les 26 sortilèges et leurs effets sont décrits dans le Catalogue.
+Les 28 sortilèges et leurs effets sont décrits dans le Catalogue.
 
 ## Fin de partie
 
@@ -311,12 +312,12 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Forteresses
 
-57 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 dans les 8 cases autour et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
+53 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 dans les 8 cases autour et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
-| Palissade | 1 | 2 | — | Camouflé | 2 | 6 |
-| Muraille | 2 | 4 | — | Camouflé | 4 | 6 |
+| Palissade | 1 | 2 | — | Camouflé | 2 | 4 |
+| Muraille | 2 | 4 | — | Camouflé | 4 | 4 |
 | Rempart | 3 | 4 | — | Camouflé ; Renforcé 2 | 6 | 3 |
 | Bastion | 3 | 3 | — | Camouflé ; Renforcé 3 | 6 | 2 |
 | Haie d'épines | 1 | 1 | **2** | Camouflée | 2 | 3 |
@@ -339,7 +340,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Sortilèges
 
-26 cartes : 15 offensives, jouées pendant le tour de l'essaim, et 11 de soutien, jouées pendant le tour de la colonie. Les dégâts offensifs vont du coup unique lourd à la zone faible.
+28 cartes : 15 offensives, jouées pendant le tour de l'essaim, et 13 de soutien, jouées pendant le tour de la colonie. Les dégâts offensifs vont du coup unique lourd à la zone faible.
 
 | Sortilège | Type | Effet | Ex. |
 | --- | --- | --- | --- |
@@ -352,6 +353,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Brouillage | Offensif | à jouer avant les attaques, sur une créature déployée ce tour : elle est retirée du plateau, sa carte retourne dans sa pioche (mélangée), la biomasse dépensée est perdue † | 2 |
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |
+| Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 2 |
 | Réparation | Soutien | rendez 3 PV, répartis sur vos tuiles abîmées, sans dépasser leurs PV de départ | 3 |
 | Renouvellement | Soutien | défaussez autant de tuiles de votre main que vous voulez, puis repiochez-en autant | 2 |
 | Reconversion | Soutien | échangez une tuile de votre main avec une tuile construite : celle de la main prend sa place, entière, sans construction ; l'autre revient en main | 2 |
@@ -421,7 +423,7 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | --- | --- | --- |
 | 1 | 1 | tourelle : 1 dégât par tour, +1 aux étages 3, 6 et 9 de la fusée |
 | 2 | 2 | tourelle : 2 dégâts par tour ; +1 Épines à chaque tuile des 8 cases autour |
-| 3 | 3 | pas de tir ; +2 travailleur tant qu'il tient |
+| 3 | 3 | pas de tir ; **+3 travailleurs** tant qu'il tient |
 
 ### Résumé du tour
 
