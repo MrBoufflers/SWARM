@@ -22,7 +22,7 @@ const SF = (() => {
     "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les créatures de sa case ne subissent pas les dégâts d'Épines." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
-    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât (sauf une tuile encore camouflée)." },
   };
   const PILES = {
     1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Hurleur", 2]] },
@@ -495,6 +495,12 @@ const SF = (() => {
     const t = S.tiles[tk]; if (!t) return;
     const [x, y] = parse(tk), lane = cellLane(x, y);
     const epVal = epinesOf(S, tk); // calculé avant les dégâts : la tuile peut tomber
+    // Une tuile encore camouflée ne subit rien des dégâts de percée (ni de zone) et reste cachée (Oni, 02/11/2026)
+    if (!primary && t.camo && !t.revealed) {
+      fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
+      log(S, "essaim", "Percée : la tuile suivante est encore camouflée, les dégâts sont annulés.");
+      return;
+    }
     if (t.camo && !t.revealed) { // Camouflage : la première attaque retourne la tuile
       t.revealed = true;
       fx(S, { t: "reveal", k: tk, trap: !!t.trap });
@@ -528,7 +534,8 @@ const SF = (() => {
       if (primary && caseMates(S, c).some(o => o.name === "Sporeur")) {
         for (const [a, b] of neighbors(x, y)) {
           const nk = key(a, b), nt = S.tiles[nk];
-          if (nt && !S.stase.includes(cellLane(a, b))) {
+          // les spores n'atteignent pas une tuile encore camouflée (Oni, 02/11/2026)
+          if (nt && !(nt.camo && !nt.revealed) && !S.stase.includes(cellLane(a, b))) {
             const sp = Math.max(0, 1 - (nt.shield || 0)), spLoss = nt.ren ? Math.floor(sp / nt.ren) : sp;
             nt.hp -= spLoss;
             fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
