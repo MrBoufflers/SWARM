@@ -61,7 +61,7 @@ const SF = (() => {
     "Égide": { d: 2, pv: 3, ep: 0, shield: 2, camo: 1, n: 3 },
   };
   const TILE_TEXT = {
-    "Rempart": "Renforcé 2 : perd 1 PV seulement si une attaque fait au moins 2 dégâts, jamais plus d'1 PV par attaque.", "Bastion": "Renforcé 3 : perd 1 PV seulement si une attaque fait au moins 3 dégâts, jamais plus d'1 PV par attaque.",
+    "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
@@ -89,9 +89,9 @@ const SF = (() => {
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
-    // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 10, 15, 20 de biomasse
+    // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 9, 15, 20 de biomasse (brièvement 10 / 15 / 20)
     // (avant : 5 paliers, départ 3 puis 6 / 9 / 12 / 15, plafonds 1 à 5 ; à l'origine 4 / 7 / 10 / 13)
-    { min: 0, n: [3, 0, 0], cap: 2 }, { min: 10, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
+    { min: 0, n: [3, 0, 0], cap: 2 }, { min: 9, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
     { min: 20, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
@@ -541,8 +541,9 @@ const SF = (() => {
       log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
     } else {
       if (t.shield) dmg = Math.max(0, dmg - t.shield); // Bouclier X : X dégâts de moins par attaque
-      // Renforcé X : 1 PV par tranche de X dégâts, et jamais plus d'1 PV par attaque (Oni, 02/11/2026)
-      const loss = t.ren ? Math.min(1, Math.floor(dmg / t.ren)) : dmg;
+      // Renforcé X : 1 PV par tranche complète de X dégâts, plusieurs PV possibles d'un coup
+      // (Oni, 02/11/2026 : retour à la règle d'origine après un essai à 1 PV maximum par attaque)
+      const loss = t.ren ? Math.floor(dmg / t.ren) : dmg;
       const capacity = t.ren ? t.hp * t.ren : t.hp;
       const excess = dmg - capacity;
       t.hp -= loss;

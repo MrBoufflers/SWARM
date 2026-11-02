@@ -75,7 +75,7 @@ const fresh = () => {
 {
   const S = fresh();
   const t = b => { S.biomass = b; return SF.tier(S) + 1; };
-  ok([3, 10, 15, 20, 30].map(t).join() === "1,2,3,4,4" && [9, 14, 19].map(t).join() === "1,2,3", "paliers : départ, puis 10 / 15 / 20 (4 paliers, Oni 02/11/2026)");
+  ok([3, 9, 15, 20, 30].map(t).join() === "1,2,3,4,4" && [8, 14, 19].map(t).join() === "1,2,3", "paliers : départ, puis 9 / 15 / 20 (4 paliers, Oni 02/11/2026)");
   ok(SF.TIERS.map(r => r.n.join("")).join() === "300,320,421,433", "pioches 3·0·0 / 3·2·0 / 4·2·1 / 4·3·3");
 }
 // 9. Protection : un tir sur une créature non tank de la case d'un tank vise le tank
@@ -182,7 +182,7 @@ const fresh = () => {
 // 18. plafond de population par lane : 1 / 2 / 3 / 4 / 5
 {
   const S = fresh();
-  ok([3, 10, 15, 20].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "2,3,4,5", "plafonds 2 / 3 / 4 / 5 (biomasse départ / 10 / 15 / 20)");
+  ok([3, 9, 15, 20].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "2,3,4,5", "plafonds 2 / 3 / 4 / 5 (biomasse départ / 9 / 15 / 20)");
 }
 // 19. Cadence : +2 points
 {
@@ -618,11 +618,11 @@ const fresh = () => {
   const U = fresh(); const w = SF.bonusWorkers(U); U.supports["3,3"] = 3;
   ok(SF.bonusWorkers(U) === w + 3, "support de niveau 3 : +3 travailleurs");
 }
-// 49. Renforcé : 1 PV maximum par attaque ; Famine : biomasse ÷ 2 ; soutiens 2 / 4 / 6 PV (Oni, 02/11/2026)
+// 49. Renforcé : plusieurs PV d'un coup (règle d'origine, rétablie le 02/11/2026) ; Famine : biomasse ÷ 2 ; soutiens 2 / 4 / 6 PV (Oni, 02/11/2026)
 {
   const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Rempart", 0, 1); // 4 PV, Renforcé 2
   const m = { id: 150, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; S.creatures.push(m); SF.act(S, m);
-  ok(S.tiles["0,1"].hp === 3, "Rempart (Renforcé 2) frappé pour 7 : 1 PV perdu seulement (4 → 3)");
+  ok(S.tiles["0,1"].hp === 1, "Rempart (Renforcé 2) frappé pour 7 : 3 PV perdus (4 → 1)");
   const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Rempart", 0, 1);
   const e = { id: 151, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(e); SF.act(T, e);
   ok(T.tiles["0,1"].hp === 4, "Rempart frappé pour 1 (moins que 2) : aucun PV perdu");
