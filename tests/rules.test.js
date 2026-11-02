@@ -544,7 +544,7 @@ const fresh = () => {
   ok(t.hp === 2 && S.tiles["0,1"].hp === 1, "Béhémoth (5 PV) survit au piège (−3) puis frappe (1 ATQ : 2 → 1 PV)");
   const P = (setup) => {
     const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k];
-    setup(T);
+    setup(T); for (const k of Object.keys(T.tiles)) T.tiles[k].revealed = true; // tuiles déjà retournées (une tuile camouflée ne subit pas la percée)
     const m = { id: 100, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(m);
     T.creatures.push({ id: 101, name: "Perforeur", lane: "N", u: 0, k: 4, hp: 5, acted: false }); // Aura Percée
     const w = T.workersBase; SF.actCase(T, SF.posKey(m), [100]); return { T, lost: w - T.workersBase };
@@ -648,6 +648,26 @@ const fresh = () => {
   ok(r.S.biomass === 3, "biomasse 4 : elle ne descend pas sous 3");
   r = hit(10, S => { S.tiles["0,1"].revealed = true; });
   ok(r.S.biomass === 10, "déjà vu (Vision d'un Œil-sonde) : ne se déclenche pas");
+}
+// 51. Une tuile encore camouflée ne subit rien de la percée ni des spores, et reste cachée (Oni, 02/11/2026)
+{
+  const P = (setup, extra) => {
+    const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k];
+    setup(T);
+    const m = { id: 170, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(m);
+    T.creatures.push({ id: 171, name: extra || "Perforeur", lane: "N", u: 0, k: 4, hp: 6, acted: false });
+    const b = T.biomass; SF.actCase(T, SF.posKey(m), [170]); return { T, dBio: T.biomass - b };
+  };
+  let r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); });
+  ok(!r.T.tiles["0,3"] && r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed, "Percée sur une Égide camouflée : aucun dégât, elle reste cachée");
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["0,2"].revealed = true; });
+  ok(!r.T.tiles["0,2"], "Percée sur une Égide déjà révélée : 6 en trop − bouclier 2 = 4 → détruite (3 PV)");
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Piège", 0, 2); });
+  ok(r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed && r.T.creatures.some(c => c.id === 170), "Percée sur un Piège camouflé : il ne se déclenche pas et reste caché");
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Siphon", 0, 2); });
+  ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); T.tiles["1,3"].revealed = true; }, "Sporeur");
+  ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && r.T.tiles["1,3"].hp === 1, "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée perd 1 PV");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

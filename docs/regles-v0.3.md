@@ -13,7 +13,7 @@ Repris du prototype jouable et validés par Oni :
 - **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
 - **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). **Siphon** (2 PV, piège qui retire 3 biomasse à l'essaim). Pioche : 54 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 3 exemplaires (au lieu de 6).
 - **Renforcé** : une tuile renforcée ne perd jamais plus d'1 PV par attaque.
-- **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée).
+- **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée). **Camouflage** : une tuile encore camouflée ne subit ni la percée ni les spores, et reste cachée.
 - **Biomasse** : 1 par tuile détruite ou support tombé.
 - **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
@@ -280,8 +280,8 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par support de niveau 2 dans les 8 cases autour, +1 par Avant-poste voisin ; tout se cumule).
 - **Bouclier X** : chaque attaque contre cette tuile inflige X dégâts de moins.
 - **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
-- **Percée** : les dégâts en trop après la destruction d'une tuile passent **seulement à la case suivante** du chemin : un bâtiment les subit, la fusée perd un seul travailleur †, une case vide les perd. Ils ne vont jamais plus loin.
-- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement, le Dortoir et les Avant-postes ; les Barbelés sont posés face visible †.
+- **Percée** : les dégâts en trop après la destruction d'une tuile passent **seulement à la case suivante** du chemin : un bâtiment les subit, la fusée perd un seul travailleur †, une case vide les perd. Ils ne vont jamais plus loin. Un bâtiment encore camouflé (jamais retourné) ne subit rien : les dégâts sont perdus et il reste face cachée (piège et Siphon ne se déclenchent pas).
+- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. Tant qu'elle n'est pas retournée, elle ne subit ni la percée ni les spores (dégâts de zone). En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement, le Dortoir et les Avant-postes ; les Barbelés sont posés face visible †.
 
 ### Barème de points
 
@@ -310,7 +310,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
 | Catalyseur | Soutien | 2 | 3 | 4 | 0 | **Aura Cuirasse** : les créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
 | Sapeur | Soutien | 3 | 5 | 6 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
-| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât | 3 |
+| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât (sauf une tuile encore camouflée) | 3 |
 
 ### Forteresses
 
