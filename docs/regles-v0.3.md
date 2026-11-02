@@ -9,8 +9,8 @@ Version de prototype. Les règles et valeurs suivies de † sont des hypothèses
 Repris du prototype jouable et validés par Oni :
 
 - **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
-- **Mise en place** : 16 **Haies d'épines de départ** (1 PV, Épines 1, face visible) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruite, une haie de départ est retirée du jeu.
-- **Épines** : Haies de départ, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
+- **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
+- **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
 - **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 54 forteresses.
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
@@ -42,7 +42,7 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 | --- | --- | --- |
 | Fusée | 1 socle + 12 étages | les étages s'empilent sur le socle |
 | Plateau des ateliers | 1 | 4 ateliers (un par lane) de 2 emplacements de chantier |
-| Haies d'épines de départ | 16 | 1 PV, Épines 1 |
+| Barbelés | 16 | 1 PV, Épines 1 |
 | Forteresses (tuiles de construction) | 54 | 18 sortes, voir le Catalogue |
 | Tuiles support | 12 | 4 de niveau 1, 4 de niveau 2, 4 de niveau 3 |
 | Cartes sortilège | 26 | 15 offensives, 11 de soutien, voir le Catalogue |
@@ -76,7 +76,7 @@ Le carré de départ couvre les couronnes 1 et 2 : chaque lane s'étendra ensuit
 ### Colonie
 
 1. Placez le socle de la fusée au centre, sans étage.
-2. Posez les 16 **Haies d'épines de départ** sur toutes les cases des couronnes 1 et 2 (4 + 12), face visible (1 PV et Épines 1).
+2. Posez les 16 **Barbelés** sur toutes les cases des couronnes 1 et 2 (4 + 12), face visible (1 PV et Épines 1).
 3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1 et 4 **supports de niveau 2** sur les 4 coins de la couronne 2.
 4. Prenez **3 travailleurs**.
 5. Mélangez les 54 forteresses en une pioche. Piochez-en **4** : c'est votre main.
@@ -172,10 +172,10 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Haies d'épines de départ, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
+- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
 - **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - **Bouclier X** : chaque attaque contre la tuile inflige X dégâts de moins (percée et spores comprises).
-- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Une Haie d'épines de départ détruite est retirée du jeu (elle ne va pas dans la défausse).
+- À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Un Barbelé détruit est retiré du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
 
 ### Supports
@@ -278,7 +278,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Bouclier X** : chaque attaque contre cette tuile inflige X dégâts de moins.
 - **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
 - **Percée** : les dégâts en trop après la destruction d'une tuile passent **seulement à la case suivante** du chemin : un bâtiment les subit, la fusée perd un seul travailleur †, une case vide les perd. Ils ne vont jamais plus loin.
-- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement, le Dortoir et les Avant-postes ; les Haies d'épines de départ sont posées face visible †.
+- **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement, le Dortoir et les Avant-postes ; les Barbelés sont posés face visible †.
 
 ### Barème de points
 
@@ -446,7 +446,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Aura Instinct** (Catalyseur) : la capacité accordée est au choix Mobilité ou Furtivité.
 - [ ] **Nom « Déploiement »** : c'est aussi le nom de l'étape 3 du tour de l'essaim. Renommer l'un des deux ?
 - [ ] **Déploiement** (centre de l'arbre aggro) : les 2 cartes viennent de la pioche de niveau 1 et respectent le plafond de population.
-- [x] **Haies d'épines de départ** (anciens murs de départ) : 1 PV, Épines 1, sur les couronnes 1 et 2, retirées du jeu quand elles sont détruites (décidé les 30/10 et 01/11/2026).
+- [x] **Barbelés** (anciens murs puis haies de départ) : 1 PV, Épines 1, sur les couronnes 1 et 2, retirés du jeu quand ils sont détruits (décidé les 30/10, 01/11 et 02/11/2026).
 - [ ] **Barème des créatures** : aggros à 1 PV et tanks à 1 ATQ à tous les niveaux ; le barème PV + ATQ = 4 / 7 / 10 ne tient plus.
 - [ ] **Barème des forteresses** : la colonne « Points » comptait une Épines 1 gratuite pour toutes les tuiles ; à recalculer depuis sa suppression.
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
