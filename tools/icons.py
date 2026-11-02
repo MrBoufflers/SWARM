@@ -61,7 +61,7 @@ ICONS = {
                '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6"/><circle cx="12" cy="20" r="1.6"/><circle cx="4" cy="12" r="1.6"/><circle cx="20" cy="12" r="1.6"/><circle cx="6.3" cy="6.3" r="1.2"/><circle cx="17.7" cy="17.7" r="1.2"/><circle cx="17.7" cy="6.3" r="1.2"/><circle cx="6.3" cy="17.7" r="1.2"/>'),
     "sabotage": ("Sabotage : détruit un chantier",
                  '<circle cx="10" cy="14.5" r="6.5"/><path d="M14.6 9.9L17.5 7M17.5 7L19 8.5M19.5 3V4.8M22 5.5H20.2M21.3 3.7L20.1 4.9"/>'),
-    "mobilite": ("Mobilité : choisit sa cible / change de lane",
+    "mobilite": ("Mobilité : 2 cases par tour",
                  '<path d="M12 21V12M12 12L6 5M12 12L18 5M6 5V9M6 5H10M18 5V9M18 5H14"/>'),
     "deploiement": ("Déploiement gratuit",
                     '<path d="M6 4L12 10L18 4M6 12L12 18L18 12M5 21H19"/>'),

@@ -94,7 +94,7 @@ const SF = (() => {
     { min: 12, n: [4, 3, 2], cap: 4 }, { min: 15, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté)."],
+    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Les créatures aggro avancent de 2 cases par tour au lieu d'1 ; elles partent devant les autres créatures de leur case."],
       A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     tank: { A1: ["Carapace épaisse", "+1 PV."], B1: ["Protection", "Les tirs visant une créature non tank de sa case visent ce tank."],
@@ -438,41 +438,57 @@ const SF = (() => {
     log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
     if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
   }
+  // Déplacement (Oni, 02/11/2026) : une case par tour, deux avec la Mobilité (aggros). Une créature qui arrive au contact
+  // d'une tuile ou de la fusée attaque aussitôt. Les aggros mobiles quittent leur case et agissent d'abord, en bloc à part.
+  const speedOf = (S, c) => (hasMobility(S, c) ? 2 : 1);
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
     const block = blockAt(S, key).filter(c => !c.acted);
-    const att = block.filter(attacks);
+    for (const c of block) c.acted = true;
+    for (const v of [2, 1]) {
+      const group = block.filter(c => speedOf(S, c) === v && S.creatures.includes(c));
+      if (group.length && !S.winner) groupAct(S, group, order, v);
+    }
+    return true;
+  }
+  function groupAct(S, group, order, steps) {
+    const att = group.filter(attacks);
     const seq = [];
     for (const id of Array.isArray(order) ? order : []) { const c = att.find(o => o.id === id); if (c && !seq.includes(c)) seq.push(c); }
     for (const c of att) if (!seq.includes(c)) seq.push(c);
-    for (const c of block) c.acted = true;
-    let pos = { lane: block[0].lane, u: block[0].u, k: block[0].k };
-    const advance = () => { // toute la case avance jusqu'à la prochaine tuile (ou la fusée)
-      const members = blockAt(S, posKey(pos)), w = walk(S, pos), from = cellName(pos.u, pos.k);
-      if (pos.u !== w.stand[0] || pos.k !== w.stand[1]) {
-        fx(S, { t: "move", ids: members.map(c => c.id), lane: pos.lane, from: [pos.u, pos.k], to: [w.stand[0], w.stand[1]] });
-        for (const c of members) { c.u = w.stand[0]; c.k = w.stand[1]; }
-        pos = { lane: pos.lane, u: w.stand[0], k: w.stand[1] };
+    let pos = { lane: group[0].lane, u: group[0].u, k: group[0].k };
+    // avance case par case (sans diagonale) tant qu'il reste des déplacements ; renvoie la cible au contact, ou null
+    const advance = () => {
+      const members = group.filter(c => S.creatures.includes(c)), from = cellName(pos.u, pos.k);
+      let target = null;
+      for (;;) {
+        const [nu, nk] = nextStep(pos.u, pos.k);
+        if (nk === 0) { target = "fusee"; break; }
+        const tk = key(...toGlobal(pos.lane, nu, nk));
+        if (S.tiles[tk]) { target = tk; break; }
+        if (steps <= 0) break;
+        fx(S, { t: "move", ids: members.map(c => c.id), lane: pos.lane, from: [pos.u, pos.k], to: [nu, nk] });
+        for (const c of members) { c.u = nu; c.k = nk; }
+        pos = { lane: pos.lane, u: nu, k: nk }; steps--;
       }
-      const to = cellName(pos.u, pos.k), tgt = w.target === "fusee" ? "la fusée" : cellName(...toLocal(pos.lane, ...parse(w.target)));
-      log(S, "essaim", `Bloc de ${members.length} (${members.map(c => c.name).join(", ")}, lane ${LANE_NAME[pos.lane]}) : ${from === to ? "reste en " + from : from + " → " + to}, devant ${tgt}.`);
-      return w.target;
+      const to = cellName(pos.u, pos.k), tgt = target === "fusee" ? "devant la fusée" : target ? "devant " + cellName(...toLocal(pos.lane, ...parse(target))) : "pas encore au contact";
+      log(S, "essaim", `${members.length > 1 ? `Bloc de ${members.length} (${members.map(c => c.name).join(", ")}, lane ${LANE_NAME[pos.lane]})` : `${members[0].name} (lane ${LANE_NAME[pos.lane]})`} : ${from === to ? "reste en " + from : from + " → " + to}, ${tgt}.`);
+      return target;
     };
     let target = advance();
     for (const c of seq) {
-      if (S.winner) break;
+      if (S.winner || !target) break;
       if (!S.creatures.includes(c)) continue; // tuée entre-temps (Épines, piège)
-      // le bloc n'avance qu'AVANT une attaque (Oni, 01/11/2026) : si la tuile visée est tombée, il avance maintenant,
-      // juste avant que cette créature frappe ; après la dernière attaque, il reste sur place
-      if (target !== "fusee" && !S.tiles[target]) target = advance();
+      // le bloc n'avance qu'AVANT une attaque (Oni, 01/11/2026) : si la tuile visée est tombée, il avance maintenant
+      // (s'il lui reste un déplacement ce tour), juste avant que cette créature frappe
+      if (target !== "fusee" && !S.tiles[target]) { target = advance(); if (!target) break; }
       auraFx(S, c);
       if (target === "fusee") { hitRocket(S, c); continue; }
       hitTile(S, c, target, effAtq(S, c), true);
       killCheck(S);
     }
-    return true;
   }
-  // une seule créature (utilisé par les tests de règles ciblés)
+  // une seule créature, sans limite de déplacement (utilisé seulement par les tests de règles ciblés)
   function act(S, c) {
     if (c.acted) return;
     c.acted = true;
@@ -572,7 +588,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
     S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = [];
-    for (const c of S.creatures) { c.new = false; c.acted = false; c.mobUsed = false; }
+    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; }
     // Réincarnation
     for (const r of S.reincQueue) {
       const nc = makeCreature(S, r.name, r.lane, r.u);
@@ -684,19 +700,6 @@ const SF = (() => {
   }
   function canBuy(S, type, slot) { return nodeState(S, type, slot) === "open" && investable(S) + invested(S, type, slot) >= nodeCost(slot); }
   function buy(S, type, slot) { return canBuy(S, type, slot) && invest(S, type, slot, nodeCost(slot)); }
-  // Mobilité (décision d'Oni, 30/10/2026) : une fois par tour et par créature, avant les attaques, une créature qui a la
-  // Mobilité (aggro avec l'amélioration) passe à l'entrée (colonne C) d'une lane voisine, plafond respecté.
-  function moveLane(S, id, toLane) {
-    const c = S.creatures.find(o => o.id === id);
-    if (!c || c.mobUsed || !hasMobility(S, c)) return false;
-    const i = LANES.indexOf(c.lane), j = LANES.indexOf(toLane);
-    if (!((i + 1) % 4 === j || (i + 3) % 4 === j)) return false;
-    if (laneCount(S, toLane) >= capOf(S)) return false;
-    fx(S, { t: "raid", id, lane: toLane });
-    c.lane = toLane; c.u = 0; c.k = 4; c.mobUsed = true;
-    log(S, "essaim", `Mobilité : ${c.name} passe à l'entrée de la lane ${LANE_NAME[toLane]}.`);
-    return true;
-  }
   function startAttacks(S) { S.phase = "A_attack"; }
   function attackOrder(S) { return [...S.creatures].filter(c => !c.acted).sort((a, b) => a.k - b.k || a.id - b.id); }
   function endAttackerTurn(S) {
@@ -974,7 +977,6 @@ const SF = (() => {
     deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && deploy(S, a.uid, a.lane, a.u, a.target) },
     endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); return true; } },
     invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
-    moveLane: { phase: ["A_upgrade"], run: (S, a) => isInt(a.id) && isLane(a.lane) && moveLane(S, a.id, a.lane) },
     toAttacks: { phase: ["A_upgrade"], run(S) {
       startAttacks(S);
       if (S.spells.some(s => SPELLS[s].kind === "off" && s !== "Famine")) S.phase = "A_react";
@@ -1063,7 +1065,7 @@ const SF = (() => {
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
     clairvoyance, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
-    attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, moveLane, startAttacks, attackOrder, endAttackerTurn,
+    attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };

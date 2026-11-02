@@ -21,8 +21,9 @@ Repris du prototype jouable et validés par Oni :
 - **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (au lieu de 2).
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
-- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; le bloc n'avance qu'avant une attaque.
-- **Essaim** : paliers à 3 (départ), 6, 9, 12 et 15 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : chaque aggro peut, une fois par tour, passer à l'entrée d'une lane voisine ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
+- **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
+- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
+- **Essaim** : paliers à 3 (départ), 6, 9, 12 et 15 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
 ## Le jeu en bref
 
@@ -140,7 +141,7 @@ Remettez les cartes non jouées dans leurs pioches et mélangez.
 
 ### 6. Fin de tour : attaques
 
-La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis **chaque case avance d'un bloc et ses créatures attaquent** (voir Déplacement et combat), les cases les plus proches de la fusée d'abord. Les créatures posées ce tour attaquent aussi.
+La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis **chaque case avance d'une case et, si elle est au contact, ses créatures attaquent** (voir Déplacement et combat), les cases les plus proches de la fusée d'abord. Les créatures posées ce tour attaquent aussi.
 
 ## Déplacement et combat
 
@@ -148,12 +149,12 @@ Une créature descend sa lane en escalier vers la fusée, traverse les cases vid
 
 ### Le chemin en escalier
 
-Une créature entre par l'une des 5 colonnes (A à E) de la couronne 3 de sa lane, puis avance **case par case, sans jamais se déplacer en diagonale** :
+Une créature entre par l'une des 5 colonnes (A à E) de la couronne 3 de sa lane, puis avance **d'une case par tour, sans jamais se déplacer en diagonale** :
 
 - si la case juste en dessous (plus près de la fusée) appartient à sa lane, elle y descend ;
 - sinon, elle fait un pas de côté vers l'axe de la lane (la colonne C).
 
-Exemple depuis la colonne A : A3 → B3 → B2 → C2 → C1 → fusée. Depuis la colonne D : D3 → D2 → C2 → C1 → fusée. Chaque case du chemin peut porter une tuile à franchir. La créature ne quitte jamais sa lane et n'entre jamais sur un coin de support.
+Exemple depuis la colonne A : A3 → B3 → B2 → C2 → C1 → fusée. Un pas de côté compte comme une case : depuis la colonne A, il faut 4 tours pour arriver en C2. Depuis la colonne D : D3 → D2 → C2 → C1 → fusée. Chaque case du chemin peut porter une tuile à franchir. La créature ne quitte jamais sa lane et n'entre jamais sur un coin de support.
 
 *[schéma non exporté — voir le livret en ligne]*
 
@@ -164,11 +165,11 @@ Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coi
 Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 
 1. **Ordre** : dans une lane, les cases les plus proches de la fusée agissent d'abord ; un bloc qui arrive sur une case déjà occupée fusionne avec elle.
-2. **Déplacement** : le bloc avance sur son chemin en traversant librement les cases vides, jusqu'à la première tuile (ou jusqu'à la fusée).
-3. **Attaque** : les créatures du bloc frappent **une par une, dans l'ordre choisi par l'essaim**. Chacune inflige son ATQ, plus les bonus des auras des soutiens de sa case. Les soutiens n'attaquent jamais : ils avancent avec le bloc et ne subissent donc pas d'Épines.
-4. **Le bloc suit** : si la tuile tombe et qu'il reste des créatures qui n'ont pas encore frappé, tout le bloc avance jusqu'à la tuile suivante, puis elles la frappent. Un bloc n'avance qu'**avant** une attaque : après la dernière attaque, il reste sur place.
+2. **Déplacement** : le bloc avance d'**une case** sur son chemin (deux pour les aggros qui ont la Mobilité, voir plus bas). S'il n'est pas encore au contact d'une tuile ou de la fusée, il s'arrête là et n'attaque pas ce tour.
+3. **Attaque** : dès que le bloc est au contact (avant ou après son déplacement), ses créatures frappent **une par une, dans l'ordre choisi par l'essaim**. Chacune inflige son ATQ, plus les bonus des auras des soutiens de sa case. Les soutiens n'attaquent jamais : ils avancent avec le bloc et ne subissent donc pas d'Épines.
+4. **Le bloc suit** : si la tuile tombe et qu'il reste des créatures qui n'ont pas encore frappé, le bloc entre dans la case libérée **s'il lui reste un déplacement ce tour** (il était déjà au contact au début de son action, ou il a la Mobilité) ; si la case suivante porte une tuile ou est la fusée, les créatures restantes la frappent. Sinon, il reste sur place. Un bloc n'avance qu'**avant** une attaque : après la dernière attaque, il reste sur place.
 
-**Mobilité** : avant les attaques, une créature qui a la Mobilité peut, une fois par tour, quitter sa case pour l'entrée d'une **lane voisine**, plafond de population respecté.
+**Mobilité** : une créature qui a la Mobilité avance de **2 cases** par tour. Dans une case qui mélange des créatures mobiles et d'autres, les mobiles **partent devant** : elles agissent d'abord, comme un bloc à part, puis le reste de la case agit. Loin de leurs soutiens, elles perdent les auras de ces derniers †.
 
 ### Dégâts sur une tuile
 
@@ -377,7 +378,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Férocité | +1 ATQ |
-| 1 | Côté B | Mobilité | une fois par tour, avant les attaques, chaque créature aggro peut passer à l'entrée d'une lane voisine (plafond de population respecté) |
+| 1 | Côté B | Mobilité | les créatures aggro avancent de **2 cases** par tour au lieu d'1 ; elles partent devant les autres créatures de leur case |
 | 2 | Côté A (après Férocité) | Carnage | +2 ATQ (total +3) |
 | 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † |
 | 2 | Côté B (après Mobilité) | Essaim agrandi | **+3 au plafond de population** de chaque lane |
