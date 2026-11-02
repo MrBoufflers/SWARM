@@ -126,8 +126,8 @@ const fresh = () => {
 {
   const S = fresh(); SF.attackerDraw(S);
   ok(["Œil-sonde","Glaneur","Hurleur"].every(n => SF.CREATURES[n].pv === 2 && SF.CREATURES[n].atq === 0), "soutiens N1 : 0 ATQ / 2 PV");
-  ok(["Phéromone","Perforeur","Catalyseur"].every(n => SF.CREATURES[n].pv === 5 && SF.CREATURES[n].atq === 0), "soutiens N2 : 0 ATQ / 5 PV");
-  ok(["Sapeur","Sporeur"].every(n => SF.CREATURES[n].pv === 8 && SF.CREATURES[n].atq === 0), "soutiens N3 : 0 ATQ / 8 PV");
+  ok(["Phéromone","Perforeur","Catalyseur"].every(n => SF.CREATURES[n].pv === 4 && SF.CREATURES[n].atq === 0), "soutiens N2 : 0 ATQ / 4 PV");
+  ok(["Sapeur","Sporeur"].every(n => SF.CREATURES[n].pv === 6 && SF.CREATURES[n].atq === 0), "soutiens N3 : 0 ATQ / 6 PV");
   const g = { id: 1, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, new: true, acted: false };
   const h = { id: 2, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2, new: true, acted: false };
   S.creatures.push(g, h);
@@ -243,7 +243,7 @@ const fresh = () => {
   ok(S.phase === "D_place", "pose du bâtiment achevé");
   ok(SF.apply(S, "colonie", "placeAt", { k: "0,2" }) === "" && S.phase === "D_fire", "après la pose : les tourelles tirent");
   ok(SF.apply(S, "colonie", "endD") === "" && S.spells.includes("Famine") && S.phase === "A_famine", "fin du tour : pioche, puis fenêtre Famine ouverte");
-  ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine === 5, "Famine jouée : budget −5");
+  ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine, "Famine jouée");
 }
 // 25. vue filtrée : rien de caché n'est envoyé à l'autre camp
 {
@@ -419,7 +419,7 @@ const fresh = () => {
 {
   const S = fresh(); S.biomass = 9; S.spells = ["Famine"]; S.phase = "A_famine";
   SF.apply(S, "colonie", "famine", { play: true }); SF.apply(S, "essaim", "draw");
-  ok(S.budget === 4, "Famine : budget 9 − 5 = 4");
+  ok(S.budget === 4, "Famine : biomasse 9 ÷ 2 = 4 (arrondi à l'inférieur)");
   const T = fresh(); T.upgrades.aggro = { r1: "A", r2: "C" }; T.biomass = 15;
   for (let i = 0; i < 10; i++) { const n = T.piles[1].pop(); T.creatures.push({ id: 900 + i, name: n, lane: "N", u: 0, k: 4, hp: 1 }); }
   T.log = []; SF.attackerDraw(T);
@@ -620,6 +620,17 @@ const fresh = () => {
   ok(!T.doubleFire || T.phase !== "D_main", "l'effet ne dure qu'un tour");
   const U = fresh(); const w = SF.bonusWorkers(U); U.supports["3,3"] = 3;
   ok(SF.bonusWorkers(U) === w + 3, "support de niveau 3 : +3 travailleurs");
+}
+// 49. Renforcé : 1 PV maximum par attaque ; Famine : biomasse ÷ 2 ; soutiens 2 / 4 / 6 PV (Oni, 02/11/2026)
+{
+  const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Rempart", 0, 1); // 4 PV, Renforcé 2
+  const m = { id: 150, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; S.creatures.push(m); SF.act(S, m);
+  ok(S.tiles["0,1"].hp === 3, "Rempart (Renforcé 2) frappé pour 7 : 1 PV perdu seulement (4 → 3)");
+  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Rempart", 0, 1);
+  const e = { id: 151, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(e); SF.act(T, e);
+  ok(T.tiles["0,1"].hp === 4, "Rempart frappé pour 1 (moins que 2) : aucun PV perdu");
+  ok([3, 6, 7, 15].map(SF.famineBudget).join() === "1,3,3,7", "Famine : budget = biomasse ÷ 2 arrondie à l'inférieur (3→1, 6→3, 7→3, 15→7)");
+  ok(["Œil-sonde", "Glaneur", "Hurleur"].every(n => SF.CREATURES[n].pv === 2) && ["Sapeur", "Sporeur"].every(n => SF.CREATURES[n].pv === 6), "soutiens : 2 PV (niveau 1), 4 (niveau 2), 6 (niveau 3)");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
