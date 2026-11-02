@@ -280,7 +280,7 @@
         else {
           const ep = SF.epinesOf(S, k, S.view === "essaim");
           inner = `<div class="tile${t.camo && !t.revealed ? " trap" : ""}" title="${t.camo && !t.revealed ? "Camouflée : l'essaim ne la voit pas" : ""}"><span class="tn">${E(short(t.name))}</span><b class="hp">${t.hp}<small>/${t.max}</small></b>
-            <span class="tb">${ep ? icon("epines") + ep : ""}${t.shield ? icon("bouclier") + t.shield : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
+            <span class="tb">${ep ? icon("epines") + ep : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
         }
       }
       const stased = S.stase.includes(lane);
@@ -299,7 +299,6 @@
     if (t.pv === "ap") cap("cardinal", "Avant-poste", `+2 PV si posé dans la lane ${L[t.dir]} (4 PV), sinon 2 PV.`);
     if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
     if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
-    if (t.shield) cap("bouclier", `Bouclier ${t.shield}`, `chaque attaque contre elle inflige ${t.shield} dégâts de moins.`);
     if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que par tranche complète de ${t.ren} dégâts d'une même attaque.`);
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
@@ -325,10 +324,17 @@
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    if (SF.hasMobility(S, c)) extras.push("Mobilité (2 cases par tour)");
+    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur") ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
     let actions = "";
+    // Frénésie : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim (cumulable)
+    if (b.type === "soutien" && S.upgrades.soutien.r2 === "B") {
+      const cur = SF.frenzyOf(S, c), others = S.creatures.filter(o => o !== c && SF.posKey(o) === SF.posKey(c));
+      const canSet = S.view === "essaim" && ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase) && !c.acted;
+      actions += `<p>Frénésie : ${cur ? `double les dégâts ${/^[AEIOUYÉÈÊŒ]/i.test(cur.name) ? "d'" : "de "}${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;
+      if (canSet && others.length > 1) actions += `<div class="choices"><span class="lab">Frénésie sur :</span>${others.map(o => `<button data-a="frenzy" data-id="${c.id}" data-v="${o.id}"${cur === o ? ` class="on" aria-pressed="true"` : ""}>${E(o.name)} · ATQ ${SF.effAtq(S, o)}</button>`).join("")}</div>`;
+    }
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
       <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${posTxt(c)}</p>
       ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${actions}</section>`;
@@ -419,9 +425,9 @@
     return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
       <h2>Règles en bref</h2>
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
-      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (départ, puis 9 · 15 · 20 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour et partent devant leur case. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
+      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (départ, puis 9 · 15 · 21 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour ; l'Aura Mobilité du Glaneur donne +1 case aux autres créatures de sa case ; les plus rapides partent devant. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 3, 4 et 5 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu par tranche complète de X dégâts d'une même attaque. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu par tranche complète de X dégâts d'une même attaque. Une aura ne profite qu'aux autres créatures de sa case (jamais à elle-même) et toutes les auras se cumulent. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
@@ -483,6 +489,7 @@
       }
       case "sapTarget": { const sp = UI.sap; UI.sap = null; if (sp) return play("deploy", { uid: sp.uid, lane: sp.lane, u: sp.u, target: d.k }, () => { UI.sel = null; }); break; }
       case "sapCancel": UI.sap = null; break;
+      case "frenzy": return play("frenzy", { src: Number(d.id), target: Number(d.v) });
       case "endDeploy": UI.sel = null; return play("endDeploy");
       case "invest": return play("invest", { t: d.t, s: d.s, n: Number(d.n) });
       case "toAttacks": return play("toAttacks");

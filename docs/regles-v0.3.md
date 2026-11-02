@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.0 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.1 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -11,7 +11,7 @@ Repris du prototype jouable et validés par Oni :
 - **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
 - **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
 - **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
-- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). **Siphon** (2 PV, piège qui retire 3 biomasse à l'essaim). Pioche : 54 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 3 exemplaires (au lieu de 6).
+- **Nouvelles forteresses** : **Égide** (3 PV, Renforcé 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Renforcé 2, +1 travailleur temporaire). **Siphon** (2 PV, piège qui retire 3 biomasse à l'essaim). Pioche : 54 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 3 exemplaires (au lieu de 6).
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée). **Camouflage** : une tuile encore camouflée ne subit ni la percée ni les spores, et reste cachée (sauf si la Vision ou la Clairvoyance la rend visible).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
 - **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
@@ -20,9 +20,11 @@ Repris du prototype jouable et validés par Oni :
 - **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (au lieu de 2).
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
+- **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1 et **Aura Mobilité 1** (+1 case aux autres créatures de sa case). **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B).
+- **Renforcé** remplace le Bouclier (Égide, Dortoir : Renforcé 2) : 1 PV perdu par tranche complète de X dégâts, plusieurs PV possibles d'un coup.
 - **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
-- **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 20 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
+- **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
 ## Le jeu en bref
 
@@ -176,7 +178,6 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
 - **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
-- **Bouclier X** : chaque attaque contre la tuile inflige X dégâts de moins (percée et spores comprises).
 - **Siphon** : la première attaque le retourne face visible et l'essaim perd **3 biomasse** ; sa biomasse ne descend jamais sous 3. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Un Barbelé détruit est retiré du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
@@ -275,10 +276,9 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 - **Même case** : les auras et les effets entre créatures ne concernent que les créatures **sur la même case**, jamais toute la lane. Deux créatures qui attendent à l'entrée de la même colonne sont sur la même case.
 - **Zones** : une **case** ; une **lane** (toutes ses cases) ; une **couronne** (toutes les cases de même couronne, sur les 4 lanes).
-- **Aura** : effet d'un soutien sur les autres créatures de sa case. Deux auras **du même nom** ne se cumulent pas ; deux auras de noms différents se cumulent.
+- **Aura** : effet d'un soutien sur les **autres** créatures de sa case, jamais sur lui-même. **Toutes les auras se cumulent**, même deux auras du même nom (chaque source compte) †.
 - **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que par tranche complète de X dégâts d'une même attaque.
 - **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par support de niveau 2 dans les 8 cases autour, +1 par Avant-poste voisin ; tout se cumule).
-- **Bouclier X** : chaque attaque contre cette tuile inflige X dégâts de moins.
 - **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
 - **Percée** : les dégâts en trop après la destruction d'une tuile passent **seulement à la case suivante** du chemin : un bâtiment les subit, la fusée perd un seul travailleur †, une case vide les perd. Ils ne vont jamais plus loin. Un bâtiment encore camouflé (jamais retourné, ni rendu visible par la Vision ou la Clairvoyance) ne subit rien : les dégâts sont perdus et il reste face cachée (piège et Siphon ne se déclenchent pas).
 - **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. Tant qu'elle n'est pas retournée ni rendue visible (Vision, Clairvoyance), elle ne subit ni la percée ni les spores (dégâts de zone). En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement, le Dortoir et les Avant-postes ; les Barbelés sont posés face visible †.
@@ -304,13 +304,13 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Béhémoth | Tank | 2 | 4 | 5 | 1 | — | 6 |
 | Colosse | Tank | 3 | 7 | 7 | 1 | — | 6 |
 | Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : révèle les tuiles camouflées de sa lane | 2 |
-| Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV | 2 |
+| Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. **Aura Mobilité 1** : les autres créatures de sa case avancent d'1 case de plus par tour (elles partent devant le Glaneur) | 2 |
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
-| Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus ; non cumulable | 2 |
+| Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus (cumulable : +1 par Phéromone) | 2 |
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
-| Catalyseur | Soutien | 2 | 3 | 4 | 0 | **Aura Cuirasse** : les créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
+| Catalyseur | Soutien | 2 | 3 | 4 | 0 | **Aura Cuirasse** : les autres créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
 | Sapeur | Soutien | 3 | 5 | 6 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
-| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât (sauf une tuile encore camouflée et non visible) | 3 |
+| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit **2 dégâts par Sporeur** de la case, en une seule attaque (sauf une tuile encore camouflée et non visible) | 3 |
 
 ### Forteresses
 
@@ -325,13 +325,13 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Haie d'épines | 1 | 1 | **2** | Camouflée | 2 | 3 |
 | Mur hérissé | 2 | 2 | **2** | Camouflé | 4 | 2 |
 | Ronceraie | 3 | 2 | **2** | Camouflée ; Renforcé 2 | † | 3 |
-| Égide | 2 | 3 | — | Camouflée ; **Bouclier 2** : chaque attaque contre elle inflige 2 dégâts de moins | † | 3 |
+| Égide | 2 | 3 | — | Camouflée ; **Renforcé 2** | † | 3 |
 | Antenne | 1 | 1 | — | +1 technologie | 2 | 3 |
 | Laboratoire | 2 | 2 | — | +2 technologies | 4 | 3 |
 | Observatoire | 3 | 3 | — | +3 technologies | 6 | 3 |
 | Archives | 2 | 3 | — | +1 technologie | † | 3 |
 | Baraquement | 1 | 1 | **1** | +1 travailleur **temporaire** : tant que la tuile tient | 2 | 3 |
-| Dortoir | 3 | 3 | — | **Bouclier 2** ; +1 travailleur **temporaire** : tant que la tuile tient | † | 3 |
+| Dortoir | 3 | 3 | — | **Renforcé 2** ; +1 travailleur **temporaire** : tant que la tuile tient | † | 3 |
 | Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | — | Face visible ; +2 PV si posé dans la lane de son point cardinal (4 PV) ; **Aura d'épines** : +1 Épines à chaque bâtiment des 8 cases autour | 3 | 1 de chaque |
 | Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | **1** | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
 | Réduit † | 2 | 5 − couronne (4 / 3 / 2) | **1** | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
@@ -387,20 +387,20 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Carapace épaisse | +1 PV |
-| 1 | Côté B | Protection | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place |
+| 1 | Côté B | Provocation | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place |
 | 2 | Côté A (après Carapace épaisse) | Blindage | +2 PV (total +3) |
 | 2 | Centre | Réincarnation | une fois par tour, quand un tank meurt, redéployez-le gratuitement au début de votre prochain tour, PV pleins, à l'entrée de sa lane |
-| 2 | Côté B (après Protection) | Masse vivante | +1 PV par autre créature sur sa case, tant qu'elle y reste |
+| 2 | Côté B (après Provocation) | Masse vivante | +1 PV par autre créature sur sa case, tant qu'elle y reste |
 
 #### Soutien
 
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
-| 1 | Côté A | Mue | +1 PV et Furtivité † : ne peut pas être visé par une tourelle ni un sortilège tant qu'une créature non furtive est sur sa case |
-| 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case † |
-| 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2** † (elle remplace l'Aura Soin 1) |
+| 1 | Côté A | Mue | tous les soutiens gagnent la **Furtivité** † (ne peuvent pas être visés par une tourelle ni un sortilège tant qu'une créature non furtive est sur leur case) et l'**Aura +1 PV** : +1 PV aux autres créatures de leur case (cumulable) |
+| 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) |
+| 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 3) |
 | 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles |
-| 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : une autre créature de sa case, au choix, inflige des dégâts doublés |
+| 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim ; cumulable (deux soutiens sur la même créature : ×4 ; ou sur deux créatures différentes) |
 
 Une tuile camouflée rendue visible par Vision ou Clairvoyance ne déclenche plus son piège †.
 
@@ -415,7 +415,7 @@ Les chiffres de référence des deux camps, à garder sous la main.
 | 1 | départ (3) | 3 / 0 / 0 | 2 |
 | 2 | 9 et plus | 3 / 2 / 0 | 3 |
 | 3 | 15 et plus | 4 / 2 / 1 | 4 |
-| 4 | 20 et plus | 4 / 3 / 3 | 5 |
+| 4 | 21 et plus | 4 / 3 / 3 | 5 |
 
 Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalogue.
 
@@ -456,7 +456,8 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
 - [ ] **Brouillage** : la biomasse dépensée pour la carte annulée est perdue.
 - [ ] **Furtivité** : non ciblable tant qu'une créature non furtive est sur sa case.
-- [ ] **Régénération** : l'Aura Soin 2 remplace l'Aura Soin 1.
+- [x] **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur (décidé le 02/11/2026).
+- [x] **Aura Frénésie** : cumulable, cible au choix ; deux Frénésies sur la même créature la quadruplent (décidé le 02/11/2026).
 - [ ] Un **piège rendu visible** par Vision ou Clairvoyance ne se déclenche plus.
 - [ ] **Ligne de front et Réduit** : garder les deux, ou un seul des deux.
 
