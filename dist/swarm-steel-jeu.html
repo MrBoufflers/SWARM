@@ -2399,8 +2399,8 @@ if (typeof module !== "undefined") module.exports = BILAN;
   let net0 = null; try { net0 = JSON.parse(localStorage.getItem(NET_KEY) || "null"); } catch (e) { /* rien */ }
   const saved = load();
   const invite = new URLSearchParams(location.search).get("code");
-  if (net0 && net0.code && net0.token && (!invite || invite.toUpperCase() === net0.code)) resumeOnline(net0);
-  else if (new URLSearchParams(location.search).has("stats") && HTTP) openStats();
+  if (new URLSearchParams(location.search).has("stats") && HTTP) openStats(); // lien direct vers les statistiques
+  else if (net0 && net0.code && net0.token && (!invite || invite.toUpperCase() === net0.code)) resumeOnline(net0);
   else if (!invite && saved && saved.phase) { S = upgradeSave(saved); MODE = "local"; render(); if (S.winner) recordLocal(); }
   else render();
   checkVersion();
