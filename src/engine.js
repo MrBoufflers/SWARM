@@ -17,7 +17,8 @@ const SF = (() => {
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
-    "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "instinct", capName: "Aura Instinct", capText: "Une autre créature de sa case gagne Mobilité ou Furtivité, au choix." },
+    // Catalyseur (Oni, 02/11/2026) : l'Aura Instinct (Mobilité ou Furtivité à une créature) est remplacée par l'Aura Cuirasse
+    "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 5, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les créatures de sa case ne subissent pas les dégâts d'Épines." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
     "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 8, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât." },
@@ -212,12 +213,10 @@ const SF = (() => {
   const anySoutien = S => S.creatures.some(c => CREATURES[c.name].type === "soutien");
   const clairvoyance = S => S.upgrades.soutien.r2 === "C" && anySoutien(S);
   function hasMobility(S, c) {
-    if (CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B") return true;
-    return caseMates(S, c).some(o => o.name === "Catalyseur" && o.instinct === "mobilite" && o.instinctTarget === c.id);
+    return CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B";
   }
   function isStealthy(S, c) {
-    if (CREATURES[c.name].type === "soutien" && S.upgrades.soutien.r1 === "A") return true;
-    return caseMates(S, c).some(o => o.name === "Catalyseur" && o.instinct === "furtivite" && o.instinctTarget === c.id);
+    return CREATURES[c.name].type === "soutien" && S.upgrades.soutien.r1 === "A";
   }
   function hasPercee(S, c) {
     return caseMates(S, c).some(o => o.name === "Perforeur");
@@ -351,7 +350,6 @@ const SF = (() => {
   // ------------------------------------------------------------------ créatures
   function makeCreature(S, name, lane, u, extra) {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
-    if (name === "Catalyseur") { c.instinct = "mobilite"; c.instinctTarget = null; }
     return c;
   }
   function killCheck(S) {
@@ -367,11 +365,6 @@ const SF = (() => {
       } else {
         S.piles[CREATURES[c.name].lvl].push(c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
       }
-    }
-    // Catalyseur : la cible d'Instinct doit rester sur sa case
-    for (const c of S.creatures) if (c.name === "Catalyseur") {
-      const mates = caseMates(S, c);
-      if (!mates.some(o => o.id === c.instinctTarget)) c.instinctTarget = mates.length ? mates[0].id : null;
     }
   }
   function damageCreature(S, c, n, why) {
@@ -426,6 +419,7 @@ const SF = (() => {
     if (S.upgrades.soutien.r1 === "B" && caseMates(S, c).some(o => CREATURES[o.name].type === "soutien")) auras.push("Griffes");
     if (frenzyTarget(S, c)) auras.push("Frénésie");
     if (hasPercee(S, c)) auras.push("Percée");
+    if (caseMates(S, c).some(o => o.name === "Catalyseur")) auras.push("Cuirasse");
     if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
   }
   function hitRocket(S, c) {
@@ -544,7 +538,11 @@ const SF = (() => {
         }
       }
     }
-    if (primary && epVal > 0) damageCreature(S, c, epVal, "épines");
+    // Aura Cuirasse (Catalyseur sur la case) : pas de dégâts d'Épines (Oni, 02/11/2026)
+    if (primary && epVal > 0) {
+      if (caseMates(S, c).some(o => o.name === "Catalyseur")) log(S, "essaim", `Aura Cuirasse : ${c.name} ne subit pas les Épines.`);
+      else damageCreature(S, c, epVal, "épines");
+    }
   }
 
   // ------------------------------------------------------------------ tour de l'essaim
@@ -603,8 +601,6 @@ const SF = (() => {
       destroyTile(S, target, "sabotage", c);
     }
     if (card.name === "Œil-sonde") revealLane(S, lane);
-    if (card.name === "Catalyseur") { const m = caseMates(S, c); c.instinctTarget = m.length ? m[0].id : null; }
-    for (const o of S.creatures) if (o.name === "Catalyseur" && !o.instinctTarget) { const m = caseMates(S, o); o.instinctTarget = m.length ? m[0].id : null; }
     return true;
   }
   function revealLane(S, lane) {
@@ -665,7 +661,7 @@ const SF = (() => {
   function canBuy(S, type, slot) { return nodeState(S, type, slot) === "open" && investable(S) + invested(S, type, slot) >= nodeCost(slot); }
   function buy(S, type, slot) { return canBuy(S, type, slot) && invest(S, type, slot, nodeCost(slot)); }
   // Mobilité (décision d'Oni, 30/10/2026) : une fois par tour et par créature, avant les attaques, une créature qui a la
-  // Mobilité (aggro avec l'amélioration, ou cible d'Instinct) passe à l'entrée (colonne C) d'une lane voisine, plafond respecté.
+  // Mobilité (aggro avec l'amélioration) passe à l'entrée (colonne C) d'une lane voisine, plafond respecté.
   function moveLane(S, id, toLane) {
     const c = S.creatures.find(o => o.id === id);
     if (!c || c.mobUsed || !hasMobility(S, c)) return false;
@@ -953,16 +949,6 @@ const SF = (() => {
     endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); return true; } },
     invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
     moveLane: { phase: ["A_upgrade"], run: (S, a) => isInt(a.id) && isLane(a.lane) && moveLane(S, a.id, a.lane) },
-    instinct: { phase: ["A_deploy", "A_upgrade"], run(S, a) {
-      const c = creatureById(S, a.id);
-      if (!c || c.name !== "Catalyseur" || !["mobilite", "furtivite"].includes(a.v)) return false;
-      c.instinct = a.v; return true;
-    } },
-    instTarget: { phase: ["A_deploy", "A_upgrade"], run(S, a) {
-      const c = creatureById(S, a.id);
-      if (!c || c.name !== "Catalyseur" || !caseMates(S, c).some(m => m.id === a.v)) return false;
-      c.instinctTarget = a.v; return true;
-    } },
     toAttacks: { phase: ["A_upgrade"], run(S) {
       startAttacks(S);
       if (S.spells.some(s => SPELLS[s].kind === "off" && s !== "Famine")) S.phase = "A_react";
