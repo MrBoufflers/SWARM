@@ -89,9 +89,10 @@ const SF = (() => {
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
-    // seuils (décision d'Oni, 30/10/2026) : départ (3), puis 6, 9, 12, 15 (à l'origine 4, 7, 10, 13)
-    { min: 0, n: [3, 0, 0], cap: 1 }, { min: 6, n: [3, 2, 0], cap: 2 }, { min: 9, n: [4, 2, 1], cap: 3 },
-    { min: 12, n: [4, 3, 2], cap: 4 }, { min: 15, n: [4, 3, 3], cap: 5 },
+    // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 10, 15, 20 de biomasse
+    // (avant : 5 paliers, départ 3 puis 6 / 9 / 12 / 15, plafonds 1 à 5 ; à l'origine 4 / 7 / 10 / 13)
+    { min: 0, n: [3, 0, 0], cap: 2 }, { min: 10, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
+    { min: 20, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
     aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Les créatures aggro avancent de 2 cases par tour au lieu d'1 ; elles partent devant les autres créatures de leur case."],
