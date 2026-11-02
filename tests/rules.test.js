@@ -470,7 +470,8 @@ const fresh = () => {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
   ok(E && E.pv === 3 && E.shield === 2 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Bouclier 2, 2 tours, camouflée, 3 exemplaires, sans Épines");
-  ok(SF.newGame().tileDeck.length + 4 === 54, "pioche de forteresses : 54 tuiles (44 + 3 Égides + 1 Dortoir + 3 Archives + 3 Ronceraies, main de 4 comprise)");
+  ok(SF.newGame().tileDeck.length + 4 === 57, "pioche de forteresses : 57 tuiles (44 + 3 Égides + 1 Dortoir + 3 Archives + 3 Ronceraies + 1 Laboratoire + 2 Observatoires, main de 4 comprise)");
+  ok(["Antenne", "Laboratoire", "Observatoire", "Archives"].every(n => SF.TILES[n].tech && SF.TILES[n].n === 3), "3 exemplaires de chaque bâtiment à technologies (Oni, 02/11/2026)");
   const hit = (name, atq) => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Égide", 0, 1);
     const c = { id: 96, name, lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);

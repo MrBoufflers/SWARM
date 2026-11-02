@@ -11,7 +11,7 @@ Repris du prototype jouable et validés par Oni :
 - **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
 - **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
 - **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
-- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 54 forteresses.
+- **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). Pioche : 57 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives).
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
 - **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
@@ -43,7 +43,7 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 | Fusée | 1 socle + 12 étages | les étages s'empilent sur le socle |
 | Plateau des ateliers | 1 | 4 ateliers (un par lane) de 2 emplacements de chantier |
 | Barbelés | 16 | 1 PV, Épines 1 |
-| Forteresses (tuiles de construction) | 54 | 18 sortes, voir le Catalogue |
+| Forteresses (tuiles de construction) | 57 | 18 sortes, voir le Catalogue |
 | Tuiles support | 12 | 4 de niveau 1, 4 de niveau 2, 4 de niveau 3 |
 | Cartes sortilège | 26 | 15 offensives, 11 de soutien, voir le Catalogue |
 | Pions travailleur | 24 |  |
@@ -79,7 +79,7 @@ Le carré de départ couvre les couronnes 1 et 2 : chaque lane s'étendra ensuit
 2. Posez les 16 **Barbelés** sur toutes les cases des couronnes 1 et 2 (4 + 12), face visible (1 PV et Épines 1).
 3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1 et 4 **supports de niveau 2** sur les 4 coins de la couronne 2.
 4. Prenez **3 travailleurs**.
-5. Mélangez les 54 forteresses en une pioche. Piochez-en **4** : c'est votre main.
+5. Mélangez les 57 forteresses en une pioche. Piochez-en **4** : c'est votre main.
 6. Mélangez les 26 cartes sortilège en une pioche.
 
 ### Essaim
@@ -227,7 +227,7 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 
 ### Les forteresses
 
-Les 54 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
+Les 57 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
 
 ## La fusée et ses paliers
 
@@ -311,7 +311,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Forteresses
 
-54 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 dans les 8 cases autour et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
+57 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 dans les 8 cases autour et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -324,8 +324,8 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Ronceraie | 3 | 2 | **2** | Camouflée ; Renforcé 2 | † | 3 |
 | Égide | 2 | 3 | — | Camouflée ; **Bouclier 2** : chaque attaque contre elle inflige 2 dégâts de moins | † | 3 |
 | Antenne | 1 | 1 | — | +1 technologie | 2 | 3 |
-| Laboratoire | 2 | 2 | — | +2 technologies | 4 | 2 |
-| Observatoire | 3 | 3 | — | +3 technologies | 6 | 1 |
+| Laboratoire | 2 | 2 | — | +2 technologies | 4 | 3 |
+| Observatoire | 3 | 3 | — | +3 technologies | 6 | 3 |
 | Archives | 2 | 3 | — | +1 technologie | † | 3 |
 | Baraquement | 1 | 1 | **1** | +1 travailleur **temporaire** : tant que la tuile tient | 2 | 3 |
 | Dortoir | 3 | 3 | — | **Bouclier 2** ; +1 travailleur **temporaire** : tant que la tuile tient | † | 3 |
@@ -334,7 +334,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Réduit † | 2 | 5 − couronne (4 / 3 / 2) | **1** | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
 | Piège | 2 | 2 | — | Camouflé ; **3 dégâts** à la créature qui le révèle en l'attaquant, avant qu'elle frappe | 4 | 3 |
 
-- **Total des technologies possibles** : 13 (3 Antennes, 2 Laboratoires, 1 Observatoire, 3 Archives).
+- **Total des technologies possibles** : 21 (3 Antennes, 3 Laboratoires, 3 Observatoires, 3 Archives).
 - **Total des travailleurs bonus possibles** : 6 temporaires (3 Baraquements, 3 Dortoirs), aucun permanent.
 
 ### Sortilèges
@@ -443,7 +443,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Coûts des aggros et des tanks** : tu ne les as pas donnés ; j'ai gardé 3 / 4 / 7 selon le niveau. Avec des stats de 4 / 7 / 10 points, le niveau 3 rapporte moins de stats par biomasse que le niveau 2.
 - [x] **Colosse (tank niveau 3)** : 7 PV / 1 ATQ (tous les tanks à 1 ATQ, décidé le 01/11/2026).
 - [ ] **Soutiens** : 2 exemplaires de chaque carte de niveau 1 et 2, 3 de chaque carte de niveau 3, pour arriver à 6 par niveau comme les autres types.
-- [x] **Catalyseur** : l'Aura Instinct est remplacée par l'Aura Cuirasse (décidé le 02/11/2026 ; nom provisoire).
+- [x] **Catalyseur** : l'Aura Instinct est remplacée par l'Aura Cuirasse (décidé le 02/11/2026).
 - [ ] **Nom « Déploiement »** : c'est aussi le nom de l'étape 3 du tour de l'essaim. Renommer l'un des deux ?
 - [ ] **Déploiement** (centre de l'arbre aggro) : les 2 cartes viennent de la pioche de niveau 1 et respectent le plafond de population.
 - [x] **Barbelés** (anciens murs puis haies de départ) : 1 PV, Épines 1, sur les couronnes 1 et 2, retirés du jeu quand ils sont détruits (décidé les 30/10, 01/11 et 02/11/2026).
