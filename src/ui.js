@@ -160,7 +160,7 @@
         body = `<p class="hint">Tourelle de niveau ${S.supports[UI.support]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : choisissez la cible.</p><div class="choices">` +
           c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("") + `</div>`;
       } else {
-        const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && !S.firedSupports.includes(k) && SF.supportTargets(S, k).length);
+        const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length);
         body = ready.length ? `<p class="hint">Tourelles prêtes : cliquez une tourelle surlignée sur le plateau.</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
       }
       acts = `<button data-a="autoFire">Tirs automatiques</button><button data-a="endD" class="primary">Terminer le tour</button>`;
@@ -214,7 +214,7 @@
       : "Soutien · pendant votre tour, avant de passer aux tirs";
     return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Reste en main tant qu'il n'est pas joué.</small></span></div>`;
   }
-  const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
+  const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Feu nourri": "tourelle", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
   const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", butin: "biomasse", percee: "percee", cuirasse: "renforce", sabotage: "sabotage", spores: "spores" }[c] || "aura");
   const cardOf = uid => S.handA.find(c => c.uid === uid) || { name: "?" };
   function posTxt(c) { return c.k === 4 ? `entrée ${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}` : `${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}${c.k}`; }
@@ -247,10 +247,10 @@
       }
       if (SF.isSupportCell(x, y)) {
         const lvl = S.supports[k];
-        const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && !S.firedSupports.includes(k) && SF.supportTargets(S, k).length;
-        const fired = S.firedSupports.includes(k);
+        const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length;
+        const fired = lvl && lvl < 3 && SF.shotsLeft(S, k) <= 0;
         html += lvl ? `<div class="cell sup${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
-            <span class="lv">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? icon("tourelle") + `<b>${SF.turretDmg(S, lvl)}</b>` : icon("travailleur") + "<b>+2</b>"}</div>`
+            <span class="lv">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? icon("tourelle") + `<b>${SF.turretDmg(S, lvl)}</b>` : icon("travailleur") + `<b>+${SF.SUP3_WORKERS}</b>`}</div>`
           : `<div class="cell corner"><span class="lv">${["", "I", "II", "III"][r]}</span></div>`;
         continue;
       }

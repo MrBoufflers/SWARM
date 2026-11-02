@@ -30,8 +30,8 @@ const SF = (() => {
   };
   // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
   const TILES = {
-    "Palissade": { d: 1, pv: 2, ep: 0, camo: 1, n: 6 },
-    "Muraille": { d: 2, pv: 4, ep: 0, camo: 1, n: 6 },
+    "Palissade": { d: 1, pv: 2, ep: 0, camo: 1, n: 4 }, // 4 ex. (Oni, 02/11/2026 ; avant 6)
+    "Muraille": { d: 2, pv: 4, ep: 0, camo: 1, n: 4 }, // 4 ex. (Oni, 02/11/2026 ; avant 6)
     "Rempart": { d: 3, pv: 4, ep: 0, ren: 2, camo: 1, n: 3 },
     "Bastion": { d: 3, pv: 3, ep: 0, ren: 3, camo: 1, n: 2 },
     "Haie d'épines": { d: 1, pv: 1, ep: 2, camo: 1, n: 3 },
@@ -78,6 +78,8 @@ const SF = (() => {
     "Brouillage": { kind: "off", n: 2, text: "Annule le déploiement d'une créature posée ce tour ; la carte retourne dans sa pioche, la biomasse est perdue." },
     "Effort": { kind: "sup", n: 3, text: "+2 points de construction ce tour." },
     "Cadence": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
+    // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
+    "Feu nourri": { kind: "sup", n: 2, text: "Ce tour, chaque tourelle tire 2 fois." },
     "Réparation": { kind: "sup", n: 3, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
     "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant." },
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
@@ -202,7 +204,9 @@ const SF = (() => {
   const laneCount = (S, lane) => S.creatures.filter(c => c.lane === lane).length;
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
-  const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + 2 * Object.values(S.supports).filter(l => l === 3).length;
+  // support de niveau 3 : +3 travailleurs tant qu'il tient (Oni, 02/11/2026 ; avant +2)
+  const SUP3_WORKERS = 3;
+  const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + SUP3_WORKERS * Object.values(S.supports).filter(l => l === 3).length;
   const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
   const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
   // main de tuiles : 4, +1 à chaque palier de la fusée atteint (étages 3, 6, 9) → 4 / 5 / 6 / 7 (décision d'Oni, 30/10/2026 ;
@@ -730,6 +734,7 @@ const SF = (() => {
       }
       case "Effort": S.extraPts += 2; return true;
       case "Cadence": S.extraPts += 2; return true;
+      case "Feu nourri": S.doubleFire = true; return true;
       case "Réparation": { // arg = liste de clés de tuiles, 3 PV au total
         if (!Array.isArray(arg) || !arg.length || arg.length > 3) return false;
         for (const k of arg) { const t = S.tiles[k]; if (t && t.hp < t.max) { t.hp += 1; fx(S, { t: "heal", k, n: 1, hp: t.hp }); } }
@@ -759,7 +764,7 @@ const SF = (() => {
 
   // ------------------------------------------------------------------ tour de la colonie
   function startDefenderTurn(S) {
-    S.phase = "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = [];
+    S.phase = "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
   }
   const pubName = name => (TILES[name] && TILES[name].camo ? "tuile camouflée" : name);
   // Le chantier est affecté à une lane ; la case exacte n'est choisie qu'à la fin de la construction.
@@ -781,9 +786,11 @@ const SF = (() => {
   }
   const rocketMilestones = S => [3, 6, 9].filter(f => S.floors >= f).length;
   const turretDmg = (S, l) => (l === 1 ? 1 + rocketMilestones(S) : l === 2 ? 2 : 0);
+  // tirs restants d'une tourelle ce tour : 1, ou 2 avec Feu nourri
+  const shotsLeft = (S, sk) => (S.doubleFire ? 2 : 1) - S.firedSupports.filter(k => k === sk).length;
   function fire(S, sk, creatureId) {
     const lvl = S.supports[sk];
-    if (!lvl || lvl === 3 || S.firedSupports.includes(sk)) return false;
+    if (!lvl || lvl === 3 || shotsLeft(S, sk) <= 0) return false;
     const c = S.creatures.find(o => o.id === creatureId);
     if (!c || !supportTargets(S, sk).includes(c)) return false;
     const t = resolveTarget(S, c);
@@ -795,12 +802,11 @@ const SF = (() => {
   }
   function autoFire(S) {
     const order = Object.keys(S.supports).sort((a, b) => S.supports[a] - S.supports[b]);
-    for (const sk of order) {
-      if (S.supports[sk] === 3 || S.firedSupports.includes(sk)) continue;
+    for (const sk of order) while (S.supports[sk] && S.supports[sk] !== 3 && shotsLeft(S, sk) > 0) {
       const cands = supportTargets(S, sk); if (!cands.length) { S.firedSupports.push(sk); continue; }
       const d = turretDmg(S, S.supports[sk]);
       cands.sort((a, b) => ((resolveTarget(S, b).hp <= d) - (resolveTarget(S, a).hp <= d)) || a.k - b.k || effAtq(S, b) - effAtq(S, a));
-      fire(S, sk, cands[0].id);
+      if (!fire(S, sk, cands[0].id)) break;
     }
   }
   // Fin du tour de la colonie (ordre décidé par Oni le 30/10/2026) : chantiers et pose des bâtiments, nouveaux supports
@@ -1031,7 +1037,7 @@ const SF = (() => {
   }
 
   return {
-    fxFor, migrate, FAMINE, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, FAMINE, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

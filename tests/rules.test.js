@@ -470,7 +470,7 @@ const fresh = () => {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
   ok(E && E.pv === 3 && E.shield === 2 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Bouclier 2, 2 tours, camouflée, 3 exemplaires, sans Épines");
-  ok(SF.newGame().tileDeck.length + 4 === 57, "pioche de forteresses : 57 tuiles (44 + 3 Égides + 1 Dortoir + 3 Archives + 3 Ronceraies + 1 Laboratoire + 2 Observatoires, main de 4 comprise)");
+  ok(SF.newGame().tileDeck.length + 4 === 53, "pioche de forteresses : 53 tuiles (main de 4 comprise)");
   ok(["Antenne", "Laboratoire", "Observatoire", "Archives"].every(n => SF.TILES[n].tech && SF.TILES[n].n === 3), "3 exemplaires de chaque bâtiment à technologies (Oni, 02/11/2026)");
   const hit = (name, atq) => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Égide", 0, 1);
@@ -598,6 +598,28 @@ const fresh = () => {
   SF.actCase(T, SF.posKey(d), [132]);
   ok(d.hp === 2, "le piège blesse quand même (3 dégâts : ce ne sont pas des Épines)");
   ok(SF.CREATURES["Catalyseur"].capName === "Aura Cuirasse" && !SF.ACTIONS.instinct && !SF.hasMobility(T, { name: "Carapace", lane: "N", u: 0, k: 4 }), "plus d'Aura Instinct : un tank n'a plus de Mobilité");
+}
+// 48. Muraille et Palissade à 4 ex., Feu nourri, support de niveau 3 à +3 travailleurs (Oni, 02/11/2026)
+{
+  ok(SF.TILES["Muraille"].n === 4 && SF.TILES["Palissade"].n === 4, "Muraille et Palissade : 4 exemplaires chacune");
+  ok(SF.SPELLS["Feu nourri"] && SF.SPELLS["Feu nourri"].kind === "sup" && SF.SPELLS["Feu nourri"].n === 2, "Feu nourri : sort de soutien, 2 exemplaires (pioche de 28 sorts)");
+  const mk = () => {
+    const S = fresh(); S.phase = "D_main";
+    S.creatures.push({ id: 140, name: "Colosse", lane: "N", u: 0, k: 2, hp: 20, acted: false }); // à portée de (1,1) et (−1,1)
+    return S;
+  };
+  const S = mk(); SF.apply(S, "colonie", "build"); SF.apply(S, "colonie", "autoFire");
+  const once = 20 - S.creatures[0].hp;
+  const T = mk(); T.spells = ["Feu nourri"]; SF.apply(T, "colonie", "spell", { i: 0, arg: null });
+  SF.apply(T, "colonie", "build");
+  const sk = "1,1";
+  ok(SF.apply(T, "colonie", "fire", { sk, id: 140 }) === "" && SF.apply(T, "colonie", "fire", { sk, id: 140 }) === "" && SF.apply(T, "colonie", "fire", { sk, id: 140 }) !== "", "Feu nourri : la tourelle (1,1) tire 2 fois, pas 3");
+  SF.apply(T, "colonie", "autoFire");
+  ok(20 - T.creatures[0].hp === 2 * once, "Feu nourri : dégâts des tourelles doublés ce tour (" + once + " → " + (20 - T.creatures[0].hp) + ")");
+  SF.apply(T, "colonie", "endD");
+  ok(!T.doubleFire || T.phase !== "D_main", "l'effet ne dure qu'un tour");
+  const U = fresh(); const w = SF.bonusWorkers(U); U.supports["3,3"] = 3;
+  ok(SF.bonusWorkers(U) === w + 3, "support de niveau 3 : +3 travailleurs");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);
