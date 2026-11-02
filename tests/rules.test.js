@@ -706,15 +706,15 @@ const fresh = () => {
   const at = (id, name, k = 4, hp = 9) => ({ id, name, lane: "N", u: 0, k, hp, acted: false });
   const e = at(200, "Écorcheur"), g = at(201, "Glaneur"), h = at(202, "Glaneur");
   S.creatures.push(e, g);
-  ok(SF.speedOf(S, e) === 2 && SF.speedOf(S, g) === 1, "Glaneur : +1 case aux autres créatures de sa case, pas à lui-même");
+  ok(SF.speedOf(S, e) === 2 && SF.speedOf(S, g) === 2, "Glaneur : +1 case aux autres créatures de sa case ; lui-même a une vitesse de base de 2");
   S.creatures.push(h);
-  ok(SF.speedOf(S, e) === 3 && SF.speedOf(S, g) === 2, "deux Glaneurs : +2 (cumulable) ; chaque Glaneur profite de l'autre");
+  ok(SF.speedOf(S, e) === 3 && SF.speedOf(S, g) === 3, "deux Glaneurs : +2 (cumulable) ; chaque Glaneur (base 2) profite de l'autre");
   S.upgrades.aggro.r1 = "B";
   ok(SF.speedOf(S, e) === 4, "cumulable avec la Mobilité des aggros (1 + 1 + 2)");
   const T = fresh(); T.phase = "A_attack"; T.supports = {}; // Barbelé en C1
   const x = at(210, "Carapace"), y = at(211, "Glaneur"); T.creatures.push(x, y);
   SF.apply(T, "essaim", "act", { key: SF.posKey(x) });
-  ok(x.k === 2 && y.k === 3, "la Carapace part devant (2 cases, au contact du Barbelé), le Glaneur ne fait qu'1 case");
+  ok(x.k === 2 && y.k === 2, "la Carapace (aura) et le Glaneur (base 2) avancent ensemble de 2 cases, au contact du Barbelé");
   // soins cumulés
   const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 7 PV max
   U.upgrades.soutien.r2 = "A"; // Régénération : Aura Soin 2 pour chaque soutien
@@ -745,6 +745,16 @@ const fresh = () => {
   ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 253 }) !== "" && SF.apply(F, "colonie", "frenzy", { src: 253, target: 250 }) !== "", "pas sur soi-même ; la colonie ne peut pas choisir");
   const G = fresh(); G.phase = "A_attack"; const g1 = at(260, "Hurleur"); G.creatures.push(at(261, "Écorcheur"), g1);
   ok(SF.apply(G, "essaim", "frenzy", { src: 260, target: 261 }) !== "", "sans l'amélioration Frénésie : refusé");
+}
+// 55. Provocation : les tanks ne subissent plus les Épines (Oni, 02/11/2026)
+{
+  const run = prov => {
+    const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mur hérissé", 0, 1); // Épines 2
+    if (prov) S.upgrades.tank.r1 = "B";
+    const c = { id: 300, name: "Carapace", lane: "N", u: 0, k: 2, hp: 3, acted: false }, e = { id: 301, name: "Écorcheur", lane: "N", u: 0, k: 2, hp: 5, acted: false };
+    S.creatures.push(c, e); SF.actCase(S, SF.posKey(c), [300, 301]); return [c.hp, e.hp];
+  };
+  ok(run(false).join() === "1,3" && run(true).join() === "3,3", "Provocation : la Carapace ne subit plus les Épines (3 PV), l'Écorcheur si (5 → 3)");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

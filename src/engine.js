@@ -13,7 +13,7 @@ const SF = (() => {
     "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Révèle les tuiles camouflées de sa lane." },
-    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Les autres créatures de sa case avancent d'1 case de plus." },
+    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Avance de 2 cases par tour, et les autres créatures de sa case d'1 case de plus." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
@@ -99,7 +99,7 @@ const SF = (() => {
       A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
-    tank: { A1: ["Carapace épaisse", "+1 PV."], B1: ["Provocation", "Les tirs visant une créature non tank de sa case visent ce tank."],
+    tank: { A1: ["Carapace épaisse", "+1 PV."], B1: ["Provocation", "Les tirs visant une créature non tank de sa case visent ce tank. Les tanks ne subissent plus les dégâts d'Épines."],
       A2: ["Blindage", "+2 PV (total +3)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
     soutien: { A1: ["Mue", "Tous les soutiens gagnent la Furtivité et l'Aura +1 PV : +1 PV aux autres créatures de leur case."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
@@ -119,7 +119,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.1";
+  const VERSION = "0.4.2";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -460,8 +460,9 @@ const SF = (() => {
   }
   // Déplacement (Oni, 02/11/2026) : une case par tour, deux avec la Mobilité (aggros). Une créature qui arrive au contact
   // d'une tuile ou de la fusée attaque aussitôt. Les aggros mobiles quittent leur case et agissent d'abord, en bloc à part.
-  // Aura Mobilité du Glaneur (Oni, 02/11/2026) : +1 case par Glaneur de la case, pour les autres créatures (cumulable).
-  const speedOf = (S, c) => 1 + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur");
+  // Aura Mobilité du Glaneur (Oni, 02/11/2026) : +1 case par Glaneur de la case, pour les autres créatures (cumulable) ;
+  // le Glaneur lui-même avance de 2 cases (vitesse de base 2) pour suivre le groupe.
+  const speedOf = (S, c) => (c.name === "Glaneur" ? 2 : 1) + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur");
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
     const block = blockAt(S, key).filter(c => !c.acted);
@@ -605,6 +606,8 @@ const SF = (() => {
     // Aura Cuirasse (Catalyseur sur la case) : pas de dégâts d'Épines (Oni, 02/11/2026)
     if (primary && epVal > 0) {
       if (caseMates(S, c).some(o => o.name === "Catalyseur")) log(S, "essaim", `Aura Cuirasse : ${c.name} ne subit pas les Épines.`);
+      // Provocation (tank, côté B) : les tanks ne subissent plus les Épines (Oni, 02/11/2026)
+      else if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "B") log(S, "essaim", `Provocation : ${c.name} ne subit pas les Épines.`);
       else damageCreature(S, c, epVal, "épines");
     }
   }

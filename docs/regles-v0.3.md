@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.1 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.2 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -20,7 +20,7 @@ Repris du prototype jouable et validés par Oni :
 - **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (au lieu de 2).
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
-- **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1 et **Aura Mobilité 1** (+1 case aux autres créatures de sa case). **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B).
+- **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1, **Aura Mobilité 1** (+1 case aux autres créatures de sa case) et vitesse de base de 2 cases. **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B) ; les tanks ne subissent plus les Épines.
 - **Renforcé** remplace le Bouclier (Égide, Dortoir : Renforcé 2) : 1 PV perdu par tranche complète de X dégâts, plusieurs PV possibles d'un coup.
 - **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
@@ -304,7 +304,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Béhémoth | Tank | 2 | 4 | 5 | 1 | — | 6 |
 | Colosse | Tank | 3 | 7 | 7 | 1 | — | 6 |
 | Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : révèle les tuiles camouflées de sa lane | 2 |
-| Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. **Aura Mobilité 1** : les autres créatures de sa case avancent d'1 case de plus par tour (elles partent devant le Glaneur) | 2 |
+| Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Avance de **2 cases** par tour. **Aura Mobilité 1** : les autres créatures de sa case avancent d'1 case de plus par tour | 2 |
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
 | Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus (cumulable : +1 par Phéromone) | 2 |
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
@@ -387,7 +387,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Carapace épaisse | +1 PV |
-| 1 | Côté B | Provocation | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place |
+| 1 | Côté B | Provocation | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place ; les tanks ne subissent plus les dégâts d'Épines |
 | 2 | Côté A (après Carapace épaisse) | Blindage | +2 PV (total +3) |
 | 2 | Centre | Réincarnation | une fois par tour, quand un tank meurt, redéployez-le gratuitement au début de votre prochain tour, PV pleins, à l'entrée de sa lane |
 | 2 | Côté B (après Provocation) | Masse vivante | +1 PV par autre créature sur sa case, tant qu'elle y reste |

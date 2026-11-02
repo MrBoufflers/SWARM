@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.2 — 2 novembre 2026
+
+**Règles (Oni)**
+- **Glaneur** : vitesse de base de **2 cases** par tour, pour suivre le groupe qu'il accélère avec son Aura Mobilité.
+- **Provocation** (tank, côté B) : en plus d'attirer les tirs, les tanks ne subissent plus les dégâts d'Épines.
+
 ## v0.4.1 — 2 novembre 2026
 
 **Règles (Oni)**
