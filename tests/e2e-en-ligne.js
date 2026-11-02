@@ -41,7 +41,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     return page;
   }
   const idle = async page => { for (let i = 0; i < 600; i++) { if ((await page.evaluate(() => document.body.dataset.busy !== '1' && document.body.dataset.anim !== '1'))) return; await sleep(20); } };
+  // la page peut se redessiner (interrogation du serveur) entre la recherche du bouton et le clic : on ignore ce clic-là
+  const detached = e => /not attached|detached|Target closed/i.test(String(e && e.message));
   const click = async (page, sel) => {
+    try { return await click0(page, sel); } catch (e) { if (detached(e)) { await sleep(50); return false; } throw e; }
+  };
+  const click0 = async (page, sel) => {
     await idle(page);
     const el = await page.$(sel); if (!el) return false;
     await el.evaluate(e => e.scrollIntoView({ block: 'center' }));
@@ -87,7 +92,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (ph === 'Attaques') { if (await click(page, '[data-a="ordGo"]')) continue; if (await click(page, '[data-a="act"]')) continue; await click(page, '[data-a="endA"]'); continue; }
     if (ph === 'Tour de la colonie') {
       if (!(await page.$('.tcard.sel'))) { if (await click(page, '[data-a="tile"]:not([disabled])') && await click(page, '[data-a="startCh"]')) continue; }
-      for (let i = 0; i < 4; i++) { const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; await bs[i].click(); await sleep(20); await idle(page); }
+      for (let i = 0; i < 4; i++) { const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; try { await bs[i].click(); } catch (e) { if (!detached(e)) throw e; } await sleep(20); await idle(page); }
       await click(page, '[data-a="build"]'); continue;
     }
     if (ph === 'Pose des bâtiments') { if (await click(page, '[data-a="placeAt"]')) continue; console.log('pose impossible'); break; }
