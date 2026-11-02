@@ -664,12 +664,12 @@ const fresh = () => {
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Siphon", 0, 2); });
   ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); T.tiles["1,3"].revealed = true; }, "Sporeur");
-  ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && r.T.tiles["1,3"].hp === 1, "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée perd 1 PV");
+  ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && !r.T.tiles["1,3"], "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée (2 PV) tombe sous 2 dégâts");
   const clair = T => { T.upgrades.soutien.r2 = "C"; }; // Clairvoyance (un soutien est en jeu : le Perforeur / le Sporeur)
   r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); });
   ok(!r.T.tiles["0,2"], "Clairvoyance : l'Égide camouflée devient vulnérable à la percée (4 dégâts après bouclier → détruite)");
   r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); }, "Sporeur");
-  ok(r.T.tiles["1,3"].hp === 1, "Clairvoyance : la Palissade camouflée voisine subit les spores");
+  ok(!r.T.tiles["1,3"], "Clairvoyance : la Palissade camouflée voisine subit les spores (détruite)");
 }
 // 52. Déplacement : une case par tour, deux avec la Mobilité ; au contact, attaque aussitôt (Oni, 02/11/2026)
 {
@@ -732,10 +732,19 @@ const fresh = () => {
   ok(W.tiles["3,0"].ren === 2 && !("shield" in W.tiles["3,0"]), "partie en cours : Bouclier 2 devient Renforcé 2");
   // Spores cumulables : 2 Sporeurs → 2 dégâts aux tuiles voisines
   const Z = fresh(); Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k];
-  Z.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); Z.tiles["1,3"] = SF.tileStats("Muraille", 1, 3); Z.tiles["1,3"].revealed = true;
+  Z.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); Z.tiles["1,3"] = SF.tileStats("Rempart", 1, 3); Z.tiles["1,3"].revealed = true;
   const a1 = at(240, "Carapace"); Z.creatures.push(a1, at(241, "Sporeur"), at(242, "Sporeur"));
   SF.actCase(Z, SF.posKey(a1), [240]);
-  ok(Z.tiles["1,3"].hp === 2, "2 Sporeurs : 2 dégâts de spores (Muraille 4 → 2)");
+  ok(Z.tiles["1,3"].hp === 2, "2 Sporeurs : 2 × 2 = 4 dégâts de spores en une attaque (Rempart, Renforcé 2 : 4 → 2 PV)");
+  // Frénésie : au choix, cumulable (Oni, 02/11/2026)
+  const F = fresh(); F.phase = "A_attack"; F.upgrades.soutien.r2 = "B";
+  const ec = at(250, "Écorcheur"), ca = at(251, "Carapace"), f1 = at(252, "Hurleur"), f2 = at(253, "Œil-sonde");
+  F.creatures.push(ec, ca, f1, f2); // Écorcheur 3 (+1 Fureur) ; Carapace 1 (+1 Fureur)
+  ok(SF.effAtq(F, ec) === 16 && SF.effAtq(F, ca) === 2, "par défaut, les 2 soutiens choisissent l'Écorcheur : (3 + 1) × 4 = 16");
+  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) === "" && SF.effAtq(F, ec) === 8 && SF.effAtq(F, ca) === 4, "l'Œil-sonde passe sur la Carapace : Écorcheur ×2 (8), Carapace ×2 (4)");
+  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 253 }) !== "" && SF.apply(F, "colonie", "frenzy", { src: 253, target: 250 }) !== "", "pas sur soi-même ; la colonie ne peut pas choisir");
+  const G = fresh(); G.phase = "A_attack"; const g1 = at(260, "Hurleur"); G.creatures.push(at(261, "Écorcheur"), g1);
+  ok(SF.apply(G, "essaim", "frenzy", { src: 260, target: 261 }) !== "", "sans l'amélioration Frénésie : refusé");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

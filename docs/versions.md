@@ -14,7 +14,8 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 - **Mue** (soutien, côté A) : les soutiens gagnent la Furtivité et l'**Aura +1 PV**. Ils n'ont plus +1 PV eux-mêmes.
 - **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur (soin 3).
 - **Provocation** : nouveau nom de la Protection (tank, côté B).
-- Inchangé, en attente d'Oni : la Frénésie (×2 au plus).
+- **Aura Spores** : **2 dégâts** par Sporeur de la case (en une seule attaque, donc soumise à Renforcé).
+- **Frénésie** : chaque soutien choisit la créature de sa case dont il double les dégâts (fiche du soutien, « Frénésie sur : … » ; par défaut la plus forte). Cumulable : deux Frénésies sur la même créature la quadruplent.
 
 ## v0.4.0 — 2 novembre 2026
 

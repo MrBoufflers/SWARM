@@ -328,6 +328,13 @@
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
     let actions = "";
+    // Frénésie : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim (cumulable)
+    if (b.type === "soutien" && S.upgrades.soutien.r2 === "B") {
+      const cur = SF.frenzyOf(S, c), others = S.creatures.filter(o => o !== c && SF.posKey(o) === SF.posKey(c));
+      const canSet = S.view === "essaim" && ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase) && !c.acted;
+      actions += `<p>Frénésie : ${cur ? `double les dégâts de ${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;
+      if (canSet && others.length > 1) actions += `<div class="choices"><span class="lab">Frénésie sur :</span>${others.map(o => `<button data-a="frenzy" data-id="${c.id}" data-v="${o.id}"${cur === o ? ` class="on" aria-pressed="true"` : ""}>${E(o.name)} · ATQ ${SF.effAtq(S, o)}</button>`).join("")}</div>`;
+    }
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
       <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${posTxt(c)}</p>
       ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${actions}</section>`;
@@ -482,6 +489,7 @@
       }
       case "sapTarget": { const sp = UI.sap; UI.sap = null; if (sp) return play("deploy", { uid: sp.uid, lane: sp.lane, u: sp.u, target: d.k }, () => { UI.sel = null; }); break; }
       case "sapCancel": UI.sap = null; break;
+      case "frenzy": return play("frenzy", { src: Number(d.id), target: Number(d.v) });
       case "endDeploy": UI.sel = null; return play("endDeploy");
       case "invest": return play("invest", { t: d.t, s: d.s, n: Number(d.n) });
       case "toAttacks": return play("toAttacks");

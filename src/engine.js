@@ -22,7 +22,7 @@ const SF = (() => {
     "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les autres créatures de sa case ne subissent pas les dégâts d'Épines." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
-    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât par Sporeur de la case (sauf une tuile encore camouflée et non visible)." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 2 dégâts par Sporeur de la case (sauf une tuile encore camouflée et non visible)." },
   };
   const PILES = {
     1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Hurleur", 2]] },
@@ -104,7 +104,7 @@ const SF = (() => {
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
     soutien: { A1: ["Mue", "Tous les soutiens gagnent la Furtivité et l'Aura +1 PV : +1 PV aux autres créatures de leur case."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2 (qui s'ajoute à leurs autres auras de soin)."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
-      B2: ["Frénésie", "Une autre créature de sa case inflige des dégâts doublés."] },
+      B2: ["Frénésie", "Chaque soutien double les dégâts d'une autre créature de sa case, au choix (cumulable : deux Frénésies sur la même créature la quadruplent)."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
   const MIN_BIOMASS = 3; // la biomasse de l'essaim ne descend jamais sous 3 (Oni, 02/11/2026)
@@ -255,24 +255,33 @@ const SF = (() => {
     if (b.type === "aggro") { if (S.upgrades.aggro.r1 === "A") a += 1; if (S.upgrades.aggro.r2 === "A") a += 2; }
     return a;
   }
-  function frenzyTarget(S, c) { // la créature doublée par un soutien Frénésie de sa case : la plus forte des autres
-    if (S.upgrades.soutien.r2 !== "B") return false;
-    const mates = caseMates(S, c);
-    const frenzySources = mates.filter(o => CREATURES[o.name].type === "soutien");
-    if (!frenzySources.length) return false;
-    // pour chaque soutien, l'autre créature de plus forte ATQ de la case est doublée
-    return frenzySources.some(src => {
-      const others = S.creatures.filter(o => o !== src && posKey(o) === posKey(src));
-      others.sort((a, b) => baseAtq(S, b.name) - baseAtq(S, a.name) || a.id - b.id);
-      return others[0] === c;
-    });
+  // Frénésie (soutien, rang 2 côté B) : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim
+  // (S.frenzy[id du soutien] = id de la cible ; par défaut, l'autre créature de plus forte ATQ). Cumulable (Oni, 02/11/2026) :
+  // ×2 par soutien qui la choisit (deux soutiens sur la même créature : ×4).
+  function frenzyOf(S, src) {
+    const others = S.creatures.filter(o => o !== src && posKey(o) === posKey(src));
+    const chosen = S.frenzy && others.find(o => o.id === S.frenzy[src.id]);
+    if (chosen) return chosen;
+    others.sort((a, b) => baseAtq(S, b.name) - baseAtq(S, a.name) || a.id - b.id);
+    return others[0] || null;
+  }
+  function frenzyCount(S, c) {
+    if (S.upgrades.soutien.r2 !== "B") return 0;
+    return caseMates(S, c).filter(o => isSoutien(o) && frenzyOf(S, o) === c).length;
+  }
+  function setFrenzy(S, srcId, targetId) {
+    const src = S.creatures.find(o => o.id === srcId), t = S.creatures.find(o => o.id === targetId);
+    if (S.upgrades.soutien.r2 !== "B" || !src || !t || src === t || !isSoutien(src) || posKey(src) !== posKey(t)) return false;
+    S.frenzy = S.frenzy || {}; S.frenzy[src.id] = t.id;
+    log(S, "essaim", `Frénésie : ${src.name} double les dégâts de ${t.name}.`);
+    return true;
   }
   function effAtq(S, c) {
     if (!attacks(c)) return 0;
     let a = baseAtq(S, c.name);
     a += countMates(S, c, o => o.name === "Hurleur"); // Aura Fureur : +1 par Hurleur de la case
     if (S.upgrades.soutien.r1 === "B") a += countMates(S, c, isSoutien); // Aura Griffes : +1 par soutien de la case
-    if (frenzyTarget(S, c)) a *= 2;
+    a *= 2 ** frenzyCount(S, c); // Frénésie : ×2 par soutien qui choisit cette créature
     return a;
   }
   function soinValue(S, c) { // somme des auras de soin des autres créatures de la case : Glaneur 1, Régénération 2 par soutien
@@ -438,7 +447,7 @@ const SF = (() => {
     const auras = [];
     if (caseMates(S, c).some(o => o.name === "Hurleur")) auras.push("Fureur");
     if (S.upgrades.soutien.r1 === "B" && caseMates(S, c).some(o => CREATURES[o.name].type === "soutien")) auras.push("Griffes");
-    if (frenzyTarget(S, c)) auras.push("Frénésie");
+    const fz = frenzyCount(S, c); if (fz) auras.push(fz > 1 ? `Frénésie ×${2 ** fz}` : "Frénésie");
     if (hasPercee(S, c)) auras.push("Percée");
     if (caseMates(S, c).some(o => o.name === "Catalyseur")) auras.push("Cuirasse");
     if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
@@ -561,7 +570,7 @@ const SF = (() => {
       t.hp -= loss;
       fx(S, { t: "hit", id: c.id, k: tk, n: Math.min(loss, t.hp + loss), hp: Math.max(0, t.hp) });
       log(S, "essaim", `${c.name} inflige ${dmg} à ${t.name} (−${Math.min(loss, t.hp + loss)} PV).`);
-      const spores = primary ? countMates(S, c, o => o.name === "Sporeur") : 0; // 1 dégât par Sporeur de la case (cumulable, 02/11/2026)
+      const spores = primary ? 2 * countMates(S, c, o => o.name === "Sporeur") : 0; // 2 dégâts par Sporeur de la case (cumulable, Oni 02/11/2026)
       if (spores) {
         for (const [a, b] of neighbors(x, y)) {
           const nk = key(a, b), nt = S.tiles[nk];
@@ -993,6 +1002,7 @@ const SF = (() => {
       return true;
     } },
     draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } },
+    frenzy: { phase: ["A_deploy", "A_upgrade", "A_attack"], run: (S, a) => isInt(a.src) && isInt(a.target) && setFrenzy(S, a.src, a.target) },
     deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && deploy(S, a.uid, a.lane, a.u, a.target) },
     endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); return true; } },
     invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
@@ -1084,7 +1094,7 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    clairvoyance, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,

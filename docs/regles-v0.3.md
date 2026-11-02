@@ -20,7 +20,7 @@ Repris du prototype jouable et validés par Oni :
 - **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (au lieu de 2).
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
-- **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, etc.). **Glaneur** : Aura Soin 1 et **Aura Mobilité 1** (+1 case aux autres créatures de sa case). **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B).
+- **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1 et **Aura Mobilité 1** (+1 case aux autres créatures de sa case). **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B).
 - **Renforcé** remplace le Bouclier (Égide, Dortoir : Renforcé 2) : 1 PV perdu par tranche complète de X dégâts, plusieurs PV possibles d'un coup.
 - **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
@@ -310,7 +310,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
 | Catalyseur | Soutien | 2 | 3 | 4 | 0 | **Aura Cuirasse** : les autres créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
 | Sapeur | Soutien | 3 | 5 | 6 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
-| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 1 dégât par Sporeur de la case, en une seule attaque (sauf une tuile encore camouflée et non visible) | 3 |
+| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit **2 dégâts par Sporeur** de la case, en une seule attaque (sauf une tuile encore camouflée et non visible) | 3 |
 
 ### Forteresses
 
@@ -400,7 +400,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) |
 | 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 3) |
 | 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles |
-| 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : une autre créature de sa case, au choix, inflige des dégâts doublés |
+| 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim ; cumulable (deux soutiens sur la même créature : ×4 ; ou sur deux créatures différentes) |
 
 Une tuile camouflée rendue visible par Vision ou Clairvoyance ne déclenche plus son piège †.
 
@@ -457,7 +457,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Brouillage** : la biomasse dépensée pour la carte annulée est perdue.
 - [ ] **Furtivité** : non ciblable tant qu'une créature non furtive est sur sa case.
 - [x] **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur (décidé le 02/11/2026).
-- [ ] **Aura Frénésie** : avec toutes les auras cumulables, deux soutiens doublent-ils deux fois (×4) la même créature ? (aujourd'hui : ×2 au plus)
+- [x] **Aura Frénésie** : cumulable, cible au choix ; deux Frénésies sur la même créature la quadruplent (décidé le 02/11/2026).
 - [ ] Un **piège rendu visible** par Vision ou Clairvoyance ne se déclenche plus.
 - [ ] **Ligne de front et Réduit** : garder les deux, ou un seul des deux.
 
