@@ -75,7 +75,7 @@ const fresh = () => {
 {
   const S = fresh();
   const t = b => { S.biomass = b; return SF.tier(S) + 1; };
-  ok([3, 9, 15, 20, 30].map(t).join() === "1,2,3,4,4" && [8, 14, 19].map(t).join() === "1,2,3", "paliers : départ, puis 9 / 15 / 20 (4 paliers, Oni 02/11/2026)");
+  ok([3, 9, 15, 21, 30].map(t).join() === "1,2,3,4,4" && [8, 14, 20].map(t).join() === "1,2,3", "paliers : départ, puis 9 / 15 / 21 (4 paliers, Oni 02/11/2026)");
   ok(SF.TIERS.map(r => r.n.join("")).join() === "300,320,421,433", "pioches 3·0·0 / 3·2·0 / 4·2·1 / 4·3·3");
 }
 // 9. Protection : un tir sur une créature non tank de la case d'un tank vise le tank
@@ -148,15 +148,15 @@ const fresh = () => {
   ok(c.hp === 3, "Muraille : ni piège ni Épines, la Carapace ne perd rien");
   ok(SF.pubName("Muraille") === "tuile camouflée" && SF.pubName("Dortoir") === "Dortoir", "le journal ne nomme pas une tuile camouflée");
 }
-// 15. Griffes : Aura +1 ATQ aux autres créatures de la case, non cumulable, cumulable avec Fureur
+// 15. Griffes : Aura +1 ATQ aux autres créatures de la case ; toutes les auras se cumulent (Oni, 02/11/2026)
 {
   const S = fresh(); S.upgrades.soutien.r1 = "B";
   const g1 = { id: 1, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2 }, g2 = { id: 2, name: "Œil-sonde", lane: "N", u: 0, k: 4, hp: 2 };
   const e = { id: 3, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 };
   S.creatures.push(g1, g2, e);
-  ok(SF.effAtq(S, e) === 4, "Écorcheur 3 + 1 (Griffes, 2 soutiens : non cumulable)");
+  ok(SF.effAtq(S, e) === 5, "Écorcheur 3 + 2 (Griffes de 2 soutiens : cumulable)");
   S.creatures.push({ id: 4, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2 });
-  ok(SF.effAtq(S, e) === 5, "+ Fureur : 3 + 1 + 1");
+  ok(SF.effAtq(S, e) === 7, "+ un Hurleur : 3 + 3 (Griffes de 3 soutiens) + 1 (Fureur)");
   ok(SF.effAtq(S, g1) === 0, "le soutien reste à 0 ATQ");
 }
 // 16. tourelles : 8 cases autour du support ; niveau I = 1 + paliers de fusée (3/6/9), niveau II = 2
@@ -182,7 +182,7 @@ const fresh = () => {
 // 18. plafond de population par lane : 1 / 2 / 3 / 4 / 5
 {
   const S = fresh();
-  ok([3, 9, 15, 20].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "2,3,4,5", "plafonds 2 / 3 / 4 / 5 (biomasse départ / 9 / 15 / 20)");
+  ok([3, 9, 15, 21].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "2,3,4,5", "plafonds 2 / 3 / 4 / 5 (biomasse départ / 9 / 15 / 21)");
 }
 // 19. Cadence : +2 points
 {
@@ -371,7 +371,7 @@ const fresh = () => {
   S.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
   const a = { id: 60, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 1, acted: false }; // au contact de la Palissade
   const b = { id: 61, name: "Carapace", lane: "N", u: 0, k: 3, hp: 3, acted: false };
-  const g = { id: 62, name: "Glaneur", lane: "N", u: 0, k: 3, hp: 2, acted: false };
+  const g = { id: 62, name: "Œil-sonde", lane: "N", u: 0, k: 3, hp: 2, acted: false };
   const back = { id: 63, name: "Écorcheur", lane: "N", u: -2, k: 4, hp: 1, acted: false }; // plus loin de la fusée (A)
   S.creatures.push(a, b, g, back);
   const key = SF.posKey(a);
@@ -466,7 +466,7 @@ const fresh = () => {
 {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
-  ok(E && E.pv === 3 && E.shield === 2 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Bouclier 2, 2 tours, camouflée, 3 exemplaires, sans Épines");
+  ok(E && E.pv === 3 && E.ren === 2 && !E.shield && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Renforcé 2 (ancien Bouclier 2), 2 tours, camouflée, 3 exemplaires, sans Épines");
   ok(SF.newGame().tileDeck.length + 4 === 54, "pioche de forteresses : 54 tuiles (main de 4 comprise)");
   ok(["Antenne", "Laboratoire", "Observatoire", "Archives"].every(n => SF.TILES[n].tech && SF.TILES[n].n === 3), "3 exemplaires de chaque bâtiment à technologies (Oni, 02/11/2026)");
   const hit = (name, atq) => {
@@ -474,14 +474,14 @@ const fresh = () => {
     const c = { id: 96, name, lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
     return S.tiles["0,1"] ? S.tiles["0,1"].hp : 0;
   };
-  ok(hit("Écorcheur") === 2, "Écorcheur (3 ATQ) contre l'Égide : 3 − 2 = 1 dégât (3 → 2 PV)");
+  ok(hit("Écorcheur") === 2, "Écorcheur (3 ATQ) contre l'Égide (Renforcé 2) : −1 PV (3 → 2)");
   ok(hit("Carapace") === 3, "Carapace (1 ATQ) contre l'Égide : aucun dégât");
-  ok(hit("Massacreur") === 0, "Massacreur (7 ATQ) : 7 − 2 = 5 dégâts, l'Égide (3 PV) tombe");
+  ok(hit("Massacreur") === 0, "Massacreur (7 ATQ) : −3 PV, l'Égide (3 PV) tombe");
 }
 // 40. Dortoir, Archives, améliorations des tanks, PV des aggros (Oni, 01/11/2026)
 {
   const D = SF.TILES["Dortoir"], A = SF.TILES["Archives"];
-  ok(D.d === 3 && D.pv === 3 && D.shield === 2 && D.temp === 1 && !D.perm && D.n === 3 && !D.camo, "Dortoir : 3 tours, 3 PV, Bouclier 2, +1 travailleur temporaire, 3 ex., face visible");
+  ok(D.d === 3 && D.pv === 3 && D.ren === 2 && D.temp === 1 && !D.perm && D.n === 3 && !D.camo, "Dortoir : 3 tours, 3 PV, Renforcé 2, +1 travailleur temporaire, 3 ex., face visible");
   ok(A.d === 2 && A.pv === 3 && A.tech === 1 && A.n === 3 && !A.camo && A.ep === 0, "Archives : 2 tours, 3 PV, +1 technologie, 3 ex., face visible");
   const S = fresh(); const w = SF.bonusWorkers(S), t = SF.tech(S);
   S.tiles["0,2"] = SF.tileStats("Dortoir", 0, 2); S.tiles["0,-2"] = SF.tileStats("Archives", 0, -2);
@@ -529,7 +529,7 @@ const fresh = () => {
   };
   ok(run([]) === 1, "sans Phéromone : +1 biomasse");
   ok(run(["Phéromone"]) === 2, "Phéromone sur la case de la créature qui détruit : +1 en plus (+2)");
-  ok(run(["Phéromone", "Phéromone"]) === 2, "deux Phéromones : non cumulable (+2)");
+  ok(run(["Phéromone", "Phéromone"]) === 3, "deux Phéromones : cumulable (+3)");
   const S = fresh(); const a = { id: 1, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 }, big = { id: 2, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5 }, ph = { id: 3, name: "Phéromone", lane: "N", u: 0, k: 4, hp: 5 };
   S.creatures.push(a, big, ph);
   ok(SF.resolveTarget(S, a) === a && SF.CREATURES["Phéromone"].capName === "Aura Butin", "plus de Leurre : un tir sur l'Écorcheur le vise bien lui");
@@ -698,6 +698,44 @@ const fresh = () => {
   const p = { id: 185, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }, q = { id: 186, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
   V.creatures.push(p, q); SF.apply(V, "essaim", "act", { key: SF.posKey(p), order: [185, 186] });
   ok(!V.tiles["0,2"] && p.k === 2 && !V.tiles["0,1"], "Mobilité : 1 case jusqu'au contact, Palissade détruite, le 2ᵉ déplacement fait entrer le bloc en C2, le 2ᵉ Écorcheur détruit le Barbelé");
+}
+// 54. Auras (Oni, 02/11/2026) : au profit des autres créatures seulement, toutes cumulables ; Glaneur : Aura Mobilité 1 ;
+//     Mue : Furtivité + Aura +1 PV ; Régénération s'ajoute à l'Aura Soin du Glaneur ; Provocation ; Bouclier fondu dans Renforcé
+{
+  const S = fresh(); S.phase = "A_attack"; S.supports = {};
+  const at = (id, name, k = 4, hp = 9) => ({ id, name, lane: "N", u: 0, k, hp, acted: false });
+  const e = at(200, "Écorcheur"), g = at(201, "Glaneur"), h = at(202, "Glaneur");
+  S.creatures.push(e, g);
+  ok(SF.speedOf(S, e) === 2 && SF.speedOf(S, g) === 1, "Glaneur : +1 case aux autres créatures de sa case, pas à lui-même");
+  S.creatures.push(h);
+  ok(SF.speedOf(S, e) === 3 && SF.speedOf(S, g) === 2, "deux Glaneurs : +2 (cumulable) ; chaque Glaneur profite de l'autre");
+  S.upgrades.aggro.r1 = "B";
+  ok(SF.speedOf(S, e) === 4, "cumulable avec la Mobilité des aggros (1 + 1 + 2)");
+  const T = fresh(); T.phase = "A_attack"; T.supports = {}; // Barbelé en C1
+  const x = at(210, "Carapace"), y = at(211, "Glaneur"); T.creatures.push(x, y);
+  SF.apply(T, "essaim", "act", { key: SF.posKey(x) });
+  ok(x.k === 2 && y.k === 3, "la Carapace part devant (2 cases, au contact du Barbelé), le Glaneur ne fait qu'1 case");
+  // soins cumulés
+  const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 7 PV max
+  U.upgrades.soutien.r2 = "A"; // Régénération : Aura Soin 2 pour chaque soutien
+  SF.endAttackerTurn(U);
+  ok(t1.hp === 7, "Régénération + 2 Glaneurs : soin 2 × (1 + 2) = 6 (Colosse 1 → 7 PV)");
+  // Mue : Furtivité + Aura +1 PV aux autres, cumulable ; plus de +1 PV au soutien lui-même
+  const V = fresh(); V.upgrades.soutien.r1 = "A";
+  const m = at(230, "Écorcheur", 4, 1), s1 = at(231, "Hurleur", 4, 2), s2 = at(232, "Œil-sonde", 4, 2);
+  V.creatures.push(m, s1, s2);
+  ok(SF.bonusHp(V, m) === 2 && SF.bonusHp(V, s1) === 1 && SF.maxHp(V, "Hurleur") === 2, "Mue : +1 PV par soutien de la case aux autres créatures (Écorcheur +2, Hurleur +1), plus de +1 PV propre");
+  ok(SF.isStealthy(V, s1) && !SF.isStealthy(V, m), "Mue : les soutiens ont la Furtivité");
+  ok(SF.TREES.tank.B1[0] === "Provocation", "tank, côté B : « Provocation » (ancienne Protection)");
+  // Bouclier → Renforcé : une ancienne partie est convertie
+  const W = fresh(); W.tiles["3,0"] = { name: "Égide", hp: 3, max: 3, ep: 0, ren: 0, shield: 2, camo: 1, revealed: false }; SF.migrate(W);
+  ok(W.tiles["3,0"].ren === 2 && !("shield" in W.tiles["3,0"]), "partie en cours : Bouclier 2 devient Renforcé 2");
+  // Spores cumulables : 2 Sporeurs → 2 dégâts aux tuiles voisines
+  const Z = fresh(); Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k];
+  Z.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); Z.tiles["1,3"] = SF.tileStats("Muraille", 1, 3); Z.tiles["1,3"].revealed = true;
+  const a1 = at(240, "Carapace"); Z.creatures.push(a1, at(241, "Sporeur"), at(242, "Sporeur"));
+  SF.actCase(Z, SF.posKey(a1), [240]);
+  ok(Z.tiles["1,3"].hp === 2, "2 Sporeurs : 2 dégâts de spores (Muraille 4 → 2)");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
