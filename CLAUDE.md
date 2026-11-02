@@ -1,4 +1,4 @@
-# Swarm & Steel — prototype v0.3 (dépôt SWARM)
+# Swarm & Steel — prototype (dépôt SWARM), version du jeu dans `SF.VERSION`
 
 Ancien nom : « Siège & Fusée » (renommé le 30/10/2026 à la demande d'Oni). Le module du moteur s'appelle toujours `SF` dans le code.
 
@@ -13,13 +13,15 @@ Tout le contenu du jeu, les messages et la documentation sont **en français**. 
 - **Signaler les incohérences** (entre le moteur, l'interface et le livret) au lieu de les corriger en silence.
 - **Pas de simulation** (parties automatiques en masse, études d'équilibrage) ni de nouveau moteur de jeu **sans demande explicite** d'Oni.
 - **Vérification obligatoire avant livraison** : `npm test` (règles) et `npm run e2e` (partie complète en vrais clics dans Chromium), sur ordinateur et à 400 px de large.
+- **Versions (depuis le 02/11/2026, demandé par Oni pour les tests d'équilibrage)** : chaque mise à jour livrée (déployée) augmente `SF.VERSION` de 1 au dernier chiffre (0.4.0 → 0.4.1…) et ajoute son entrée dans `docs/versions.md` (un test le vérifie). Les statistiques sont regroupées par version.
 - Honnêteté plutôt que diplomatie ; information sourcée.
 
 ## Arborescence
 
 ```
 src/engine.js      Moteur de règles pur (aucun accès au DOM), module `SF`, utilisable dans le navigateur et sous Node
-src/ui.js          Interface : rendu par innerHTML, tous les clics délégués sur [data-a], fonction handle(a, d)
+src/bilan.js       Bilan de fin de partie (résumé chiffré, mini-plan SVG, agrégats par version), sans DOM : page et serveur
+src/ui.js          Interface : rendu par innerHTML, tous les clics délégués sur [data-a], fonction handle(a, d) ; page Statistiques (MODE "stats")
 src/style.css      Styles (thèmes clair/sombre, plateau 9 × 9 en CSS grid)
 tools/icons.py     Pictos SVG (viewBox 24, trait = currentColor), partagés avec les planches d'impression
 tools/build.py     Assemble dist/swarm-steel-jeu.html (une seule page autonome)
@@ -32,7 +34,8 @@ server/core.js     Serveur du jeu en ligne (lobby, codes, jetons, actions) — s
 server/dev.js      Serveur local (page + /api, parties en mémoire) : `npm run serveur`
 netlify/functions/api.mjs  Le même serveur sur Netlify, état des parties dans Netlify Blobs (store « parties »)
 netlify.toml       Build Netlify : `python3 tools/build.py --site` → site/index.html (dossier ignoré par git, recréé à chaque déploiement)
-docs/regles-v0.3.md  Export du livret de règles (à jour au 01/11/2026), source du PDF
+docs/regles-v0.3.md  Export du livret de règles, source du PDF
+docs/versions.md   Journal des versions (une entrée par version livrée)
 docs/swarm-steel-livret-v0.3.pdf  Livret en PDF, régénéré par `npm run livret` (tools/livret.py → docs/livret.html → tools/livret-pdf.js)
 ```
 
@@ -43,13 +46,21 @@ Le livret de référence est un document Claude d'Oni ; `docs/regles-v0.3.md` en
 - **État** : un seul objet `S`, entièrement sérialisable en JSON (sauvegardé dans `localStorage`, clé `swarm-steel-v03`). Créé par `SF.newGame()`.
 - **Point d'entrée des actions** : `SF.apply(S, camp, type, args)` vérifie le camp (`SF.actor(S)`), la phase et les paramètres, puis appelle les fonctions de règles ; renvoie `""` ou la raison du refus. Table `SF.ACTIONS`. L'interface locale **et** le serveur passent par là. `SF.viewFor(S, camp)` produit la vue filtrée envoyée à un joueur.
 - **Moteur** (`SF`) : fonctions pures qui modifient `S` et renvoient `true/false` selon que l'action est légale. Principales actions :
-  - Essaim : `attackerDraw`, `deploy`, `endDeploy`, `invest` (amélioration payée en plusieurs fois), `moveLane` (Mobilité), `startAttacks`, `actCase` (un bloc avance puis ses créatures attaquent), `endAttackerTurn`.
+  - Essaim : `attackerDraw`, `deploy`, `endDeploy`, `invest` (amélioration payée en plusieurs fois), `startAttacks`, `actCase` (un bloc avance d'une case puis ses créatures attaquent si elles sont au contact), `endAttackerTurn`.
   - Colonie : `useSpell`, `startChantier(S, i, lane)`, `cancelChantier`, `endDefenderTurn` (construction) → phase `D_place` → `placeTile(S, key)` → fusée, supports → phase `D_fire` : `fire`, `autoFire` → `endColonyTurn`.
   - Hasard : `Math.random` par défaut, remplaçable par `SF.setRng(f)` (utile pour un serveur ou des tests reproductibles).
 - **Phases** (`S.phase`) et camp qui agit (table `PHASE_TXT` dans `ui.js`) : `A_famine` (colonie), `A_start`, `A_deploy`, `A_upgrade` (essaim), `A_react` (colonie), `A_attack` (essaim), `D_main`, `D_fire`, `D_place` (colonie).
 - Les transitions de phase qui vivaient dans `ui.js` (fenêtres `A_famine` / `A_react`, passage aux tirs, répartition des travailleurs) sont maintenant dans `SF.ACTIONS` (moteur).
 - **Animations (lot 1, validé par Oni : style sobre, rapide)** : le moteur décrit ce qui se passe dans `S.fx` (déplacement, attaque de tuile, dégâts, mort, tuile ou support détruit, fusée touchée, tir de tourelle, déploiement) — seulement quand l'appelant crée `S.fx = []` avant l'action, et sans effet sur les règles. L'interface rejoue ces événements par-dessus le plateau encore à l'ancien état (calque `#fx`), puis affiche l'état final ; un toucher termine l'animation ; bouton « Animations : oui/non » (désactivées par défaut si le système demande moins d'animations). En ligne, le serveur garde les 400 derniers événements (`room.fx`) et renvoie à chaque joueur ceux qu'il n'a pas vus (paramètre `f`), filtrés par `SF.fxFor` (PV d'une tuile camouflée encore cachée non transmis à l'essaim). Bandeau « À vous de jouer » en ligne. Pas de son pour l'instant. **Lot 2 fait** : sortilèges (bandeau « Sortilège : … » + effet sobre par sort), soins, tuile camouflée retournée / piège, chantier lancé, saboté, avancé, bâtiment posé, créatures qui reculent, support apparu, points vers la fusée. **Lot 3 fait** : étage de fusée allumé (+ bandeau aux paliers 3 / 6 / 9), Nuke (flash du plateau), décollage, investissement (barre) et amélioration acquise, auras d'attaque (Fureur, Griffes, Frénésie, Percée) et soins de fin de tour, Vision (balayage + tuiles retournées), Raid, Réincarnation, pioche de l'essaim, écran de victoire. Non animé : la pioche de la colonie (elle la découvre au tour suivant).
 - **Hot-seat** : écran de passage (`S.handoff`) entre les camps ; `S.view` = camp qui regarde l'écran. Les mains et les tuiles camouflées de l'autre camp sont masquées **à l'affichage seulement** — l'état complet est dans le navigateur.
+
+## Versions et statistiques (v0.4.0, 02/11/2026)
+
+- `SF.VERSION` ; chaque partie note sa version de départ (`S.version`, « 0.3 » pour les parties plus anciennes via `migrate`) et compte les travailleurs tués (`S.killed`).
+- **Page périmée** : chaque requête de jeu envoie `cv` (version de la page) ; le serveur répond 409 `{reload: true}` si elle diffère (ou manque : pages d'avant la v0.4) → bandeau « Nouvelle version… Recharger ». Hors partie en ligne, la page interroge `/api/version` au chargement puis toutes les 5 min. (Cause du « déploiement refusé à l'Ouest » signalé par Oni le 02/11 : page ouverte avant une mise à jour des paliers.)
+- **Enregistrement** : partie en ligne terminée → le serveur enregistre `BILAN.summary` + `BILAN.miniMap` (une fois, `room.recorded`) ; partie locale terminée → la page envoie `POST /api/resultat` (seulement si servie en http(s) ; `S.recorded`, nouvel essai au chargement). Stockage : `store.results` (mémoire en local, store Netlify Blobs « resultats » : `index` + `p/<id>`).
+- **Consultation** : `GET /api/stats` (résumés), `GET /api/resultat?id=` (avec le SVG, affiché en `<img>` pour qu'un SVG envoyé par une page ne puisse rien exécuter) ; page Statistiques (accueil ou `?stats`) : tableau par version, dernières parties, plateau final, export CSV.
+- **Parties de test** : `window.SF_TEST` ou `?test` (gardé en sessionStorage) → marquées `test`, masquées par défaut. Les robots e2e en ligne le posent.
 
 ## Cahier des charges du jeu en ligne
 

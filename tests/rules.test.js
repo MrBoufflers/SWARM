@@ -683,6 +683,7 @@ const fresh = () => {
   c.acted = false; const w = S.workersBase;
   SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
   ok(c.k === 1 && S.workersBase === w - 1, "tour 3 : C2 → C1, au contact de la fusée : −1 travailleur");
+  ok(S.killed === 1 && SF.newGame().killed === 0 && SF.newGame().version === SF.VERSION, "statistiques : travailleurs tués comptés (S.killed), version de départ notée (S.version)");
   // après une casse : le bloc qui a déjà bougé ne repart pas
   const T = setup(); T.tiles["0,2"] = SF.tileStats("Palissade", 0, 2); T.tiles["0,2"].revealed = true; T.tiles["0,2"].hp = 1;
   const x = { id: 181, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }, y = { id: 182, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
@@ -697,6 +698,11 @@ const fresh = () => {
   const p = { id: 185, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }, q = { id: 186, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
   V.creatures.push(p, q); SF.apply(V, "essaim", "act", { key: SF.posKey(p), order: [185, 186] });
   ok(!V.tiles["0,2"] && p.k === 2 && !V.tiles["0,1"], "Mobilité : 1 case jusqu'au contact, Palissade détruite, le 2ᵉ déplacement fait entrer le bloc en C2, le 2ᵉ Écorcheur détruit le Barbelé");
+}
+// 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
+{
+  const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");
+  ok(/^\d+\.\d+\.\d+$/.test(SF.VERSION) && journal.includes("## v" + SF.VERSION + " "), "version " + SF.VERSION + " présente dans docs/versions.md");
 }
 console.log(fails ? `\n${fails} échec(s)` : "\nTous les tests passent.");
 process.exit(fails ? 1 : 0);

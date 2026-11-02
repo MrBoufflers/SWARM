@@ -15,7 +15,15 @@
     }
   } catch (e) { /* stockage indisponible */ }
   let S = null;
-  let MODE = "home"; // "home" (accueil), "local" (même appareil) ou "online"
+  let MODE = "home"; // "home" (accueil), "local" (même appareil), "online" ou "stats" (statistiques des parties)
+  const HTTP = /^https?:$/.test(location.protocol); // page servie par le site (serveur disponible), pas un fichier ouvert en local
+  // parties de test (robots e2e) : marquées pour être exclues des statistiques
+  const TEST = (() => {
+    try { if (window.SF_TEST || new URLSearchParams(location.search).has("test")) sessionStorage.setItem("swarm-steel-test", "1"); return sessionStorage.getItem("swarm-steel-test") === "1"; }
+    catch (e) { return !!window.SF_TEST; }
+  })();
+  let STALE = null; // version plus récente du jeu annoncée par le serveur : la page doit être rechargée
+  let STATS = null; // page Statistiques : { list, error, test, ver, plans: {id: svg} }
   // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
   let NET = null;
   let busy = false;
@@ -42,7 +50,8 @@
   function load() { try { const t = localStorage.getItem(SAVE); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
-  function newGame() { MODE = "local"; S = SF.newGame(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   function setPhaseHandoff() { // passe la main si le joueur actif change
     const w = who();
@@ -52,10 +61,12 @@
   // ---------------------------------------------------------------- rendu
   function render() {
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
-    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + home() + (UI.help ? help() : ""); return; }
+    const bar = staleBar();
+    if (MODE === "stats") { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + statsPage(); return; }
+    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
-    $("#app").innerHTML = header() + main + (UI.help ? help() : "");
+    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "");
   }
   function header() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
@@ -63,13 +74,16 @@
       ? `<span class="code-chip" data-code="${E(NET.code)}">Partie <b>${E(NET.code)}</b> · ${E(SIDE[NET.side])}</span><button data-a="help" class="ghost">Règles</button><button data-a="quit" class="ghost">Quitter</button>`
       : `<button data-a="help" class="ghost">Règles</button><button data-a="home" class="ghost">Menu</button><button data-a="new" class="ghost">Nouvelle partie</button>`;
     const animBtn = `<button data-a="anim" class="ghost" aria-pressed="${animOn}">Animations : ${animOn ? "oui" : "non"}</button>`;
-    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v${SF.VERSION}</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
       <div class="menu">${animBtn}${menu}</div></header>`;
   }
   function homeHeader() {
-    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v${SF.VERSION}</span></div>
       <div class="menu"><button data-a="help" class="ghost">Règles</button></div></header>`;
+  }
+  function staleBar() {
+    return STALE ? `<div class="stale" role="alert"><span>Nouvelle version du jeu disponible (v${E(STALE)}). Rechargez la page pour continuer avec les règles à jour.</span><button data-a="reload" class="primary">Recharger</button></div>` : "";
   }
   // ---------------------------------------------------------------- accueil et salle d'attente (jeu en ligne)
   function home() {
@@ -84,6 +98,8 @@
       <div class="home-acts"><button data-a="create" data-side="essaim">Je joue l'essaim</button><button data-a="create" data-side="colonie">Je joue la colonie</button></div>
       <p class="ho-k">En ligne · rejoindre</p>
       <div class="home-acts join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="primary">Rejoindre</button></div>
+      ${HTTP ? `<p class="ho-k">Équilibrage</p><div class="home-acts"><button data-a="stats">Statistiques des parties</button></div>` : ""}
+      <p class="small">Version v${E(SF.VERSION)}</p>
     </div></section>`;
   }
   function waitingRoom() {
@@ -420,10 +436,13 @@
     if (!refused && onOk) onOk();
     if (!S.winner) setPhaseHandoff();
     save();
+    if (S.winner) recordLocal();
     animate(events).then(() => { render(); afterRender(events); });
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
+    if (a === "reload") { location.reload(); return; }
+    if (MODE === "stats") { statsAction(a, d); return; }
     if (a === "anim") { animOn = !animOn; try { localStorage.setItem(ANIM_KEY, animOn ? "1" : "0"); } catch (e) { /* rien */ } render(); return; }
     if (MODE === "home" || !S) { homeAction(a, d); return; }
     if (a === "home") { if (online()) return; MODE = "home"; render(); return; }
@@ -498,6 +517,7 @@
     if (a === "resume") { const t = load(); if (t && t.phase) { S = upgradeSave(t); MODE = "local"; UI = resetUI(); render(); } return; }
     if (a === "local") { MODE = "local"; clearSave(); newGame(); return; }
     if (a === "create") { createOnline(d.side); return; }
+    if (a === "stats") { openStats(); return; }
     if (a === "join") { const c = ($("#joincode").value || "").trim().toUpperCase(); if (c.length !== 5) { flash("Le code fait 5 caractères."); return; } joinOnline(c); }
   }
   function confirmQuit() { return UI.confirmQuit ? true : (UI.confirmQuit = true, setTimeout(() => { UI.confirmQuit = false; }, 4000), flash("Touchez encore « Quitter » : vous ne pourrez plus revenir dans cette partie depuis cet appareil."), false); }
@@ -773,11 +793,82 @@
   // ---------------------------------------------------------------- jeu en ligne
   const POLL_MS = window.SF_POLL_MS || 2000;
   function setNet(n) { NET = n; try { if (n) localStorage.setItem(NET_KEY, JSON.stringify({ code: n.code, token: n.token, side: n.side })); else localStorage.removeItem(NET_KEY); } catch (e) { /* stockage indisponible */ } }
-  async function api(path, body) {
-    const res = await fetch("/api/" + path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : { cache: "no-store" });
+  async function api(path, body) { // chaque requête porte la version de la page (cv) : le serveur refuse une page périmée
+    const url = "/api/" + path + (body ? "" : (path.includes("?") ? "&" : "?") + "cv=" + encodeURIComponent(SF.VERSION));
+    const res = await fetch(url, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, cv: SF.VERSION }) } : { cache: "no-store" });
     let j = null; try { j = await res.json(); } catch (e) { /* réponse vide */ }
+    if (res.status === 409 && j && j.reload) { if (STALE !== j.version) { STALE = j.version; render(); } }
     if (!res.ok) throw new Error((j && j.error) || "Serveur injoignable (" + res.status + ").");
     return j;
+  }
+  // page restée ouverte pendant une mise à jour : on vérifie la version du site de temps en temps (hors partie en ligne,
+  // où chaque requête la vérifie déjà)
+  async function checkVersion() {
+    if (!HTTP || STALE || online()) return;
+    try { const r = await fetch("/api/version", { cache: "no-store" }); const j = await r.json(); if (j.version && j.version !== SF.VERSION) { STALE = j.version; render(); } }
+    catch (e) { /* hors ligne : on réessaiera */ }
+  }
+  setInterval(checkVersion, 5 * 60 * 1000);
+  // ---------------------------------------------------------------- statistiques (parties terminées, par version)
+  async function recordLocal() {
+    if (!HTTP || !S || !S.winner || S.recorded) return;
+    S.gid = S.gid || newGid();
+    try {
+      const r = await fetch("/api/resultat", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ record: BILAN.summary(S, { id: S.gid, mode: "local", test: TEST }), svg: BILAN.miniMap(S) }) });
+      if (r.ok) { S.recorded = true; if (MODE === "local") save(); }
+    } catch (e) { /* hors ligne : nouvel essai au prochain chargement de la partie */ }
+  }
+  function openStats() {
+    MODE = "stats"; STATS = { list: null, error: "", test: false, ver: null, plans: {} }; render();
+    fetch("/api/stats", { cache: "no-store" }).then(r => r.json()).then(j => {
+      if (!j.results) throw new Error(j.error || "Statistiques indisponibles.");
+      STATS.list = j.results.sort((a, b) => (a.date < b.date ? 1 : -1)); render();
+    }).catch(e => { STATS.error = e.message || "Serveur injoignable."; render(); });
+  }
+  const pct = (a, n) => (n ? Math.round(100 * a / n) + " %" : "–");
+  const avg = v => (Math.round(v * 10) / 10).toLocaleString("fr-FR");
+  const shown = () => (STATS.list || []).filter(r => STATS.test || !r.test);
+  function statsPage() {
+    const head = `<div class="st-head"><h2>Statistiques des parties</h2><button data-a="statsBack" class="ghost">Retour</button></div>`;
+    if (STATS.error) return `<section class="stats">${head}<p>${E(STATS.error)}</p></section>`;
+    if (!STATS.list) return `<section class="stats">${head}<p>Chargement…</p></section>`;
+    const list = shown(), rows = BILAN.byVersion(list);
+    const nTest = STATS.list.filter(r => r.test).length;
+    const table = rows.length ? `<div class="tbl"><table><thead><tr><th>Version</th><th>Parties</th><th>Essaim gagne</th><th>Colonie gagne</th><th>Manches</th><th>Biomasse finale</th><th>Travailleurs tués</th><th>Étages</th></tr></thead><tbody>${
+      rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td></tr>`).join("")
+    }</tbody></table></div><p class="small">Moyennes par partie. Touchez une version pour ne voir que ses parties.</p>` : `<p>Aucune partie terminée enregistrée pour l'instant.</p>`;
+    const games = list.filter(r => !STATS.ver || r.version === STATS.ver).slice(0, 100);
+    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
+      <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
+      ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
+    return `<section class="stats">${head}
+      <p class="small">Version actuelle : v${E(SF.VERSION)} · ${list.length} partie${list.length > 1 ? "s" : ""} terminée${list.length > 1 ? "s" : ""}${STATS.test ? "" : ` (hors ${nTest} partie${nTest > 1 ? "s" : ""} de test)`}.</p>
+      <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
+      ${table}
+      <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
+      <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
+  }
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
+  function statsAction(a, d) {
+    if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
+    if (a === "help") { return; }
+    if (!STATS) return;
+    if (a === "statsTest") STATS.test = !STATS.test;
+    if (a === "statsVer") STATS.ver = d.v || null;
+    if (a === "statsPlan") {
+      fetch("/api/resultat?id=" + encodeURIComponent(d.id), { cache: "no-store" }).then(r => r.json()).then(j => { if (j.svg) { STATS.plans[d.id] = j.svg; render(); } }).catch(() => flash("Plateau indisponible."));
+      return;
+    }
+    if (a === "statsCsv") {
+      const cell = v => { const s = String(v === undefined || v === null ? "" : v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+      const csv = [CSV_COLS.join(";"), ...shown().map(r => CSV_COLS.map(c => cell(r[c])).join(";"))].join("\n");
+      const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+      const link = document.createElement("a"); link.href = url; link.download = "swarm-steel-parties.csv"; document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
+    render();
   }
   function receive(j) { // nouvel état envoyé par le serveur (vue filtrée pour notre camp)
     if (!j || !j.S) return;
@@ -801,7 +892,7 @@
   }
   function createOnline(side) {
     withBusy(async () => {
-      const j = await api("create", { side });
+      const j = await api("create", { side, test: TEST });
       setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
       history.replaceState(null, "", location.pathname);
     });
@@ -855,6 +946,8 @@
   const saved = load();
   const invite = new URLSearchParams(location.search).get("code");
   if (net0 && net0.code && net0.token && (!invite || invite.toUpperCase() === net0.code)) resumeOnline(net0);
-  else if (!invite && saved && saved.phase) { S = upgradeSave(saved); MODE = "local"; render(); }
+  else if (new URLSearchParams(location.search).has("stats") && HTTP) openStats();
+  else if (!invite && saved && saved.phase) { S = upgradeSave(saved); MODE = "local"; render(); if (S.winner) recordLocal(); }
   else render();
+  checkVersion();
 })();

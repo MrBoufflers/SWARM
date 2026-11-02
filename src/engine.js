@@ -116,6 +116,9 @@ const SF = (() => {
   // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
   // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).
   const START_WALL = "Barbelé";
+  // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
+  // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
+  const VERSION = "0.4.0";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -171,7 +174,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ mise en place
   function newGame() {
     const S = {
-      round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1,
+      version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
       tiles: {}, supports: {}, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
       workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
       tileDeck: [], tileDiscard: [], hand: [],
@@ -434,7 +437,7 @@ const SF = (() => {
     if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
   }
   function hitRocket(S, c) {
-    S.workersBase -= 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
+    S.workersBase -= 1; S.killed = (S.killed || 0) + 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
     fx(S, { t: "rocket", id: c.id });
     log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
     if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
@@ -568,7 +571,7 @@ const SF = (() => {
         if (primary && excess > 0 && hasPercee(S, c)) {
           const [nu, nk] = nextStep(...toLocal(lane, x, y));
           if (nk === 0) {
-            S.workersBase -= 1;
+            S.workersBase -= 1; S.killed = (S.killed || 0) + 1;
             fx(S, { t: "rocket", id: c.id });
             log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
             if (S.workersBase <= 0) S.winner = "essaim";
@@ -932,6 +935,8 @@ const SF = (() => {
   // « Haie d'épines » marquée start) deviennent des Barbelés
   // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
+    if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
+    if (S.killed === undefined) S.killed = 0;
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
       if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1
@@ -1061,6 +1066,7 @@ const SF = (() => {
   }
 
   return {
+    VERSION,
     fxFor, migrate, famineBudget, MIN_BIOMASS, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,

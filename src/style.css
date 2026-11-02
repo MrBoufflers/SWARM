@@ -242,3 +242,27 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 /* carte gratuite (amélioration Déploiement) */
 .ccard.free { box-shadow: inset 0 0 0 2px var(--hot); }
 .ccard.free .cost { background: var(--hot); color: #1b1f1d; }
+
+/* nouvelle version disponible (page restée ouverte pendant une mise à jour) */
+.stale { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 12px; max-width: 900px; padding: 10px 14px; border-radius: 8px; background: var(--hot); color: #1b1f1d; font-weight: 600; }
+.stale button { border: 0; background: #1b1f1d; color: #fff; padding: 7px 14px; border-radius: 6px; font-weight: 600; }
+/* page Statistiques */
+.stats { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
+.st-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.st-head h2 { font: 700 1.8rem/1.1 var(--display); margin: 8px 0; }
+.stats h3 { font: 700 1.25rem/1.2 var(--display); margin: 22px 0 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.stats .home-acts { justify-content: flex-start; margin: 10px 0; }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); }
+.tbl table { border-collapse: collapse; width: 100%; font-size: .9rem; white-space: nowrap; }
+.tbl th, .tbl td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--rule); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font-weight: 600; color: var(--ink-soft); background: var(--panel-2); }
+.tbl tbody tr { cursor: pointer; }
+.tbl tbody tr:hover, .tbl tbody tr.sel { background: var(--panel-2); }
+.tbl tbody tr.sel td:first-child { box-shadow: inset 4px 0 0 var(--hot); }
+.st-games { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.st-game { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.st-line { margin: 2px 0; overflow-wrap: anywhere; }
+.st-line b.essaim { color: var(--essaim); } .st-line b.colonie { color: var(--colonie); }
+.st-game button { margin-top: 6px; }
+.st-plan { display: block; width: 100%; max-width: 278px; height: auto; margin-top: 8px; }

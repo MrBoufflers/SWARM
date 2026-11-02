@@ -15,7 +15,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   let covered = 0;
   async function open(side) {
     const ctx = await browser.newContext({ viewport: { width: W, height: 1000 } });
-    await ctx.addInitScript(POLL => { window.SF_POLL_MS = POLL; }, process.env.E2E_URL ? 400 : 150);
+    await ctx.addInitScript(POLL => { window.SF_POLL_MS = POLL; window.SF_TEST = true; }, process.env.E2E_URL ? 400 : 150); // partie de test : exclue des statistiques
     const page = await ctx.newPage();
     page.on('pageerror', e => errs.push(side + ' : ' + e.message));
     page.on('console', m => { if (m.type() === 'error' && m.text().startsWith('animation')) errs.push(side + ' : ' + m.text()); });
@@ -105,7 +105,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const finC = await pC.evaluate(() => (document.querySelector('.banner.win b') || {}).textContent || 'en cours');
   const fxE = await pE.evaluate(() => window.__fx), fxC = await pC.evaluate(() => window.__fx);
   console.log('animations jouées — essaim :', JSON.stringify(fxE), '| colonie :', JSON.stringify(fxC));
-  const ok = fxE['déplacement'] > 0 && fxC['déplacement'] > 0 && fxC['bandeau'] > 0 && fxE['bandeau'] > 0 && !errs.length && !leaks.length && !covered && started && pre === code && resumed === true && fin !== 'en cours' && fin === finC;
+  // statistiques : la partie terminée est enregistrée (marquée test), la page s'affiche et montre le plateau final
+  let stats = 'non vérifiées';
+  if (fin !== 'en cours') {
+    const rec = await pE.evaluate(async c => ((await (await fetch('/api/stats')).json()).results || []).find(r => r.id.startsWith(c + '-')), code);
+    await pE.goto(URL0 + '?stats'); await pE.waitForSelector('.stats .tbl, .stats .st-games p', { timeout: 10000 });
+    await pE.click('[data-a="statsTest"]'); await sleep(200);
+    await pE.click('[data-a="statsPlan"]'); await pE.waitForSelector('.st-plan', { timeout: 10000 });
+    const overflow = await pE.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+    stats = rec && rec.test && rec.mode === 'en ligne' && rec.winner && !overflow ? 'ok' : `problème (enregistrée : ${!!rec}, test : ${rec && rec.test}, débordement : ${overflow})`;
+  }
+  console.log('statistiques :', stats);
+  const ok = stats === 'ok' && fxE['déplacement'] > 0 && fxC['déplacement'] > 0 && fxC['bandeau'] > 0 && fxE['bandeau'] > 0 && !errs.length && !leaks.length && !covered && started && pre === code && resumed === true && fin !== 'en cours' && fin === finC;
   console.log('erreurs :', errs.length ? errs : 'aucune', '| fuites :', leaks.length ? [...new Set(leaks)] : 'aucune', '| boutons masqués :', covered,
     '| reprise après rechargement :', resumed, '| fin (essaim / colonie) :', fin, '/', finC, '| phases vues :', Object.keys(seen).join(', '));
   await browser.close(); if (server) server.close();
