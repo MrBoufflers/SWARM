@@ -247,6 +247,30 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 /* carte gratuite (amélioration Déploiement) */
 .ccard.free { box-shadow: inset 0 0 0 2px var(--hot); }
 .ccard.free .cost { background: var(--hot); color: #1b1f1d; }
+
+/* nouvelle version disponible (page restée ouverte pendant une mise à jour) */
+.stale { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 12px; max-width: 900px; padding: 10px 14px; border-radius: 8px; background: var(--hot); color: #1b1f1d; font-weight: 600; }
+.stale button { border: 0; background: #1b1f1d; color: #fff; padding: 7px 14px; border-radius: 6px; font-weight: 600; }
+/* page Statistiques */
+.stats { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
+.st-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.st-head h2 { font: 700 1.8rem/1.1 var(--display); margin: 8px 0; }
+.stats h3 { font: 700 1.25rem/1.2 var(--display); margin: 22px 0 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.stats .home-acts { justify-content: flex-start; margin: 10px 0; }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); }
+.tbl table { border-collapse: collapse; width: 100%; font-size: .9rem; white-space: nowrap; }
+.tbl th, .tbl td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--rule); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font-weight: 600; color: var(--ink-soft); background: var(--panel-2); }
+.tbl tbody tr { cursor: pointer; }
+.tbl tbody tr:hover, .tbl tbody tr.sel { background: var(--panel-2); }
+.tbl tbody tr.sel td:first-child { box-shadow: inset 4px 0 0 var(--hot); }
+.st-games { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.st-game { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.st-line { margin: 2px 0; overflow-wrap: anywhere; }
+.st-line b.essaim { color: var(--essaim); } .st-line b.colonie { color: var(--colonie); }
+.st-game button { margin-top: 6px; }
+.st-plan { display: block; width: 100%; max-width: 278px; height: auto; margin-top: 8px; }
 </style></head><body>
 <div id="app"></div>
 <div id="flash" role="status" hidden></div>
@@ -314,7 +338,7 @@ const SF = (() => {
     "Égide": { d: 2, pv: 3, ep: 0, shield: 2, camo: 1, n: 3 },
   };
   const TILE_TEXT = {
-    "Rempart": "Renforcé 2 : perd 1 PV seulement si une attaque fait au moins 2 dégâts, jamais plus d'1 PV par attaque.", "Bastion": "Renforcé 3 : perd 1 PV seulement si une attaque fait au moins 3 dégâts, jamais plus d'1 PV par attaque.",
+    "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
@@ -342,9 +366,9 @@ const SF = (() => {
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
-    // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 10, 15, 20 de biomasse
+    // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 9, 15, 20 de biomasse (brièvement 10 / 15 / 20)
     // (avant : 5 paliers, départ 3 puis 6 / 9 / 12 / 15, plafonds 1 à 5 ; à l'origine 4 / 7 / 10 / 13)
-    { min: 0, n: [3, 0, 0], cap: 2 }, { min: 10, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
+    { min: 0, n: [3, 0, 0], cap: 2 }, { min: 9, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
     { min: 20, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
@@ -369,6 +393,9 @@ const SF = (() => {
   // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
   // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).
   const START_WALL = "Barbelé";
+  // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
+  // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
+  const VERSION = "0.4.0";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -424,7 +451,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ mise en place
   function newGame() {
     const S = {
-      round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1,
+      version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
       tiles: {}, supports: {}, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
       workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
       tileDeck: [], tileDiscard: [], hand: [],
@@ -687,7 +714,7 @@ const SF = (() => {
     if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
   }
   function hitRocket(S, c) {
-    S.workersBase -= 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
+    S.workersBase -= 1; S.killed = (S.killed || 0) + 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
     fx(S, { t: "rocket", id: c.id });
     log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
     if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
@@ -794,8 +821,9 @@ const SF = (() => {
       log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
     } else {
       if (t.shield) dmg = Math.max(0, dmg - t.shield); // Bouclier X : X dégâts de moins par attaque
-      // Renforcé X : 1 PV par tranche de X dégâts, et jamais plus d'1 PV par attaque (Oni, 02/11/2026)
-      const loss = t.ren ? Math.min(1, Math.floor(dmg / t.ren)) : dmg;
+      // Renforcé X : 1 PV par tranche complète de X dégâts, plusieurs PV possibles d'un coup
+      // (Oni, 02/11/2026 : retour à la règle d'origine après un essai à 1 PV maximum par attaque)
+      const loss = t.ren ? Math.floor(dmg / t.ren) : dmg;
       const capacity = t.ren ? t.hp * t.ren : t.hp;
       const excess = dmg - capacity;
       t.hp -= loss;
@@ -820,7 +848,7 @@ const SF = (() => {
         if (primary && excess > 0 && hasPercee(S, c)) {
           const [nu, nk] = nextStep(...toLocal(lane, x, y));
           if (nk === 0) {
-            S.workersBase -= 1;
+            S.workersBase -= 1; S.killed = (S.killed || 0) + 1;
             fx(S, { t: "rocket", id: c.id });
             log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
             if (S.workersBase <= 0) S.winner = "essaim";
@@ -1184,6 +1212,8 @@ const SF = (() => {
   // « Haie d'épines » marquée start) deviennent des Barbelés
   // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
+    if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
+    if (S.killed === undefined) S.killed = 0;
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
       if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1
@@ -1313,6 +1343,7 @@ const SF = (() => {
   }
 
   return {
+    VERSION,
     fxFor, migrate, famineBudget, MIN_BIOMASS, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
@@ -1325,6 +1356,101 @@ const SF = (() => {
   };
 })();
 if (typeof module !== "undefined") module.exports = SF;
+
+// Swarm & Steel — bilan de fin de partie, pour les statistiques par version :
+// résumé chiffré (vainqueur, manches, biomasse finale, travailleurs tués…) et mini-plan schématique du plateau (SVG).
+// Aucun accès au DOM : utilisé par la page (parties locales) et par le serveur (parties en ligne).
+"use strict";
+const BILAN = (() => {
+  const E = typeof SF !== "undefined" ? SF : require("./engine.js");
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // résumé d'une partie terminée ; extra = { id, mode: "local" | "en ligne", test }
+  function summary(S, extra) {
+    const tiles = Object.values(S.tiles || {});
+    return {
+      id: String(extra.id || ""), mode: extra.mode, test: !!extra.test,
+      version: S.version || E.VERSION, versionFin: E.VERSION, date: new Date().toISOString(),
+      winner: S.winner, rounds: S.round, biomass: S.biomass, reserve: S.reserve || 0,
+      killed: S.killed || 0, workers: S.workersBase, floors: S.floors,
+      creatures: (S.creatures || []).length, buildings: tiles.filter(t => !t.start).length, barbed: tiles.filter(t => t.start).length,
+      supports: Object.keys(S.supports || {}).length,
+      upgrades: ["aggro", "tank", "soutien"].map(ty => [ty, S.upgrades[ty].r1 || "-", S.upgrades[ty].r2 || "-"].join(":")).join(" "),
+    };
+  }
+
+  // mini-plan : grille 9 × 9 (fusée au centre), bâtiments (nom abrégé, PV), supports (niveau), créatures (nombre par type)
+  const C = 30, PAD = 4, COL = { aggro: "#e0604f", tank: "#4f8fe0", soutien: "#a46ee0" };
+  const LANE_TINT = { N: "#1d2a3a", E: "#1d3328", S: "#3a321d", O: "#33213a" };
+  function miniMap(S) {
+    const parts = [];
+    const W = 9 * C + 2 * PAD;
+    parts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" width="${W}" height="${W}" font-family="Arial, sans-serif">`);
+    parts.push(`<rect width="${W}" height="${W}" rx="6" fill="#15181c"/>`);
+    const crAt = {};
+    for (const c of S.creatures || []) {
+      const [x, y] = E.toGlobal(c.lane, c.u, c.k), k = x + "," + y;
+      const t = (E.CREATURES[c.name] || {}).type || "aggro";
+      (crAt[k] = crAt[k] || { aggro: 0, tank: 0, soutien: 0 })[t]++;
+    }
+    for (let y = 4; y >= -4; y--) for (let x = -4; x <= 4; x++) {
+      const k = x + "," + y, r = E.ring(x, y), lane = E.cellLane(x, y);
+      const px = PAD + (x + 4) * C, py = PAD + (4 - y) * C;
+      const cell = (fill, stroke) => parts.push(`<rect x="${px + 1}" y="${py + 1}" width="${C - 2}" height="${C - 2}" rx="3" fill="${fill}"${stroke ? ` stroke="${stroke}"` : ""}/>`);
+      const text = (s, dy, size, fill) => parts.push(`<text x="${px + C / 2}" y="${py + dy}" font-size="${size}" text-anchor="middle" fill="${fill}">${esc(s)}</text>`);
+      if (r === 4) { // cases d'entrée : seulement les 5 colonnes de chaque lane
+        if (!lane || E.toLocal(lane, x, y)[0] < -2 || E.toLocal(lane, x, y)[0] > 2) continue;
+        cell("#1b1f24", "#3a3f46");
+      } else if (r === 0) {
+        cell("#e8e6e1"); text("FUSÉE", 12, 6.5, "#222"); text(`${S.floors}/12`, 23, 9, "#222");
+      } else if (E.isSupportCell(x, y)) {
+        const lv = (S.supports || {})[k];
+        if (lv) { cell("#1f6f63"); text("S" + lv, 19, 11, "#e8fff9"); } else cell("#202429");
+      } else {
+        const t = (S.tiles || {})[k];
+        if (t) {
+          cell(t.start ? "#4a3d30" : "#6b4a2b", t.camo && !t.revealed ? "#d0a24a" : null);
+          text(t.start ? "Barb." : String(t.name).slice(0, 6), 11, 6.5, "#f4e9da");
+          text(`${Math.max(0, t.hp)}/${t.max}`, 22, 8.5, "#f4e9da");
+        } else cell(LANE_TINT[lane] || "#202429");
+      }
+      const cr = crAt[k];
+      if (cr) { // pastilles : une par type présent, avec le nombre
+        const types = ["aggro", "tank", "soutien"].filter(ty => cr[ty]);
+        types.forEach((ty, i) => {
+          const cx = px + C / 2 + (i - (types.length - 1) / 2) * 9, cy = py + C - 6;
+          parts.push(`<circle cx="${cx}" cy="${cy}" r="4.5" fill="${COL[ty]}"/><text x="${cx}" y="${cy + 2.5}" font-size="6.5" text-anchor="middle" fill="#fff">${cr[ty]}</text>`);
+        });
+      }
+    }
+    parts.push(`</svg>`);
+    return parts.join("");
+  }
+
+  // comparaison de numéros de version (« 0.4.10 » après « 0.4.9 »)
+  function cmpVersion(a, b) {
+    const pa = String(a).split(".").map(Number), pb = String(b).split(".").map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d) return d; }
+    return 0;
+  }
+
+  // agrégats par version (pour la page Statistiques) à partir des résumés
+  function byVersion(list) {
+    const g = {};
+    for (const r of list) {
+      const v = r.version || "?";
+      const a = g[v] = g[v] || { version: v, n: 0, essaim: 0, colonie: 0, rounds: 0, biomass: 0, killed: 0, floors: 0 };
+      a.n++; if (r.winner === "essaim") a.essaim++; else if (r.winner === "colonie") a.colonie++;
+      a.rounds += r.rounds || 0; a.biomass += r.biomass || 0; a.killed += r.killed || 0; a.floors += r.floors || 0;
+    }
+    return Object.values(g).sort((x, y) => cmpVersion(y.version, x.version)).map(a => ({
+      ...a, rounds: a.rounds / a.n, biomass: a.biomass / a.n, killed: a.killed / a.n, floors: a.floors / a.n,
+    }));
+  }
+
+  return { summary, miniMap, cmpVersion, byVersion };
+})();
+if (typeof module !== "undefined") module.exports = BILAN;
 
 // Swarm & Steel — interface : 2 joueurs sur le même écran (local) ou sur deux appareils (en ligne)
 "use strict";
@@ -1343,7 +1469,15 @@ if (typeof module !== "undefined") module.exports = SF;
     }
   } catch (e) { /* stockage indisponible */ }
   let S = null;
-  let MODE = "home"; // "home" (accueil), "local" (même appareil) ou "online"
+  let MODE = "home"; // "home" (accueil), "local" (même appareil), "online" ou "stats" (statistiques des parties)
+  const HTTP = /^https?:$/.test(location.protocol); // page servie par le site (serveur disponible), pas un fichier ouvert en local
+  // parties de test (robots e2e) : marquées pour être exclues des statistiques
+  const TEST = (() => {
+    try { if (window.SF_TEST || new URLSearchParams(location.search).has("test")) sessionStorage.setItem("swarm-steel-test", "1"); return sessionStorage.getItem("swarm-steel-test") === "1"; }
+    catch (e) { return !!window.SF_TEST; }
+  })();
+  let STALE = null; // version plus récente du jeu annoncée par le serveur : la page doit être rechargée
+  let STATS = null; // page Statistiques : { list, error, test, ver, plans: {id: svg} }
   // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
   let NET = null;
   let busy = false;
@@ -1370,7 +1504,8 @@ if (typeof module !== "undefined") module.exports = SF;
   function load() { try { const t = localStorage.getItem(SAVE); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
-  function newGame() { MODE = "local"; S = SF.newGame(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   function setPhaseHandoff() { // passe la main si le joueur actif change
     const w = who();
@@ -1380,10 +1515,12 @@ if (typeof module !== "undefined") module.exports = SF;
   // ---------------------------------------------------------------- rendu
   function render() {
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
-    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + home() + (UI.help ? help() : ""); return; }
+    const bar = staleBar();
+    if (MODE === "stats") { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + statsPage(); return; }
+    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
-    $("#app").innerHTML = header() + main + (UI.help ? help() : "");
+    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "");
   }
   function header() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
@@ -1391,13 +1528,16 @@ if (typeof module !== "undefined") module.exports = SF;
       ? `<span class="code-chip" data-code="${E(NET.code)}">Partie <b>${E(NET.code)}</b> · ${E(SIDE[NET.side])}</span><button data-a="help" class="ghost">Règles</button><button data-a="quit" class="ghost">Quitter</button>`
       : `<button data-a="help" class="ghost">Règles</button><button data-a="home" class="ghost">Menu</button><button data-a="new" class="ghost">Nouvelle partie</button>`;
     const animBtn = `<button data-a="anim" class="ghost" aria-pressed="${animOn}">Animations : ${animOn ? "oui" : "non"}</button>`;
-    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v${SF.VERSION}</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
       <div class="menu">${animBtn}${menu}</div></header>`;
   }
   function homeHeader() {
-    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v0.3</span></div>
+    return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v${SF.VERSION}</span></div>
       <div class="menu"><button data-a="help" class="ghost">Règles</button></div></header>`;
+  }
+  function staleBar() {
+    return STALE ? `<div class="stale" role="alert"><span>Nouvelle version du jeu disponible (v${E(STALE)}). Rechargez la page pour continuer avec les règles à jour.</span><button data-a="reload" class="primary">Recharger</button></div>` : "";
   }
   // ---------------------------------------------------------------- accueil et salle d'attente (jeu en ligne)
   function home() {
@@ -1412,6 +1552,8 @@ if (typeof module !== "undefined") module.exports = SF;
       <div class="home-acts"><button data-a="create" data-side="essaim">Je joue l'essaim</button><button data-a="create" data-side="colonie">Je joue la colonie</button></div>
       <p class="ho-k">En ligne · rejoindre</p>
       <div class="home-acts join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="primary">Rejoindre</button></div>
+      ${HTTP ? `<p class="ho-k">Équilibrage</p><div class="home-acts"><button data-a="stats">Statistiques des parties</button></div>` : ""}
+      <p class="small">Version v${E(SF.VERSION)}</p>
     </div></section>`;
   }
   function waitingRoom() {
@@ -1612,7 +1754,7 @@ if (typeof module !== "undefined") module.exports = SF;
     if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
     if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
     if (t.shield) cap("bouclier", `Bouclier ${t.shield}`, `chaque attaque contre elle inflige ${t.shield} dégâts de moins.`);
-    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que si une attaque lui inflige au moins ${t.ren} dégâts, et jamais plus d'1 PV par attaque.`);
+    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que par tranche complète de ${t.ren} dégâts d'une même attaque.`);
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
@@ -1731,9 +1873,9 @@ if (typeof module !== "undefined") module.exports = SF;
     return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
       <h2>Règles en bref</h2>
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
-      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (départ, puis 10 · 15 · 20 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour et partent devant leur case. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
+      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (départ, puis 9 · 15 · 20 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour et partent devant leur case. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 3, 4 et 5 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu seulement si une attaque fait au moins X dégâts, jamais plus d'1 PV par attaque. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
+      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu par tranche complète de X dégâts d'une même attaque. Les auras ne touchent que les créatures de la même case. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
       <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
   }
@@ -1748,10 +1890,13 @@ if (typeof module !== "undefined") module.exports = SF;
     if (!refused && onOk) onOk();
     if (!S.winner) setPhaseHandoff();
     save();
+    if (S.winner) recordLocal();
     animate(events).then(() => { render(); afterRender(events); });
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
+    if (a === "reload") { location.reload(); return; }
+    if (MODE === "stats") { statsAction(a, d); return; }
     if (a === "anim") { animOn = !animOn; try { localStorage.setItem(ANIM_KEY, animOn ? "1" : "0"); } catch (e) { /* rien */ } render(); return; }
     if (MODE === "home" || !S) { homeAction(a, d); return; }
     if (a === "home") { if (online()) return; MODE = "home"; render(); return; }
@@ -1826,6 +1971,7 @@ if (typeof module !== "undefined") module.exports = SF;
     if (a === "resume") { const t = load(); if (t && t.phase) { S = upgradeSave(t); MODE = "local"; UI = resetUI(); render(); } return; }
     if (a === "local") { MODE = "local"; clearSave(); newGame(); return; }
     if (a === "create") { createOnline(d.side); return; }
+    if (a === "stats") { openStats(); return; }
     if (a === "join") { const c = ($("#joincode").value || "").trim().toUpperCase(); if (c.length !== 5) { flash("Le code fait 5 caractères."); return; } joinOnline(c); }
   }
   function confirmQuit() { return UI.confirmQuit ? true : (UI.confirmQuit = true, setTimeout(() => { UI.confirmQuit = false; }, 4000), flash("Touchez encore « Quitter » : vous ne pourrez plus revenir dans cette partie depuis cet appareil."), false); }
@@ -2101,11 +2247,82 @@ if (typeof module !== "undefined") module.exports = SF;
   // ---------------------------------------------------------------- jeu en ligne
   const POLL_MS = window.SF_POLL_MS || 2000;
   function setNet(n) { NET = n; try { if (n) localStorage.setItem(NET_KEY, JSON.stringify({ code: n.code, token: n.token, side: n.side })); else localStorage.removeItem(NET_KEY); } catch (e) { /* stockage indisponible */ } }
-  async function api(path, body) {
-    const res = await fetch("/api/" + path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : { cache: "no-store" });
+  async function api(path, body) { // chaque requête porte la version de la page (cv) : le serveur refuse une page périmée
+    const url = "/api/" + path + (body ? "" : (path.includes("?") ? "&" : "?") + "cv=" + encodeURIComponent(SF.VERSION));
+    const res = await fetch(url, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, cv: SF.VERSION }) } : { cache: "no-store" });
     let j = null; try { j = await res.json(); } catch (e) { /* réponse vide */ }
+    if (res.status === 409 && j && j.reload) { if (STALE !== j.version) { STALE = j.version; render(); } }
     if (!res.ok) throw new Error((j && j.error) || "Serveur injoignable (" + res.status + ").");
     return j;
+  }
+  // page restée ouverte pendant une mise à jour : on vérifie la version du site de temps en temps (hors partie en ligne,
+  // où chaque requête la vérifie déjà)
+  async function checkVersion() {
+    if (!HTTP || STALE || online()) return;
+    try { const r = await fetch("/api/version", { cache: "no-store" }); const j = await r.json(); if (j.version && j.version !== SF.VERSION) { STALE = j.version; render(); } }
+    catch (e) { /* hors ligne : on réessaiera */ }
+  }
+  setInterval(checkVersion, 5 * 60 * 1000);
+  // ---------------------------------------------------------------- statistiques (parties terminées, par version)
+  async function recordLocal() {
+    if (!HTTP || !S || !S.winner || S.recorded) return;
+    S.gid = S.gid || newGid();
+    try {
+      const r = await fetch("/api/resultat", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ record: BILAN.summary(S, { id: S.gid, mode: "local", test: TEST }), svg: BILAN.miniMap(S) }) });
+      if (r.ok) { S.recorded = true; if (MODE === "local") save(); }
+    } catch (e) { /* hors ligne : nouvel essai au prochain chargement de la partie */ }
+  }
+  function openStats() {
+    MODE = "stats"; STATS = { list: null, error: "", test: false, ver: null, plans: {} }; render();
+    fetch("/api/stats", { cache: "no-store" }).then(r => r.json()).then(j => {
+      if (!j.results) throw new Error(j.error || "Statistiques indisponibles.");
+      STATS.list = j.results.sort((a, b) => (a.date < b.date ? 1 : -1)); render();
+    }).catch(e => { STATS.error = e.message || "Serveur injoignable."; render(); });
+  }
+  const pct = (a, n) => (n ? Math.round(100 * a / n) + " %" : "–");
+  const avg = v => (Math.round(v * 10) / 10).toLocaleString("fr-FR");
+  const shown = () => (STATS.list || []).filter(r => STATS.test || !r.test);
+  function statsPage() {
+    const head = `<div class="st-head"><h2>Statistiques des parties</h2><button data-a="statsBack" class="ghost">Retour</button></div>`;
+    if (STATS.error) return `<section class="stats">${head}<p>${E(STATS.error)}</p></section>`;
+    if (!STATS.list) return `<section class="stats">${head}<p>Chargement…</p></section>`;
+    const list = shown(), rows = BILAN.byVersion(list);
+    const nTest = STATS.list.filter(r => r.test).length;
+    const table = rows.length ? `<div class="tbl"><table><thead><tr><th>Version</th><th>Parties</th><th>Essaim gagne</th><th>Colonie gagne</th><th>Manches</th><th>Biomasse finale</th><th>Travailleurs tués</th><th>Étages</th></tr></thead><tbody>${
+      rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td></tr>`).join("")
+    }</tbody></table></div><p class="small">Moyennes par partie. Touchez une version pour ne voir que ses parties.</p>` : `<p>Aucune partie terminée enregistrée pour l'instant.</p>`;
+    const games = list.filter(r => !STATS.ver || r.version === STATS.ver).slice(0, 100);
+    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
+      <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
+      ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
+    return `<section class="stats">${head}
+      <p class="small">Version actuelle : v${E(SF.VERSION)} · ${list.length} partie${list.length > 1 ? "s" : ""} terminée${list.length > 1 ? "s" : ""}${STATS.test ? "" : ` (hors ${nTest} partie${nTest > 1 ? "s" : ""} de test)`}.</p>
+      <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
+      ${table}
+      <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
+      <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
+  }
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
+  function statsAction(a, d) {
+    if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
+    if (a === "help") { return; }
+    if (!STATS) return;
+    if (a === "statsTest") STATS.test = !STATS.test;
+    if (a === "statsVer") STATS.ver = d.v || null;
+    if (a === "statsPlan") {
+      fetch("/api/resultat?id=" + encodeURIComponent(d.id), { cache: "no-store" }).then(r => r.json()).then(j => { if (j.svg) { STATS.plans[d.id] = j.svg; render(); } }).catch(() => flash("Plateau indisponible."));
+      return;
+    }
+    if (a === "statsCsv") {
+      const cell = v => { const s = String(v === undefined || v === null ? "" : v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+      const csv = [CSV_COLS.join(";"), ...shown().map(r => CSV_COLS.map(c => cell(r[c])).join(";"))].join("\n");
+      const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+      const link = document.createElement("a"); link.href = url; link.download = "swarm-steel-parties.csv"; document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
+    render();
   }
   function receive(j) { // nouvel état envoyé par le serveur (vue filtrée pour notre camp)
     if (!j || !j.S) return;
@@ -2129,7 +2346,7 @@ if (typeof module !== "undefined") module.exports = SF;
   }
   function createOnline(side) {
     withBusy(async () => {
-      const j = await api("create", { side });
+      const j = await api("create", { side, test: TEST });
       setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
       history.replaceState(null, "", location.pathname);
     });
@@ -2182,9 +2399,11 @@ if (typeof module !== "undefined") module.exports = SF;
   let net0 = null; try { net0 = JSON.parse(localStorage.getItem(NET_KEY) || "null"); } catch (e) { /* rien */ }
   const saved = load();
   const invite = new URLSearchParams(location.search).get("code");
-  if (net0 && net0.code && net0.token && (!invite || invite.toUpperCase() === net0.code)) resumeOnline(net0);
-  else if (!invite && saved && saved.phase) { S = upgradeSave(saved); MODE = "local"; render(); }
+  if (new URLSearchParams(location.search).has("stats") && HTTP) openStats(); // lien direct vers les statistiques
+  else if (net0 && net0.code && net0.token && (!invite || invite.toUpperCase() === net0.code)) resumeOnline(net0);
+  else if (!invite && saved && saved.phase) { S = upgradeSave(saved); MODE = "local"; render(); if (S.winner) recordLocal(); }
   else render();
+  checkVersion();
 })();
 </script>
 </body></html>

@@ -7,6 +7,7 @@ from icons import ICONS  # noqa: E402
 
 icons_js = "const ICONS = " + json.dumps({k: v[1] for k, v in ICONS.items()}, ensure_ascii=False) + ";"
 engine = (ROOT / "src/engine.js").read_text(encoding="utf-8")
+bilan = (ROOT / "src/bilan.js").read_text(encoding="utf-8")
 ui = (ROOT / "src/ui.js").read_text(encoding="utf-8")
 css = (ROOT / "src/style.css").read_text(encoding="utf-8")
 
@@ -20,6 +21,7 @@ page = f"""<!doctype html>
 <div id="flash" role="status" hidden></div>
 <script>{icons_js}
 {engine}
+{bilan}
 {ui}</script>
 </body></html>
 """

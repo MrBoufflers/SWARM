@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni
+2026-11-02 · @Oni · version du jeu v0.4.0 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -12,7 +12,6 @@ Repris du prototype jouable et validés par Oni :
 - **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
 - **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
 - **Nouvelles forteresses** : **Égide** (3 PV, Bouclier 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Bouclier 2, +1 travailleur temporaire). **Siphon** (2 PV, piège qui retire 3 biomasse à l'essaim). Pioche : 54 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 3 exemplaires (au lieu de 6).
-- **Renforcé** : une tuile renforcée ne perd jamais plus d'1 PV par attaque.
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée). **Camouflage** : une tuile encore camouflée ne subit ni la percée ni les spores, et reste cachée (sauf si la Vision ou la Clairvoyance la rend visible).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
 - **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
@@ -23,7 +22,7 @@ Repris du prototype jouable et validés par Oni :
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
-- **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 10, 15 et 20 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
+- **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 20 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 
 ## Le jeu en bref
 
@@ -174,7 +173,7 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 ### Dégâts sur une tuile
 
 - La tuile pivote d'**un quart de tour par PV perdu**.
-- **Renforcé X** : la tuile ne perd 1 PV que si une attaque lui inflige au moins X dégâts, et **jamais plus d'1 PV par attaque**.
+- **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
 - **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - **Bouclier X** : chaque attaque contre la tuile inflige X dégâts de moins (percée et spores comprises).
@@ -277,7 +276,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Même case** : les auras et les effets entre créatures ne concernent que les créatures **sur la même case**, jamais toute la lane. Deux créatures qui attendent à l'entrée de la même colonne sont sur la même case.
 - **Zones** : une **case** ; une **lane** (toutes ses cases) ; une **couronne** (toutes les cases de même couronne, sur les 4 lanes).
 - **Aura** : effet d'un soutien sur les autres créatures de sa case. Deux auras **du même nom** ne se cumulent pas ; deux auras de noms différents se cumulent.
-- **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que si une attaque lui inflige au moins X dégâts, et jamais de plus d'un cran par attaque.
+- **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que par tranche complète de X dégâts d'une même attaque.
 - **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par support de niveau 2 dans les 8 cases autour, +1 par Avant-poste voisin ; tout se cumule).
 - **Bouclier X** : chaque attaque contre cette tuile inflige X dégâts de moins.
 - **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
@@ -414,7 +413,7 @@ Les chiffres de référence des deux camps, à garder sous la main.
 | Palier | Biomasse | Cartes piochées (N1 / N2 / N3) | Plafond par lane |
 | --- | --- | --- | --- |
 | 1 | départ (3) | 3 / 0 / 0 | 2 |
-| 2 | 10 et plus | 3 / 2 / 0 | 3 |
+| 2 | 9 et plus | 3 / 2 / 0 | 3 |
 | 3 | 15 et plus | 4 / 2 / 1 | 4 |
 | 4 | 20 et plus | 4 / 3 / 3 | 5 |
 

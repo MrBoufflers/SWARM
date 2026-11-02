@@ -61,7 +61,7 @@ const SF = (() => {
     "Égide": { d: 2, pv: 3, ep: 0, shield: 2, camo: 1, n: 3 },
   };
   const TILE_TEXT = {
-    "Rempart": "Renforcé 2 : perd 1 PV seulement si une attaque fait au moins 2 dégâts, jamais plus d'1 PV par attaque.", "Bastion": "Renforcé 3 : perd 1 PV seulement si une attaque fait au moins 3 dégâts, jamais plus d'1 PV par attaque.",
+    "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
@@ -89,9 +89,9 @@ const SF = (() => {
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
-    // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 10, 15, 20 de biomasse
+    // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 9, 15, 20 de biomasse (brièvement 10 / 15 / 20)
     // (avant : 5 paliers, départ 3 puis 6 / 9 / 12 / 15, plafonds 1 à 5 ; à l'origine 4 / 7 / 10 / 13)
-    { min: 0, n: [3, 0, 0], cap: 2 }, { min: 10, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
+    { min: 0, n: [3, 0, 0], cap: 2 }, { min: 9, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
     { min: 20, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
@@ -116,6 +116,9 @@ const SF = (() => {
   // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
   // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).
   const START_WALL = "Barbelé";
+  // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
+  // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
+  const VERSION = "0.4.0";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -171,7 +174,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ mise en place
   function newGame() {
     const S = {
-      round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1,
+      version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
       tiles: {}, supports: {}, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
       workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
       tileDeck: [], tileDiscard: [], hand: [],
@@ -434,7 +437,7 @@ const SF = (() => {
     if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
   }
   function hitRocket(S, c) {
-    S.workersBase -= 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
+    S.workersBase -= 1; S.killed = (S.killed || 0) + 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
     fx(S, { t: "rocket", id: c.id });
     log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
     if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
@@ -541,8 +544,9 @@ const SF = (() => {
       log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
     } else {
       if (t.shield) dmg = Math.max(0, dmg - t.shield); // Bouclier X : X dégâts de moins par attaque
-      // Renforcé X : 1 PV par tranche de X dégâts, et jamais plus d'1 PV par attaque (Oni, 02/11/2026)
-      const loss = t.ren ? Math.min(1, Math.floor(dmg / t.ren)) : dmg;
+      // Renforcé X : 1 PV par tranche complète de X dégâts, plusieurs PV possibles d'un coup
+      // (Oni, 02/11/2026 : retour à la règle d'origine après un essai à 1 PV maximum par attaque)
+      const loss = t.ren ? Math.floor(dmg / t.ren) : dmg;
       const capacity = t.ren ? t.hp * t.ren : t.hp;
       const excess = dmg - capacity;
       t.hp -= loss;
@@ -567,7 +571,7 @@ const SF = (() => {
         if (primary && excess > 0 && hasPercee(S, c)) {
           const [nu, nk] = nextStep(...toLocal(lane, x, y));
           if (nk === 0) {
-            S.workersBase -= 1;
+            S.workersBase -= 1; S.killed = (S.killed || 0) + 1;
             fx(S, { t: "rocket", id: c.id });
             log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
             if (S.workersBase <= 0) S.winner = "essaim";
@@ -931,6 +935,8 @@ const SF = (() => {
   // « Haie d'épines » marquée start) deviennent des Barbelés
   // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
+    if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
+    if (S.killed === undefined) S.killed = 0;
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
       if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1
@@ -1060,6 +1066,7 @@ const SF = (() => {
   }
 
   return {
+    VERSION,
     fxFor, migrate, famineBudget, MIN_BIOMASS, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,

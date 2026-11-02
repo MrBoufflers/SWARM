@@ -3,9 +3,13 @@
 // et n'envoie à chaque joueur que la vue filtrée de son camp (SF.viewFor).
 // Le stockage est fourni par l'appelant (Netlify Blobs en production, mémoire en local) :
 //   get(code) → { data, etag } | null ; create(code, data) → bool ; update(code, data, etag) → bool (écriture conditionnelle)
+//   results (facultatif) : add(résumé, svg) → bool ; list() → [résumés] ; get(id) → { ...résumé, svg } | null
+// Version : chaque requête de jeu porte la version de la page (cv) ; une page d'une autre version est refusée (409)
+// pour éviter de jouer avec des règles périmées (page restée ouverte pendant une mise à jour).
 "use strict";
 const crypto = require("crypto");
 const SF = require("../src/engine.js");
+const BILAN = require("../src/bilan.js");
 
 const ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // sans I, L, O, 0, 1 (caractères ambigus)
 const SIDES = ["essaim", "colonie"];
@@ -24,6 +28,24 @@ function sideOf(room, token) {
   return SIDES.find(s => room.tokens[s] && room.tokens[s] === token) || null;
 }
 function freshGame() { const S = SF.newGame(); S.handoff = null; return S; }
+const stale = cv => out(409, { error: `Nouvelle version du jeu (v${SF.VERSION}) : rechargez la page.`, reload: true, version: SF.VERSION });
+// partie en ligne terminée : résumé + mini-plan enregistrés pour les statistiques (une seule fois par partie)
+async function saveResult(rawStore, room) {
+  if (!rawStore.results || !room.S.winner || room.recorded) return;
+  const rec = BILAN.summary(room.S, { id: room.code + "-" + (room.started || room.created), mode: "en ligne", test: room.test });
+  try { await rawStore.results.add(rec, BILAN.miniMap(room.S)); } catch (e) { console.error("statistiques :", e); }
+}
+// résumé envoyé par une page (partie locale) : seuls les champs connus, avec leur type, sont gardés
+const NUM = ["rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports"];
+function cleanRecord(r) {
+  if (!r || typeof r !== "object") return null;
+  const str = (v, n) => (typeof v === "string" && v.length <= n ? v : null);
+  if (!str(r.id, 60) || !/^[\w.-]+$/.test(r.id) || !["essaim", "colonie"].includes(r.winner) || !str(r.version, 20)) return null;
+  const o = { id: "local-" + r.id, mode: "local", test: !!r.test, version: r.version, versionFin: str(r.versionFin, 20) || r.version,
+    date: new Date().toISOString(), winner: r.winner, upgrades: str(r.upgrades, 120) || "" };
+  for (const k of NUM) { const v = Number(r[k]); if (!Number.isFinite(v) || Math.abs(v) > 1e5) return null; o[k] = v; }
+  return o;
+}
 // f = numéro du dernier événement visuel déjà reçu par ce joueur : on lui renvoie les suivants (animations à rejouer)
 const FX_KEEP = 400;
 function pub(room, side, extra, f) {
@@ -41,12 +63,31 @@ async function handle(rawStore, method, route, query, body) {
   const store = { ...rawStore, async get(code) { const r = await rawStore.get(code); if (r && r.data && r.data.S) SF.migrate(r.data.S); return r; } };
   body = body && typeof body === "object" ? body : {};
   query = query || {};
+  if (method === "GET" && route === "version") return out(200, { version: SF.VERSION });
+  // statistiques : liste des résumés, détail d'une partie (mini-plan), envoi d'une partie locale terminée
+  if (method === "GET" && route === "stats") {
+    if (!rawStore.results) return err(404, "Statistiques indisponibles.");
+    return out(200, { version: SF.VERSION, results: await rawStore.results.list() });
+  }
+  if (method === "GET" && route === "resultat") {
+    const r = rawStore.results && typeof query.id === "string" ? await rawStore.results.get(query.id) : null;
+    return r ? out(200, r) : err(404, "Partie introuvable.");
+  }
+  if (method === "POST" && route === "resultat") {
+    if (!rawStore.results) return err(404, "Statistiques indisponibles.");
+    const rec = cleanRecord(body.record), svg = body.svg;
+    if (!rec || typeof svg !== "string" || !svg.startsWith("<svg") || svg.length > 60000) return err(400, "Résultat invalide.");
+    await rawStore.results.add(rec, svg);
+    return out(200, { ok: true });
+  }
+  // routes de jeu : la page doit être de la même version que le serveur
+  if (["create", "join", "state", "action", "rematch"].includes(route) && (body.cv || query.cv) !== SF.VERSION) return stale();
   if (method === "POST" && route === "create") {
     const side = body.side;
     if (!SIDES.includes(side)) return err(400, "Camp inconnu.");
     for (let i = 0; i < 8; i++) {
       const code = newCode(), token = newToken();
-      const room = { code, tokens: { essaim: null, colonie: null }, S: freshGame(), v: 1, created: Date.now(), updated: Date.now() };
+      const room = { code, tokens: { essaim: null, colonie: null }, S: freshGame(), v: 1, created: Date.now(), started: Date.now(), updated: Date.now(), test: !!body.test };
       room.tokens[side] = token;
       if (await store.create(code, room)) return out(200, pub(room, side, { token }));
     }
@@ -91,7 +132,7 @@ async function handle(rawStore, method, route, query, body) {
       if (!side) return err(403, "Jeton inconnu pour cette partie.");
       let refusal = "";
       if (!room.tokens.essaim || !room.tokens.colonie) refusal = "En attente de l'adversaire.";
-      else if (type === "rematch") { if (room.S.winner) { room.S = freshGame(); room.fx = []; } else refusal = "La partie n'est pas terminée."; }
+      else if (type === "rematch") { if (room.S.winner) { room.S = freshGame(); room.fx = []; room.started = Date.now(); room.recorded = false; } else refusal = "La partie n'est pas terminée."; }
       else {
         const before = JSON.stringify(room.S);
         room.S.fx = [];
@@ -107,7 +148,12 @@ async function handle(rawStore, method, route, query, body) {
       const f = asInt(body.f);
       if (refusal) return out(200, pub(room, side, { ok: false, error: refusal.charAt(0).toUpperCase() + refusal.slice(1) + (refusal.endsWith(".") ? "" : ".") }, f));
       room.v += 1; room.updated = Date.now();
-      if (await store.update(code, room, r.etag)) return out(200, pub(room, side, { ok: true }, f));
+      const ended = room.S.winner && !room.recorded;
+      if (ended) room.recorded = true;
+      if (await store.update(code, room, r.etag)) {
+        if (ended) await saveResult(rawStore, { ...room, recorded: false });
+        return out(200, pub(room, side, { ok: true }, f));
+      }
     }
     return err(503, "Partie occupée, réessayez.");
   }
@@ -117,7 +163,13 @@ async function handle(rawStore, method, route, query, body) {
 // stockage en mémoire (serveur local et tests)
 function memoryStore() {
   const m = new Map(); let n = 0;
+  const res = new Map();
   return {
+    results: {
+      async add(rec, svg) { if (res.has(rec.id)) return false; res.set(rec.id, { ...rec, svg }); return true; },
+      async list() { return [...res.values()].map(({ svg, ...r }) => r); },
+      async get(id) { return res.get(id) || null; },
+    },
     async get(code) { const r = m.get(code); return r ? { data: JSON.parse(r.s), etag: r.e } : null; },
     async create(code, data) { if (m.has(code)) return false; m.set(code, { s: JSON.stringify(data), e: String(++n) }); return true; },
     async update(code, data, etag) { const r = m.get(code); if (!r || r.e !== etag) return false; m.set(code, { s: JSON.stringify(data), e: String(++n) }); return true; },

@@ -1,11 +1,20 @@
 // Tests du serveur en ligne (server/core.js) avec un stockage en mémoire : lobby, codes, jetons, droits, vues filtrées.
 const core = require("../server/core.js");
+const SF = require("../src/engine.js");
 let fails = 0;
 const ok = (cond, msg) => { if (!cond) { fails++; console.log("ÉCHEC :", msg); } else console.log("ok   :", msg); };
 
 (async () => {
   const store = core.memoryStore();
-  const call = (m, route, body, q) => core.handle(store, m, route, q, body);
+  // la page envoie sa version (cv) avec chaque requête ; raw = sans version (ancienne page)
+  const raw = (m, route, body, q) => core.handle(store, m, route, q, body);
+  const call = (m, route, body, q) => raw(m, route, body && { cv: SF.VERSION, ...body }, { cv: SF.VERSION, ...(q || {}) });
+
+  // version : une page d'une autre version (ou trop ancienne pour l'envoyer) est refusée et doit être rechargée
+  ok((await raw("GET", "version")).json.version === SF.VERSION, "le serveur annonce sa version (" + SF.VERSION + ")");
+  const old = await raw("POST", "create", { side: "essaim" });
+  ok(old.status === 409 && old.json.reload && old.json.version === SF.VERSION && /rechargez/.test(old.json.error), "page sans version (avant la v0.4) : refusée, rechargement demandé");
+  ok((await raw("POST", "create", { side: "essaim", cv: "0.3.9" })).status === 409, "page d'une autre version : refusée");
 
   // création : code de 5 caractères sans caractères ambigus, jeton, camp choisi
   const a = await call("POST", "create", { side: "colonie" });
@@ -78,8 +87,27 @@ const ok = (cond, msg) => { if (!cond) { fails++; console.log("ÉCHEC :", msg); 
     st = r.json;
   }
   ok(!!st.S.winner, `partie complète par le serveur : victoire de ${st.S.winner} en ${steps} actions`);
+  // statistiques : la partie en ligne terminée est enregistrée une fois, avec son mini-plan
+  let stats = (await raw("GET", "stats")).json.results;
+  ok(stats.length === 1 && stats[0].mode === "en ligne" && stats[0].winner === st.S.winner && stats[0].version === SF.VERSION && stats[0].rounds === st.S.round && Number.isInteger(stats[0].killed),
+    "partie en ligne terminée : résumé enregistré (vainqueur, version, manches, biomasse, travailleurs tués)");
+  const plan = await raw("GET", "resultat", null, { id: stats[0].id });
+  ok(plan.status === 200 && plan.json.svg.startsWith("<svg"), "mini-plan du plateau final disponible");
   const rm = await call("POST", "rematch", { code, token: ta });
   ok(rm.json.ok && !rm.json.S.winner && rm.json.S.round === 1, "revanche : nouvelle partie dans la même salle");
+  // partie locale : résumé envoyé par la page ; champs vérifiés, doublon ignoré
+  const B = require("../src/bilan.js");
+  const L = SF.newGame(); L.winner = "colonie"; L.floors = 12;
+  const rec = B.summary(L, { id: "abc123", mode: "local", test: true });
+  ok((await raw("POST", "resultat", { record: rec, svg: B.miniMap(L) })).status === 200, "partie locale terminée : résultat accepté");
+  await raw("POST", "resultat", { record: rec, svg: B.miniMap(L) });
+  ok((await raw("POST", "resultat", { record: { ...rec, winner: "pirates" }, svg: "<svg/>" })).status === 400, "résultat invalide refusé");
+  ok((await raw("POST", "resultat", { record: rec, svg: "<script>alert(1)</script>" })).status === 400, "mini-plan qui n'est pas un SVG refusé");
+  stats = (await raw("GET", "stats")).json.results;
+  const loc = stats.find(r => r.mode === "local");
+  ok(stats.length === 2 && loc && loc.id === "local-abc123" && loc.test && loc.floors === 12 && !("svg" in loc), "liste : 1 partie en ligne + 1 locale (marquée test, sans doublon), sans les mini-plans");
+  const agg = B.byVersion(stats);
+  ok(agg.length === 1 && agg[0].n === 2 && agg[0].essaim + agg[0].colonie === 2, "agrégats par version : 2 parties, victoires réparties par camp");
 
   // écriture concurrente : l'etag protège contre l'écrasement
   const r1 = await store.get(code), r2 = await store.get(code);
