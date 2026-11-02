@@ -273,7 +273,7 @@ const SF = (() => {
     const src = S.creatures.find(o => o.id === srcId), t = S.creatures.find(o => o.id === targetId);
     if (S.upgrades.soutien.r2 !== "B" || !src || !t || src === t || !isSoutien(src) || posKey(src) !== posKey(t)) return false;
     S.frenzy = S.frenzy || {}; S.frenzy[src.id] = t.id;
-    log(S, "essaim", `Frénésie : ${src.name} double les dégâts de ${t.name}.`);
+    log(S, "essaim", `Frénésie : ${src.name} double les dégâts ${/^[AEIOUYÉÈÊŒ]/i.test(t.name) ? "d'" : "de "}${t.name}.`);
     return true;
   }
   function effAtq(S, c) {

@@ -332,7 +332,7 @@
     if (b.type === "soutien" && S.upgrades.soutien.r2 === "B") {
       const cur = SF.frenzyOf(S, c), others = S.creatures.filter(o => o !== c && SF.posKey(o) === SF.posKey(c));
       const canSet = S.view === "essaim" && ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase) && !c.acted;
-      actions += `<p>Frénésie : ${cur ? `double les dégâts de ${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;
+      actions += `<p>Frénésie : ${cur ? `double les dégâts ${/^[AEIOUYÉÈÊŒ]/i.test(cur.name) ? "d'" : "de "}${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;
       if (canSet && others.length > 1) actions += `<div class="choices"><span class="lab">Frénésie sur :</span>${others.map(o => `<button data-a="frenzy" data-id="${c.id}" data-v="${o.id}"${cur === o ? ` class="on" aria-pressed="true"` : ""}>${E(o.name)} · ATQ ${SF.effAtq(S, o)}</button>`).join("")}</div>`;
     }
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
