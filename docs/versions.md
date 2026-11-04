@@ -4,6 +4,13 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.3 — 4 novembre 2026
+
+**Règles (Oni)**
+- **Départ de l'essaim** : **5 de biomasse** (au lieu de 3).
+- **Premier tour de l'essaim** : à la place de la pioche, une créature de niveau 1 de chaque type : Écorcheur, Carapace et un soutien tiré au hasard (Œil-sonde, Glaneur ou Hurleur). Elles se paient normalement. La pioche normale reprend au 2ᵉ tour.
+- **Œil-sonde** (changement définitif) : tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, y compris celles posées après lui. Une tuile révélée le reste après sa mort.
+
 ## v0.4.2 — 2 novembre 2026
 
 **Règles (Oni)**

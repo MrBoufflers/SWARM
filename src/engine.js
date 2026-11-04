@@ -12,7 +12,7 @@ const SF = (() => {
     "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 1 },
     "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
-    "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Révèle les tuiles camouflées de sa lane." },
+    "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Avance de 2 cases par tour, et les autres créatures de sa case d'1 case de plus." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
@@ -119,7 +119,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.2";
+  const VERSION = "0.4.3";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -181,7 +181,7 @@ const SF = (() => {
       tileDeck: [], tileDiscard: [], hand: [],
       spellDeck: [], spellDiscard: [], spells: [],
       alloc: { N: 0, E: 0, S: 0, O: 0 }, extraPts: 0, cadence: false, firedSupports: [],
-      biomass: 3, budget: 0, reserve: 0, famine: 0,
+      biomass: 5, budget: 0, reserve: 0, famine: 0, startHand: true, // départ : 5 biomasse (Oni, 04/11/2026 ; avant 3)
       piles: { 1: [], 2: [], 3: [] }, handA: [], creatures: [], reincQueue: [], reincUsed: false, raidUsed: false,
       upgrades: { aggro: { r1: null, r2: null }, tank: { r1: null, r2: null }, soutien: { r1: null, r2: null } }, invest: {},
       stase: [], log: [],
@@ -629,6 +629,20 @@ const SF = (() => {
   function attackerDraw(S) {
     const t = TIERS[tier(S)];
     S.handA = [];
+    // Premier tour (Oni, 04/11/2026) : à la place de la pioche, une créature de niveau 1 de chaque type (aggro, tank, et un
+    // soutien tiré au hasard), prises dans la pioche de niveau 1 et payées normalement
+    if (S.startHand) {
+      delete S.startHand;
+      for (const type of ["aggro", "tank", "soutien"]) {
+        const i = S.piles[1].findIndex(n => CREATURES[n].type === type); // pioche mélangée : le soutien est tiré au hasard
+        if (i >= 0) S.handA.push({ name: S.piles[1].splice(i, 1)[0], free: false, uid: S.nextId++ });
+      }
+      S.budget = S.famine ? famineBudget(S.biomass) : S.biomass;
+      fx(S, { t: "draw", n: S.handA.length });
+      S.phase = "A_deploy";
+      log(S, "essaim", `Main de départ : ${S.handA.map(c => c.name).join(", ")} ; budget ${S.budget}.`);
+      return;
+    }
     // Déploiement (aggro, centre du rang 2) : les 2 cartes gratuites de niveau 1 sont piochées EN PREMIER, sinon la pioche
     // normale (qui se rabat sur le niveau 1 quand les niveaux 2 et 3 sont vides) pouvait vider le niveau 1 avant elles.
     if (S.upgrades.aggro.r2 === "C") {
@@ -669,6 +683,12 @@ const SF = (() => {
     }
     if (card.name === "Œil-sonde") revealLane(S, lane);
     return true;
+  }
+  // Vision de l'Œil-sonde (Oni, 04/11/2026) : tant qu'il est en vie, les tuiles camouflées de sa lane sont révélées,
+  // y compris celles posées plus tard (appelé au déploiement et à chaque pose de la colonie). Une tuile révélée le reste.
+  function visionSweep(S) {
+    const lanes = new Set(S.creatures.filter(c => c.name === "Œil-sonde").map(c => c.lane));
+    for (const lane of lanes) if (laneTiles(S, lane).some(k => S.tiles[k].camo && !S.tiles[k].revealed)) revealLane(S, lane);
   }
   function revealLane(S, lane) {
     fx(S, { t: "vision", lane, keys: laneTiles(S, lane).filter(k => S.tiles[k].camo && !S.tiles[k].revealed) });
@@ -908,6 +928,7 @@ const SF = (() => {
     if (TILES[p.tile].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
     placeSupports(S); // un support apparaît dès que ses murs sont construits
     log(S, "colonie", TILES[p.tile].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[p.lane]}.` : `${p.tile} construit en lane ${LANE_NAME[p.lane]}.`);
+    visionSweep(S); // un Œil-sonde en vie dans la lane révèle aussitôt la nouvelle tuile camouflée
     skipUnplaceable(S);
     if (!S.toPlace.length) finishDefenderTurn(S);
     return true;

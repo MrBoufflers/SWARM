@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.2 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.3 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -25,6 +25,7 @@ Repris du prototype jouable et validés par Oni :
 - **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
 - **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
 - **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
+- **Départ de l'essaim** : **5 de biomasse** ; au premier tour, à la place de la pioche, une aggro, un tank et un soutien de niveau 1 (au hasard), payés normalement. **Œil-sonde** : Vision permanente sur sa lane tant qu'il est en vie.
 
 ## Le jeu en bref
 
@@ -67,7 +68,7 @@ Une zone de jeu de 7 × 7 cases, la fusée au centre ; le matériel de chaque ca
 
 ## Mise en place
 
-La colonie démarre retranchée dans un carré de 5 × 5 cases autour de sa fusée (couronnes 1 et 2) ; l'essaim démarre avec 3 de biomasse.
+La colonie démarre retranchée dans un carré de 5 × 5 cases autour de sa fusée (couronnes 1 et 2) ; l'essaim démarre avec **5 de biomasse**.
 
 ### Le plateau
 
@@ -115,6 +116,8 @@ Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais d
 ### 2. Pioche
 
 Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe combien de cartes vous piochez dans chaque niveau, et combien de créatures peuvent attaquer une même lane. Si une pioche de niveau 2 ou 3 est vide, piochez à la place dans le niveau inférieur.
+
+**Premier tour** : au lieu de piocher, l'essaim reçoit une créature de niveau 1 de chaque type : un Écorcheur (aggro), une Carapace (tank) et un soutien de niveau 1 tiré au hasard (Œil-sonde, Glaneur ou Hurleur). Elles se paient normalement avec le budget.
 
 ### 3. Déploiement
 
@@ -303,7 +306,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Carapace | Tank | 1 | 3 | 3 | 1 | — | 6 |
 | Béhémoth | Tank | 2 | 4 | 5 | 1 | — | 6 |
 | Colosse | Tank | 3 | 7 | 7 | 1 | — | 6 |
-| Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : révèle les tuiles camouflées de sa lane | 2 |
+| Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées après lui (une tuile révélée le reste) | 2 |
 | Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Avance de **2 cases** par tour. **Aura Mobilité 1** : les autres créatures de sa case avancent d'1 case de plus par tour | 2 |
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
 | Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus (cumulable : +1 par Phéromone) | 2 |
@@ -412,7 +415,7 @@ Les chiffres de référence des deux camps, à garder sous la main.
 
 | Palier | Biomasse | Cartes piochées (N1 / N2 / N3) | Plafond par lane |
 | --- | --- | --- | --- |
-| 1 | départ (3) | 3 / 0 / 0 | 2 |
+| 1 | départ (5) | premier tour : 1 aggro, 1 tank, 1 soutien ; ensuite 3 / 0 / 0 | 2 |
 | 2 | 9 et plus | 3 / 2 / 0 | 3 |
 | 3 | 15 et plus | 4 / 2 / 1 | 4 |
 | 4 | 21 et plus | 4 / 3 / 3 | 5 |
