@@ -32,7 +32,7 @@ const stale = cv => out(409, { error: `Nouvelle version du jeu (v${SF.VERSION}) 
 // partie en ligne terminée : résumé + mini-plan enregistrés pour les statistiques (une seule fois par partie)
 async function saveResult(rawStore, room) {
   if (!rawStore.results || !room.S.winner || room.recorded) return;
-  const rec = BILAN.summary(room.S, { id: room.code + "-" + (room.started || room.created), mode: "en ligne", test: room.test });
+  const rec = BILAN.summary(room.S, { id: room.code + "-" + (room.started || room.created), mode: "en ligne", test: room.test, decouverte: room.decouverte });
   try { await rawStore.results.add(rec, BILAN.miniMap(room.S)); } catch (e) { console.error("statistiques :", e); }
 }
 // résumé envoyé par une page (partie locale) : seuls les champs connus, avec leur type, sont gardés
@@ -41,7 +41,7 @@ function cleanRecord(r) {
   if (!r || typeof r !== "object") return null;
   const str = (v, n) => (typeof v === "string" && v.length <= n ? v : null);
   if (!str(r.id, 60) || !/^[\w.-]+$/.test(r.id) || !["essaim", "colonie"].includes(r.winner) || !str(r.version, 20)) return null;
-  const o = { id: "local-" + r.id, mode: "local", test: !!r.test, version: r.version, versionFin: str(r.versionFin, 20) || r.version,
+  const o = { id: "local-" + r.id, mode: "local", test: !!r.test, decouverte: !!r.decouverte, version: r.version, versionFin: str(r.versionFin, 20) || r.version,
     date: new Date().toISOString(), winner: r.winner, upgrades: str(r.upgrades, 120) || "" };
   for (const k of NUM) { const v = Number(r[k]); if (!Number.isFinite(v) || Math.abs(v) > 1e5) return null; o[k] = v; }
   return o;
@@ -87,7 +87,7 @@ async function handle(rawStore, method, route, query, body) {
     if (!SIDES.includes(side)) return err(400, "Camp inconnu.");
     for (let i = 0; i < 8; i++) {
       const code = newCode(), token = newToken();
-      const room = { code, tokens: { essaim: null, colonie: null }, S: freshGame(), v: 1, created: Date.now(), started: Date.now(), updated: Date.now(), test: !!body.test };
+      const room = { code, tokens: { essaim: null, colonie: null }, S: freshGame(), v: 1, created: Date.now(), started: Date.now(), updated: Date.now(), test: !!body.test, decouverte: !!body.disc };
       room.tokens[side] = token;
       if (await store.create(code, room)) return out(200, pub(room, side, { token }));
     }
@@ -105,7 +105,7 @@ async function handle(rawStore, method, route, query, body) {
       const side = SIDES.find(s => !room.tokens[s]);
       if (!side) return err(409, "Cette partie est déjà complète.");
       const token = newToken();
-      room.tokens[side] = token; room.v += 1; room.updated = Date.now();
+      room.tokens[side] = token; room.v += 1; room.updated = Date.now(); if (body.disc) room.decouverte = true;
       if (await store.update(code, room, r.etag)) return out(200, pub(room, side, { token }));
     }
     return err(503, "Partie occupée, réessayez.");

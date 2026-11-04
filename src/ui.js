@@ -59,7 +59,7 @@
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true; S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   function setPhaseHandoff() { // passe la main si le joueur actif change
     const w = who();
@@ -74,7 +74,7 @@
     if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
-    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "");
+    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + tipCard();
   }
   function header() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
@@ -99,6 +99,8 @@
     const preset = new URLSearchParams(location.search).get("code") || "";
     return `<section class="handoff home ${imCls("Champ de bataille")}"><div class="ho-card">${icon("fusee", "i big")}
       <h2>Swarm &amp; Steel</h2>
+      <div class="home-acts disc"><button data-a="disc" aria-pressed="${DISC}" class="${DISC ? "on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button></div>
+      <p class="small">Conseils au fil de la partie, pour apprendre les règles en jouant.</p>
       <p class="ho-k">Sur cet appareil</p>
       <div class="home-acts">${saved && saved.phase ? `<button data-a="resume" class="primary">Reprendre la partie locale</button>` : ""}
         <button data-a="local"${saved && saved.phase ? "" : ` class="primary"`}>Nouvelle partie locale</button></div>
@@ -510,15 +512,26 @@
   function logPanel() {
     return `<h4>Journal</h4><ol class="log">${S.log.slice(0, 40).map(l => `<li class="${l.who}"><span>M${l.r}</span>${E(l.msg)}</li>`).join("")}</ol>`;
   }
+  // Règles : trois onglets (Essaim, Colonie, Commun), générés par AIDE à partir du moteur (Oni, 04/11/2026)
   function help() {
-    return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
-      <h2>Règles en bref</h2>
-      <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
-      <p><b>Essaim.</b> Budget = biomasse (5 au départ). Premier tour : une aggro, un tank et un soutien de niveau 1, au lieu de la pioche. Ensuite, piochez selon le palier (départ, puis 9 · 15 · 21 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour ; l'Aura Mobilité du Glaneur donne +1 case aux autres créatures de sa case ; les plus rapides partent devant. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
-      <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 4, 6 et 8 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par Avant-poste dans les 8 cases autour, cumulable. Renforcé X : 1 PV perdu par tranche complète de X dégâts d'une même attaque. Une aura ne profite qu'aux autres créatures de sa case (jamais à elle-même) et toutes les auras se cumulent. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
-      <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
-      <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
+    const tab = UI.helpTab || (S && S.view) || "commun";
+    const tabs = [["essaim", "Essaim"], ["colonie", "Colonie"], ["commun", "Commun"]].map(([k, l]) => `<button data-a="helpTab" data-v="${k}" class="${tab === k ? "on" : ""}">${l}</button>`).join("");
+    return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card rules"><button data-a="help" class="x close" aria-label="Fermer">×</button>
+      <h2>Règles</h2><div class="rtabs">${tabs}</div>
+      <p class="small disc-line">Mode découverte : <b>${DISC ? "activé" : "désactivé"}</b> <button data-a="disc" class="ghost">${DISC ? "Désactiver" : "Activer"}</button>${DISC && SEEN.size ? ` <button data-a="discReset" class="ghost">Revoir tous les conseils</button>` : ""}</p>
+      <div class="rbody">${AIDE.rules(tab, { E, icon, imCls })}</div></div></div>`;
+  }
+  // ---------------------------------------------------------------- mode découverte (conseils au fil de la partie)
+  const DISC_KEY = "swarm-steel-decouverte", SEEN_KEY = "swarm-steel-vus";
+  let DISC = (() => { try { return localStorage.getItem(DISC_KEY) === "1"; } catch (e) { return false; } })();
+  let SEEN = (() => { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) { return new Set(); } })();
+  function saveDisc() { try { localStorage.setItem(DISC_KEY, DISC ? "1" : "0"); localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN])); } catch (e) { /* rien */ } }
+  function tipCard() {
+    if (!DISC || !S || S.handoff || S.winner || !S.view || (online() && !NET.full) || FX.playing) return "";
+    const t = AIDE.nextTip(S, S.view, SEEN); if (!t) return "";
+    return `<aside class="tipcard ${S.view}" role="note" aria-label="Conseil">${t.img && imCls(t.img) ? `<div class="tc-img ${imCls(t.img)}"></div>` : ""}<div class="tc-body">
+      <span class="tc-k">Mode découverte</span><b>${E(t.title)}</b><p>${E(t.text(S))}</p>
+      <div class="tc-acts"><button data-a="tipOk" data-id="${t.id}" class="primary">Compris</button><button data-a="tipOff" class="ghost">Arrêter les conseils</button></div></div></aside>`;
   }
 
   // ---------------------------------------------------------------- actions
@@ -536,6 +549,11 @@
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
+    if (a === "helpTab") { UI.helpTab = d.v; render(); return; }
+    if (a === "disc") { DISC = !DISC; if (DISC && S && MODE === "local") { S.decouverte = true; save(); } saveDisc(); render(); return; }
+    if (a === "discReset") { SEEN = new Set(); saveDisc(); render(); return; }
+    if (a === "tipOk") { SEEN.add(d.id); saveDisc(); render(); return; }
+    if (a === "tipOff") { DISC = false; saveDisc(); flash("Conseils désactivés. Vous pouvez les réactiver dans « Règles »."); render(); return; }
     if (a === "reload") { location.reload(); return; }
     if (a === "theme") { THEME = THEMES[(THEMES.indexOf(THEME) + 1) % THEMES.length]; try { localStorage.setItem(THEME_KEY, THEME); } catch (e) { /* rien */ } applyTheme(); render(); return; }
     if (MODE === "stats") { statsAction(a, d); return; }
@@ -939,7 +957,7 @@
       rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td></tr>`).join("")
     }</tbody></table></div><p class="small">Moyennes par partie. Touchez une version pour ne voir que ses parties.</p>` : `<p>Aucune partie terminée enregistrée pour l'instant.</p>`;
     const games = list.filter(r => !STATS.ver || r.version === STATS.ver).slice(0, 100);
-    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
+    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.decouverte ? " · découverte" : ""}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
       <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
       ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
     return `<section class="statpage">${head}
@@ -949,7 +967,7 @@
       <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
       <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
   }
-  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
   function statsAction(a, d) {
     if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
     if (a === "help") { return; }
@@ -992,14 +1010,14 @@
   }
   function createOnline(side) {
     withBusy(async () => {
-      const j = await api("create", { side, test: TEST });
+      const j = await api("create", { side, test: TEST, disc: DISC });
       setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
       history.replaceState(null, "", location.pathname);
     });
   }
   function joinOnline(code) {
     withBusy(async () => {
-      const j = await api("join", { code });
+      const j = await api("join", { code, disc: DISC });
       setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
       history.replaceState(null, "", location.pathname);
     });

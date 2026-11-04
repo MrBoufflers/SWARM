@@ -4,6 +4,20 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.11 — 4 novembre 2026
+
+Aide pour les nouveaux joueurs, sans changement de règles.
+
+- **Règles par camp** : le bouton « Règles » ouvre trois onglets.
+  - **Essaim** : objectif, ressources, paliers, déroulé du tour, créatures, améliorations, menaces.
+  - **Colonie** : objectif, ressources, déroulé du tour, fusée, supports, bâtiments, sortilèges, menaces.
+  - **Commun** : plateau, manche, combat, informations cachées, jeu en ligne.
+
+  Les tableaux (paliers, créatures, bâtiments, sortilèges, améliorations) et les chiffres sont générés depuis le moteur : ils suivent chaque changement de règle.
+- **Mode découverte** (accueil, ou fenêtre des règles) : un conseil s'affiche la première fois que chaque situation se présente, selon le camp joué. Il y a 13 conseils pour l'essaim et 13 pour la colonie (déployer, attaquer, tuiles camouflées, Épines, tourelles, chantiers, fusée, pose, tirs, sortilèges…). « Compris » le range, « Arrêter les conseils » coupe le mode, et « Revoir tous les conseils » les remet à zéro.
+- Les parties jouées en mode découverte sont marquées « découverte » dans les statistiques et l'export CSV.
+- Texte de la Mobilité mis à jour : il évoquait encore les blocs.
+
 ## v0.4.10 — 4 novembre 2026
 
 Correctif d'affichage : l'illustration de la fusée n'apparaissait pas sur sa case en mode sombre (le fond uni du thème la masquait). Elle s'affiche maintenant dans tous les thèmes.

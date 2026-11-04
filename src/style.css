@@ -400,3 +400,32 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .cell.atk { box-shadow: inset 0 0 0 3px var(--danger); cursor: crosshair; }
 .cell.atk .tile { box-shadow: 0 0 10px color-mix(in srgb, var(--danger) 70%, transparent); }
 .cell.core.atk { box-shadow: inset 0 0 0 3px var(--danger), 0 0 14px var(--danger); }
+
+/* ---- règles par camp et mode découverte (Oni, 04/11/2026) ---- */
+.modal-card.rules { max-width: 860px; width: calc(100vw - 32px); box-sizing: border-box; }
+.rtabs { display: flex; gap: 6px; margin: 4px 0 8px; flex-wrap: wrap; }
+.rtabs button { border: 1px solid var(--rule); background: var(--panel-2); padding: 7px 14px; border-radius: 99px; font-weight: 600; }
+.rtabs button.on { background: var(--hot); border-color: var(--hot); color: #1b120a; }
+.disc-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rbody h3 { font: 700 1.15rem/1.2 var(--display); margin: 18px 0 6px; color: var(--ink); }
+.rbody h5 { font: 700 .95rem/1.2 var(--display); margin: 12px 0 4px; display: flex; align-items: center; gap: 6px; }
+.rbody p, .rbody li { font-size: .9rem; line-height: 1.5; color: var(--ink); }
+.rbody ul, .rbody ol { padding-left: 20px; margin: 6px 0; } .rbody li { margin: 3px 0; }
+.rt-wrap { overflow-x: auto; margin: 8px 0; border: 1px solid var(--rule); border-radius: 8px; }
+.rt { border-collapse: collapse; width: 100%; font-size: .82rem; }
+.rt th, .rt td { padding: 6px 8px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.rt th { background: var(--panel-2); color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+.rt-n { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.rt-img { display: inline-block; width: 30px; height: 30px; border-radius: 5px; background: var(--img) center / cover; flex: none; }
+table.rt:not(.rt-wrap .rt) { border: 1px solid var(--rule); border-radius: 8px; margin: 8px 0; }
+.home-acts.disc button.on { background: var(--hot); border-color: var(--hot); color: #1b120a; font-weight: 600; }
+/* fiche-conseil du mode découverte : en bas à droite, ne bloque pas le jeu */
+.tipcard { position: fixed; right: 16px; bottom: 16px; z-index: 25; width: min(380px, calc(100vw - 32px)); display: flex; gap: 12px; padding: 12px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--rule); border-left: 5px solid var(--c, var(--hot)); box-shadow: 0 12px 34px rgba(0,0,0,.45); box-sizing: border-box; }
+.tipcard.essaim { --c: var(--essaim); } .tipcard.colonie { --c: var(--colonie); }
+.tc-img { width: 72px; height: 72px; flex: none; border-radius: 8px; background: var(--img) center / cover; }
+.tc-body { min-width: 0; } .tc-k { font: 600 .7rem/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--c); }
+.tc-body b { display: block; font: 700 1.05rem/1.2 var(--display); margin: 3px 0 4px; }
+.tc-body p { margin: 0 0 8px; font-size: .86rem; line-height: 1.45; }
+.tc-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 680px) { .tipcard { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 45vh; overflow-y: auto; } .tc-img { width: 52px; height: 52px; } }

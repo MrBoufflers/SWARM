@@ -407,6 +407,35 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .cell.atk .tile { box-shadow: 0 0 10px color-mix(in srgb, var(--danger) 70%, transparent); }
 .cell.core.atk { box-shadow: inset 0 0 0 3px var(--danger), 0 0 14px var(--danger); }
 
+/* ---- règles par camp et mode découverte (Oni, 04/11/2026) ---- */
+.modal-card.rules { max-width: 860px; width: calc(100vw - 32px); box-sizing: border-box; }
+.rtabs { display: flex; gap: 6px; margin: 4px 0 8px; flex-wrap: wrap; }
+.rtabs button { border: 1px solid var(--rule); background: var(--panel-2); padding: 7px 14px; border-radius: 99px; font-weight: 600; }
+.rtabs button.on { background: var(--hot); border-color: var(--hot); color: #1b120a; }
+.disc-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rbody h3 { font: 700 1.15rem/1.2 var(--display); margin: 18px 0 6px; color: var(--ink); }
+.rbody h5 { font: 700 .95rem/1.2 var(--display); margin: 12px 0 4px; display: flex; align-items: center; gap: 6px; }
+.rbody p, .rbody li { font-size: .9rem; line-height: 1.5; color: var(--ink); }
+.rbody ul, .rbody ol { padding-left: 20px; margin: 6px 0; } .rbody li { margin: 3px 0; }
+.rt-wrap { overflow-x: auto; margin: 8px 0; border: 1px solid var(--rule); border-radius: 8px; }
+.rt { border-collapse: collapse; width: 100%; font-size: .82rem; }
+.rt th, .rt td { padding: 6px 8px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.rt th { background: var(--panel-2); color: var(--ink-soft); font-weight: 600; white-space: nowrap; }
+.rt-n { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.rt-img { display: inline-block; width: 30px; height: 30px; border-radius: 5px; background: var(--img) center / cover; flex: none; }
+table.rt:not(.rt-wrap .rt) { border: 1px solid var(--rule); border-radius: 8px; margin: 8px 0; }
+.home-acts.disc button.on { background: var(--hot); border-color: var(--hot); color: #1b120a; font-weight: 600; }
+/* fiche-conseil du mode découverte : en bas à droite, ne bloque pas le jeu */
+.tipcard { position: fixed; right: 16px; bottom: 16px; z-index: 25; width: min(380px, calc(100vw - 32px)); display: flex; gap: 12px; padding: 12px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--rule); border-left: 5px solid var(--c, var(--hot)); box-shadow: 0 12px 34px rgba(0,0,0,.45); box-sizing: border-box; }
+.tipcard.essaim { --c: var(--essaim); } .tipcard.colonie { --c: var(--colonie); }
+.tc-img { width: 72px; height: 72px; flex: none; border-radius: 8px; background: var(--img) center / cover; }
+.tc-body { min-width: 0; } .tc-k { font: 600 .7rem/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--c); }
+.tc-body b { display: block; font: 700 1.05rem/1.2 var(--display); margin: 3px 0 4px; }
+.tc-body p { margin: 0 0 8px; font-size: .86rem; line-height: 1.45; }
+.tc-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 680px) { .tipcard { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 45vh; overflow-y: auto; } .tc-img { width: 52px; height: 52px; } }
+
 .im-antenne{--img:url(data:image/webp;base64,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)}
 .im-archive{--img:url(data:image/webp;base64,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)}
 .im-avant-poste{--img:url(data:image/webp;base64,UklGRmIZAABXRUJQVlA4IFYZAACwdwCdASrIAMgAPqFGmkqmI6IuK3PMicAUCWcAzqk6K7hVJHuyff+LjdEpTl3jE6jRT7j9q+gjpCeCRrQysH+t4/1AfxpdJSouwb8r2C4Qgi9Z+syErc8AzcoHVs4XKM+JEtHwsB9c/uvkqucXFuW2VUEbowFysOW/cDXI+6mzWvUz3z+FnK61fqRaT4w04/0Rs+ZZBi+C0VjzKSMTk1vgvVF/i6mK2bv+uiY/CpFryiZt0YrOO/dE3Jem/agQZDLh71ijvLZ+Y72Z/BteVXJ94mYUf0ehFt6AhJi5g7MwsA8P2UR9r+yBwFnQIyLFjFOatqOkSeNUtCewe7dZ6psYqE2a6W6WXdUJwz/IdUpaiiwGnTz+cwzXlGXz0PfYd2LR6zTx68ZrTZ38pGLAVd8X0xoAACIn77xs+VIND4N650OclAh5e0St9cG73pFPEfIKgG6ABTYMgIguGeY+MlOhUGDOnR+pp5Ww8RNlgvpgidciaaSZ9WZMBAaLcNVcP6I/j1OlCo0aNblSjWudwKEHboWvB0ucNkG/eQjIb1wK2FrTGAlQ57szmjQmhVh1rNV/cu8ThI89qhRVCwFo7jTROVzYLCa+ihel3yzb18HU/I2iIEXKGOimIa0kfLY65oZz9OIJPWnqni5+Blcq0Q3Mf5hRVRJ0U3RWbSzgiTmKizRrsuo52h7rOhgZI2Y1NZpF2V4TPx/HmHnit/tRn6YGuDNKCdRufL2+eVSlUZ9ddG/7x0UMCQXhVFfahNEGZN7xWncAHtsQZLE/MJQpcaDFwfh1jZ5nTze6/VwsVURTcFBClvOpGxGA8OHrlSVq5WAyWOOho1epEIwTjfyCdoJJulGvcAK6YK5NDYNP6eVNRRioOZZWiVklauhTSSiNBafm8liD43yBaSXF9b6IVWYHO7hCIxMapDlK4X1xULmSb13bQhejsPvJR3UM9wtcBDSgKzyZSHtG/2GX9aO86L4O7uXSR2BeM+N9054G8gvzQOaJS9XQrgcj7cJXmeQ2rE5GdyXOxonaflrY00MvrVxm6JibafrlA6KsSV3JJV5jZkSLuFAOr0cpkZm+q7P/jhJ8hiS0iLeTycZKBV3oGfrjXOcRIC8muB5FO7dCTvLCMPR6FwpD4Nvv4NbFn/OeZ48kLZVcgPtX+5MPLo88TnHKhN7h/SAFsoLKhSGIJFxjsJAFf07RHVg46TfvfAIKmPKX8grVNGbD1deZVh6zqDjzu9kSM/iox1w2teG0aWJ1BpX0aj9uVkaYzqVgmBNJXRp5TpgfAuAA/veufT6YVoiUI93XWJkS705OsjE2LncVMacx7GoCH0jv7Fo6knarv0pb3i9l/5CfSZL+iJZAn8KGX2mX03GiXZiRHF0Y6GB0E407JuFrh/tXoOeVDQs0nkESU2TeU5kdV3eFS/me/kw3pyHCaeKBdYpU+H/zzYxhknVWfCNxqlYWrAp6f2aHQYe8qXUzeSPWBqRKceCSMiJK882v54SCa0LbUmtqetAMPmTcdV+M6QUBuwBctd3zWATf5VouzZNb5UGS5rxgS0K8GBLR3JUORG9+YjnmX5BoO4rJNM95lZDR8JKuXk43sKKomRufzj9N1tht2tU5nb/nCvE56senMU61NyX8xtRQNNbx6WU7U+GRYKWIK1Xn7hsXS0QWrv7F3Rug+x82dwWSIjE6RHUGQguX3k+AIxR4Lp4lUN1jjqLQW5J6DvmUduMWY9QiGyGUPRYnoDLw3AozoWsIijNpmlLYLCTkoGv769YjM8c8K7hJmrCdfT68g4SybovNibShZlxEhTut5tt0H/lnub8gk+sp76QcZHvwrldDX0eAZTYqup6XGlKak4QxX9tZXsUVPAnIKDV0+Bl9luT4vkC9mRI8TT5KNCXrRlKxQDaTkRnroYWf7+9YtLxdsDJlHeooz/yuKd3ePAtR2TvQcfk3pA/InBZ1lgsqAQgFGSj2FYYtKQyBdSUk891q+tZDEQ+9jHXm4evja4ep72PhXok7HZBExC1PWWj7AJdwtP/5tJMxtUngY7VHzu/ouAinR3fyCVI9/hHXLc2TdCkgAsKMvZPvNV8wkkJVeuAXNVTvQi0rhaqjxPDECI+i11UX6LLecid5mtQe9m8usBKd1Kpx+P3lL8G7toPkvjjp8qR5yaLlZre9rzrjN2qBE1SPJ0VZASlWAMmpwKiq7xD9P37FL60pFX99scLEwy1nlAMwWd8kpSUD6a2z151TgxusKtyResvqF9IDiKGV541BbOPcNJqKeddF2CjBvg4t8m5rwm1UOHD80BRHORKqCvg1tQGzzosIxBaApIgLMT0x5pqRKSfbjfDrswLcojEhcsuD5F9DF6MJAa60hr2Hn08uKZ7N92GsaFKzwB2g+90Q3IfBGMf43ZSzBKzqhPT9ruXjtOXrbFMbp39EzJqIA4WHU21OSN2iinbML3xUUdTXwLaXPw9xeKEL6egdeTyHHJI2VKXVF7BfeuNzVpgwPAtBTIVQonGPjf99NLIOD8OQCVY12GmH+Zyj7+Y350QOSCtnRA/oRfUAeqchzhDOcTsVhtWgT+HGZIbgydLhnoftnWKfW61i26zKx8EFYB/E8iH2Rqyz+YDMe9q3tvdOXEYHHfVD230iRRtKIklRJ6rSGxyFA6DpLEIl2FpbwZWb9u/ie5fXQypjuJ6+YaRDXRfDRDAm30F4zLCV4HjBQE2lCX3qv/F8ZqnCnep4TAy+mzkT49nGZAYYSwMDXi7e8g4YPalgwj/Z398MjspJ2gwRg2KRtU8lKcklee/mc9VaDbk/mgf1wW/eIgeQbKH3b/aymV9XtNAAunk2B5PQ5ADN2c15NFV3/bT6nOliRhpBRR09M0LeUgYWiGt0xgVSEYX6h/B+gUapLiNpGmZW7RaIn195OCrfsTpNUyzpXLK4wpS9M636/CXZ3m3bMHolqCVUaQ5xQgygbWisO/7lNh6HEN/I4wWTofSQTAFGCpHi0xO8dHdMcmaS1y0Fv/aeWBCVWfV53Bkk8aLbFzdRQERFCJFW3uHE/+EtYvVs2m711bW6HCCooNxIjZeQ/Dw3A55FGsx1jRqsqySkUmdeVlosBaB9/UH4ITMcZUCnuWL84kxi/gInf5LVU6GLjCPFRaL6oM33Fg2Cp1q0CH2k+IPGqitY6jiKZV6lTbzzIlyUT0OLM2z3mPbwdhxNSwbV4WZmL6XUvL0M9eq+i+TaTvEBwdxgJQKjwF2QywlyVj/MSWMLOwkfEiyQ0IBhimYVDLWRZZHa+804XnaMvpG6wQHTIJMN9nfir1b9+ZhBqAz9J2My0VU9ZFYOfwvwTHuvIYeyYbbUXTB8bLyvLH5EPeYD4JHBpqVNqGbysCMESVSEMzju5b2MArzPdknMWKdKgsBYsUwK49Sok0raduRSjlzG/6z4yNjkoUdza7IBDXAxtVWpXzLT/OqvtOJdNCd4hW0OVjR5BqJql7Vp8Bkg3om81oGRR/QLMfNdSkVRXhCMflmiNl09yERzvL3KteSBh2ZaIFJpnTHhsfaDxz5V3AVw0zAJKz7vuenuCMwbFBpBAHxfjkSEkhh77RfUbWGgZPk5Yp68EBIrWYJb7HWdUa8Gtl0FHZbMmxBeFpu0pg9QAh1fFp/9i4N0hnDz1S5iVei/DiUVU2aHVGA2WSbnis52EgpU2tkIAqb0j4oAHfMhJjszQdG4M07+Eql0zdRe21iLmigV1+h8ZTMgg0gFKlCrQVIQog8H8C2bFhKtJQWVWrM5XAGTMmnRZ8tNVAxLmjy6hNwITTWz1i59WPjxEShy6DCSxhjhFNelFkWRvCMTQrhRmu2e7/uyld8OlaJG1Y4YJmA1t0a8nkwFuSylFn/z9/5N2Nv6Nt2ANTzfqk38unFDk/Yv7AAy1Bh8CorxIsCOZCbqLwyRg13ZZrNW+c29YYFbhy3uVCx4HwqHmQxxZ1MqO8xh3e+2eVBQDu8R6C7yrGJqQUQOxf7m6Wl2OUk+l3zXiuvb0R22eexoCgfJF2yiS5xBG0PL9lRRVudGS2QqYRbIR13dW6EN1RW9Lw9dhoApC8bCAoCnbT2lSBIPkihogVaDFuI9QL/nat6P7KErMDRceN0g/q9aIt8P8FNOvmN/++c70XwYfeLuaF0qGL6aK1CtnuLfAsIevNdEFUKHUSaSF5oSsIS9yb1503kA9GBZ+8BP9NqmsJzT/hsZ7oQgTaWDJWoZ9kR4+N0tqNUqJCkIC61AucpDiXQskSfcEhmGnHhQ0zcuxw4U33Z1qHUU2AcO/gO/YmZbK4c8/z1cy5bkyY8Ga5Zj+PnIrh0CyroIp4OASn/VeUyNbcjMSktBbwBCv6+KPjqIqA72FbYFAvauoulq9PVb975OxLEka8juj6swM6hvtrlSGWHTvlaRHulxmn/oK3eBNqg5UABL0GZfzNDLl8EX5rchHn4BZLpJ/foYPsH2G1zo6qpMkfMtK7w1UTvXi+zOtslF6KfuUB/+Y6+8DURBlxgMzkUCRGZUNMjAPHDEWruq2hZHxYasryRILgm+ebsh6rqgAkNwn5vK9SFe1DSTJiA46nH6GVA7WlOEpf58Ezg51m4L0kKmtjjgb3n0BwhJXRRf3Dua1+N6FFvM6YyNosI/5dyBcs4d7R4RoF33iiilkcVfhZt1vqNdhxjhs0dZ+6ZRBm4JUl1CYRQFCLeEYe10EYwEniHLfXKJDZGdf+fAP9jrxwlqnQDVf+Tl1i0O5DdV6tJiwg6r6ROJ09PaCqLk14/tK3gUX+5DRWsTneVCBUKDqeOxxpp7duCfPv+ERdoOWW4hD9hgttS60lWWXtHdmgLEeF886JAfD6dtovpmEbD4wCR5Auzr2D/g7mfsatr5laGmaQyZYza5aFeO/30xlntiDe1dR23oaIw/LL9vkHLVpPLl9ysuFp+bblPEa+YQjGpoN0QxWpfzPjaxKUsqqgln79eUZAfwqVG5/1hJ2cTvu+sL7tjm2j8V9VeJb2yWRYlqOGLRvPKR5uOsheTQ2adFQcGOyv3LCLQtmB+hEvO1b5A8GCmCulC9oA1stz29E7IRbR0fhFFNfLCye+NJzXUtRwFe5egs8vvE4hLmuAvmCsTFNzJxyt4OwGsAGW5yeDhKMn/OBH8n08FIwBsPAL0NhdPKFW4fXarYBHuo4yXB2ZRy3rZc13cLMimz47l/1dedNTEUz9tVcK42ubagtLNzS60PQpMikR3Jb3lS8Xd+OqNlmqvI4eHC62pCP9O/Zgzih/aRRGSwJgd7E5S8uIqKmXD2fHsdULQ5P7TWLg1ASg9U/DJx0HJFA3wC5Wz6tH+uyKU/R4o+3hwxMPGXCLbmIqBhySOixdSkvjwUUwXi6UTxx/uKjXQTdciy2anUK1ijFA1sqYQ8faOVrW+kaV6Vn+vctD6m4y2UnnTWCtb3TOihckw2ASyKQlet5sBRY7ztymHoMgfUphrlQC3UCLG4P3cpP98dthPyyAfMB6RScIWVw+Xv24etHKZLfGiEcNvYlKHV9HpshycKLjnTtK4ggO/cezUB2ujqRXCE75Tp4njM7uQqQZteSWPcmeZCBhXNgbH7CkRfpoUQhmXYqsdsTpwl7XJI3pEWnYXN0QSr1fBz8bCNgeH+1GuEy2X1JMl7lmxq5HO1UV98Lu3o2g4tHSGpLBt5hn+YIt+90rCMqSYX5bEGkCPPZRiHoafLicbAiNbTwkW0qK9nyUKPlZGlXcQsQWCi/WqYTWmHyIDG+BlLyEzwGWVtXJvRrcaIVVprfQzDZf9uZJfXpBaovwOnrhPF0RJIPYDhl3RX1QpywFYGengY0Vt99p7aKgE7mqybUMHjojCkh7h5rrpR8nS3FzVz58s/1AHv1kn53dQn+Xj4pJ7I6XW9m1VTMxM4tyfGXC196nYVpg0byKhlQqqL7O1kd2ELiKwvk0mng6PpRz9OBSg9U7sEoksdK232GR46E7X61yVJM/yg5Ww+/0M0NZBvbyQCwMc5uUIebhKQtaB2271rrp5aSsTPTWRbfIIS+je13L1FrmmzckvWL/eeGMPxNATVffIxhl6dQJq5gzf1BFODv0s5XXfCIHMnZ1+vsMTsxaG8si7Y3rNbTKeeFFKBv6XgWGHGHZwNs04GMb/urSO7lCgadcXVCNP7qXMtIOOAn7VQNYPLLA5Z5sEgrkSPsJNQ4J1m71JkpE1clv+O81tdpMg5tENetLrC3E/3qrYVV1TliytFNwMuGIqI3fpNiq+i+uXESEhbsasNMn/yOcyIMGLrHPkhbnyAJ/Aq3c7vHv5wnMZkeKA63JCiI2xboLUfjVcnl6D8uXZ7haeXwMMwTcDBcG8+kso1B6WNhZe2a0mxt7As0IXD7Ymu71epcp+EKDlpJEgB9J8mMe38D5hUrKbxJ1QewiDbafOVHytxwAruXgZDaeb/qVuoEc9ZduNBBBq6sAffCCnoVj0M2QG4jiQ4GHdfiJnRrjjxtLhHwULK84EIVw1SalKhzMdSbCkUN1TpV5fmN++u8RD6ixXRmgAc3n4i3Vl3oJELyqlDvEcyo/bCLKVPzwEV9ZBYSc5fyYDM4aGS0yHYbIoDV4yEbF8fyz7IGa8C1XngoYYeotdr/3ZiR4XkxY+Qs8sLYK96RzEgNhjw4+tKB8n2ICxvHdU62L8LJzh2x4BCz4C0TjfF8q5qksovcTM0eOD/WeA4/ApWNSjuz0g7OWmGX3QtU7dho1Hfb25M3vPzGRUK0EFt8ZHuDUiSaByBvPkb4sdl/6QSILfyi0Zipvxm6r418JOVQeJAJPc9hcGvQ2sbsF6ycx/A0wz92AEWhLCYfRf5jcmPOlUJPLCurkWRzl+j4hTDcvjP2wr08kUwjwwNrg6gYJC6NH8VX6SBcwWovWFSDpMfJW7/XF1q6Xsjcy/DZMr81X0KHeUhRlo5RWdBfPP8zKBKMl602AI3Bae+zjL7fzJi/LPpZtNYnmqUyhUXv4mf/14Zi0ZnwnIopEvBu1wMfhSdRE2I/swmgcvyhLLidvNz+vOZHPKxr10xmr9CClrhMfGIDM+j1BHTYcapZXDBuV7QKGqKLoVW0xGcNqWco7aYJFG+xiITYY5fCr5sLmLwL4c/zePpdzX45X/chg3Lxqopj+JMN5MKSrHPYJcdJ2qTEmSWAgBMXPgrpvf4mAehj+mjPCL4aMaCp7obndZxg4WAJEGnWVfhUYUvFwqvwxdGPR5ew8ZFA8C3QaLZZVCXtmFYK2t52e2o+ISjfSrO0Ck7c4CXruHzUfpWk9MPzWlb69b5tRSocuglgZvl1tsxpsm71prmWrXvneIeQ121a3Nk2cpwyFniuYZlFUkJXInertm8mwowOLTQm3MgWul3ps7tuSZjsRQzHxpkwWccnQTmZoOefYoFEIcf5g8/nvvjgzpzcWj6ZhbXagdUlG+Sx2uU+R+Je3HJ7FXY/RQN5nONXAkVB+4i9lj2r72uPqCZzsC4snAozy5SrEJSB7eblYXyIEmt8omdVeDesHtdpyS73FEoUXij8AkeZoHfYzBT9NSFZ6TDFl6szqHz+NMU1n0WAU/5Fy+F6MlDgMQHYtP2cJ01u/phmddOjX821z3vDsSQih8vK8VrNxt8cm8XqkwHDHMFaXWrGIpAtVLq4blFbjLSgOFfYfrFl3muykNNcLrBC4Dd84wOyEzX+DiROnfJ9U8jGuFg/zXYTn7HppCtt9Nhhtl2nIqci1zM64/CgmYNPUbC8EvY5BDnblOuQNOQQVVTz0FL4JuyGKHGDPsenwDOH1hPjoU+ccotC9iIVzBbqmVOgrQakC/0T5p5PMV0AGLInNh5pw/FxGobVRpgwNYldlM5h1tzsag/P/w4mcb6RQvuMLVSNxdhDkun4ikaKudbUdeHqPQ8cc2BnOFCu4jxa7L1sUUzMOtQI8RTMn2R8oaR96ebqxd8a4ueCUA6UZQd7d1j+RhZ/YHU1PLlxOIRLOQ9QelxOzy79wLJhYzuZqJmJWF2CribCw7HtgKEk3KrUFzPEz/aK4P+f7I5ZdaXNIogirwMx/1XmJU/UWo8XbwCtgzTYzXFrcdu2UtepYWyV1Ms1zpjhic1ZcTw5z1zleg70HDPe2FTkdA8VBb0+ynNiY9USLFE0qRYVeIC1uCrM0nPZY0o0xNZQRIOC59WHuiVgGf/UAwJSmp9CNAcw1QBhdZgL/4P31xprCEfb1qlyQda1SHuF8s+beqFNv2//T8TgK1DbljUiKIZZG6g6L32S0VX4kqZGH9W68ftfyYg/U6abKYtgO6VT5AjOrAtG//l7eCIpN9o/njFRae+9LYAncPUhYp9qa6v5/SXGSJnx28RiGj1/GZOibw/iMAwKAYnlLwPmXXDZMjHWH+gIZcIPOx8qTIITerP2EWIewoAmNg6hxRAorE0vdH8w04TAWn+q+mKhGps6SwnU9z8uuT6EwKyfiw1L7ZfL8aMU7/gTs4I2JNFZo0rCGpqvwI7hWh0EXPl4AHCLwiqIyJYp2BRptBXJvlZPOhnBHuCt6D316VTvarMd8Ub16QYhm9jhLJTJyKAjWjy9mO7wbVVwEyn3Bd7FfI20hWQrFhcNmkpyBmEW9R7uDrtGIo4uxUCDCD+rBc4YG30FMgD8ITgLc8wXnCGHpYFgriKSJTTbx9oNkAAAAA=)}
@@ -550,7 +579,7 @@ const SF = (() => {
     { min: 21, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Les créatures aggro avancent de 2 cases par tour au lieu d'1 ; elles partent devant les autres créatures de leur case."],
+    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Les créatures aggro se déplacent de 2 cases par tour au lieu d'1."],
       A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
@@ -574,7 +603,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.10";
+  const VERSION = "0.4.11";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1690,7 +1719,7 @@ const BILAN = (() => {
   function summary(S, extra) {
     const tiles = Object.values(S.tiles || {});
     return {
-      id: String(extra.id || ""), mode: extra.mode, test: !!extra.test,
+      id: String(extra.id || ""), mode: extra.mode, test: !!extra.test, decouverte: !!(extra.decouverte || S.decouverte),
       version: S.version || E.VERSION, versionFin: E.VERSION, date: new Date().toISOString(),
       winner: S.winner, rounds: S.round, biomass: S.biomass, reserve: S.reserve || 0,
       killed: S.killed || 0, workers: S.workersBase, floors: S.floors,
@@ -1773,6 +1802,244 @@ const BILAN = (() => {
 })();
 if (typeof module !== "undefined") module.exports = BILAN;
 
+// Swarm & Steel — aide de jeu : fiches de règles par camp (bouton « Règles ») et conseils du mode découverte.
+// Les chiffres (coûts, paliers, dégâts…) sont lus dans le moteur (SF) : les textes suivent les changements de règles.
+// Aucun accès direct au DOM : l'interface (ui.js) fournit les petites fonctions d'affichage h = { E, icon, imCls }.
+"use strict";
+const AIDE = (() => {
+  const list = a => a.join(", ").replace(/, ([^,]*)$/, " et $1");
+  const plural = (n, s, p) => `${n} ${n > 1 ? (p || s + "s") : s}`;
+
+  // ------------------------------------------------------------------ fiches de règles
+  function tiersTable(h) {
+    const rows = SF.TIERS.map((t, i) => `<tr><td>${i + 1}</td><td>${i ? t.min + " et plus" : "départ"}</td><td>${t.n.join(" · ")}</td><td>${t.cap}</td></tr>`).join("");
+    return `<table class="rt"><thead><tr><th>Palier</th><th>Biomasse</th><th>Pioche (niv. 1 · 2 · 3)</th><th>Créatures max par lane</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  function creaturesTable(h) {
+    const rows = Object.entries(SF.CREATURES).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
+    return `<div class="rt-wrap"><table class="rt"><thead><tr><th>Créature</th><th>Type</th><th>Niv.</th><th>Coût</th><th>PV</th><th>ATQ</th><th>Capacité</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function tilePv(t) { return t.pv === "ap" ? "2 (4 dans sa lane)" : t.pv === "front" ? "1 + couronne" : t.pv === "reduit" ? "5 − couronne" : t.pv; }
+  function tilesTable(h) {
+    const rows = Object.entries(SF.TILES).map(([n, t]) => {
+      const caps = [];
+      if (t.camo) caps.push("camouflée");
+      if (t.ep) caps.push(`Épines ${t.ep}`);
+      if (t.ren) caps.push(`Renforcé ${t.ren}`);
+      if (t.tech) caps.push(`+${t.tech} technologie${t.tech > 1 ? "s" : ""}`);
+      if (t.temp) caps.push("+1 travailleur");
+      if (t.trap) caps.push(`piège (${SF.TRAP_DMG} dégâts)`);
+      if (t.siphon) caps.push(`Siphon (−${t.siphon} biomasse)`);
+      if (t.aura) caps.push("Aura d'épines");
+      return `<tr><td><span class="rt-n">${h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${t.d}</td><td>${tilePv(t)}</td><td>${h.E(caps.join(" · ") || "—")}</td><td>${t.n}</td></tr>`;
+    }).join("");
+    return `<div class="rt-wrap"><table class="rt"><thead><tr><th>Bâtiment</th><th>Points</th><th>PV</th><th>Capacités</th><th>Ex.</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function spellsTable(h) {
+    const rows = Object.entries(SF.SPELLS).map(([n, s]) => `<tr><td><b>${h.E(n)}</b></td><td>${s.kind === "off" ? "offensif" : "soutien"}</td><td>${h.E(s.text)}</td><td>${s.n}</td></tr>`).join("");
+    return `<div class="rt-wrap"><table class="rt"><thead><tr><th>Sortilège</th><th>Type</th><th>Effet</th><th>Ex.</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function treesList(h) {
+    const POS = { A1: "rang 1, côté A", B1: "rang 1, côté B", A2: "rang 2, après A", C2: "rang 2, centre", B2: "rang 2, après B" };
+    return ["aggro", "tank", "soutien"].map(ty => `<h5>${h.icon(ty)} Arbre ${ty}</h5><ul>${["A1", "B1", "A2", "C2", "B2"].map(s => `<li><b>${h.E(SF.TREES[ty][s][0])}</b> (${POS[s]}) : ${h.E(SF.TREES[ty][s][1])}</li>`).join("")}</ul>`).join("");
+  }
+  const F = SF.FLOOR_COSTS;
+
+  function common(h) {
+    return `
+      <h3>Le jeu en bref</h3>
+      <p>Swarm &amp; Steel oppose deux camps asymétriques. La <b>colonie</b> défend sa fusée au centre du plateau et doit en achever les <b>${SF.FLOORS} étages</b>. L'<b>essaim</b> attaque depuis les bords : il gagne s'il tue <b>tous les travailleurs</b> de la colonie (une créature qui frappe la fusée tue 1 travailleur).</p>
+      <h3>Le plateau</h3>
+      <ul>
+        <li>Une grille de 9 × 9 cases, la fusée au centre. Quatre <b>lanes</b> en partent : Nord, Est, Sud, Ouest (couleurs bleue, verte, jaune, violette).</li>
+        <li>Autour de la fusée, trois <b>couronnes</b> (1 au contact de la fusée, 3 au bord). Au-delà, les <b>cases d'entrée</b> de chaque lane, colonnes A à E : c'est là que l'essaim déploie ses créatures.</li>
+        <li>Les cases en diagonale de la fusée (les coins) accueillent les <b>supports</b> de la colonie ; les créatures n'y vont jamais.</li>
+        <li>Au départ, ${plural(16, "Barbelé")} (1 PV, Épines 1) couvrent les couronnes 1 et 2, et les supports de niveau 1 et 2 sont déjà en place.</li>
+      </ul>
+      <h3>Une manche</h3>
+      <p>L'essaim joue d'abord, puis la colonie. La colonie peut jouer certains sortilèges pendant le tour de l'essaim (fenêtres de réaction).</p>
+      <h3>Combat</h3>
+      <ul>
+        <li><b>ATQ</b> : dégâts infligés par une attaque. <b>PV</b> : points de vie ; à 0, la créature ou le bâtiment est détruit.</li>
+        <li><b>Épines X</b> : une créature qui attaque ce bâtiment subit X dégâts après son attaque. +1 par Avant-poste dans les 8 cases autour.</li>
+        <li><b>Renforcé X</b> : le bâtiment perd 1 PV par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).</li>
+        <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Un <b>piège</b> camouflé inflige ${SF.TRAP_DMG} dégâts à la créature qui le révèle, avant qu'elle frappe ; un <b>Siphon</b> retire de la biomasse à l'essaim. Une tuile encore cachée ne subit ni la percée ni les spores.</li>
+        <li><b>Percée</b> (Aura du Perforeur) : les dégâts en trop après la destruction d'un bâtiment passent à la case suivante du chemin vers la fusée.</li>
+        <li><b>Auras</b> : effets des soutiens sur les <b>autres</b> créatures de leur case ; elles se cumulent toutes.</li>
+      </ul>
+      <h3>Informations cachées</h3>
+      <p>Chaque camp ne voit pas la main de l'autre. En partie sur un seul appareil, un écran de passage s'affiche à chaque changement de camp : passez l'appareil.</p>
+      <h3>Jouer en ligne</h3>
+      <p>Créez une partie en choisissant votre camp et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p>
+      <h3>Mode découverte</h3>
+      <p>Activé sur l'accueil ou ici, il affiche un conseil la première fois que chaque situation se présente, selon le camp que vous jouez. « Compris » le range ; il ne revient plus.</p>`;
+  }
+
+  function essaim(h) {
+    return `
+      <h3>Votre objectif</h3>
+      <p>Tuer <b>tous les travailleurs</b> de la colonie avant qu'elle n'achève sa fusée. Chaque attaque contre la fusée tue 1 travailleur. La colonie en gagne 1 à chaque étage : frappez vite et souvent.</p>
+      <h3>Vos ressources</h3>
+      <ul>
+        <li><b>Biomasse</b> : vous commencez avec 5. Elle n'est jamais dépensée : chaque tour, votre <b>budget</b> est égal à votre biomasse. Elle augmente de 1 par bâtiment détruit et par support tombé.</li>
+        <li><b>Réserve</b> : le budget non dépensé à la fin du déploiement y est versé ; elle ne sert qu'aux améliorations.</li>
+        <li><b>Paliers</b> : votre biomasse fixe votre pioche et le nombre maximum de créatures par lane.</li>
+      </ul>
+      ${tiersTable(h)}
+      <h3>Votre tour</h3>
+      <ol>
+        <li><b>Pioche</b> selon votre palier. Si une pioche de niveau 2 ou 3 est vide, vous piochez au niveau inférieur. <b>Premier tour</b> : à la place, vous recevez un Écorcheur, une Carapace et un soutien de niveau 1 tiré au hasard.</li>
+        <li><b>Déploiement</b> : choisissez une carte, puis une case d'entrée (A à E) d'une lane. Payez son coût avec le budget, en respectant le maximum de créatures de la lane. Les cartes non jouées retournent dans la pioche.</li>
+        <li><b>Améliorations</b> : investissez votre budget ou votre réserve dans un nœud d'amélioration (voir plus bas).</li>
+        <li><b>Réaction de la colonie</b> : si elle tient un sortilège offensif, elle peut le jouer maintenant.</li>
+        <li><b>Attaques</b> : pour chaque créature, dans l'ordre que vous voulez :
+          <ul>
+            <li><b>Déplacement</b> : 1 case vers n'importe quelle case voisine de sa lane, sans diagonale (vers la fusée, sur le côté ou en retraite). Jamais sur un bâtiment, un coin ni la fusée.</li>
+            <li><b>Attaque, facultative</b> : un bâtiment qui touche sa case (sans diagonale), au choix, ou la fusée si elle la touche. Après une attaque, la créature ne bouge plus.</li>
+          </ul>
+          Touchez une créature : ses cases possibles sont surlignées et ses cibles encadrées. « Fin du tour » quand vous avez fini ; « Tout résoudre automatiquement » fait avancer les créatures restantes et attaquer ce qui est devant elles.</li>
+        <li><b>Fin du tour</b> : les auras de soin agissent.</li>
+      </ol>
+      <h3>Vos créatures</h3>
+      <ul>
+        <li><b>Aggros</b> : grosse attaque, 1 PV. Elles meurent vite sur les Épines.</li>
+        <li><b>Tanks</b> : beaucoup de PV, 1 ATQ. Ils encaissent les Épines et les tirs.</li>
+        <li><b>Soutiens</b> : ils n'attaquent jamais, mais leurs <b>auras</b> renforcent les <b>autres</b> créatures de leur case ; toutes les auras se cumulent.</li>
+        <li><b>Vitesse</b> : 1 case par tour ; le Glaneur fait 2 cases et donne +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros. Le nombre de déplacements est fixé au premier pas du tour.</li>
+      </ul>
+      ${creaturesTable(h)}
+      <h3>Améliorations</h3>
+      <p>Trois arbres (aggro, tank, soutien). <b>Rang 1</b> : ${SF.COST_R1} biomasse, un choix sur deux, et les cartes de niveau 2 de ce type rejoignent votre pioche. <b>Rang 2</b> : ${SF.COST_R2} biomasse, un choix sur trois (le côté du rang 1 choisi, ou le centre), et les cartes de niveau 3 arrivent. Un nœud se paie en plusieurs fois ; commencer à investir dans un nœud ferme les autres choix du même rang.</p>
+      ${treesList(h)}
+      <h3>Ce qui vous menace</h3>
+      <ul>
+        <li><b>Épines</b> des bâtiments, <b>pièges</b> et <b>Siphons</b> camouflés.</li>
+        <li><b>Tourelles</b> : à la fin de son tour, chaque support de niveau 1 ou 2 tire sur une créature des 8 cases qui l'entourent.</li>
+        <li><b>Sortilèges</b> de la colonie : dégâts, Champ de stase, Brouillage, et Famine (votre budget divisé par 2 au début de votre tour).</li>
+        <li><b>Nuke</b> : quand la fusée atteint l'étage 9, toutes vos créatures sont détruites.</li>
+      </ul>`;
+  }
+
+  function colonie(h) {
+    return `
+      <h3>Votre objectif</h3>
+      <p>Achever les <b>${SF.FLOORS} étages</b> de la fusée. Vous perdez si l'essaim tue tous vos travailleurs : chaque attaque contre la fusée en tue 1.</p>
+      <h3>Vos ressources</h3>
+      <ul>
+        <li><b>Travailleurs</b> : 3 au départ, +1 par étage achevé, +1 par bâtiment à travailleur temporaire encore debout, +${SF.SUP3_WORKERS} par support de niveau 3. Chaque travailleur donne <b>1 point de construction</b> par tour.</li>
+        <li><b>Main de tuiles</b> : 4 tuiles, +1 à chaque palier de la fusée (étages 3, 6 et 9). Vous la complétez à la fin de votre tour.</li>
+        <li><b>Technologies</b> : à 3, 6 et 9 technologies, vous piochez 1, 2 ou 3 sortilèges à la fin de chaque tour. Elles viennent des bâtiments à technologies et du palier de l'étage 3 (+2).</li>
+      </ul>
+      <h3>Votre tour</h3>
+      <ol>
+        <li><b>Sortilèges de soutien</b> : jouez ceux que vous voulez.</li>
+        <li><b>Chantiers</b> : touchez une tuile de votre main, puis un atelier (une lane). Le chantier demande autant de points que la durée de la tuile. Un chantier par lane (deux après l'étage 6). Juste assez de travailleurs y sont assignés d'office.</li>
+        <li><b>Répartition</b> : ajustez les points de chaque atelier avec + / −. Les points non utilisés vont à la <b>fusée</b>, de même que les points en trop d'un atelier.</li>
+        <li><b>Construire</b> : les chantiers avancent. Un bâtiment achevé se <b>pose</b> sur une case libre de sa lane qui touche un bâtiment, un support ou la fusée (sans diagonale). Les créatures présentes reculent d'une case. S'il n'y a aucune case possible, la tuile revient en main.</li>
+        <li><b>Supports et fusée</b> : les nouveaux supports apparaissent, puis la fusée gagne ses étages.</li>
+        <li><b>Tirs</b> : touchez une tourelle surlignée, puis une créature surlignée (ou « Tirs automatiques »). « Terminer le tour » fait tirer les tourelles restantes. Le tour passe seul quand plus aucune tourelle ne peut tirer.</li>
+        <li><b>Pioche</b> de tuiles et de sortilèges.</li>
+      </ol>
+      <h3>La fusée</h3>
+      <ul>
+        <li>Un étage coûte <b>${F[0]} points</b> (étages 1 à 3), puis ${F[1]} (4 à 6), ${F[2]} (7 à 9) et ${F[3]} (10 à 12). Les points en trop passent à l'étage suivant. Chaque étage donne <b>+1 travailleur</b>.</li>
+        <li><b>Étage 3</b> : +2 technologies. <b>Étage 6</b> : +1 chantier par lane. <b>Étage 9</b> : la <b>Nuke</b> détruit toutes les créatures. Chaque palier (3, 6, 9) donne aussi +1 tuile en main et +1 dégât aux tourelles de niveau 1.</li>
+        <li><b>Étage 12</b> : décollage, vous gagnez.</li>
+      </ul>
+      <h3>Les supports</h3>
+      <ul>
+        <li>Ils apparaissent tout seuls sur un coin dès que ses <b>2 bâtiments côté fusée</b> sont posés, et tombent quand <b>tous</b> les bâtiments qui le touchent ont disparu (l'essaim gagne alors 1 biomasse).</li>
+        <li><b>Niveau 1</b> (couronne 1) : tourelle, 1 dégât (+1 par palier de la fusée). <b>Niveau 2</b> (couronne 2) : tourelle, 2 dégâts. <b>Niveau 3</b> (couronne 3) : pas de tir, +${SF.SUP3_WORKERS} travailleurs.</li>
+        <li>Une tourelle tire une fois par tour (deux avec Feu nourri) sur une créature des <b>8 cases</b> qui l'entourent, diagonales comprises.</li>
+      </ul>
+      <h3>Vos bâtiments</h3>
+      <p>« Points » : points de construction à fournir. Les bâtiments camouflés sont posés face cachée. Épines, Renforcé, pièges : voir l'onglet « Commun ».</p>
+      ${tilesTable(h)}
+      <h3>Vos sortilèges</h3>
+      <p><b>Soutien</b> : pendant votre tour. <b>Offensifs</b> : pendant le tour de l'essaim, juste avant ses attaques ; Famine se joue au tout début de son tour. Un sortilège non joué reste en main.</p>
+      ${spellsTable(h)}
+      <h3>Ce qui vous menace</h3>
+      <ul>
+        <li>Les <b>aggros</b> détruisent vite vos bâtiments ; les <b>tanks</b> encaissent vos tirs et vos Épines.</li>
+        <li>Chaque bâtiment détruit et chaque support tombé rapporte de la <b>biomasse</b> à l'essaim, qui monte alors de palier (plus de cartes, de meilleur niveau).</li>
+        <li>Le <b>Sapeur</b> détruit un bâtiment de sa lane à son arrivée ; l'<b>Œil-sonde</b> révèle vos tuiles camouflées de sa lane.</li>
+      </ul>`;
+  }
+
+  function rules(tab, h) {
+    return tab === "essaim" ? essaim(h) : tab === "colonie" ? colonie(h) : common(h);
+  }
+
+  // ------------------------------------------------------------------ mode découverte
+  // Un conseil s'affiche la première fois que sa situation se présente, pour le camp qui joue.
+  // when(S) : condition ; text(S) : texte (chiffres lus dans S et SF) ; img : nom d'une illustration.
+  const hasTile = (S, f) => Object.values(S.tiles).some(t => t && f(t));
+  const inHand = (S, f) => (S.hand || []).some(n => n && SF.TILES[n] && f(SF.TILES[n]));
+  const nearRocket = S => S.creatures.some(c => c.k === 1 && c.u === 0);
+  const TIPS = [
+    // ---- essaim
+    { id: "e-but", side: "essaim", img: "Massacreur", title: "Vous jouez l'essaim", when: () => true,
+      text: () => `Votre but : tuer tous les travailleurs de la colonie en frappant sa fusée, au centre du plateau. Elle gagne si elle achève ses ${SF.FLOORS} étages avant. Chaque tour : piocher, déployer, améliorer, puis déplacer et attaquer. Le bouton « Règles » détaille tout.` },
+    { id: "e-pioche", side: "essaim", img: "Écorcheur", title: "Piocher", when: S => S.phase === "A_start",
+      text: () => `Votre palier, fixé par votre biomasse, détermine combien de cartes de chaque niveau vous piochez. Au premier tour, vous recevez à la place une aggro, un tank et un soutien.` },
+    { id: "e-deploy", side: "essaim", img: "Carapace", title: "Déployer", when: S => S.phase === "A_deploy",
+      text: S => `Touchez une carte, puis une case d'entrée (lettres A à E au bord) d'une lane. Chaque carte coûte de la biomasse. Votre budget du tour égale votre biomasse (${S.biomass}) : elle n'est jamais dépensée et revient chaque tour. Au plus ${SF.capOf(S)} créatures par lane. Le budget non dépensé va à la réserve, pour les améliorations.` },
+    { id: "e-types", side: "essaim", img: "Hurleur", title: "Aggros, tanks et soutiens", when: S => S.phase === "A_deploy" && S.handA.length > 0,
+      text: () => `Aggros : grosse attaque mais 1 PV. Tanks : beaucoup de PV, 1 ATQ. Soutiens : ils n'attaquent pas, mais leurs auras renforcent les autres créatures de leur case (les auras se cumulent). Touchez une carte pour voir sa capacité.` },
+    { id: "e-ameli", side: "essaim", img: "Béhémoth", title: "Améliorations", when: S => S.phase === "A_upgrade",
+      text: () => `Investissez votre budget ou votre réserve dans un nœud des arbres d'amélioration (panneau Essaim) : ${SF.COST_R1} biomasse au rang 1, ${SF.COST_R2} au rang 2, payables en plusieurs tours. Un rang 1 ajoute les cartes de niveau 2 de ce type à votre pioche, un rang 2 celles de niveau 3.` },
+    { id: "e-attaque", side: "essaim", img: "Ravageur", title: "Déplacer et attaquer", when: S => S.phase === "A_attack",
+      text: () => `Touchez une créature : les cases surlignées montrent où elle peut aller (1 case, sans diagonale : en avant, sur le côté ou en retraite). Ensuite, si vous le voulez, touchez un bâtiment encadré qui touche sa case pour l'attaquer. Après une attaque, elle ne bouge plus. « Fin du tour » quand vous avez fini.` },
+    { id: "e-camo", side: "essaim", img: "Piège", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
+      text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être un piège (${SF.TRAP_DMG} dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez de la biomasse). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
+    { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),
+      text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : le bâtiment ne perd qu'1 PV par tranche de X dégâts d'une même attaque.` },
+    { id: "e-tourelles", side: "essaim", img: "support 2", title: "Les tourelles", when: S => S.phase === "A_attack" && S.creatures.some(c => c.k <= 3),
+      text: () => `Les coins turquoise sont des supports. Ceux de niveau I et II sont des tourelles : à la fin de son tour, la colonie tire avec chacune sur une créature des 8 cases autour. Un support tombe quand tous les bâtiments qui le touchent sont détruits, et vous rapporte 1 biomasse.` },
+    { id: "e-biomasse", side: "essaim", img: "Phéromone", title: "Gagner de la biomasse", when: S => S.biomass > 5,
+      text: S => `Chaque bâtiment détruit et chaque support tombé rapporte 1 biomasse. Paliers suivants : ${SF.TIERS.slice(1).map(t => t.min).join(", ")} de biomasse. Ils donnent plus de cartes, de meilleur niveau, et plus de créatures par lane.` },
+    { id: "e-fusee", side: "essaim", img: "Fusée", title: "Frapper la fusée", when: S => nearRocket(S),
+      text: () => `Une créature qui touche la fusée peut l'attaquer : chaque attaque tue 1 travailleur, quelle que soit sa force. La colonie perd quand elle n'a plus de travailleurs.` },
+    { id: "e-sorts", side: "essaim", img: null, title: "Les sortilèges de la colonie", when: S => (S.spells || []).length > 0,
+      text: () => `La colonie tient des sortilèges. Les offensifs se jouent pendant votre tour : juste avant vos attaques (dégâts, Champ de stase, Brouillage…), et Famine au tout début (votre budget est alors divisé par 2).` },
+    { id: "e-nuke", side: "essaim", img: "Fusée", title: "Attention à la Nuke", when: S => S.floors >= 6,
+      text: () => `Quand la fusée atteindra l'étage 9, la Nuke détruira toutes vos créatures. Profitez-en pour frapper fort juste avant, ou gardez des créatures en réserve.` },
+    // ---- colonie
+    { id: "c-but", side: "colonie", img: "Fusée", title: "Vous jouez la colonie", when: () => true,
+      text: () => `Votre but : achever les ${SF.FLOORS} étages de la fusée, au centre. Vous perdez si l'essaim tue tous vos travailleurs. Chaque tour : lancer des chantiers, répartir vos travailleurs entre ateliers et fusée, construire, poser les bâtiments, puis tirer avec vos tourelles. Le bouton « Règles » détaille tout.` },
+    { id: "c-chantier", side: "colonie", img: "Muraille", title: "Lancer un chantier", when: S => S.phase === "D_main" && S.hand.length > 0,
+      text: S => `Touchez une tuile de votre main, puis un atelier (une lane : N, E, S, O). Le chantier demande autant de points que sa durée. ${S.chPerLane > 1 ? "Deux chantiers" : "Un chantier"} par lane. Juste assez de travailleurs y sont assignés d'office.` },
+    { id: "c-points", side: "colonie", img: "Baraquement", title: "Répartir les travailleurs", when: S => S.phase === "D_main",
+      text: S => `Vos travailleurs donnent ${SF.totalPoints(S)} points ce tour. Les points d'un atelier font avancer son chantier ; tous les autres vont à la fusée. Ajustez avec + / −, puis touchez « Construire ».` },
+    { id: "c-fusee", side: "colonie", img: "Fusée", title: "La fusée", when: S => S.phase === "D_main",
+      text: () => `Un étage coûte ${F[0]} points (étages 1 à 3), puis ${F[1]}, ${F[2]} et ${F[3]}. Chaque étage donne +1 travailleur. Étage 3 : +2 technologies. Étage 6 : +1 chantier par lane. Étage 9 : la Nuke détruit toutes les créatures. Survolez les étages pour le détail.` },
+    { id: "c-pose", side: "colonie", img: "Rempart", title: "Poser un bâtiment", when: S => S.phase === "D_place",
+      text: () => `Le bâtiment est achevé : touchez une case surlignée. Elle doit être libre, dans sa lane, et toucher un bâtiment, un support ou la fusée. Les créatures présentes reculent d'une case.` },
+    { id: "c-supports", side: "colonie", img: "support 1", title: "Les supports", when: S => S.phase === "D_place" || S.phase === "D_fire",
+      text: () => `Un support apparaît sur un coin dès que ses 2 bâtiments côté fusée sont posés, et tombe quand tous ceux qui le touchent sont détruits. Niveau I (couronne 1) et II (couronne 2) : tourelles. Niveau III (couronne 3) : +${SF.SUP3_WORKERS} travailleurs.` },
+    { id: "c-tirs", side: "colonie", img: "support 2", title: "Tirer", when: S => S.phase === "D_fire",
+      text: () => `Touchez une tourelle surlignée, puis une créature surlignée (dans les 8 cases autour). Niveau I : 1 dégât, +1 par palier de la fusée ; niveau II : 2 dégâts. « Tirs automatiques » choisit pour vous ; « Terminer le tour » fait tirer les tourelles restantes.` },
+    { id: "c-camo", side: "colonie", img: "Égide", title: "Le camouflage", when: S => inHand(S, t => t.camo),
+      text: () => `Les tuiles marquées « Camouflage » sont posées face cachée : l'essaim ne sait pas ce que c'est avant de les attaquer. Les pièges blessent la créature qui les révèle ; le Siphon lui retire de la biomasse. Un Œil-sonde ennemi révèle votre lane.` },
+    { id: "c-epines", side: "colonie", img: "Mur hérissé", title: "Les Épines", when: S => inHand(S, t => t.ep > 0),
+      text: () => `Épines : la créature qui attaque ce bâtiment subit autant de dégâts. Très efficace contre les aggros, qui n'ont qu'1 PV. Un Avant-poste ajoute +1 Épines aux bâtiments des 8 cases autour.` },
+    { id: "c-tech", side: "colonie", img: "Laboratoire", title: "Les technologies", when: S => inHand(S, t => t.tech > 0) || SF.tech(S) > 0,
+      text: () => `À 3, 6 et 9 technologies, vous piochez 1, 2 ou 3 sortilèges à la fin de chaque tour. Antenne, Laboratoire, Observatoire et Archives en donnent, tant qu'ils tiennent ; l'étage 3 de la fusée en donne 2 de plus.` },
+    { id: "c-sorts", side: "colonie", img: null, title: "Vos sortilèges", when: S => (S.spells || []).some(Boolean),
+      text: () => `Sortilèges de soutien (verts) : pendant votre tour. Offensifs (orange) : pendant le tour de l'essaim, juste avant ses attaques ; Famine au tout début de son tour. Le jeu vous propose de les jouer au bon moment. Un sortilège non joué reste en main.` },
+    { id: "c-reaction", side: "colonie", img: null, title: "Fenêtre de réaction", when: S => S.phase === "A_react" || S.phase === "A_famine",
+      text: () => `C'est le tour de l'essaim, mais vous pouvez jouer un sortilège offensif maintenant. Sinon, laissez passer.` },
+    { id: "c-creatures", side: "colonie", img: "Colosse", title: "Les créatures de l'essaim", when: S => S.phase === "D_main" && S.creatures.length > 0,
+      text: () => `Aggros : grosse attaque mais 1 PV. Tanks : beaucoup de PV. Soutiens : auras pour les autres créatures de leur case. Touchez une créature pour voir sa carte. Chaque bâtiment qu'elles détruisent rend l'essaim plus fort.` },
+  ];
+  function nextTip(S, side, seen) {
+    for (const t of TIPS) if (t.side === side && !seen.has(t.id)) { try { if (t.when(S)) return t; } catch (e) { /* condition non applicable */ } }
+    return null;
+  }
+  return { rules, nextTip, TIPS };
+})();
+if (typeof module !== "undefined") module.exports = AIDE;
+
 // Swarm & Steel — interface : 2 joueurs sur le même écran (local) ou sur deux appareils (en ligne)
 "use strict";
 (() => {
@@ -1834,7 +2101,7 @@ if (typeof module !== "undefined") module.exports = BILAN;
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true; S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   function setPhaseHandoff() { // passe la main si le joueur actif change
     const w = who();
@@ -1849,7 +2116,7 @@ if (typeof module !== "undefined") module.exports = BILAN;
     if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
-    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "");
+    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + tipCard();
   }
   function header() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
@@ -1874,6 +2141,8 @@ if (typeof module !== "undefined") module.exports = BILAN;
     const preset = new URLSearchParams(location.search).get("code") || "";
     return `<section class="handoff home ${imCls("Champ de bataille")}"><div class="ho-card">${icon("fusee", "i big")}
       <h2>Swarm &amp; Steel</h2>
+      <div class="home-acts disc"><button data-a="disc" aria-pressed="${DISC}" class="${DISC ? "on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button></div>
+      <p class="small">Conseils au fil de la partie, pour apprendre les règles en jouant.</p>
       <p class="ho-k">Sur cet appareil</p>
       <div class="home-acts">${saved && saved.phase ? `<button data-a="resume" class="primary">Reprendre la partie locale</button>` : ""}
         <button data-a="local"${saved && saved.phase ? "" : ` class="primary"`}>Nouvelle partie locale</button></div>
@@ -2285,15 +2554,26 @@ if (typeof module !== "undefined") module.exports = BILAN;
   function logPanel() {
     return `<h4>Journal</h4><ol class="log">${S.log.slice(0, 40).map(l => `<li class="${l.who}"><span>M${l.r}</span>${E(l.msg)}</li>`).join("")}</ol>`;
   }
+  // Règles : trois onglets (Essaim, Colonie, Commun), générés par AIDE à partir du moteur (Oni, 04/11/2026)
   function help() {
-    return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
-      <h2>Règles en bref</h2>
-      <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
-      <p><b>Essaim.</b> Budget = biomasse (5 au départ). Premier tour : une aggro, un tank et un soutien de niveau 1, au lieu de la pioche. Ensuite, piochez selon le palier (départ, puis 9 · 15 · 21 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour ; l'Aura Mobilité du Glaneur donne +1 case aux autres créatures de sa case ; les plus rapides partent devant. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
-      <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 4, 6 et 8 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
-      <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par Avant-poste dans les 8 cases autour, cumulable. Renforcé X : 1 PV perdu par tranche complète de X dégâts d'une même attaque. Une aura ne profite qu'aux autres créatures de sa case (jamais à elle-même) et toutes les auras se cumulent. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
-      <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
-      <p><b>En ligne.</b> Créez une partie et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p></div></div>`;
+    const tab = UI.helpTab || (S && S.view) || "commun";
+    const tabs = [["essaim", "Essaim"], ["colonie", "Colonie"], ["commun", "Commun"]].map(([k, l]) => `<button data-a="helpTab" data-v="${k}" class="${tab === k ? "on" : ""}">${l}</button>`).join("");
+    return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card rules"><button data-a="help" class="x close" aria-label="Fermer">×</button>
+      <h2>Règles</h2><div class="rtabs">${tabs}</div>
+      <p class="small disc-line">Mode découverte : <b>${DISC ? "activé" : "désactivé"}</b> <button data-a="disc" class="ghost">${DISC ? "Désactiver" : "Activer"}</button>${DISC && SEEN.size ? ` <button data-a="discReset" class="ghost">Revoir tous les conseils</button>` : ""}</p>
+      <div class="rbody">${AIDE.rules(tab, { E, icon, imCls })}</div></div></div>`;
+  }
+  // ---------------------------------------------------------------- mode découverte (conseils au fil de la partie)
+  const DISC_KEY = "swarm-steel-decouverte", SEEN_KEY = "swarm-steel-vus";
+  let DISC = (() => { try { return localStorage.getItem(DISC_KEY) === "1"; } catch (e) { return false; } })();
+  let SEEN = (() => { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) { return new Set(); } })();
+  function saveDisc() { try { localStorage.setItem(DISC_KEY, DISC ? "1" : "0"); localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN])); } catch (e) { /* rien */ } }
+  function tipCard() {
+    if (!DISC || !S || S.handoff || S.winner || !S.view || (online() && !NET.full) || FX.playing) return "";
+    const t = AIDE.nextTip(S, S.view, SEEN); if (!t) return "";
+    return `<aside class="tipcard ${S.view}" role="note" aria-label="Conseil">${t.img && imCls(t.img) ? `<div class="tc-img ${imCls(t.img)}"></div>` : ""}<div class="tc-body">
+      <span class="tc-k">Mode découverte</span><b>${E(t.title)}</b><p>${E(t.text(S))}</p>
+      <div class="tc-acts"><button data-a="tipOk" data-id="${t.id}" class="primary">Compris</button><button data-a="tipOff" class="ghost">Arrêter les conseils</button></div></div></aside>`;
   }
 
   // ---------------------------------------------------------------- actions
@@ -2311,6 +2591,11 @@ if (typeof module !== "undefined") module.exports = BILAN;
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
+    if (a === "helpTab") { UI.helpTab = d.v; render(); return; }
+    if (a === "disc") { DISC = !DISC; if (DISC && S && MODE === "local") { S.decouverte = true; save(); } saveDisc(); render(); return; }
+    if (a === "discReset") { SEEN = new Set(); saveDisc(); render(); return; }
+    if (a === "tipOk") { SEEN.add(d.id); saveDisc(); render(); return; }
+    if (a === "tipOff") { DISC = false; saveDisc(); flash("Conseils désactivés. Vous pouvez les réactiver dans « Règles »."); render(); return; }
     if (a === "reload") { location.reload(); return; }
     if (a === "theme") { THEME = THEMES[(THEMES.indexOf(THEME) + 1) % THEMES.length]; try { localStorage.setItem(THEME_KEY, THEME); } catch (e) { /* rien */ } applyTheme(); render(); return; }
     if (MODE === "stats") { statsAction(a, d); return; }
@@ -2714,7 +2999,7 @@ if (typeof module !== "undefined") module.exports = BILAN;
       rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td></tr>`).join("")
     }</tbody></table></div><p class="small">Moyennes par partie. Touchez une version pour ne voir que ses parties.</p>` : `<p>Aucune partie terminée enregistrée pour l'instant.</p>`;
     const games = list.filter(r => !STATS.ver || r.version === STATS.ver).slice(0, 100);
-    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
+    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.decouverte ? " · découverte" : ""}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
       <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
       ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
     return `<section class="statpage">${head}
@@ -2724,7 +3009,7 @@ if (typeof module !== "undefined") module.exports = BILAN;
       <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
       <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
   }
-  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
   function statsAction(a, d) {
     if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
     if (a === "help") { return; }
@@ -2767,14 +3052,14 @@ if (typeof module !== "undefined") module.exports = BILAN;
   }
   function createOnline(side) {
     withBusy(async () => {
-      const j = await api("create", { side, test: TEST });
+      const j = await api("create", { side, test: TEST, disc: DISC });
       setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
       history.replaceState(null, "", location.pathname);
     });
   }
   function joinOnline(code) {
     withBusy(async () => {
-      const j = await api("join", { code });
+      const j = await api("join", { code, disc: DISC });
       setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
       history.replaceState(null, "", location.pathname);
     });

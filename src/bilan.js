@@ -10,7 +10,7 @@ const BILAN = (() => {
   function summary(S, extra) {
     const tiles = Object.values(S.tiles || {});
     return {
-      id: String(extra.id || ""), mode: extra.mode, test: !!extra.test,
+      id: String(extra.id || ""), mode: extra.mode, test: !!extra.test, decouverte: !!(extra.decouverte || S.decouverte),
       version: S.version || E.VERSION, versionFin: E.VERSION, date: new Date().toISOString(),
       winner: S.winner, rounds: S.round, biomass: S.biomass, reserve: S.reserve || 0,
       killed: S.killed || 0, workers: S.workersBase, floors: S.floors,
