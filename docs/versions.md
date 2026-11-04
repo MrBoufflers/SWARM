@@ -4,6 +4,14 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.6 — 4 novembre 2026
+
+Interface seulement, sans changement de règles.
+
+- **Mode sombre**, par défaut, dans l'esprit des illustrations : charbon, lueurs de braise, accents rouille et orange. Le champ de bataille sert de fond à l'accueil.
+- Bouton **Thème** dans l'en-tête : sombre → clair → auto (suit le réglage de l'appareil). Le choix est mémorisé dans le navigateur.
+- Sur téléphone, les boutons de l'en-tête passent à la ligne au lieu de déborder.
+
 ## v0.4.5 — 4 novembre 2026
 
 Interface seulement, sans changement de règles.

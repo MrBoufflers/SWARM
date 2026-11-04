@@ -10,12 +10,32 @@
   --body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --cell: min(96px, calc((100vw - 52px) / 9)); /* plateau agrandi pour les illustrations (Oni, 04/11/2026 ; avant 64 px) */
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #131716; --panel: #1c2120; --panel-2: #232927; --ink: #e5eae7; --ink-soft: #9ba7a1; --rule: #33403b;
-  --wall-bg: #3a2e20; --support-bg: #18332f; --colonie: #3fb3a3; --essaim: #a68bd6; color-scheme: dark } }
-:root[data-theme="dark"] {
-  --bg: #131716; --panel: #1c2120; --panel-2: #232927; --ink: #e5eae7; --ink-soft: #9ba7a1; --rule: #33403b;
-  --wall-bg: #3a2e20; --support-bg: #18332f; --colonie: #3fb3a3; --essaim: #a68bd6; color-scheme: dark }
+/* Thème sombre (Oni, 04/11/2026) : charbon, braises et rouille, dans l'esprit des illustrations. Choisi par le bouton
+   « Thème » (data-theme sur <html>, par défaut sombre) ; « auto » suit le réglage du système. */
+:root[data-theme="dark"], :root[data-theme="auto"].sys-dark {
+  --bg: #100e0d; --panel: #1b1816; --panel-2: #241f1c; --ink: #ece4da; --ink-soft: #a89b8e; --rule: #3a322c;
+  --aggro: #d2533f; --tank: #4f8fd6; --soutien: #a07ad6;
+  --wall: #c98d4e; --wall-bg: #3a2a1c; --support: #2f8f80; --support-bg: #17302c;
+  --off: #e07a35; --sup: #57a368;
+  --north: #4a86d0; --east: #46a96f; --south: #d9a12e; --west: #c25fab;
+  --colonie: #4fb8a6; --essaim: #a77fd9; --hot: #f0a43a; --danger: #e0533f;
+  color-scheme: dark;
+}
+:root[data-theme="dark"] body, :root[data-theme="auto"].sys-dark body {
+  background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(240,120,40,.10), transparent 60%),
+              radial-gradient(ellipse 60% 50% at 100% 100%, rgba(167,127,217,.07), transparent 70%), var(--bg);
+  background-attachment: fixed;
+}
+:root[data-theme="dark"] .panel, :root[data-theme="dark"] .phase, :root[data-theme="dark"] .detail, :root[data-theme="dark"] .ho-card,
+:root[data-theme="auto"].sys-dark .panel, :root[data-theme="auto"].sys-dark .phase, :root[data-theme="auto"].sys-dark .detail, :root[data-theme="auto"].sys-dark .ho-card {
+  box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 8px 24px rgba(0,0,0,.35);
+}
+:root[data-theme="dark"] .board, :root[data-theme="auto"].sys-dark .board { border-color: #2b2420; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+:root[data-theme="dark"] .fl.on, :root[data-theme="auto"].sys-dark .fl.on { box-shadow: 0 0 8px rgba(79,184,166,.35); }
+:root[data-theme="dark"] button.primary, :root[data-theme="auto"].sys-dark button.primary { background: var(--hot); color: #1b120a; border-color: var(--hot); }
+:root[data-theme="dark"] .home-acts button.primary, :root[data-theme="auto"].sys-dark .home-acts button.primary { background: var(--hot); color: #1b120a; border-color: var(--hot); }
+:root[data-theme="dark"] .cell.core, :root[data-theme="auto"].sys-dark .cell.core { background: #2a2420; }
+:root[data-theme="dark"] [data-tip]::after, :root[data-theme="auto"].sys-dark [data-tip]::after { background: #f1e9de; color: #1b1612; }
 
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45;
   padding-block: 0 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -30,7 +50,7 @@ button:focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; }
 .brand span { color: var(--ink-soft); font-size: .8rem; }
 .round { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 1.1rem; }
 .round b { font-size: 1.3rem; }
-.menu { margin-left: auto; display: flex; gap: 8px; }
+.menu { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--ink-soft); }
 .dot.colonie { background: var(--colonie); } .dot.essaim { background: var(--essaim); }
 
@@ -354,3 +374,5 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .board.im .cell.entry { background: rgba(0,0,0,.28); border-color: rgba(255,255,255,.35); }
 .board.im .cell.entry .col { color: #f1ece6; }
 .cell.core.im { background: linear-gradient(rgba(0,0,0,.05) 30%, rgba(0,0,0,.72)), var(--img) center / cover; color: #fff; justify-content: flex-end; padding-bottom: 4px; text-shadow: 0 1px 2px #000; }
+@media (max-width: 680px) { .menu button { padding: 6px 9px; font-size: .85rem; } }
+:root[data-theme="dark"] .handoff.home.im, :root[data-theme="auto"].sys-dark .handoff.home.im { background: radial-gradient(circle at 50% 40%, rgba(16,14,13,.55), rgba(16,14,13,.95) 70%), var(--img) center / cover; border-radius: 14px; }
