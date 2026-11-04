@@ -815,6 +815,43 @@ const fresh = () => {
   SF.apply(T, "colonie", "build"); while (T.phase === "D_place") SF.apply(T, "colonie", "placeAt", { k: SF.placeTargets(T)[0] });
   ok(T.phase !== "D_fire", "aucune créature à portée : pas d'étape de tirs, le tour passe à l'essaim");
 }
+// 59. Déplacements au choix (Oni, 04/11/2026) : chaque créature seule, cases voisines de sa lane, retraite possible,
+//     attaque facultative d'un bâtiment qui touche sa case, plus de mouvement après l'attaque
+{
+  const S = fresh(); S.phase = "A_attack"; S.supports = {}; // Barbelé en C1 (0,1)
+  const c = { id: 800, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 5, acted: false }, h = { id: 801, name: "Carapace", lane: "N", u: 0, k: 3, hp: 3, acted: false };
+  S.creatures.push(c, h);
+  const R = SF.reachable(S, c);
+  ok(Object.values(R).map(r => r.u + "," + r.k).sort().join(" ") === "-1,3 0,2 0,4 1,3", "1 déplacement : avant (C2), arrière (entrée C), côtés (B3, D3) ; jamais en diagonale");
+  ok(SF.apply(S, "essaim", "move", { id: 800, u: 0, k: 4 }) === "" && c.k === 4 && h.k === 3, "retraite de l'Écorcheur vers l'entrée ; la Carapace de sa case ne bouge pas");
+  ok(SF.apply(S, "essaim", "move", { id: 800, u: 0, k: 3 }) !== "", "plus de déplacement ce tour (vitesse 1)");
+  ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 1 }) !== "", "pas sur un bâtiment");
+  ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 2 }) === "" && SF.strikeTargets(S, h).join() === "0,1", "la Carapace avance en C2 : le Barbelé (C1) est attaquable");
+  ok(S.tiles["0,1"].hp === 1, "l'attaque est facultative : rien ne se passe tant qu'on ne la demande pas");
+  ok(SF.apply(S, "essaim", "strike", { id: 801, target: "0,1" }) === "" && !S.tiles["0,1"] && h.acted, "la Carapace attaque et détruit le Barbelé");
+  ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 1 }) !== "", "après une attaque, plus de déplacement");
+  ok(S.phase === "D_main", "plus aucune créature ne peut agir : le tour passe seul à la colonie");
+  // fusée et cibles au choix
+  const T = fresh(); T.phase = "A_attack"; T.supports = {};
+  T.tiles["1,1"] = undefined; delete T.tiles["1,1"];
+  const m = { id: 810, name: "Massacreur", lane: "N", u: 0, k: 2, hp: 1, acted: false }; T.creatures.push(m);
+  delete T.tiles["0,1"]; T.tiles["-1,2"] = SF.tileStats("Muraille", -1, 2); T.tiles["1,2"] = SF.tileStats("Antenne", 1, 2);
+  ok(SF.strikeTargets(T, m).sort().join() === "-1,2,1,2", "cibles : les bâtiments qui touchent sa case (B2 et D2), au choix");
+  SF.apply(T, "essaim", "move", { id: 810, u: 0, k: 1 });
+  ok(SF.strikeTargets(T, m).includes("fusee"), "en C1 : la fusée est attaquable");
+  // Glaneur : déplacements fixés au premier pas, Mobilité
+  const U = fresh(); U.phase = "A_attack"; U.supports = {}; delete U.tiles["0,1"];
+  const g = { id: 820, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, acted: false }, e = { id: 821, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
+  U.creatures.push(g, e);
+  ok(SF.stepsLeft(U, e) === 2 && SF.stepsLeft(U, g) === 2, "Glaneur : 2 cases ; l'Écorcheur de sa case aussi (Aura Mobilité)");
+  SF.apply(U, "essaim", "move", { id: 821, u: 0, k: 3 });
+  ok(SF.stepsLeft(U, e) === 1, "après un pas loin du Glaneur, il lui reste quand même 1 déplacement (fixé au premier pas)");
+  // Tout résoudre : l'ancien comportement automatique, créature par créature
+  const V = fresh(); V.phase = "A_attack"; V.supports = {};
+  const v = { id: 830, name: "Massacreur", lane: "N", u: 0, k: 3, hp: 5, acted: false }; V.creatures.push(v);
+  SF.apply(V, "essaim", "actAll");
+  ok(v.k === 2 && !V.tiles["0,1"] && V.phase === "D_main", "Tout résoudre : avance d'une case, attaque devant, puis le tour passe");
+}
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
   const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");

@@ -43,7 +43,7 @@
     A_deploy: ["essaim", "Déploiement", "Choisissez une carte, puis une case d'entrée (bord du plateau) dans une lane. Vous pouvez aussi investir votre budget dans une amélioration (panneau Essaim). Le budget non dépensé ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
-    A_attack: ["essaim", "Attaques", "Chaque case avance d'une case (deux pour les aggros mobiles) ; arrivées au contact d'une tuile ou de la fusée, ses créatures attaquent dans l'ordre de votre choix. Les cases les plus proches de la fusée d'abord."],
+    A_attack: ["essaim", "Attaques", "Déplacez chaque créature où vous voulez dans sa lane (1 case, 2 avec la Mobilité ou un Glaneur), puis attaquez si vous le souhaitez un bâtiment qui touche sa case, ou la fusée."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
@@ -233,19 +233,15 @@
       body = spellBox("off");
       acts = `<button data-a="reactDone" class="primary">Terminer la réaction</button>`;
     } else if (ph === "A_attack") {
-      const ready = SF.readyCases(S), crOf = k => S.creatures.filter(c => SF.posKey(c) === k && !c.acted);
-      const blockTxt = k => { const cs = crOf(k); return `${posTxt(cs[0])} : ${cs.map(c => c.name + (SF.attacks(c) ? "" : " (avance)")).join(", ")}`; };
-      if (UI.blk && ready.includes(UI.blk)) { // choix de l'ordre d'attaque dans le bloc
-        const att = crOf(UI.blk).filter(SF.attacks);
-        body = `<p class="hint">Bloc ${E(blockTxt(UI.blk))}. Touchez les créatures dans l'ordre où elles attaqueront (les autres suivront).</p><div class="choices">` +
-          att.map(c => { const n = UI.ord.indexOf(c.id); return `<button data-a="ordPick" data-id="${c.id}" class="${n >= 0 ? "on" : ""}">${n >= 0 ? (n + 1) + ". " : ""}${E(c.name)} · ATQ ${SF.effAtq(S, c)} · ${c.hp + SF.bonusHp(S, c)} PV</button>`; }).join("") + `</div>`;
-        acts = `<button data-a="ordGo" class="primary">Attaquer</button><button data-a="ordCancel">Annuler</button>`;
-      } else {
-        const waiting = [...new Set(S.creatures.filter(c => !c.acted).map(SF.posKey))].filter(k => !ready.includes(k));
-        body = ready.length ? `<p class="hint">Chaque case avance en bloc d'une case (deux pour les aggros mobiles) et attaque si elle est au contact ; dans une lane, les cases les plus proches de la fusée agissent d'abord.</p><div class="choices">` + ready.map(k => `<button data-a="act" data-k="${k}">${E(blockTxt(k))}</button>`).join("") + `</div>` +
-          (waiting.length ? `<p class="small">En attente : ${waiting.map(k => E(blockTxt(k))).join(" · ")}</p>` : "") : `<p class="hint">Toutes les créatures ont agi.</p>`;
-        acts = ready.length ? `<button data-a="actAll">Tout résoudre (les plus avancées d'abord)</button>` : ""; // le tour passe seul quand toutes les cases ont agi
-      }
+      // déplacements au choix (Oni, 04/11/2026) : toucher une créature, puis une case surlignée ou un bâtiment encadré
+      const sel = S.creatures.find(c => c.id === UI.selCreature && !c.acted);
+      const left = S.creatures.filter(c => SF.canAct(S, c)).length;
+      if (sel) {
+        const t = SF.strikeTargets(S, sel), n = SF.stepsLeft(S, sel);
+        body = `<p class="hint"><b>${E(sel.name)}</b> · ${posTxt(sel)} : ${n ? `encore ${n} déplacement${n > 1 ? "s" : ""} (cases surlignées, retraite comprise)` : "plus de déplacement ce tour"}${SF.attacks(sel) ? (t.length ? ", ou attaquez une cible encadrée" : "") : " · un soutien n'attaque pas"}.</p>` +
+          (t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "");
+      } else body = `<p class="hint">Touchez une créature, puis une case surlignée pour la déplacer (en avant, sur le côté ou en retraite), ou une cible encadrée pour attaquer. ${left ? `${left} créature${left > 1 ? "s peuvent" : " peut"} encore agir.` : ""}</p>`;
+      acts = `<button data-a="actAll">Tout résoudre automatiquement</button><button data-a="endA" class="primary">Fin du tour</button>`;
     } else if (ph === "D_main") {
       body = spellBox("sup") + (UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
       acts = `<button data-a="build" class="primary">Construire, puis passer aux tirs</button>`;
@@ -327,6 +323,10 @@
   function board() {
     const canDeployHere = (lane, u) => S.phase === "A_deploy" && S.view === "essaim" && UI.sel && SF.canDeploy(S, cardOf(UI.sel), lane);
     const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : [];
+    // créature choisie en phase d'attaque : cases où elle peut aller, cibles qu'elle peut attaquer
+    const mover = S.phase === "A_attack" && S.view === "essaim" ? S.creatures.find(c => c.id === UI.selCreature && !c.acted) : null;
+    const R = mover ? SF.reachable(S, mover) : {}, T = mover ? SF.strikeTargets(S, mover) : [];
+    const mvAttr = k => R[k] ? ` data-a="moveTo" data-u="${R[k].u}" data-k="${R[k].k}"` : "";
     let html = "";
     for (let y = 4; y >= -4; y--) for (let x = -4; x <= 4; x++) {
       const r = SF.ring(x, y), k = SF.key(x, y);
@@ -337,11 +337,11 @@
         if (Math.abs(u) > 2) { html += `<div class="cell void"></div>`; continue; }
         const crs = S.creatures.filter(c => c.lane === lane && c.k === 4 && c.u === u);
         const hot = canDeployHere(lane, u);
-        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}" data-xy="${k}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : ""}><span class="col">${SF.COLS[u + 2]}</span>${tokens(crs)}</div>`;
+        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}${R[k] ? " mv" : ""}" data-xy="${k}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : mvAttr(k)}><span class="col">${SF.COLS[u + 2]}</span>${tokens(crs)}</div>`;
         continue;
       }
       if (x === 0 && y === 0) {
-        html += `<div class="cell core ${imCls("Fusée")}" data-xy="${k}">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
+        html += `<div class="cell core ${imCls("Fusée")}${T.includes("fusee") ? " atk" : ""}" data-xy="${k}"${T.includes("fusee") ? ` data-a="strike" data-k="fusee"` : ""}>${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
         continue;
       }
       if (SF.isSupportCell(x, y)) {
@@ -367,7 +367,8 @@
         }
       }
       const stased = S.stase.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : ""}>${inner}${tokens(crs)}</div>`;
+      const atk = !target && T.includes(k);
+      html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -402,7 +403,7 @@
       const t = SF.CREATURES[c.name].type;
       // tourelle choisie : toucher une créature à portée la vise directement (Oni, 04/11/2026)
       const tgt = S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c);
-      const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${c.acted && S.phase === "A_attack" ? " done" : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
+      const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" && !SF.canAct(S, c) ? " done" : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${tgt ? " : tirer dessus" : ""}"><span>${SF.effAtq(S, c)}</span><span>${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
@@ -564,6 +565,8 @@
         if (att.length >= 2) { UI.blk = d.k; UI.ord = []; break; }
         return play("act", { key: d.k });
       }
+      case "moveTo": if (UI.selCreature !== null) return play("move", { id: UI.selCreature, u: Number(d.u), k: Number(d.k) }); break;
+      case "strike": if (UI.selCreature !== null) { const id = UI.selCreature; return play("strike", { id, target: d.k }, () => { UI.selCreature = null; }); } break;
       case "ordPick": { const id = Number(d.id); UI.ord = UI.ord.includes(id) ? UI.ord.filter(x => x !== id) : [...UI.ord, id]; break; }
       case "ordCancel": UI.blk = null; UI.ord = []; break;
       case "ordGo": { const key = UI.blk, order = UI.ord; UI.blk = null; UI.ord = []; if (key) return play("act", { key, order }); break; }
@@ -698,9 +701,10 @@
   const STEP = {
     async move(e) { // tout le bloc glisse ensemble, case par case
       const gs = (e.ids || [e.id]).map(ghost).filter(Boolean); if (!gs.length) return;
-      let [u, k] = e.from;
-      for (let i = 0; i < 12 && !(u === e.to[0] && k === e.to[1]); i++) {
-        [u, k] = SF.nextStep(u, k);
+      // chemin fourni par le moteur (déplacements au choix, retraite comprise), sinon le chemin vers la fusée
+      const steps = e.path ? e.path.slice() : [];
+      if (!e.path) { let [u, k] = e.from; for (let i = 0; i < 12 && !(u === e.to[0] && k === e.to[1]); i++) { [u, k] = SF.nextStep(u, k); steps.push([u, k]); } }
+      for (const [u, k] of steps) {
         const c = cellAt(SF.toGlobal(e.lane, u, k).join(","));
         if (c) { const b = box(c); await Promise.all(gs.map((g, j) => glide(g, b.cx + (j - (gs.length - 1) / 2) * 8, b.cy, 130))); }
       }

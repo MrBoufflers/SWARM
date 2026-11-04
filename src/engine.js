@@ -121,7 +121,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.7";
+  const VERSION = "0.4.8";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -509,6 +509,77 @@ const SF = (() => {
       killCheck(S);
     }
   }
+  // ---- Déplacements au choix (Oni, 04/11/2026) : chaque créature se déplace seule, case par case et sans diagonale,
+  // sur toute case voisine de sa lane (cases d'entrée comprises), vers la fusée comme en arrière (retraite) ; jamais sur
+  // un bâtiment, un coin de support ni la fusée. Ensuite, si elle le veut, elle attaque un bâtiment qui touche sa case
+  // (ou la fusée) ; après une attaque, elle ne bouge plus. Son nombre de déplacements est fixé à son premier pas du tour
+  // (vitesse de base, Mobilité, Aura Mobilité du Glaneur de sa case à ce moment-là).
+  const gpos = c => toGlobal(c.lane, c.u, c.k);
+  function walkable(S, lane, x, y) {
+    if (cellLane(x, y) !== lane) return false;
+    const r = ring(x, y);
+    if (r === 4) return Math.abs(toLocal(lane, x, y)[0]) <= 2;
+    return r >= 1 && r <= 3 && !S.tiles[key(x, y)];
+  }
+  function stepsLeft(S, c) { return c.acted ? 0 : Math.max(0, (c.spd !== undefined ? c.spd : speedOf(S, c)) - (c.moved || 0)); }
+  function reachable(S, c) { // cases atteignables ce tour : { clé globale : { u, k, d (distance), prev (clé précédente) } }
+    const left = stepsLeft(S, c), out = {};
+    const [x0, y0] = gpos(c), start = key(x0, y0), seen = new Set([start]);
+    let front = [[x0, y0]];
+    for (let d = 1; d <= left; d++) {
+      const next = [];
+      for (const [x, y] of front) for (const [a, b] of neighbors(x, y)) {
+        const k = key(a, b); if (seen.has(k) || !walkable(S, c.lane, a, b)) continue;
+        seen.add(k); next.push([a, b]);
+        const [u, kk] = toLocal(c.lane, a, b);
+        out[k] = { u, k: kk, d, prev: key(x, y) };
+      }
+      front = next;
+    }
+    return out;
+  }
+  function strikeTargets(S, c) { // bâtiments qui touchent sa case (sans diagonale), ou la fusée
+    if (c.acted || !attacks(c)) return [];
+    const [x, y] = gpos(c), out = [];
+    for (const [a, b] of neighbors(x, y)) { if (a === 0 && b === 0) out.push("fusee"); else if (S.tiles[key(a, b)]) out.push(key(a, b)); }
+    return out;
+  }
+  const canAct = (S, c) => !c.acted && (strikeTargets(S, c).length > 0 || Object.keys(reachable(S, c)).length > 0);
+  function moveCreature(S, id, u, k) {
+    const c = S.creatures.find(o => o.id === id); if (!c || c.acted) return false;
+    const R = reachable(S, c), dest = key(...toGlobal(c.lane, u, k)), r = R[dest];
+    if (!r) return false;
+    if (c.spd === undefined) c.spd = speedOf(S, c);
+    const start = key(...gpos(c)), path = [];
+    for (let cur = dest; cur && cur !== start; cur = R[cur] ? R[cur].prev : null) path.unshift([R[cur].u, R[cur].k]);
+    const from = cellName(c.u, c.k);
+    fx(S, { t: "move", ids: [c.id], lane: c.lane, from: [c.u, c.k], to: [u, k], path });
+    c.u = u; c.k = k; c.moved = (c.moved || 0) + r.d;
+    log(S, "essaim", `${c.name} (lane ${LANE_NAME[c.lane]}) : ${from} → ${cellName(u, k)}.`);
+    return true;
+  }
+  function strikeAt(S, id, target) {
+    const c = S.creatures.find(o => o.id === id); if (!c || !strikeTargets(S, c).includes(target)) return false;
+    c.acted = true;
+    auraFx(S, c);
+    if (target === "fusee") hitRocket(S, c); else hitTile(S, c, target, effAtq(S, c), true);
+    killCheck(S);
+    return true;
+  }
+  // résolution automatique d'une créature (bouton « Tout résoudre ») : elle avance sur le chemin vers la fusée tant
+  // qu'elle peut, puis attaque ce qui est devant elle s'il y a quelque chose
+  function autoCreature(S, c) {
+    if (c.acted) return;
+    for (let i = 0; i < 8 && stepsLeft(S, c) > 0; i++) {
+      const [nu, nk] = nextStep(c.u, c.k);
+      if (nk === 0 || S.tiles[key(...toGlobal(c.lane, nu, nk))]) break;
+      if (!moveCreature(S, c.id, nu, nk)) break;
+    }
+    const [nu, nk] = nextStep(c.u, c.k);
+    const front = nk === 0 ? "fusee" : key(...toGlobal(c.lane, nu, nk));
+    if (attacks(c) && strikeTargets(S, c).includes(front)) strikeAt(S, c.id, front);
+    else c.acted = true;
+  }
   // une seule créature, sans limite de déplacement (utilisé seulement par les tests de règles ciblés)
   function act(S, c) {
     if (c.acted) return;
@@ -613,7 +684,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
     S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = [];
-    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; }
+    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; }
     // Réincarnation
     for (const r of S.reincQueue) {
       const nc = makeCreature(S, r.name, r.lane, r.u);
@@ -1044,11 +1115,15 @@ const SF = (() => {
       if (typeof a.key !== "string" || (a.order !== undefined && !(Array.isArray(a.order) && a.order.every(isInt)))) return false;
       return actCase(S, a.key, a.order);
     } },
-    actAll: { phase: ["A_attack"], run(S) {
-      for (let i = 0; i < 200 && !S.winner; i++) { const r = readyCases(S); if (!r.length) break; actCase(S, r[0]); }
+    // déplacements au choix (Oni, 04/11/2026)
+    move: { phase: ["A_attack"], run: (S, a) => isInt(a.id) && isInt(a.u) && isInt(a.k) && moveCreature(S, a.id, a.u, a.k) },
+    strike: { phase: ["A_attack"], run: (S, a) => isInt(a.id) && (a.target === "fusee" || (typeof a.target === "string" && /^-?\d,-?\d$/.test(a.target))) && strikeAt(S, a.id, a.target) },
+    actAll: { phase: ["A_attack"], run(S) { // les créatures qui n'ont pas encore agi avancent et attaquent devant elles, les plus avancées d'abord
+      const todo = S.creatures.filter(c => !c.acted).sort((a, b) => pathLen(a.u, a.k) - pathLen(b.u, b.k) || a.id - b.id);
+      for (const c of todo) { if (S.winner) break; if (S.creatures.includes(c)) autoCreature(S, c); }
       return true;
     } },
-    endA: { phase: ["A_attack"], run(S) { if (attackOrder(S).length) return false; endAttackerTurn(S); return true; } },
+    endA: { phase: ["A_attack"], run(S) { endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
     startCh: { phase: ["D_main"], run(S, a) {
       if (!(isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane))) return false;
       // travailleurs assignés d'office (Oni, 04/11/2026) : juste assez pour finir les chantiers de la lane, dans la
@@ -1090,8 +1165,8 @@ const SF = (() => {
   }
   function autoAdvance(S) {
     if (S.winner) return;
-    if (S.phase === "A_attack" && !attackOrder(S).length) {
-      log(S, "essaim", "Toutes les cases ont agi : fin du tour de l'essaim.");
+    if (S.phase === "A_attack" && !S.creatures.some(c => canAct(S, c))) {
+      log(S, "essaim", "Plus aucune créature ne peut agir : fin du tour de l'essaim.");
       endAttackerTurn(S);
     }
     if (S.phase === "D_fire" && !canStillFire(S) && !S.winner) {
@@ -1142,7 +1217,7 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    clairvoyance, reachable, strikeTargets, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,

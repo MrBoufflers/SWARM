@@ -4,6 +4,18 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.8 — 4 novembre 2026
+
+**Règles (Oni) : déplacements au choix**
+- Les créatures ne se déplacent plus toutes seules. L'essaim choisit, pour **chaque créature**, où elle va : n'importe quelle case voisine de sa lane, sans diagonale (vers la fusée, sur le côté ou **en retraite** jusqu'aux entrées). Une créature fait 1 case (2 avec la Mobilité ou un Glaneur).
+- Ensuite, l'attaque est **facultative** : la créature peut frapper **le bâtiment de son choix** parmi ceux qui touchent sa case, ou la fusée. Après une attaque, elle ne bouge plus.
+- Les créatures d'une même case ne bougent plus ensemble, et il n'y a plus d'ordre imposé (les plus proches de la fusée d'abord).
+- Le bouton **Fin du tour** revient pour l'essaim, puisqu'on peut choisir d'attendre. Le tour passe aussi tout seul quand plus aucune créature ne peut agir.
+- « **Tout résoudre automatiquement** » joue les créatures restantes comme avant : elles avancent sur le chemin, puis attaquent ce qui est devant elles.
+- La Percée envoie toujours ses dégâts en trop à la case suivante du chemin, après le bâtiment détruit.
+
+**Interface** : touchez une créature, puis une case surlignée pour la déplacer, ou une cible encadrée de rouge pour attaquer (aussi en boutons dans l'encadré de l'étape).
+
 ## v0.4.7 — 4 novembre 2026
 
 Confort de jeu, sans changement de règles.
