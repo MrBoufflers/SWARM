@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.9 — 4 novembre 2026
+
+Interface seulement : illustration de la **Palissade** ; tous les bâtiments ont maintenant leur image.
+
 ## v0.4.8 — 4 novembre 2026
 
 **Règles (Oni) : déplacements au choix**
