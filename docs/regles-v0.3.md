@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.7 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.8 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -22,8 +22,7 @@ Repris du prototype jouable et validés par Oni :
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1, **Aura Mobilité 1** (+1 case aux autres créatures de sa case) et vitesse de base de 2 cases. **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B) ; les tanks ne subissent plus les Épines.
 - **Renforcé** remplace le Bouclier (Égide, Dortoir : Renforcé 2) : 1 PV perdu par tranche complète de X dégâts, plusieurs PV possibles d'un coup.
-- **Déplacement** : **une case par tour** (une créature qui vient d'entrer met 2 tours pour arriver au contact d'un bâtiment de la couronne 1) ; arrivée au contact, elle attaque aussitôt.
-- **Blocs** : les créatures d'une même case avancent ensemble ; les cases les plus proches de la fusée agissent d'abord ; l'essaim choisit l'ordre d'attaque ; si la tuile tombe, le bloc n'entre dans la case libérée que s'il lui reste un déplacement ce tour.
+- **Déplacements au choix** : chaque créature se déplace seule d'une case par tour (deux avec la Mobilité ou un Glaneur) vers n'importe quelle case voisine de sa lane, en avant, sur le côté ou en retraite ; puis elle attaque, si l'essaim le veut, un bâtiment qui touche sa case (au choix) ou la fusée.
 - **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 - **Départ de l'essaim** : **5 de biomasse** ; au premier tour, à la place de la pioche, une aggro, un tank et un soutien de niveau 1 (au hasard), payés normalement. **Œil-sonde** : Vision permanente sur sa lane tant qu'il est en vie.
 
@@ -164,16 +163,18 @@ Exemple depuis la colonne A : A3 → B3 → B2 → C2 → C1 → fusée. Un pas 
 
 Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coin de support, donc la créature de la colonne A fait d'abord un pas de côté vers B3.
 
-### Déplacer puis attaquer : les blocs
+### Déplacer puis attaquer (déplacements au choix)
 
-Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
+Pendant ses attaques, l'essaim décide de ce que fait **chaque créature**, une par une, dans l'ordre qu'il veut.
 
-1. **Ordre** : dans une lane, les cases les plus proches de la fusée agissent d'abord ; un bloc qui arrive sur une case déjà occupée fusionne avec elle.
-2. **Déplacement** : le bloc avance d'**une case** sur son chemin (deux pour les aggros qui ont la Mobilité, voir plus bas). S'il n'est pas encore au contact d'une tuile ou de la fusée, il s'arrête là et n'attaque pas ce tour.
-3. **Attaque** : dès que le bloc est au contact (avant ou après son déplacement), ses créatures frappent **une par une, dans l'ordre choisi par l'essaim**. Chacune inflige son ATQ, plus les bonus des auras des soutiens de sa case. Les soutiens n'attaquent jamais : ils avancent avec le bloc et ne subissent donc pas d'Épines.
-4. **Le bloc suit** : si la tuile tombe et qu'il reste des créatures qui n'ont pas encore frappé, le bloc entre dans la case libérée **s'il lui reste un déplacement ce tour** (il était déjà au contact au début de son action, ou il a la Mobilité) ; si la case suivante porte une tuile ou est la fusée, les créatures restantes la frappent. Sinon, il reste sur place. Un bloc n'avance qu'**avant** une attaque : après la dernière attaque, il reste sur place.
+1. **Déplacement** : la créature se déplace d'**une case** (deux avec la Mobilité ou le Glaneur, voir plus bas) vers **n'importe quelle case voisine de sa lane**, sans diagonale : vers la fusée, sur le côté, ou **en retraite** jusqu'aux cases d'entrée. Elle ne passe jamais sur un bâtiment, un coin de support ou la fusée. Plusieurs créatures peuvent partager une case ; chacune bouge séparément.
+2. **Attaque (facultative)** : ensuite, si elle le veut, elle attaque **un bâtiment qui touche sa case** (sans diagonale), au choix, ou la fusée si elle la touche. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais.
+3. **Après une attaque**, la créature ne bouge plus ce tour.
+4. **Fin du tour** : l'essaim termine son tour quand il veut, et les créatures qui n'ont pas agi restent sur place. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
 
-**Mobilité** : une créature qui a la Mobilité avance de **2 cases** par tour. Dans une case qui mélange des créatures mobiles et d'autres, les mobiles **partent devant** : elles agissent d'abord, comme un bloc à part, puis le reste de la case agit. Loin de leurs soutiens, elles perdent les auras de ces derniers †.
+**Mobilité** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1, +1 avec la Mobilité (aggros), +1 par Glaneur sur sa case à ce moment-là (le Glaneur lui-même fait 2).
+
+**Percée** : les dégâts en trop passent à la case suivante du **chemin** vers la fusée, à partir du bâtiment détruit (comme avant) †.
 
 ### Dégâts sur une tuile
 

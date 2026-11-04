@@ -393,3 +393,10 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .cell.sup { outline: 2px solid color-mix(in srgb, var(--support) 55%, #fff); outline-offset: -2px; }
 :root[data-theme="dark"] .cell.sup, :root[data-theme="auto"].sys-dark .cell.sup { outline-color: #5fd4c0; }
 .cell.sup.spent { outline-style: dashed; }
+
+/* déplacements au choix (Oni, 04/11/2026) : cases atteignables et cibles attaquables de la créature choisie */
+.cell.mv { box-shadow: inset 0 0 0 2px var(--hot); cursor: pointer; }
+.cell.mv::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--hot) 16%, transparent); pointer-events: none; }
+.cell.atk { box-shadow: inset 0 0 0 3px var(--danger); cursor: crosshair; }
+.cell.atk .tile { box-shadow: 0 0 10px color-mix(in srgb, var(--danger) 70%, transparent); }
+.cell.core.atk { box-shadow: inset 0 0 0 3px var(--danger), 0 0 14px var(--danger); }
