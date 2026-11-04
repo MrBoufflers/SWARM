@@ -165,9 +165,9 @@
           <span class="kc" tabindex="0" data-tip="Fusée : ${S.rocketPts} / ${SF.floorCost(S)} points vers l'étage ${Math.min(12, S.floors + 1)}">${icon("fusee")}<b>${S.rocketPts}</b><small>/${SF.floorCost(S)} pts</small></span>
           <span class="kc" tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b><small>tuiles</small></span>
           <span class="kc" tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b><small>sorts</small></span>
+          <div class="sum-at" data-fx="ateliers">${ateliers}</div>
         </div>
-      </div>
-      <div class="sum-at" data-fx="ateliers">${ateliers}</div>`;
+      </div>`;
   }
   // icône de chaque nœud d'amélioration (résumé de l'essaim vu par la colonie)
   const NODE_ICON = {
@@ -333,7 +333,7 @@
         continue;
       }
       if (x === 0 && y === 0) {
-        html += `<div class="cell core" data-xy="${k}">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
+        html += `<div class="cell core ${imCls("Fusée")}" data-xy="${k}">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
         continue;
       }
       if (SF.isSupportCell(x, y)) {
@@ -361,7 +361,7 @@
       const stased = S.stase.includes(k);
       html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : ""}>${inner}${tokens(crs)}</div>`;
     }
-    return `<div class="board" role="grid" aria-label="Plateau">${html}</div>
+    return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
   }
   // Carte de tuile en main : durée, PV, Épines et capacités (libellés du Catalogue du livret v0.3)

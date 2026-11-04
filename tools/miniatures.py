@@ -12,12 +12,21 @@ TAILLE, QUALITE = 200, 68
 NOMS = {
     "Écorcheur": "écorcheur.jpg", "Ravageur": "ravageur.jpg", "Massacreur": "massacreur.jpg",
     "Carapace": "carapace.jpg", "Béhémoth": "béhémoth.jpg", "Colosse": "colosse.jpg",
-    "Œil-sonde": "oeil sonde.jpg", "Glaneur": "glaneur.jpg", "Hurleur": "hurleur.jpg", "Phéromone": "phéromone.jpg",
+    "Œil-sonde": "oeil sonde.jpg", "Glaneur": "glaneur.jpg", "Hurleur": "hurleur.jpg",
+    "Phéromone": "phéromone.jpg", "Perforeur": "perforeur.jpg", "Catalyseur": "catalyseur.jpg",
+    "Sapeur": "sapeur.jpg", "Sporeur": "sporeur.jpg",
     "Barbelé": "barbelé.jpg", "Antenne": "antenne.jpg", "Bastion": "bastion.jpg", "Haie d'épines": "haie d'épines.jpg",
     "Laboratoire": "laboratoire.jpg", "Mur hérissé": "mur hérissé.jpg", "Muraille": "muraille.jpg",
-    "Observatoire": "observatroire.jpg", "Rempart": "rempart.jpg",
+    "Observatoire": "observatroire.jpg", "Rempart": "rempart.jpg", "Archives": "archive.jpg",
+    "Baraquement": "baraquement.jpg", "Dortoir": "dortoir.jpg", "Égide": "egide.jpg", "Ligne de front": "ligne de front.jpg",
+    "Réduit": "réduit.jpg", "Piège": "piege.jpg", "Siphon": "siphon.jpg", "Ronceraie": "ronceraie.jpg",
+    "Avant-poste du Nord": "avant poste.jpg", "Avant-poste de l'Est": "avant poste.jpg",
+    "Avant-poste du Sud": "avant poste.jpg", "Avant-poste de l'Ouest": "avant poste.jpg",
     "support 1": "support 1.jpg", "support 2": "support 2.jpg", "support 3": "support niveau 3.jpg",
+    "Fusée": "fusée.jpg", "Champ de bataille": "champs de bataille.jpg",
 }
+# taille particulière : le champ de bataille sert de fond à tout le plateau
+TAILLES = {"champs de bataille.jpg": (840, 55)}
 
 def slug(n):
     n = unicodedata.normalize("NFKD", n.replace("Œ", "Oe")).encode("ascii", "ignore").decode().lower()
@@ -25,16 +34,20 @@ def slug(n):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    table, total = {}, 0
+    for old in OUT.glob("*.webp"): old.unlink()
+    table, faits, total = {}, {}, 0
     for nom, fichier in NOMS.items():
         src = unicodedata.normalize("NFC", fichier)
-        path = next((p for p in SRC.iterdir() if unicodedata.normalize("NFC", p.name) == src), None)
-        if not path: print("absent :", fichier); continue
-        im = Image.open(path).convert("RGB"); im.thumbnail((TAILLE, TAILLE), Image.LANCZOS)
-        dest = OUT / (slug(nom) + ".webp"); im.save(dest, "WEBP", quality=QUALITE, method=6)
-        table[nom] = dest.name; total += dest.stat().st_size
+        if src not in faits:  # une image partagée (Avant-postes) n'est réduite et intégrée qu'une fois
+            path = next((p for p in SRC.iterdir() if unicodedata.normalize("NFC", p.name) == src), None)
+            if not path: print("absent :", fichier); continue
+            taille, qualite = TAILLES.get(src, (TAILLE, QUALITE))
+            im = Image.open(path).convert("RGB"); im.thumbnail((taille, taille), Image.LANCZOS)
+            dest = OUT / (slug(src.rsplit(".", 1)[0]) + ".webp"); im.save(dest, "WEBP", quality=qualite, method=6)
+            faits[src] = dest.name; total += dest.stat().st_size
+        table[nom] = faits[src]
     (OUT / "table.json").write_text(json.dumps(table, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"{len(table)} miniatures, {total // 1024} Ko au total")
+    print(f"{len(faits)} miniatures pour {len(table)} noms, {total // 1024} Ko au total")
 
 if __name__ == "__main__":
     main()

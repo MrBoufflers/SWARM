@@ -310,7 +310,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .floors.v .fl { flex: 1; min-height: 22px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: .7rem; cursor: help; position: relative; }
 .floors.v .fl.cur { background: linear-gradient(to top, color-mix(in srgb, var(--colonie) 45%, transparent) var(--p), transparent var(--p)); }
 .rk-lab { font: 600 .72rem/1 var(--display); color: var(--ink-soft); } .rk-lab b { color: var(--ink); font-size: .9rem; }
-.sum-at { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; }
+.sum-at { display: grid; grid-template-columns: 1fr; gap: 4px; margin-top: 4px; grid-column: 1 / -1; }
 .sa { display: flex; align-items: center; gap: 5px; font-size: .74rem; padding: 4px 6px; border-radius: 5px; background: var(--panel-2); border-left: 3px solid var(--lc); cursor: help; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sa b { font: 700 .8rem/1 var(--display); color: var(--lc); }
 /* améliorations en icônes */
@@ -344,5 +344,13 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   .panel.essaim.mini [data-tip]:hover::after, .panel.essaim.mini [data-tip]:focus::after { left: auto; right: 0; }
 }
 .panel.mini, .panel.mini .kcs { overflow: visible; }
-@media (max-width: 1180px) { .panel.mini .kcs { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); align-content: start; } .sum-at { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 420px) { .sum-at { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1180px) { .panel.mini .kcs { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); align-content: start; } .sum-at { grid-template-columns: 1fr 1fr; } }
+
+/* fond du plateau (champ de bataille) et case de la fusée (Oni, 04/11/2026) */
+.board.im { background: linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)), var(--img) center / cover; border-color: #2b2724; }
+.board.im .cell.lane { background: color-mix(in srgb, var(--lc) 24%, transparent); }
+.board.im .cell.lane.r1 { background: color-mix(in srgb, var(--lc) 30%, transparent); }
+.board.im .cell.corner { background: rgba(0,0,0,.35); color: #e8e2da; }
+.board.im .cell.entry { background: rgba(0,0,0,.28); border-color: rgba(255,255,255,.35); }
+.board.im .cell.entry .col { color: #f1ece6; }
+.cell.core.im { background: linear-gradient(rgba(0,0,0,.05) 30%, rgba(0,0,0,.72)), var(--img) center / cover; color: #fff; justify-content: flex-end; padding-bottom: 4px; text-shadow: 0 1px 2px #000; }
