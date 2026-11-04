@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.10 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.11 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -23,7 +23,7 @@ Repris du prototype jouable et validés par Oni :
 - **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1, **Aura Mobilité 1** (+1 case aux autres créatures de sa case) et vitesse de base de 2 cases. **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B) ; les tanks ne subissent plus les Épines.
 - **Renforcé** remplace le Bouclier (Égide, Dortoir : Renforcé 2) : 1 PV perdu par tranche complète de X dégâts, plusieurs PV possibles d'un coup.
 - **Déplacements au choix** : chaque créature se déplace seule d'une case par tour (deux avec la Mobilité ou un Glaneur) vers n'importe quelle case voisine de sa lane, en avant, sur le côté ou en retraite ; puis elle attaque, si l'essaim le veut, un bâtiment qui touche sa case (au choix) ou la fusée.
-- **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros avancent de **2 cases** par tour et partent devant les autres créatures de leur case (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
+- **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros se déplacent de **2 cases** par tour (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 - **Départ de l'essaim** : **5 de biomasse** ; au premier tour, à la place de la pioche, une aggro, un tank et un soutien de niveau 1 (au hasard), payés normalement. **Œil-sonde** : Vision permanente sur sa lane tant qu'il est en vie.
 
 ## Le jeu en bref
@@ -381,7 +381,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Férocité | +1 ATQ |
-| 1 | Côté B | Mobilité | les créatures aggro avancent de **2 cases** par tour au lieu d'1 ; elles partent devant les autres créatures de leur case |
+| 1 | Côté B | Mobilité | les créatures aggro se déplacent de **2 cases** par tour au lieu d'1 |
 | 2 | Côté A (après Férocité) | Carnage | +2 ATQ (total +3) |
 | 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † |
 | 2 | Côté B (après Mobilité) | Essaim agrandi | **+3 au plafond de population** de chaque lane |

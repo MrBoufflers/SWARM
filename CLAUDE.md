@@ -61,6 +61,10 @@ Le livret de référence est un document Claude d'Oni ; `docs/regles-v0.3.md` en
   - `startCh` assigne d'office les travailleurs nécessaires aux chantiers de la lane, dans la limite des libres.
   - Une créature à portée de la tourelle choisie est cliquable (`.tok.tgt`, action `fireAt`).
   - Cartes de tuiles : `.art` (illustration) et `.cap` (capacité, texte en `data-tip`).
+- **Aide (v0.4.11, Oni)** : `src/aide.js` (module `AIDE`, inclus par build.py après bilan.js).
+  - `AIDE.rules(onglet, h)` : fiches Essaim / Colonie / Commun, chiffres et tableaux lus dans `SF`. Fenêtre « Règles » : `UI.helpTab`.
+  - `AIDE.nextTip(S, camp, vus)` : conseils du mode découverte (`TIPS` : id, camp, condition, texte). `DISC` et `SEEN` sont gardés dans `localStorage` (`swarm-steel-decouverte`, `swarm-steel-vus`) ; la fiche est rendue par `tipCard()`.
+  - Parties marquées `decouverte` (`S.decouverte` en local, `room.decouverte` en ligne via `disc` à la création ou à l'arrivée), visibles dans les statistiques.
 - **Hot-seat** : écran de passage (`S.handoff`) entre les camps ; `S.view` = camp qui regarde l'écran. Les mains et les tuiles camouflées de l'autre camp sont masquées **à l'affichage seulement** — l'état complet est dans le navigateur.
 
 ## Versions et statistiques (v0.4.0, 02/11/2026)
