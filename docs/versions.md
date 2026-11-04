@@ -6,10 +6,7 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 
 ## v0.4.12 — 4 novembre 2026
 
-Interface, sans changement de règles.
-
-- **Avancement de la fusée vu par l'essaim** : un encart en tête du résumé de la colonie indique l'étage en construction, une barre de progression, les points accumulés sur le coût de l'étage, le nombre de points que la colonie peut y mettre par tour, et le palier suivant avec son effet.
-- **Colonne d'étages** : les paliers (3, 6, 9, 12) ne sont plus encadrés comme des étages entamés ; seul l'étage en cours est marqué (pointillés), rempli selon les points déjà accumulés.
+Interface, sans changement de règles : au survol d'un étage de la fusée (résumé de la colonie et panneau de la colonie), la bulle indique son avancement, par exemple « Étage 5 : 1/4 travailleurs » (« achevé » pour les étages déjà construits).
 
 ## v0.4.11 — 4 novembre 2026
 

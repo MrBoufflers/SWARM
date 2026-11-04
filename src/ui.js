@@ -151,18 +151,9 @@
       9: `Palier 3 : Nuke, toutes les créatures sont détruites · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
       12: "Décollage : la colonie gagne",
     }[n];
-    return `Étage ${n} · ${cost} points\n+1 travailleur${extra ? "\n" + extra : ""}`;
-  }
-  // avancement de la fusée vu par l'essaim (Oni, 04/11/2026) : étage en cours, points accumulés, points par tour, prochain palier
-  function rocketProgress() {
-    if (S.floors >= SF.FLOORS) return `<div class="kprog">${icon("fusee")}<b>Fusée achevée</b></div>`;
-    const next = S.floors + 1, cost = SF.floorCost(S), pts = S.rocketPts, ms = [3, 6, 9, 12].find(n => n > S.floors);
-    const EFFECT = { 3: "+2 technologies, +1 tuile en main, tourelles I +1 dégât", 6: "+1 chantier par lane, +1 tuile en main, tourelles I +1 dégât", 9: "Nuke : toutes les créatures détruites", 12: "décollage : la colonie gagne" };
-    return `<div class="kprog" tabindex="0" data-tip="${E(`Étage ${next} : ${pts} point${pts > 1 ? "s" : ""} sur ${cost} déjà accumulé${pts > 1 ? "s" : ""}${pts ? " (restés du tour précédent)" : ""}. La colonie peut y mettre jusqu'à ${SF.totalPoints(S)} points par tour (ses travailleurs), moins ce qu'elle garde pour ses chantiers.`)}">
-      <span class="kp-h">${icon("fusee")}<b>Étage ${next}</b><small>en construction · ${S.floors}/12 achevés</small></span>
-      <span class="bar"><i style="width:${Math.round(100 * pts / cost)}%"></i></span>
-      <span class="kp-t"><b>${pts} / ${cost}</b> points · jusqu'à <b>${SF.totalPoints(S)}</b> par tour</span>
-      <span class="kp-n">Palier suivant : étage ${ms}${ms === next ? " (celui-ci)" : ` (dans ${ms - S.floors} étages)`} — ${EFFECT[ms]}</span></div>`;
+    // avancement (Oni, 04/11/2026) : « Étage 5 : 1/4 travailleurs » (points déjà investis sur le coût de l'étage)
+    const done = n <= S.floors ? cost : n === S.floors + 1 ? S.rocketPts : 0;
+    return `Étage ${n} : ${done}/${cost} travailleurs${n <= S.floors ? " (achevé)" : ""}\n+1 travailleur une fois achevé${extra ? "\n" + extra : ""}`;
   }
   // résumé de la colonie vu par l'essaim : chiffres clés, fusée en colonne, ateliers
   function colonySummary() {
@@ -178,12 +169,12 @@
       return `<span class="sa lane-${l}" tabindex="0" data-tip="${E(`Atelier ${SF.LANE_NAME[l]} : ${chs.length ? chs.map(ch => `${!ch.tile || SF.TILES[ch.tile].camo ? "tuile cachée" : ch.tile}, ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}`).join(" ; ") : "libre"}`)}"><b>${l}</b>${txt}</span>`;
     }).join("");
     return `<h3>${icon("fusee")} Colonie</h3>
-      ${rocketProgress()}
       <div class="sum">
         <div class="rocket" aria-label="Fusée : ${S.floors} étages sur 12"><div class="floors v">${rocket}</div><span class="rk-lab"><b>${S.floors}</b>/12</span></div>
         <div class="kcs">
           <span class="kc" tabindex="0" data-tip="Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.">${icon("travailleur")}<b>${S.workersBase}</b>${bonus ? `<small>+${bonus}</small>` : ""}</span>
           <span class="kc" tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b><small>${SF.spellsPerTurn(S)} sort/t</small></span>
+          <span class="kc" tabindex="0" data-tip="Fusée : ${S.rocketPts} / ${SF.floorCost(S)} points vers l'étage ${Math.min(12, S.floors + 1)}">${icon("fusee")}<b>${S.rocketPts}</b><small>/${SF.floorCost(S)} pts</small></span>
           <span class="kc" tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b><small>tuiles</small></span>
           <span class="kc" tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b><small>sorts</small></span>
           <div class="sum-at" data-fx="ateliers">${ateliers}</div>
