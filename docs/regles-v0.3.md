@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.3 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.4 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -10,14 +10,14 @@ Repris du prototype jouable et validés par Oni :
 
 - **Nom** : le jeu s'appelle désormais **Swarm & Steel** (anciennement Siège & Fusée).
 - **Mise en place** : 16 **Barbelés** (1 PV, Épines 1, face visible ; anciens murs puis haies de départ) sur toutes les cases des couronnes 1 et 2 ; les 4 supports de niveau 1 et les 4 supports de niveau 2 sont donc en place dès le départ. Détruit, un Barbelé est retiré du jeu.
-- **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulables : +1 par support de niveau 2 et +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour.
-- **Nouvelles forteresses** : **Égide** (3 PV, Renforcé 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Renforcé 2, +1 travailleur temporaire). **Siphon** (2 PV, piège qui retire 3 biomasse à l'essaim). Pioche : 54 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 3 exemplaires (au lieu de 6).
+- **Épines** : Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé (au lieu de 3), Ronceraie : 2 ; les autres tuiles n'en ont pas. Bonus cumulable : +1 par Avant-poste (**Aura d'épines**, Avant-postes posés face visible) dans les 8 cases autour. Les supports de niveau 2 ne donnent plus d'Épines.
+- **Nouvelles forteresses** : **Égide** (2 PV, Renforcé 2), **Archives** (3 PV, +1 technologie), **Ronceraie** (2 PV, Renforcé 2, Épines 2) ; **Dortoir** revu (3 PV, Renforcé 2, +1 travailleur temporaire). **Siphon** (2 PV, piège qui retire 3 biomasse à l'essaim). Pioche : 54 forteresses ; 3 exemplaires de chaque bâtiment à technologies (Antenne, Laboratoire, Observatoire, Archives) ; Palissade et Muraille à 3 exemplaires (au lieu de 6).
 - **Piège** : 3 dégâts (au lieu de 2), infligés avant que la créature frappe. **Percée** : seulement jusqu'à la case suivante du chemin (bâtiment ou fusée). **Camouflage** : une tuile encore camouflée ne subit ni la percée ni les spores, et reste cachée (sauf si la Vision ou la Clairvoyance la rend visible).
 - **Biomasse** : 1 par tuile détruite ou support tombé.
-- **Fusée** : un étage coûte 2, 3, 4 puis 5 points selon le palier atteint.
+- **Fusée** : un étage coûte 2, 4, 6 puis 8 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
-- **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : ce tour, le budget de l'essaim est sa biomasse divisée par 2 (arrondie à l'inférieur). **Brouillage** : se joue avant les attaques, sur une créature déployée ce tour.
-- **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (au lieu de 2).
+- **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : ce tour, le budget de l'essaim est sa biomasse divisée par 2 (arrondie à l'inférieur). **Brouillage** : se joue avant les attaques, sur n'importe quelle créature : ce tour, elle ne bouge pas et n'attaque pas. **Champ de stase** : protège un seul bâtiment ce tour (aucun dégât, et ses Épines sont suspendues).
+- **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +2 travailleurs.
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1, **Aura Mobilité 1** (+1 case aux autres créatures de sa case) et vitesse de base de 2 cases. **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B) ; les tanks ne subissent plus les Épines.
@@ -179,7 +179,7 @@ Toutes les créatures d'une même case forment un **bloc** qui avance ensemble.
 
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).
-- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus, tous cumulables : **+1** par support de niveau 2 dans les 8 cases autour, **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
+- **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus cumulable : **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
 - **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - **Siphon** : la première attaque le retourne face visible et l'essaim perd **3 biomasse** ; sa biomasse ne descend jamais sous 3. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Un Barbelé détruit est retiré du jeu (elle ne va pas dans la défausse).
@@ -240,7 +240,7 @@ Les 54 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
 
 La fusée compte 12 étages, de plus en plus chers ; chaque étage achevé rapporte un travailleur, et les étages 3, 6 et 9 débloquent un bonus majeur.
 
-- Un étage coûte **2 points de construction** pour les étages 1 à 3, **3** pour les étages 4 à 6, **4** pour les étages 7 à 9 et **5** pour les étages 10 à 12. Chaque fois que la fusée accumule le coût de l'étage suivant, ajoutez-le. Les points en trop restent acquis pour l'étage suivant.
+- Un étage coûte **2 points de construction** pour les étages 1 à 3, **4** pour les étages 4 à 6, **6** pour les étages 7 à 9 et **8** pour les étages 10 à 12. Chaque fois que la fusée accumule le coût de l'étage suivant, ajoutez-le. Les points en trop restent acquis pour l'étage suivant.
 - Chaque étage achevé : **+1 travailleur** de base.
 
 | Étage | Bonus |
@@ -281,7 +281,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 - **Zones** : une **case** ; une **lane** (toutes ses cases) ; une **couronne** (toutes les cases de même couronne, sur les 4 lanes).
 - **Aura** : effet d'un soutien sur les **autres** créatures de sa case, jamais sur lui-même. **Toutes les auras se cumulent**, même deux auras du même nom (chaque source compte) †.
 - **Renforcé X** : la tuile ne pivote d'un cran (1 PV) que par tranche complète de X dégâts d'une même attaque.
-- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par support de niveau 2 dans les 8 cases autour, +1 par Avant-poste voisin ; tout se cumule).
+- **Épines X** : la créature qui attaque cette tuile subit X dégâts après son attaque (Épines de base de la tuile, +1 par Avant-poste voisin ; cumulable).
 - **Aura d'épines** (Avant-postes) : chaque bâtiment des 8 cases autour gagne +1 Épines ; plusieurs Avant-postes se cumulent.
 - **Percée** : les dégâts en trop après la destruction d'une tuile passent **seulement à la case suivante** du chemin : un bâtiment les subit, la fusée perd un seul travailleur †, une case vide les perd. Ils ne vont jamais plus loin. Un bâtiment encore camouflé (jamais retourné, ni rendu visible par la Vision ou la Clairvoyance) ne subit rien : les dégâts sont perdus et il reste face cachée (piège et Siphon ne se déclenchent pas).
 - **Camouflée** : tuile posée face cachée, retournée à la première attaque ou par une capacité de vision. Tant qu'elle n'est pas retournée ni rendue visible (Vision, Clairvoyance), elle ne subit ni la percée ni les spores (dégâts de zone). En chantier, elle reste aussi face cachée dans l'atelier †. Toutes les forteresses sont camouflées, sauf l'Antenne, le Laboratoire, l'Observatoire, les Archives, le Baraquement, le Dortoir et les Avant-postes ; les Barbelés sont posés face visible †.
@@ -317,7 +317,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Forteresses
 
-54 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoutent +1 par support de niveau 2 dans les 8 cases autour et +1 par Avant-poste dans les 8 cases autour, tout se cumulant. La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
+54 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoute +1 par Avant-poste dans les 8 cases autour (cumulable). La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -328,7 +328,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Haie d'épines | 1 | 1 | **2** | Camouflée | 2 | 3 |
 | Mur hérissé | 2 | 2 | **2** | Camouflé | 4 | 2 |
 | Ronceraie | 3 | 2 | **2** | Camouflée ; Renforcé 2 | † | 3 |
-| Égide | 2 | 3 | — | Camouflée ; **Renforcé 2** | † | 3 |
+| Égide | 2 | 2 | — | Camouflée ; **Renforcé 2** | † | 3 |
 | Antenne | 1 | 1 | — | +1 technologie | 2 | 3 |
 | Laboratoire | 2 | 2 | — | +2 technologies | 4 | 3 |
 | Observatoire | 3 | 3 | — | +3 technologies | 6 | 3 |
@@ -354,9 +354,9 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Salve | Offensif | 2 dégâts à 2 créatures de la même case | 3 |
 | Barrage | Offensif | 1 dégât à chaque créature d'une lane | 2 |
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
-| Champ de stase | Offensif | choisissez une lane : ses tuiles ne subissent aucun dégât ce tour | 2 |
+| Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines | 2 |
 | Famine | Offensif | à jouer au début du tour de l'essaim : ce tour, son budget est sa biomasse **divisée par 2**, arrondie à l'inférieur (sa biomasse ne change pas) | 2 |
-| Brouillage | Offensif | à jouer avant les attaques, sur une créature déployée ce tour : elle est retirée du plateau, sa carte retourne dans sa pioche (mélangée), la biomasse dépensée est perdue † | 2 |
+| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation et Furtivité s'appliquent) : ce tour, elle ne bouge pas et n'attaque pas | 2 |
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |
 | Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 2 |
@@ -427,8 +427,8 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | Niveau | Couronne | Effet † |
 | --- | --- | --- |
 | 1 | 1 | tourelle : 1 dégât par tour, +1 aux étages 3, 6 et 9 de la fusée |
-| 2 | 2 | tourelle : 2 dégâts par tour ; +1 Épines à chaque tuile des 8 cases autour |
-| 3 | 3 | pas de tir ; **+3 travailleurs** tant qu'il tient |
+| 2 | 2 | tourelle : 2 dégâts par tour |
+| 3 | 3 | pas de tir ; **+2 travailleurs** tant qu'il tient |
 
 ### Résumé du tour
 
@@ -457,7 +457,6 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Barème des créatures** : aggros à 1 PV et tanks à 1 ATQ à tous les niveaux ; le barème PV + ATQ = 4 / 7 / 10 ne tient plus.
 - [ ] **Barème des forteresses** : la colonne « Points » comptait une Épines 1 gratuite pour toutes les tuiles ; à recalculer depuis sa suppression.
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
-- [ ] **Brouillage** : la biomasse dépensée pour la carte annulée est perdue.
 - [ ] **Furtivité** : non ciblable tant qu'une créature non furtive est sur sa case.
 - [x] **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur (décidé le 02/11/2026).
 - [x] **Aura Frénésie** : cumulable, cible au choix ; deux Frénésies sur la même créature la quadruplent (décidé le 02/11/2026).

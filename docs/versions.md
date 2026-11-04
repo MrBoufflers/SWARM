@@ -4,6 +4,20 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.4 — 4 novembre 2026
+
+**Règles (Oni)**
+- **Supports de niveau 2** : ils ne donnent plus d'Épines aux tuiles voisines.
+- **Fusée** : un étage coûte 2, **4, 6 puis 8** points selon le palier (au lieu de 2, 3, 4, 5).
+- **Supports de niveau 3** : **+2 travailleurs** (au lieu de +3).
+- **Égide** : **2 PV** (au lieu de 3).
+- **Champ de stase** : protège **un seul bâtiment** ce tour (aucun dégât, ni attaque ni percée ni spores), et ses Épines sont suspendues pour les créatures qui l'attaquent.
+- **Brouillage** : sur n'importe quelle créature ; ce tour, elle ne bouge pas et n'attaque pas (au lieu d'annuler un déploiement).
+
+**Interface**
+- Illustrations d'Oni (dossier `images/`) en fond des tuiles, des supports et des jetons de créatures, et en vignette sur les cartes en main. Il n'y a pas encore d'image pour : Perforeur, Catalyseur, Sapeur, Sporeur, Palissade, Baraquement, Dortoir, Archives, Avant-postes, Ligne de front, Réduit, Piège, Siphon, Ronceraie, Égide.
+- Plateau agrandi (cases jusqu'à 96 px, 84 px sur un écran de 1400 px avec les deux panneaux).
+
 ## v0.4.3 — 4 novembre 2026
 
 **Règles (Oni)**

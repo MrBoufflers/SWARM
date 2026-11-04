@@ -8,7 +8,7 @@
   --colonie: #1e7469; --essaim: #6b4c97; --hot: #e2a400; --danger: #b0372b;
   --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --cell: min(64px, calc((100vw - 100px) / 9));
+  --cell: min(96px, calc((100vw - 52px) / 9)); /* plateau agrandi pour les illustrations (Oni, 04/11/2026 ; avant 64 px) */
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #131716; --panel: #1c2120; --panel-2: #232927; --ink: #e5eae7; --ink-soft: #9ba7a1; --rule: #33403b;
@@ -266,3 +266,20 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .st-line b.essaim { color: var(--essaim); } .st-line b.colonie { color: var(--colonie); }
 .st-game button { margin-top: 6px; }
 .st-plan { display: block; width: 100%; max-width: 278px; height: auto; margin-top: 8px; }
+
+/* illustrations (Oni, 04/11/2026) : .im-… fournit --img (miniature WebP intégrée par tools/build.py) */
+.tile.im { background: linear-gradient(to bottom, rgba(0,0,0,.05) 35%, rgba(0,0,0,.78)), var(--img) center / cover; color: #fff; justify-content: flex-end; gap: 1px; padding-bottom: 3px; }
+.tile.im .tn { font-size: max(9.5px, calc(var(--cell) * .13)); text-shadow: 0 1px 2px #000; }
+.tile.im .hp { color: #fff; font-size: max(15px, calc(var(--cell) * .2)); text-shadow: 0 1px 2px #000; } .tile.im .hp small { color: #e6dccd; }
+.tile.im .tb { color: #ffd9a8; text-shadow: 0 1px 2px #000; }
+.tile.im .tb .i { width: max(9px, calc(var(--cell) * .12)); height: max(9px, calc(var(--cell) * .12)); }
+.cell.sup.im { background: linear-gradient(rgba(10,40,36,.35), rgba(10,40,36,.75)), var(--img) center / cover; text-shadow: 0 1px 2px #000; }
+.tok.im { background: linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,.75)), var(--img) center 30% / cover; box-shadow: inset 0 0 0 2px var(--tc); align-items: flex-end; padding-bottom: 1px; text-shadow: 0 1px 2px #000; }
+.tok.aggro { --tc: var(--aggro); } .tok.tank { --tc: var(--tank); } .tok.soutien { --tc: var(--soutien); }
+.tok.im.new { box-shadow: inset 0 0 0 2px var(--tc), 0 0 0 1.5px #fff; }
+.tcard, .ccard { position: relative; }
+.tcard:has(.thumb) > b, .tcard:has(.thumb) > small, .ccard:has(.thumb) > b, .ccard:has(.thumb) > small { padding-right: 50px; }
+.tcard:has(.thumb), .ccard:has(.thumb) { min-height: 54px; }
+.thumb { position: absolute; top: 6px; right: 6px; width: 42px; height: 42px; border-radius: 5px; background: var(--img) center / cover; box-shadow: 0 0 0 1px var(--rule); }
+@media (min-width: 681px) { .tok { width: calc(var(--cell) / 2.3); height: calc(var(--cell) / 2.6); } }
+@media (min-width: 1181px) { :root { --cell: min(96px, calc((100vw - 640px) / 9)); } } /* 3 colonnes : le plateau laisse la place aux panneaux */
