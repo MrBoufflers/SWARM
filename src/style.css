@@ -34,7 +34,7 @@
 :root[data-theme="dark"] .fl.on, :root[data-theme="auto"].sys-dark .fl.on { box-shadow: 0 0 8px rgba(79,184,166,.35); }
 :root[data-theme="dark"] button.primary, :root[data-theme="auto"].sys-dark button.primary { background: var(--hot); color: #1b120a; border-color: var(--hot); }
 :root[data-theme="dark"] .home-acts button.primary, :root[data-theme="auto"].sys-dark .home-acts button.primary { background: var(--hot); color: #1b120a; border-color: var(--hot); }
-:root[data-theme="dark"] .cell.core, :root[data-theme="auto"].sys-dark .cell.core { background: #2a2420; }
+:root[data-theme="dark"] .cell.core:not(.im), :root[data-theme="auto"].sys-dark .cell.core:not(.im) { background: #2a2420; } /* sans écraser l'illustration de la fusée */
 :root[data-theme="dark"] [data-tip]::after, :root[data-theme="auto"].sys-dark [data-tip]::after { background: #f1e9de; color: #1b1612; }
 
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45;

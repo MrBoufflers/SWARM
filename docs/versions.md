@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.10 — 4 novembre 2026
+
+Correctif d'affichage : l'illustration de la fusée n'apparaissait pas sur sa case en mode sombre (le fond uni du thème la masquait). Elle s'affiche maintenant dans tous les thèmes.
+
 ## v0.4.9 — 4 novembre 2026
 
 Interface seulement : illustration de la **Palissade** ; tous les bâtiments ont maintenant leur image.
