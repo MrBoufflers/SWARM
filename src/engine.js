@@ -58,7 +58,7 @@ const SF = (() => {
     // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
     "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 2, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Renforcé 2 (02/11/2026 : le Bouclier est fondu dans Renforcé)
-    "Égide": { d: 2, pv: 3, ep: 0, ren: 2, camo: 1, n: 3 },
+    "Égide": { d: 2, pv: 2, ep: 0, ren: 2, camo: 1, n: 3 }, // 2 PV (Oni, 04/11/2026 ; avant 3)
   };
   const TILE_TEXT = {
     "Rempart": "Renforcé 2 : perd 1 PV par tranche de 2 dégâts.", "Bastion": "Renforcé 3 : perd 1 PV par tranche de 3 dégâts.",
@@ -77,9 +77,11 @@ const SF = (() => {
     "Salve": { kind: "off", n: 3, text: "2 dégâts à 2 créatures de la même case." },
     "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
-    "Champ de stase": { kind: "off", n: 2, text: "Choisissez une lane : ses tuiles ne subissent aucun dégât ce tour." },
+    // Champ de stase (Oni, 04/11/2026 ; avant : toute une lane) : un seul bâtiment, et ses Épines sont suspendues
+    "Champ de stase": { kind: "off", n: 2, text: "Choisissez un bâtiment : ce tour, il ne subit aucun dégât et les créatures qui l'attaquent ne subissent pas ses Épines." },
     "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : ce tour, son budget est sa biomasse divisée par 2 (arrondie à l'inférieur)." },
-    "Brouillage": { kind: "off", n: 2, text: "Annule le déploiement d'une créature posée ce tour ; la carte retourne dans sa pioche, la biomasse est perdue." },
+    // Brouillage (Oni, 04/11/2026 ; avant : annulait le déploiement d'une créature posée ce tour)
+    "Brouillage": { kind: "off", n: 2, text: "Choisissez une créature : ce tour, elle ne bouge pas et n'attaque pas." },
     "Effort": { kind: "sup", n: 3, text: "+2 points de construction ce tour." },
     "Cadence": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
     // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
@@ -112,14 +114,14 @@ const SF = (() => {
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
-  const FLOOR_COSTS = [2, 3, 4, 5]; // Oni, 01/11/2026 (avant 3 / 4 / 5 / 6)
+  const FLOOR_COSTS = [2, 4, 6, 8]; // Oni, 04/11/2026 (avant 2 / 3 / 4 / 5 ; à l'origine 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
   // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
   // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.3";
+  const VERSION = "0.4.4";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -216,7 +218,7 @@ const SF = (() => {
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
   // support de niveau 3 : +3 travailleurs tant qu'il tient (Oni, 02/11/2026 ; avant +2)
-  const SUP3_WORKERS = 3;
+  const SUP3_WORKERS = 2; // Oni, 04/11/2026 (+3 du 02/11 au 04/11)
   const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + SUP3_WORKERS * Object.values(S.supports).filter(l => l === 3).length;
   const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
   const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
@@ -308,11 +310,6 @@ const SF = (() => {
   function epinesOf(S, k, visibleOnly) {
     let e = S.tiles[k].ep || 0;
     const [x, y] = parse(k), clair = clairvoyance(S);
-    for (const [sk, l] of Object.entries(S.supports)) {
-      if (l !== 2) continue;
-      const [a, b] = parse(sk);
-      if (Math.max(Math.abs(a - x), Math.abs(b - y)) === 1) e += 1;
-    }
     for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
       if (!dx && !dy) continue;
       const o = S.tiles[key(x + dx, y + dy)];
@@ -559,9 +556,9 @@ const SF = (() => {
         log(S, "colonie", `Siphon : l'essaim perd ${before - S.biomass} biomasse (biomasse ${S.biomass}).`);
       }
     }
-    if (S.stase.includes(lane)) {
+    if (S.stase.includes(tk)) { // Champ de stase : ce bâtiment ne subit rien ce tour
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
-      log(S, "colonie", `Champ de stase : ${t.name} ne subit aucun dégât.`);
+      log(S, "colonie", `Champ de stase : ${t.camo && !t.revealed ? "le bâtiment" : t.name} ne subit aucun dégât.`);
     } else {
       // Renforcé X : 1 PV par tranche complète de X dégâts, plusieurs PV possibles d'un coup
       // (Oni, 02/11/2026 : retour à la règle d'origine après un essai à 1 PV maximum par attaque)
@@ -576,7 +573,7 @@ const SF = (() => {
         for (const [a, b] of neighbors(x, y)) {
           const nk = key(a, b), nt = S.tiles[nk];
           // les spores n'atteignent pas une tuile encore camouflée (Oni, 02/11/2026)
-          if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(cellLane(a, b))) {
+          if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
             const sp = spores, spLoss = nt.ren ? Math.floor(sp / nt.ren) : sp;
             nt.hp -= spLoss;
             fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
@@ -605,7 +602,8 @@ const SF = (() => {
     }
     // Aura Cuirasse (Catalyseur sur la case) : pas de dégâts d'Épines (Oni, 02/11/2026)
     if (primary && epVal > 0) {
-      if (caseMates(S, c).some(o => o.name === "Catalyseur")) log(S, "essaim", `Aura Cuirasse : ${c.name} ne subit pas les Épines.`);
+      if (S.stase.includes(tk)) log(S, "colonie", `Champ de stase : pas d'Épines pour ${c.name}.`);
+      else if (caseMates(S, c).some(o => o.name === "Catalyseur")) log(S, "essaim", `Aura Cuirasse : ${c.name} ne subit pas les Épines.`);
       // Provocation (tank, côté B) : les tanks ne subissent plus les Épines (Oni, 02/11/2026)
       else if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "B") log(S, "essaim", `Provocation : ${c.name} ne subit pas les Épines.`);
       else damageCreature(S, c, epVal, "épines");
@@ -615,7 +613,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
     S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = [];
-    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; }
+    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; }
     // Réincarnation
     for (const r of S.reincQueue) {
       const nc = makeCreature(S, r.name, r.lane, r.u);
@@ -767,7 +765,7 @@ const SF = (() => {
     const sp = SPELLS[name];
     // événement visuel du sort, placé avant ses effets (dégâts, soins…) ; seules des informations publiques
     const at = S.fx ? S.fx.length : 0;
-    const pubArg = ["Frappe orbitale", "Salve", "Brouillage"].includes(name) ? { id: arg } : ["Barrage", "Champ de stase"].includes(name) ? { lane: arg }
+    const pubArg = ["Frappe orbitale", "Salve", "Brouillage"].includes(name) ? { id: arg } : name === "Barrage" ? { lane: arg } : name === "Champ de stase" ? { k: arg }
       : name === "Onde de choc" ? { ring: Number(arg) } : name === "Réparation" ? { keys: arg } : name === "Reconversion" ? { k: arg && arg.tile }
       : name === "Renouvellement" ? { n: Array.isArray(arg) ? arg.length : 0 } : {};
     fx(S, { t: "spell", name, kind: sp.kind, ...pubArg });
@@ -793,13 +791,12 @@ const SF = (() => {
       }
       case "Barrage": { if (!LANES.includes(arg)) return false; for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
-      case "Champ de stase": { if (!LANES.includes(arg)) return false; S.stase.push(arg); return true; }
+      case "Champ de stase": { if (typeof arg !== "string" || !S.tiles[arg]) return false; S.stase.push(arg); return true; }
       case "Famine": { if (S.phase !== "A_start") return false; S.famine = 1; return true; }
-      case "Brouillage": {
-        const c = cr(arg); if (!c || !c.new) return false;
-        S.creatures.splice(S.creatures.indexOf(c), 1);
-        S.piles[CREATURES[c.name].lvl].push(c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
-        log(S, "colonie", `Brouillage : le déploiement de ${c.name} est annulé.`);
+      case "Brouillage": { // la créature visée (Provocation et Furtivité s'appliquent) ne bouge pas et n'attaque pas ce tour
+        const c0 = cr(arg); if (!c0) return false; const c = resolveTarget(S, c0); if (!c || c.acted) return false;
+        c.acted = true; c.jammed = true;
+        log(S, "colonie", `Brouillage : ${c.name} ne bouge pas et n'attaque pas ce tour.`);
         return true;
       }
       case "Effort": S.extraPts += 2; return true;
@@ -1011,7 +1008,8 @@ const SF = (() => {
   function spellArgOk(S, name, arg) {
     switch (name) {
       case "Frappe orbitale": case "Salve": case "Brouillage": return isInt(arg);
-      case "Barrage": case "Champ de stase": return isLane(arg);
+      case "Barrage": return isLane(arg);
+      case "Champ de stase": return typeof arg === "string" && /^-?\d,-?\d$/.test(arg);
       case "Onde de choc": return [1, 2, 3, "1", "2", "3"].includes(arg);
       case "Réparation": return Array.isArray(arg) && arg.length >= 1 && arg.length <= 3 && arg.every(k => own(S.tiles, k));
       case "Renouvellement": return Array.isArray(arg) && arg.every(i => isInt(i) && i >= 0 && i < S.hand.length) && new Set(arg).size === arg.length;

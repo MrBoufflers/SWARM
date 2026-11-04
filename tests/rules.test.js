@@ -293,9 +293,9 @@ const fresh = () => {
   S.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
   const touching = SF.supportWalls(1, 2);
   const tk = touching.find(k => k === "0,2");
-  ok(!tk || SF.epinesOf(S, "0,2") === 1, "support de niveau 2 : +1 Épines à toute tuile qui le touche, même une Muraille (0 → 1)");
+  ok(SF.epinesOf(S, "0,2") === 0, "support de niveau 2 : plus de bonus d'Épines (Oni, 04/11/2026) : Muraille 0");
   S.tiles["0,2"] = SF.tileStats("Haie d'épines", 0, 2);
-  ok(!tk || SF.epinesOf(S, "0,2") === 3, "support de niveau 2 : +1 à une Haie d'épines (2 → 3)");
+  ok(SF.epinesOf(S, "0,2") === 2, "Haie d'épines à côté d'un support de niveau 2 : Épines 2 (sans bonus)");
   const old = { tiles: { "0,1": { name: "Mur de départ", ep: 1 }, "0,2": { name: "Muraille", ep: 1 } }, tileDiscard: ["Mur de départ", "Muraille"], tileDeck: [], hand: [] };
   SF.migrate(old);
   ok(old.tiles["0,1"].name === "Barbelé" && old.tiles["0,1"].start && old.tiles["0,2"].ep === 0 && old.tileDiscard.join() === "Muraille", "ancienne partie : Mur de départ devenu Barbelé, Épines mises à jour");
@@ -303,25 +303,25 @@ const fresh = () => {
   SF.migrate(old2);
   ok(old2.tiles["0,1"].name === "Barbelé" && old2.tiles["0,1"].hp === 1 && old2.tiles["0,1"].max === 1, "partie d'hier : Haie de départ (2 PV) ramenée à 1 PV");
 }
-// 28. fusée : coût d'un étage 3 / 4 / 5 / 6 selon le palier (étages 1-3, 4-6, 7-9, 10-12)
+// 28. fusée : coût d'un étage 2 / 4 / 6 / 8 selon le palier (Oni, 04/11/2026) (étages 1-3, 4-6, 7-9, 10-12)
 {
   const S = fresh();
   const costs = [];
   for (let f = 0; f < 12; f++) { S.floors = f; costs.push(SF.floorCost(S)); }
-  ok(costs.join("") === "222333444555", "coût par étage (2 / 3 / 4 / 5) : " + costs.join(" "));
+  ok(costs.join(" ") === "2 2 2 4 4 4 6 6 6 8 8 8", "coût par étage (2 / 4 / 6 / 8) : " + costs.join(" "));
   const T = fresh(); T.phase = "D_fire"; T.floors = 2; T.rocketPts = 0; T.workersBase = 6;
   T.alloc = { N: 0, E: 0, S: 0, O: 0 }; T.extraPts = 0;
   SF.endDefenderTurn(T);
-  ok(T.floors === 4 && T.rocketPts === 1, "6 points avec 2 étages : étage 3 (2 points), étage 4 (3 points), 1 point gardé");
+  ok(T.floors === 4 && T.rocketPts === 0, "6 points avec 2 étages : étage 3 (2 points), étage 4 (4 points)");
 }
 // 29. animations du lot 3 : fusée (étage, Nuke, décollage), Vision, améliorations — événements seulement, règles inchangées
 {
-  const T = fresh(); T.phase = "D_fire"; T.floors = 8; T.rocketPts = 0; T.workersBase = 5;
+  const T = fresh(); T.phase = "D_fire"; T.floors = 8; T.rocketPts = 0; T.workersBase = 6;
   T.alloc = { N: 0, E: 0, S: 0, O: 0 }; T.extraPts = 0;
   T.creatures.push({ id: 70, name: "Carapace", lane: "S", u: 0, k: 4, hp: 3, acted: false });
   T.fx = []; SF.endDefenderTurn(T);
   ok(T.floors === 9 && T.fx.some(e => e.t === "floor" && e.n === 9) && T.fx.some(e => e.t === "nuke" && e.ids.includes(70)) && T.creatures.length === 0, "étage 9 : événements étage + Nuke, créatures détruites");
-  const U = fresh(); U.phase = "D_fire"; U.floors = 11; U.rocketPts = 0; U.workersBase = 6;
+  const U = fresh(); U.phase = "D_fire"; U.floors = 11; U.rocketPts = 0; U.workersBase = 8;
   U.alloc = { N: 0, E: 0, S: 0, O: 0 }; U.extraPts = 0; U.fx = []; SF.endDefenderTurn(U);
   ok(U.winner === "colonie" && U.fx.some(e => e.t === "liftoff"), "étage 12 : décollage et victoire de la colonie");
   const V = fresh(); SF.attackerDraw(V); V.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
@@ -448,7 +448,7 @@ const fresh = () => {
   const starts = Object.keys(S.tiles).filter(k => S.tiles[k].start);
   ok(starts.length === 16 && starts.every(k => [1, 2].includes(SF.ring(...SF.parse(k))) && S.tiles[k].hp === 1 && S.tiles[k].ep === 1 && S.tiles[k].revealed), "16 Barbelés de départ (couronnes 1 et 2), 1 PV, Épines 1, face visible");
   ok(Object.values(S.supports).filter(l => l === 1).length === 4 && Object.values(S.supports).filter(l => l === 2).length === 4, "4 supports de niveau 1 et 4 de niveau 2 dès le départ");
-  ok(SF.epinesOf(S, "1,2") === 2 && SF.epinesOf(S, "0,2") === 1, "une haie qui touche un support de niveau 2 a Épines 2 (1 + 1), les autres Épines 1");
+  ok(SF.epinesOf(S, "1,2") === 1 && SF.epinesOf(S, "0,2") === 1, "tous les Barbelés ont Épines 1 (plus de bonus des supports de niveau 2)");
 }
 // 38. sortilèges non joués : gardés en main tant qu'ils ne sont pas joués, offensifs comme de soutien (Oni, 01/11/2026)
 {
@@ -467,7 +467,7 @@ const fresh = () => {
 {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
-  ok(E && E.pv === 3 && E.ren === 2 && !E.shield && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 3 PV, Renforcé 2 (ancien Bouclier 2), 2 tours, camouflée, 3 exemplaires, sans Épines");
+  ok(E && E.pv === 2 && E.ren === 2 && !E.shield && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 2 PV, Renforcé 2 (ancien Bouclier 2), 2 tours, camouflée, 3 exemplaires, sans Épines");
   ok(SF.newGame().tileDeck.length + 4 === 54, "pioche de forteresses : 54 tuiles (main de 4 comprise)");
   ok(["Antenne", "Laboratoire", "Observatoire", "Archives"].every(n => SF.TILES[n].tech && SF.TILES[n].n === 3), "3 exemplaires de chaque bâtiment à technologies (Oni, 02/11/2026)");
   const hit = (name, atq) => {
@@ -475,8 +475,8 @@ const fresh = () => {
     const c = { id: 96, name, lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
     return S.tiles["0,1"] ? S.tiles["0,1"].hp : 0;
   };
-  ok(hit("Écorcheur") === 2, "Écorcheur (3 ATQ) contre l'Égide (Renforcé 2) : −1 PV (3 → 2)");
-  ok(hit("Carapace") === 3, "Carapace (1 ATQ) contre l'Égide : aucun dégât");
+  ok(hit("Écorcheur") === 1, "Écorcheur (3 ATQ) contre l'Égide (Renforcé 2) : −1 PV (2 → 1)");
+  ok(hit("Carapace") === 2, "Carapace (1 ATQ) contre l'Égide : aucun dégât");
   ok(hit("Massacreur") === 0, "Massacreur (7 ATQ) : −3 PV, l'Égide (3 PV) tombe");
 }
 // 40. Dortoir, Archives, améliorations des tanks, PV des aggros (Oni, 01/11/2026)
@@ -502,11 +502,11 @@ const fresh = () => {
   S.tiles["2,3"] = SF.tileStats("Avant-poste de l'Est", 2, 3);    // autre diagonale
   ok(SF.epinesOf(S, "1,2") === 2, "deux Avant-postes voisins : +1 chacun (Épines 2)");
   S.supports["2,2"] = 2; // coin de support de niveau 2 qui touche (1,2) par un côté
-  ok(SF.epinesOf(S, "1,2") === 3, "tout se cumule : +1 du support de niveau 2 (Épines 3)");
-  ok(SF.epinesOf(S, "1,2", true) === 3 && !S.tiles["0,3"].camo, "Avant-postes posés face visible : l'essaim voit aussi leur aura (Épines 3)");
+  ok(SF.epinesOf(S, "1,2") === 2, "le support de niveau 2 n'ajoute plus d'Épines (Épines 2)");
+  ok(SF.epinesOf(S, "1,2", true) === 2 && !S.tiles["0,3"].camo, "Avant-postes posés face visible : l'essaim voit aussi leur aura (Épines 2)");
   const U = fresh(); U.supports = { "2,2": 2 };
   U.tiles["1,3"] = SF.tileStats("Muraille", 1, 3); U.tiles["3,1"] = SF.tileStats("Muraille", 3, 1); U.tiles["2,3"] = SF.tileStats("Muraille", 2, 3);
-  ok(SF.epinesOf(U, "1,3") === 1 && SF.epinesOf(U, "3,1") === 1 && SF.epinesOf(U, "2,3") === 1, "support de niveau 2 : +1 Épines aux bâtiments des 8 cases autour (diagonales comprises)");
+  ok(SF.epinesOf(U, "1,3") === 0 && SF.epinesOf(U, "3,1") === 0 && SF.epinesOf(U, "2,3") === 0, "support de niveau 2 : aucune Épines autour (Oni, 04/11/2026)");
   const old = { tiles: { "0,3": { name: "Avant-poste du Nord", camo: 1, revealed: false, ep: 0 } }, tileDiscard: [], tileDeck: [], hand: [] };
   SF.migrate(old);
   ok(old.tiles["0,3"].revealed && !old.tiles["0,3"].camo, "partie en cours : un Avant-poste caché est retourné face visible");
@@ -617,7 +617,7 @@ const fresh = () => {
   SF.apply(T, "colonie", "endD");
   ok(!T.doubleFire || T.phase !== "D_main", "l'effet ne dure qu'un tour");
   const U = fresh(); const w = SF.bonusWorkers(U); U.supports["3,3"] = 3;
-  ok(SF.bonusWorkers(U) === w + 3, "support de niveau 3 : +3 travailleurs");
+  ok(SF.bonusWorkers(U) === w + 2, "support de niveau 3 : +2 travailleurs (Oni, 04/11/2026)");
 }
 // 49. Renforcé : plusieurs PV d'un coup (règle d'origine, rétablie le 02/11/2026) ; Famine : biomasse ÷ 2 ; soutiens 2 / 4 / 6 PV (Oni, 02/11/2026)
 {
@@ -657,7 +657,7 @@ const fresh = () => {
     const b = T.biomass; SF.actCase(T, SF.posKey(m), [170]); return { T, dBio: T.biomass - b };
   };
   let r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); });
-  ok(!r.T.tiles["0,3"] && r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed, "Percée sur une Égide camouflée : aucun dégât, elle reste cachée");
+  ok(!r.T.tiles["0,3"] && r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed, "Percée sur une Égide camouflée : aucun dégât, elle reste cachée");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["0,2"].revealed = true; });
   ok(!r.T.tiles["0,2"], "Percée sur une Égide déjà révélée : 6 en trop − bouclier 2 = 4 → détruite (3 PV)");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Piège", 0, 2); });
@@ -665,7 +665,7 @@ const fresh = () => {
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Siphon", 0, 2); });
   ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); T.tiles["1,3"].revealed = true; }, "Sporeur");
-  ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && !r.T.tiles["1,3"], "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée (2 PV) tombe sous 2 dégâts");
+  ok(r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed && !r.T.tiles["1,3"], "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée (2 PV) tombe sous 2 dégâts");
   const clair = T => { T.upgrades.soutien.r2 = "C"; }; // Clairvoyance (un soutien est en jeu : le Perforeur / le Sporeur)
   r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); });
   ok(!r.T.tiles["0,2"], "Clairvoyance : l'Égide camouflée devient vulnérable à la percée (4 dégâts après bouclier → détruite)");
@@ -781,6 +781,22 @@ const fresh = () => {
   ok(V.tiles[kN].revealed, "Œil-sonde en vie dans la lane Nord : la Muraille posée ensuite est aussitôt révélée");
   const kE = SF.placeTargets(V).find(k => SF.cellLane(...SF.parse(k)) === "E");
   if (kE) { SF.placeTile(V, kE); ok(!V.tiles[kE].revealed, "lane Est (sans Œil-sonde) : la tuile reste cachée"); }
+}
+// 57. Champ de stase (un bâtiment, Épines suspendues) et Brouillage (la créature ne bouge ni n'attaque) — Oni, 04/11/2026
+{
+  const mk = () => { const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mur hérissé", 0, 1); S.tiles["0,1"].revealed = true; return S; };
+  const S = mk(); S.phase = "A_react"; S.spells = ["Champ de stase"];
+  const c = { id: 500, name: "Ravageur", lane: "N", u: 0, k: 2, hp: 3, acted: false }; S.creatures.push(c);
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: "N" }) !== "", "Champ de stase : une lane n'est plus une cible valable");
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: "0,1" }) === "", "Champ de stase sur le Mur hérissé");
+  SF.apply(S, "colonie", "reactDone"); SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
+  ok(S.tiles["0,1"].hp === 2 && c.hp === 3, "le bâtiment ne perd rien et le Ravageur ne subit pas ses Épines");
+  const T = mk(); T.phase = "A_react"; T.spells = ["Brouillage"];
+  const d = { id: 510, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 5, acted: false }, e = { id: 511, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false };
+  T.creatures.push(d, e);
+  ok(SF.apply(T, "colonie", "spell", { i: 0, arg: 510 }) === "", "Brouillage sur une créature qui n'a pas été déployée ce tour");
+  SF.apply(T, "colonie", "reactDone"); SF.apply(T, "essaim", "act", { key: SF.posKey(e) });
+  ok(d.k === 4 && e.k === 3, "l'Écorcheur brouillé ne bouge pas, la Carapace de sa case avance");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

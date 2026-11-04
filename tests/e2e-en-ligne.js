@@ -71,7 +71,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   // 2. partie complète : on joue sur la page dont c'est le tour
   const pages = { essaim: pE, colonie: pC }, seen = {};
   let reloaded = false, resumed = null, steps = 0, stuck = 0;
-  for (; steps < 1500; steps++) {
+  for (; steps < 2500; steps++) {
     if (await pE.$('.banner.win') && await pC.$('.banner.win')) break;
     let page = null;
     for (const s of ['essaim', 'colonie']) if ((await pages[s].evaluate(() => document.body.dataset.myturn)) === '1') page = pages[s];
