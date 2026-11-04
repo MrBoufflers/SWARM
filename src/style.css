@@ -247,11 +247,11 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .stale { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 12px; max-width: 900px; padding: 10px 14px; border-radius: 8px; background: var(--hot); color: #1b1f1d; font-weight: 600; }
 .stale button { border: 0; background: #1b1f1d; color: #fff; padding: 7px 14px; border-radius: 6px; font-weight: 600; }
 /* page Statistiques */
-.stats { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
+.statpage { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
 .st-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .st-head h2 { font: 700 1.8rem/1.1 var(--display); margin: 8px 0; }
-.stats h3 { font: 700 1.25rem/1.2 var(--display); margin: 22px 0 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.stats .home-acts { justify-content: flex-start; margin: 10px 0; }
+.statpage h3 { font: 700 1.25rem/1.2 var(--display); margin: 22px 0 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.statpage .home-acts { justify-content: flex-start; margin: 10px 0; }
 .tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); }
 .tbl table { border-collapse: collapse; width: 100%; font-size: .9rem; white-space: nowrap; }
 .tbl th, .tbl td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--rule); }
@@ -283,3 +283,74 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .thumb { position: absolute; top: 6px; right: 6px; width: 42px; height: 42px; border-radius: 5px; background: var(--img) center / cover; box-shadow: 0 0 0 1px var(--rule); }
 @media (min-width: 681px) { .tok { width: calc(var(--cell) / 2.3); height: calc(var(--cell) / 2.6); } }
 @media (min-width: 1181px) { :root { --cell: min(96px, calc((100vw - 640px) / 9)); } } /* 3 colonnes : le plateau laisse la place aux panneaux */
+
+/* ---- résumé compact du camp adverse (Oni, 04/11/2026) : moins de place pour l'adversaire, plateau plus grand ---- */
+.layout.me-essaim { grid-template-columns: 196px auto minmax(330px, 1fr); }
+.layout.me-colonie { grid-template-columns: minmax(330px, 1fr) auto 196px; }
+@media (min-width: 1181px) {
+  :root:has(.layout.me-essaim), :root:has(.layout.me-colonie) { --cell: min(104px, calc((100vw - 650px) / 9)); }
+}
+@media (max-width: 1180px) {
+  .layout.me-essaim { grid-template-columns: 210px 1fr; }
+  .layout.me-colonie { grid-template-columns: 1fr 210px; }
+}
+@media (max-width: 680px) { .layout.me-essaim, .layout.me-colonie { grid-template-columns: 1fr; } }
+.panel.mini { padding: 12px; }
+.panel.mini h3 { font-size: 1.05rem; margin-bottom: 8px; }
+.panel.mini h4 { margin: 12px 0 6px; }
+.sum { display: flex; gap: 10px; align-items: stretch; }
+.kcs { display: grid; grid-template-columns: 1fr; gap: 4px; flex: 1; min-width: 0; align-content: start; }
+.kc { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--rule); cursor: help; min-width: 0; }
+.kc .i { width: 15px; height: 15px; flex: none; color: var(--ink-soft); }
+.kc b { font: 700 1.05rem/1 var(--display); }
+.kc small { font-size: .72rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* fusée en colonne : étage 1 en bas, 12 en haut */
+.rocket { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.floors.v { display: flex; flex-direction: column-reverse; gap: 3px; margin: 0; width: 34px; flex: 1; }
+.floors.v .fl { flex: 1; min-height: 22px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: .7rem; cursor: help; position: relative; }
+.floors.v .fl.cur { background: linear-gradient(to top, color-mix(in srgb, var(--colonie) 45%, transparent) var(--p), transparent var(--p)); }
+.rk-lab { font: 600 .72rem/1 var(--display); color: var(--ink-soft); } .rk-lab b { color: var(--ink); font-size: .9rem; }
+.sum-at { display: grid; grid-template-columns: 1fr; gap: 4px; margin-top: 4px; grid-column: 1 / -1; }
+.sa { display: flex; align-items: center; gap: 5px; font-size: .74rem; padding: 4px 6px; border-radius: 5px; background: var(--panel-2); border-left: 3px solid var(--lc); cursor: help; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sa b { font: 700 .8rem/1 var(--display); color: var(--lc); }
+/* améliorations en icônes */
+.utrees { display: flex; flex-direction: column; gap: 6px; }
+.utree { display: flex; align-items: center; gap: 4px; }
+.utree .ut { width: 20px; display: flex; justify-content: center; color: var(--c); cursor: help; }
+.utree.aggro { --c: var(--aggro); } .utree.tank { --c: var(--tank); } .utree.soutien { --c: var(--soutien); }
+.utree .usep { width: 1px; align-self: stretch; background: var(--rule); margin: 0 1px; }
+.node.un { position: relative; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--rule); color: var(--ink-soft); background: var(--panel); cursor: help; padding: 0; }
+.node.un .i { width: 17px; height: 17px; }
+.node.un .bar { position: absolute; left: 3px; right: 3px; bottom: 2px; height: 3px; border-radius: 2px; background: transparent; overflow: hidden; }
+.node.un.prog .bar { background: var(--rule); }
+.node.un .bar i { display: block; height: 100%; background: var(--c); }
+.node.un.taken { background: var(--c); border-color: var(--c); color: #fff; }
+.node.un.taken .bar { display: none; }
+.node.un.prog { border-color: var(--c); color: var(--c); }
+.node.un.closed { opacity: .28; }
+.node.un.needR1 { opacity: .55; }
+/* info-bulles (survol, ou toucher sur mobile : focus) */
+[data-tip] { position: relative; }
+[data-tip]:hover::after, [data-tip]:focus-visible::after, [data-tip]:focus::after {
+  content: attr(data-tip); position: absolute; z-index: 40; top: 50%; left: calc(100% + 8px); transform: translateY(-50%);
+  width: max-content; max-width: 230px; white-space: pre-line; text-align: left;
+  background: var(--ink); color: var(--panel); font: 500 .76rem/1.4 var(--body); letter-spacing: 0; text-transform: none;
+  padding: 7px 9px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.25); pointer-events: none; }
+.panel.essaim.mini [data-tip]:hover::after, .panel.essaim.mini [data-tip]:focus::after { left: auto; right: calc(100% + 8px); }
+.panel.colonie:not(.mini) .floors [data-tip]:hover::after, .panel.colonie:not(.mini) .floors [data-tip]:focus::after { top: calc(100% + 6px); left: 0; transform: none; }
+@media (max-width: 1180px) {
+  [data-tip]:hover::after, [data-tip]:focus::after, .panel.essaim.mini [data-tip]:hover::after, .panel.essaim.mini [data-tip]:focus::after {
+    top: calc(100% + 6px); left: 0; right: auto; transform: none; max-width: min(230px, 70vw); }
+  .panel.essaim.mini [data-tip]:hover::after, .panel.essaim.mini [data-tip]:focus::after { left: auto; right: 0; }
+}
+.panel.mini, .panel.mini .kcs { overflow: visible; }
+@media (max-width: 1180px) { .panel.mini .kcs { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); align-content: start; } .sum-at { grid-template-columns: 1fr 1fr; } }
+
+/* fond du plateau (champ de bataille) et case de la fusée (Oni, 04/11/2026) */
+.board.im { background: linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)), var(--img) center / cover; border-color: #2b2724; }
+.board.im .cell.lane { background: color-mix(in srgb, var(--lc) 24%, transparent); }
+.board.im .cell.lane.r1 { background: color-mix(in srgb, var(--lc) 30%, transparent); }
+.board.im .cell.corner { background: rgba(0,0,0,.35); color: #e8e2da; }
+.board.im .cell.entry { background: rgba(0,0,0,.28); border-color: rgba(255,255,255,.35); }
+.board.im .cell.entry .col { color: #f1ece6; }
+.cell.core.im { background: linear-gradient(rgba(0,0,0,.05) 30%, rgba(0,0,0,.72)), var(--img) center / cover; color: #fff; justify-content: flex-end; padding-bottom: 4px; text-shadow: 0 1px 2px #000; }

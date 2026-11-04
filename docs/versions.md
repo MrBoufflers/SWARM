@@ -4,6 +4,21 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.5 — 4 novembre 2026
+
+Interface seulement, sans changement de règles.
+
+- **Panneau de l'adversaire réduit à un résumé compact**, ce qui laisse plus de place au plateau et à son propre panneau (au moins 330 px de large).
+  - Vu par l'essaim, la colonie montre la fusée en colonne : étage 1 en bas, 12 en haut, avec l'effet de chaque étage au survol. À côté, ses chiffres clés (travailleurs, technologies, points vers l'étage suivant, tuiles et sorts en main), puis les ateliers en colonne.
+  - Vu par la colonie, l'essaim montre ses chiffres clés et ses améliorations en icônes : pleine si acquise, avec une barre si en cours, pâle si fermée, et le détail au survol. 9 nouveaux pictos d'amélioration.
+- **Info-bulles** au survol, ou au toucher sur téléphone.
+- **Nouvelles illustrations d'Oni** :
+  - toutes les créatures et tous les bâtiments, sauf la Palissade ;
+  - une même image pour les quatre Avant-postes ;
+  - la fusée sur la case centrale ;
+  - le champ de bataille en fond du plateau.
+- Correctif : les cartes en main avaient de grands vides, à cause d'un conflit de style avec la page Statistiques.
+
 ## v0.4.4 — 4 novembre 2026
 
 **Règles (Oni)**

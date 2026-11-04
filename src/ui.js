@@ -120,10 +120,84 @@
     return `<section class="banner win ${S.winner}">${icon(S.winner === "essaim" ? "spores" : "fusee")}<b>${S.winner === "essaim" ? "L'essaim gagne : la colonie n'a plus de travailleurs." : "La fusée décolle : la colonie gagne."}</b>
       <button data-a="new" class="primary">Rejouer</button></section>`;
   }
+  // Mise en page : le camp qui regarde a son panneau complet ; l'adversaire n'a qu'un résumé compact (Oni, 04/11/2026),
+  // ce qui laisse plus de place au plateau. Sans camp (fin de partie en local), les deux panneaux complets.
   function layout() {
-    return `<main class="layout"><aside class="panel colonie">${colonyPanel()}</aside>
-      <section class="center">${phaseBox()}<div class="board-wrap">${board()}</div>${detail()}</section>
+    const center = `<section class="center">${phaseBox()}<div class="board-wrap">${board()}</div>${detail()}</section>`;
+    if (S.view === "essaim") return `<main class="layout me-essaim"><aside class="panel colonie mini">${colonySummary()}</aside>${center}
       <aside class="panel essaim">${swarmPanel()}${logPanel()}</aside></main>`;
+    if (S.view === "colonie") return `<main class="layout me-colonie"><aside class="panel colonie">${colonyPanel()}${logPanel()}</aside>${center}
+      <aside class="panel essaim mini">${swarmSummary()}</aside></main>`;
+    return `<main class="layout"><aside class="panel colonie">${colonyPanel()}</aside>${center}
+      <aside class="panel essaim">${swarmPanel()}${logPanel()}</aside></main>`;
+  }
+  // ce que fait chaque étage de la fusée (info-bulle)
+  function floorTip(n) {
+    const cost = SF.FLOOR_COSTS[Math.floor((n - 1) / 3)];
+    const next = SF.FLOOR_COSTS[Math.floor(n / 3)];
+    const extra = {
+      3: `Palier 1 : +2 technologies · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
+      6: `Palier 2 : +1 chantier par lane · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
+      9: `Palier 3 : Nuke, toutes les créatures sont détruites · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
+      12: "Décollage : la colonie gagne",
+    }[n];
+    return `Étage ${n} · ${cost} points\n+1 travailleur${extra ? "\n" + extra : ""}`;
+  }
+  // résumé de la colonie vu par l'essaim : chiffres clés, fusée en colonne, ateliers
+  function colonySummary() {
+    const bonus = SF.bonusWorkers(S);
+    const rocket = Array.from({ length: 12 }, (_, i) => {
+      const n = i + 1, on = n <= S.floors, cur = n === S.floors + 1;
+      const fill = cur ? Math.round(100 * S.rocketPts / SF.floorCost(S)) : 0;
+      return `<i class="fl${on ? " on" : ""}${n % 3 === 0 ? " ms" : ""}${cur ? " cur" : ""}" tabindex="0" data-tip="${E(floorTip(n))}"${cur ? ` style="--p:${fill}%"` : ""}>${n % 3 === 0 ? n : ""}</i>`;
+    }).join("");
+    const ateliers = SF.LANES.map(l => {
+      const chs = S.chantiers[l];
+      const txt = chs.length ? chs.map(ch => `${E(!ch.tile || SF.TILES[ch.tile].camo ? "?" : short(ch.tile))} ${ch.left}`).join(" · ") : "—";
+      return `<span class="sa lane-${l}" tabindex="0" data-tip="${E(`Atelier ${SF.LANE_NAME[l]} : ${chs.length ? chs.map(ch => `${!ch.tile || SF.TILES[ch.tile].camo ? "tuile cachée" : ch.tile}, ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}`).join(" ; ") : "libre"}`)}"><b>${l}</b>${txt}</span>`;
+    }).join("");
+    return `<h3>${icon("fusee")} Colonie</h3>
+      <div class="sum">
+        <div class="rocket" aria-label="Fusée : ${S.floors} étages sur 12"><div class="floors v">${rocket}</div><span class="rk-lab"><b>${S.floors}</b>/12</span></div>
+        <div class="kcs">
+          <span class="kc" tabindex="0" data-tip="Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.">${icon("travailleur")}<b>${S.workersBase}</b>${bonus ? `<small>+${bonus}</small>` : ""}</span>
+          <span class="kc" tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b><small>${SF.spellsPerTurn(S)} sort/t</small></span>
+          <span class="kc" tabindex="0" data-tip="Fusée : ${S.rocketPts} / ${SF.floorCost(S)} points vers l'étage ${Math.min(12, S.floors + 1)}">${icon("fusee")}<b>${S.rocketPts}</b><small>/${SF.floorCost(S)} pts</small></span>
+          <span class="kc" tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b><small>tuiles</small></span>
+          <span class="kc" tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b><small>sorts</small></span>
+          <div class="sum-at" data-fx="ateliers">${ateliers}</div>
+        </div>
+      </div>`;
+  }
+  // icône de chaque nœud d'amélioration (résumé de l'essaim vu par la colonie)
+  const NODE_ICON = {
+    aggro: { A1: "ferocite", B1: "mobilite", A2: "carnage", C2: "deploiement", B2: "essaim" },
+    tank: { A1: "carapace", B1: "protection", A2: "blindage", C2: "reincarnation", B2: "masse" },
+    soutien: { A1: "mue", B1: "griffes", A2: "regeneration", C2: "clairvoyance", B2: "frenesie" },
+  };
+  // résumé de l'essaim vu par la colonie : chiffres clés et améliorations en icônes (détail au survol)
+  function swarmSummary() {
+    const t = SF.TIERS[SF.tier(S)], next = SF.TIERS[SF.tier(S) + 1];
+    const POS = { A1: "rang 1, côté A", B1: "rang 1, côté B", A2: "rang 2, après A", C2: "rang 2, centre", B2: "rang 2, après B" };
+    const trees = ["aggro", "tank", "soutien"].map(ty => {
+      const T = SF.TREES[ty];
+      const node = slot => {
+        const st = SF.nodeState(S, ty, slot), cost = SF.nodeCost(slot), got = SF.invested(S, ty, slot);
+        const state = st === "taken" ? "acquis" : st === "closed" ? "fermé" : st === "needR1" ? "demande d'abord un rang 1" : got ? `${got} / ${cost} investis` : `${cost} biomasse`;
+        return `<span class="node un ${st}${got && st !== "taken" ? " prog" : ""}" data-node="${ty}:${slot}" tabindex="0" style="--p:${Math.round(100 * got / cost)}%"
+          data-tip="${E(`${T[slot][0]} (${POS[slot]}) : ${T[slot][1]}\n${state}`)}">${icon(NODE_ICON[ty][slot])}<span class="bar"><i style="width:${Math.round(100 * got / cost)}%"></i></span></span>`;
+      };
+      return `<div class="utree ${ty}"><span class="ut" tabindex="0" data-tip="Améliorations ${ty}">${icon(ty)}</span>${node("A1")}${node("B1")}<span class="usep"></span>${node("A2")}${node("C2")}${node("B2")}</div>`;
+    }).join("");
+    const turn = ["A_deploy", "A_upgrade", "A_attack", "A_react"].includes(S.phase);
+    return `<h3>${icon("spores")} Essaim</h3>
+      <div class="kcs">
+        <span class="kc" tabindex="0" data-tip="Biomasse : ${S.biomass}${next ? ` (palier suivant à ${next.min})` : ""}">${icon("biomasse")}<b>${S.biomass}</b><small>bio</small></span>
+        <span class="kc" tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche ${t.n.join(" / ")} (niveaux 1 / 2 / 3), plafond ${SF.capOf(S)} créatures par lane">${icon("palier")}<b>${SF.tier(S) + 1}</b><small>max ${SF.capOf(S)}/lane</small></span>
+        ${turn ? `<span class="kc" data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b><small>budget</small></span>` : `<span class="kc" data-fx="budget" tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b><small>réserve</small></span>`}
+        <span class="kc hidden-hand" tabindex="0" data-tip="${S.handA.length} cartes en main (cachées) · pioches ${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}">${icon("sort")}<b>${S.handA.length}</b><small>cartes</small></span>
+      </div>
+      <h4>Améliorations</h4><div class="utrees">${trees}</div>`;
   }
 
   // ---------------------------------------------------------------- boîte d'action
@@ -259,7 +333,7 @@
         continue;
       }
       if (x === 0 && y === 0) {
-        html += `<div class="cell core" data-xy="${k}">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
+        html += `<div class="cell core ${imCls("Fusée")}" data-xy="${k}">${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
         continue;
       }
       if (SF.isSupportCell(x, y)) {
@@ -287,7 +361,7 @@
       const stased = S.stase.includes(k);
       html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : ""}>${inner}${tokens(crs)}</div>`;
     }
-    return `<div class="board" role="grid" aria-label="Plateau">${html}</div>
+    return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
   }
   // Carte de tuile en main : durée, PV, Épines et capacités (libellés du Catalogue du livret v0.3)
@@ -348,7 +422,7 @@
   function colonyPanel() {
     const mine = S.view === "colonie";
     const pts = SF.totalPoints(S), used = SF.allocated(S);
-    const floors = Array.from({ length: 12 }, (_, i) => `<i class="fl${i < S.floors ? " on" : ""}${[2, 5, 8, 11].includes(i) ? " ms" : ""}">${i + 1}</i>`).join("");
+    const floors = Array.from({ length: 12 }, (_, i) => `<i class="fl${i < S.floors ? " on" : ""}${[2, 5, 8, 11].includes(i) ? " ms" : ""}" tabindex="0" data-tip="${E(floorTip(i + 1))}">${i + 1}</i>`).join("");
     let ateliers = "";
     for (const l of SF.LANES) {
       const chs = S.chantiers[l];
@@ -842,8 +916,8 @@
   const shown = () => (STATS.list || []).filter(r => STATS.test || !r.test);
   function statsPage() {
     const head = `<div class="st-head"><h2>Statistiques des parties</h2><button data-a="statsBack" class="ghost">Retour</button></div>`;
-    if (STATS.error) return `<section class="stats">${head}<p>${E(STATS.error)}</p></section>`;
-    if (!STATS.list) return `<section class="stats">${head}<p>Chargement…</p></section>`;
+    if (STATS.error) return `<section class="statpage">${head}<p>${E(STATS.error)}</p></section>`;
+    if (!STATS.list) return `<section class="statpage">${head}<p>Chargement…</p></section>`;
     const list = shown(), rows = BILAN.byVersion(list);
     const nTest = STATS.list.filter(r => r.test).length;
     const table = rows.length ? `<div class="tbl"><table><thead><tr><th>Version</th><th>Parties</th><th>Essaim gagne</th><th>Colonie gagne</th><th>Manches</th><th>Biomasse finale</th><th>Travailleurs tués</th><th>Étages</th></tr></thead><tbody>${
@@ -853,7 +927,7 @@
     const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
       <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
       ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
-    return `<section class="stats">${head}
+    return `<section class="statpage">${head}
       <p class="small">Version actuelle : v${E(SF.VERSION)} · ${list.length} partie${list.length > 1 ? "s" : ""} terminée${list.length > 1 ? "s" : ""}${STATS.test ? "" : ` (hors ${nTest} partie${nTest > 1 ? "s" : ""} de test)`}.</p>
       <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
       ${table}
