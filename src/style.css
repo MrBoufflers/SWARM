@@ -376,3 +376,20 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .cell.core.im { background: linear-gradient(rgba(0,0,0,.05) 30%, rgba(0,0,0,.72)), var(--img) center / cover; color: #fff; justify-content: flex-end; padding-bottom: 4px; text-shadow: 0 1px 2px #000; }
 @media (max-width: 680px) { .menu button { padding: 6px 9px; font-size: .85rem; } }
 :root[data-theme="dark"] .handoff.home.im, :root[data-theme="auto"].sys-dark .handoff.home.im { background: radial-gradient(circle at 50% 40%, rgba(16,14,13,.55), rgba(16,14,13,.95) 70%), var(--img) center / cover; border-radius: 14px; }
+
+/* cartes de tuiles en main (Oni, 04/11/2026) : grande illustration à gauche, capacités en pastilles (texte au survol) */
+.tcard { display: grid; grid-template-columns: 78px 1fr; column-gap: 10px; row-gap: 2px; align-items: start; padding: 6px; }
+.tcard .art { grid-row: 1 / span 4; width: 78px; height: 78px; border-radius: 6px; background: var(--img, var(--wall-bg)) center / cover; display: flex; align-items: center; justify-content: center; color: var(--wall); box-shadow: 0 0 0 1px var(--rule); }
+.tcard .art .i { width: 30px; height: 30px; }
+.tcard > b { padding-top: 2px; } .tcard .stats { font-size: .8rem; }
+.tcard .caps { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.tcard .cap { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 600; color: var(--wall); background: color-mix(in srgb, var(--wall) 12%, transparent); border: 1px solid color-mix(in srgb, var(--wall) 35%, transparent); border-radius: 99px; padding: 2px 7px; cursor: help; }
+.tcard .cap .i { width: 12px; height: 12px; }
+.tcard .cap[data-tip]:hover::after, .tcard .cap[data-tip]:focus::after { top: calc(100% + 6px); left: 0; transform: none; }
+/* créature à portée de la tourelle choisie : on peut la toucher pour tirer */
+.tok.tgt { outline: 2px solid var(--hot); outline-offset: 1px; animation: tgt 1.1s ease-in-out infinite; cursor: crosshair; }
+@keyframes tgt { 50% { outline-color: transparent; } }
+/* supports mieux visibles (Oni, 04/11/2026) */
+.cell.sup { outline: 2px solid color-mix(in srgb, var(--support) 55%, #fff); outline-offset: -2px; }
+:root[data-theme="dark"] .cell.sup, :root[data-theme="auto"].sys-dark .cell.sup { outline-color: #5fd4c0; }
+.cell.sup.spent { outline-style: dashed; }

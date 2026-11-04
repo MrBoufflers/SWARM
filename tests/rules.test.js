@@ -211,19 +211,20 @@ const fresh = () => {
   ok(SF.apply(S, "essaim", "deploy", { uid: S.handA[0].uid, lane: "X", u: 0 }) !== "", "lane inconnue refusée");
   ok(SF.apply(S, "essaim", "deploy", { uid: S.handA[0].uid, lane: "N", u: 7 }) !== "", "colonne hors plateau refusée");
   ok(SF.apply(S, "essaim", "nimporte") !== "", "action inconnue refusée");
+  S.creatures.push({ id: 990, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }); // une créature en jeu : sinon l'étape d'attaque passe d'elle-même
   ok(SF.apply(S, "essaim", "endDeploy") === "" && SF.apply(S, "essaim", "toAttacks") === "", "fin de déploiement puis passage aux attaques");
   ok(S.phase === "A_attack" || S.phase === "A_react", "phase d'attaque (ou de réaction si la colonie tient un sortilège offensif)");
 }
 // 22. fenêtre de réaction : ouverte seulement si la colonie tient un sortilège offensif autre que Famine
 {
   const S = fresh(); SF.apply(S, "essaim", "draw"); SF.apply(S, "essaim", "endDeploy");
-  S.spells = ["Barrage"];
+  S.spells = ["Barrage"]; S.creatures.push({ id: 990, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false });
   SF.apply(S, "essaim", "toAttacks");
   ok(S.phase === "A_react", "Barrage en main → fenêtre de réaction");
   ok(SF.apply(S, "essaim", "endA") !== "", "l'essaim ne peut pas agir pendant la réaction");
   ok(SF.apply(S, "colonie", "spell", { i: 0, arg: "N" }) === "" && S.spells.length === 0, "la colonie joue Barrage");
   ok(SF.apply(S, "colonie", "reactDone") === "" && S.phase === "A_attack", "fin de la réaction");
-  const T = fresh(); SF.apply(T, "essaim", "draw"); SF.apply(T, "essaim", "endDeploy"); T.spells = ["Famine", "Effort"];
+  const T = fresh(); SF.apply(T, "essaim", "draw"); SF.apply(T, "essaim", "endDeploy"); T.spells = ["Famine", "Effort"]; T.creatures.push({ id: 990, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false });
   SF.apply(T, "essaim", "toAttacks");
   ok(T.phase === "A_attack", "Famine ou sort de soutien seuls : pas de fenêtre de réaction");
 }
@@ -239,6 +240,7 @@ const fresh = () => {
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
   S.hand.unshift("Palissade");
+  S.creatures.push({ id: 991, name: "Colosse", lane: "N", u: 1, k: 2, hp: 7, acted: false }); // à portée de la tourelle (1,1)
   SF.apply(S, "colonie", "startCh", { i: 0, lane: "N" }); S.alloc.N = 1;
   const deck = S.spellDeck; S.spellDeck = [...deck.filter(s => s !== "Famine"), "Famine"]; S.techBonus = 3; // pioche 1 sortilège : Famine
   SF.apply(S, "colonie", "build");
@@ -678,10 +680,10 @@ const fresh = () => {
   const S = setup();
   const c = { id: 180, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(c); // assez de PV pour survivre aux Épines
   ok(SF.apply(S, "essaim", "act", { key: SF.posKey(c) }) === "" && c.k === 3 && S.tiles["0,1"].hp === 1, "tour 1 : entrée → C3, pas encore au contact, pas d'attaque");
-  c.acted = false;
+  c.acted = false; S.phase = "A_attack"; // le tour est passé tout seul (plus rien à faire) : on rejoue une phase d'attaque
   SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
   ok(c.k === 2 && !S.tiles["0,1"], "tour 2 : C3 → C2, au contact du Barbelé (couronne 1) : il attaque aussitôt et le détruit");
-  c.acted = false; const w = S.workersBase;
+  c.acted = false; S.phase = "A_attack"; const w = S.workersBase;
   SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
   ok(c.k === 1 && S.workersBase === w - 1, "tour 3 : C2 → C1, au contact de la fusée : −1 travailleur");
   ok(S.killed === 1 && SF.newGame().killed === 0 && SF.newGame().version === SF.VERSION, "statistiques : travailleurs tués comptés (S.killed), version de départ notée (S.version)");
@@ -797,6 +799,21 @@ const fresh = () => {
   ok(SF.apply(T, "colonie", "spell", { i: 0, arg: 510 }) === "", "Brouillage sur une créature qui n'a pas été déployée ce tour");
   SF.apply(T, "colonie", "reactDone"); SF.apply(T, "essaim", "act", { key: SF.posKey(e) });
   ok(d.k === 4 && e.k === 3, "l'Écorcheur brouillé ne bouge pas, la Carapace de sa case avance");
+}
+// 58. Passage automatique et travailleurs assignés d'office (Oni, 04/11/2026)
+{
+  const S = fresh(); S.phase = "A_attack"; S.supports = {};
+  const c = { id: 600, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; S.creatures.push(c);
+  SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
+  ok(S.phase === "D_main" && !SF.ACTIONS.endA.phase.includes(S.phase), "dernière case jouée : le tour passe seul à la colonie");
+  const T = fresh(); SF.attackerDraw(T); SF.endDeploy(T); SF.startAttacks(T); SF.endAttackerTurn(T);
+  T.hand.unshift("Rempart"); const free = SF.totalPoints(T) - SF.allocated(T);
+  SF.apply(T, "colonie", "startCh", { i: 0, lane: "E" });
+  ok(T.alloc.E === Math.min(3, free), "Rempart (3 points) lancé à l'Est : " + T.alloc.E + " travailleur(s) assigné(s) d'office (" + free + " libres)");
+  T.hand.unshift("Palissade"); SF.apply(T, "colonie", "startCh", { i: 0, lane: "O" });
+  ok(SF.allocated(T) <= SF.totalPoints(T), "jamais plus de travailleurs que disponibles");
+  SF.apply(T, "colonie", "build"); while (T.phase === "D_place") SF.apply(T, "colonie", "placeAt", { k: SF.placeTargets(T)[0] });
+  ok(T.phase !== "D_fire", "aucune créature à portée : pas d'étape de tirs, le tour passe à l'essaim");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
