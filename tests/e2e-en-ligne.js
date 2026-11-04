@@ -109,7 +109,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   let stats = 'non vérifiées';
   if (fin !== 'en cours') {
     const rec = await pE.evaluate(async c => ((await (await fetch('/api/stats')).json()).results || []).find(r => r.id.startsWith(c + '-')), code);
-    await pE.goto(URL0 + '?stats'); await pE.waitForSelector('.stats .tbl, .stats .st-games p', { timeout: 10000 });
+    await pE.goto(URL0 + '?stats'); await pE.waitForSelector('.statpage .tbl, .statpage .st-games p', { timeout: 10000 });
     await pE.click('[data-a="statsTest"]'); await sleep(200);
     await pE.click('[data-a="statsPlan"]'); await pE.waitForSelector('.st-plan', { timeout: 10000 });
     const overflow = await pE.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);

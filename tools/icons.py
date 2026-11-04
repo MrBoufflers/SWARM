@@ -132,3 +132,25 @@ def ic(name, cls="i"):
     # picto intégré directement (plus fiable à l'impression qu'une référence <use>)
     return (f'<svg class="{cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
             f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICONS[name][1]}</svg>')
+
+# Améliorations de l'essaim sans picto propre (04/11/2026) : affichées en icônes dans le résumé vu par la colonie
+ICONS.update({
+    "ferocite": ("Férocité : +1 ATQ",
+                 '<path d="M4 17C7 13 9 10 12 6M8 21C11 16 13 13 16 9"/><path d="M18 3V9M15 6H21"/>'),
+    "carnage": ("Carnage : +2 ATQ",
+                '<path d="M3 15C6 11 8 8 11 4M6 19C9 14 12 10 15 6M10 21C13 16 15 13 18 10"/><path d="M19 2V6M17 4H21"/><path d="M19 13.5C20.2 15 20.6 16 20.6 16.8A1.6 1.6 0 0 1 17.4 16.8C17.4 16 17.8 15 19 13.5Z" fill="currentColor" stroke="none"/>'),
+    "essaim": ("Essaim agrandi : plafond de population +3",
+               '<circle cx="7.5" cy="8.5" r="2.3"/><circle cx="13.5" cy="7" r="2.3"/><circle cx="10" cy="14.5" r="2.3"/><path d="M16.5 15H22M19.25 12.25V17.75"/>'),
+    "carapace": ("Carapace épaisse : +1 PV",
+                 '<path d="M3 17C3 11 7 6.5 12 6.5C17 6.5 21 11 21 17Z"/><path d="M8 17C8 13 9.8 9.8 12 9.8C14.2 9.8 16 13 16 17M12 6.5V17"/>'),
+    "blindage": ("Blindage : +2 PV",
+                 '<path d="M4 7L12 3L20 7V13.5L12 21L4 13.5Z"/><path d="M4 12.5L12 8.5L20 12.5M12 8.5V21"/>'),
+    "masse": ("Masse vivante : +1 PV par autre créature de la case",
+              '<circle cx="8.5" cy="9.5" r="4"/><circle cx="15.5" cy="9.5" r="4"/><circle cx="12" cy="15.5" r="4"/>'),
+    "mue": ("Mue : Furtivité et Aura +1 PV",
+            '<circle cx="9" cy="8" r="3"/><path d="M3.5 20C3.5 16 5.8 13 9 13C12.2 13 14.5 16 14.5 20"/><circle cx="15.5" cy="8" r="3" stroke-dasharray="1.6 1.9"/><path d="M15.5 13C18.7 13 20.5 16 20.5 20" stroke-dasharray="1.6 1.9"/>'),
+    "griffes": ("Griffes : +1 ATQ aux autres créatures de la case",
+                '<path d="M5 21C5 15 7.5 9 12.5 4.5M10 21C10 16 12 11.5 16.5 8M15 21C15 17.5 16.8 14.5 20.5 12.5"/>'),
+    "regeneration": ("Régénération : Aura Soin 2",
+                     '<path d="M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2"/><path d="M10.6 8.6H13.4V11.1H15.9V13.9H13.4V16.4H10.6V13.9H8.1V11.1H10.6Z"/>'),
+})
