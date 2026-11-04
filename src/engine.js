@@ -105,7 +105,7 @@ const SF = (() => {
       A2: ["Blindage", "+2 PV (total +3)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
     soutien: { A1: ["Mue", "Tous les soutiens gagnent la Furtivité et l'Aura +1 PV : +1 PV aux autres créatures de leur case."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
-      A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2 (qui s'ajoute à leurs autres auras de soin)."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles."],
+      A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2 (qui s'ajoute à leurs autres auras de soin)."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles. Les Œil-sonde de la pioche sortent du jeu."],
       B2: ["Frénésie", "Chaque soutien double les dégâts d'une autre créature de sa case, au choix (cumulable : deux Frénésies sur la même créature la quadruplent)."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -205,6 +205,10 @@ const SF = (() => {
     startAttackerTurn(S);
     return S;
   }
+  // une carte revient dans sa pioche (créature morte, carte non jouée, Nuke) — sauf l'Œil-sonde une fois Clairvoyance
+  // acquise : il sort du jeu (Oni, 04/11/2026)
+  const retired = (S, name) => name === "Œil-sonde" && S.upgrades.soutien.r2 === "C";
+  function toPile(S, name) { if (!retired(S, name)) S.piles[CREATURES[name].lvl].push(name); }
   function addPile(S, lvl, type) {
     for (const [name, n] of PILES[lvl][type]) for (let i = 0; i < n; i++) S.piles[lvl].push(name);
     shuffle(S.piles[lvl]);
@@ -390,7 +394,7 @@ const SF = (() => {
         S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u });
         log(S, "essaim", `Réincarnation : ${c.name} reviendra au début du prochain tour de l'essaim.`);
       } else {
-        S.piles[CREATURES[c.name].lvl].push(c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
+        toPile(S, c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
       }
     }
   }
@@ -766,7 +770,7 @@ const SF = (() => {
   function endDeploy(S) {
     if (S.budget > 0) { S.reserve += S.budget; log(S, "essaim", `${S.budget} biomasse versée à la réserve (réserve ${S.reserve}).`); }
     S.budget = 0;
-    for (const c of S.handA) S.piles[CREATURES[c.name].lvl].push(c.name);
+    for (const c of S.handA) toPile(S, c.name);
     for (const l of [1, 2, 3]) shuffle(S.piles[l]);
     S.handA = [];
     S.phase = "A_upgrade";
@@ -812,7 +816,13 @@ const SF = (() => {
     fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
-    if (type === "soutien" && slot === "C2") log(S, "essaim", "Clairvoyance : les tuiles camouflées sont visibles tant qu'un soutien est en jeu.");
+    if (type === "soutien" && slot === "C2") {
+      log(S, "essaim", "Clairvoyance : les tuiles camouflées sont visibles tant qu'un soutien est en jeu.");
+      // les Œil-sonde de la pioche sortent du jeu ; ceux en main ou sur le plateau restent, mais ne reviendront plus dans la pioche
+      const n = S.piles[1].filter(x => x === "Œil-sonde").length;
+      S.piles[1] = S.piles[1].filter(x => x !== "Œil-sonde");
+      if (n) log(S, "essaim", `Clairvoyance : ${n} Œil-sonde ${n > 1 ? "sortent" : "sort"} de la pioche (plus utile${n > 1 ? "s" : ""}).`);
+    }
   }
   function canBuy(S, type, slot) { return nodeState(S, type, slot) === "open" && investable(S) + invested(S, type, slot) >= nodeCost(slot); }
   function buy(S, type, slot) { return canBuy(S, type, slot) && invest(S, type, slot, nodeCost(slot)); }
@@ -1014,7 +1024,7 @@ const SF = (() => {
       if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
       if (S.floors === 9) {
         fx(S, { t: "nuke", ids: S.creatures.map(c => c.id) });
-        for (const c of S.creatures) S.piles[CREATURES[c.name].lvl].push(c.name);
+        for (const c of S.creatures) toPile(S, c.name);
         for (const l of [1, 2, 3]) shuffle(S.piles[l]);
         log(S, "colonie", `Palier 9 · Nuke : ${S.creatures.length} créature${S.creatures.length > 1 ? "s" : ""} détruite${S.creatures.length > 1 ? "s" : ""}.`);
         S.creatures = [];

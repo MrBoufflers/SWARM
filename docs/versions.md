@@ -6,7 +6,9 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 
 ## v0.4.12 — 4 novembre 2026
 
-Interface, sans changement de règles : au survol d'un étage de la fusée (résumé de la colonie et panneau de la colonie), la bulle indique son avancement, par exemple « Étage 5 : 1/4 travailleurs » (« achevé » pour les étages déjà construits).
+**Règle (Oni)** : quand l'essaim acquiert **Clairvoyance**, les Œil-sonde de la pioche sortent du jeu. Ceux en main ou sur le plateau restent jouables, mais ne reviennent plus dans la pioche (carte non jouée, créature morte, Nuke).
+
+**Interface** : au survol d'un étage de la fusée (résumé de la colonie et panneau de la colonie), la bulle indique son avancement, par exemple « Étage 5 : 1/4 travailleurs » (« achevé » pour les étages déjà construits).
 
 ## v0.4.11 — 4 novembre 2026
 

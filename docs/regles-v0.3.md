@@ -403,7 +403,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | 1 | Côté A | Mue | tous les soutiens gagnent la **Furtivité** † (ne peuvent pas être visés par une tourelle ni un sortilège tant qu'une créature non furtive est sur leur case) et l'**Aura +1 PV** : +1 PV aux autres créatures de leur case (cumulable) |
 | 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) |
 | 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 3) |
-| 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles |
+| 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles ; les Œil-sonde de la pioche sortent du jeu (ceux en main ou en jeu restent, mais ne reviennent plus dans la pioche) |
 | 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim ; cumulable (deux soutiens sur la même créature : ×4 ; ou sur deux créatures différentes) |
 
 Une tuile camouflée rendue visible par Vision ou Clairvoyance ne déclenche plus son piège †.
