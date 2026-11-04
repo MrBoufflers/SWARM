@@ -121,7 +121,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.6";
+  const VERSION = "0.4.7";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1049,7 +1049,15 @@ const SF = (() => {
       return true;
     } },
     endA: { phase: ["A_attack"], run(S) { if (attackOrder(S).length) return false; endAttackerTurn(S); return true; } },
-    startCh: { phase: ["D_main"], run: (S, a) => isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane) },
+    startCh: { phase: ["D_main"], run(S, a) {
+      if (!(isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane))) return false;
+      // travailleurs assignés d'office (Oni, 04/11/2026) : juste assez pour finir les chantiers de la lane, dans la
+      // limite des travailleurs libres ; toujours modifiable avec + / −
+      const need = S.chantiers[a.lane].reduce((n, ch) => n + ch.left, 0);
+      const free = totalPoints(S) - allocated(S);
+      S.alloc[a.lane] = Math.max(S.alloc[a.lane], Math.min(need, S.alloc[a.lane] + free));
+      return true;
+    } },
     cancelCh: { phase: ["D_main"], run: (S, a) => isLane(a.lane) && isInt(a.i) && cancelChantier(S, a.lane, a.i) },
     alloc: { phase: ["D_main"], run(S, a) {
       if (!isLane(a.lane) || ![1, -1].includes(a.d)) return false;
@@ -1071,7 +1079,25 @@ const SF = (() => {
     if (S.winner) return "la partie est terminée";
     if (side !== actor(S)) return "ce n'est pas votre tour";
     if (!A.phase.includes(S.phase)) return "action impossible dans cette phase";
-    return A.run(S, args && typeof args === "object" ? args : {}) ? "" : "action refusée";
+    if (!A.run(S, args && typeof args === "object" ? args : {})) return "action refusée";
+    autoAdvance(S);
+    return "";
+  }
+  // Passage automatique (Oni, 04/11/2026) : quand le camp n'a plus rien à faire dans l'étape, le tour passe seul
+  // (plus de bouton « Fin du tour de l'essaim » ; la colonie passe la main dès qu'aucune tourelle ne peut plus tirer).
+  function canStillFire(S) {
+    return Object.entries(S.supports).some(([k, l]) => l < 3 && shotsLeft(S, k) > 0 && supportTargets(S, k).length);
+  }
+  function autoAdvance(S) {
+    if (S.winner) return;
+    if (S.phase === "A_attack" && !attackOrder(S).length) {
+      log(S, "essaim", "Toutes les cases ont agi : fin du tour de l'essaim.");
+      endAttackerTurn(S);
+    }
+    if (S.phase === "D_fire" && !canStillFire(S) && !S.winner) {
+      log(S, "colonie", "Plus aucune tourelle ne peut tirer : fin du tour de la colonie.");
+      endColonyTurn(S); openFamine(S);
+    }
   }
 
   // ------------------------------------------------------------------ vue filtrée par camp (jeu en ligne)

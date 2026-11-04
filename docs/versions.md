@@ -4,6 +4,19 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.7 — 4 novembre 2026
+
+Confort de jeu, sans changement de règles.
+
+- **Travailleurs assignés d'office** : quand on lance un chantier, l'atelier reçoit juste assez de travailleurs pour le finir, dans la limite des travailleurs libres. Le reste va à la fusée, et la répartition reste modifiable avec + / −.
+- **Fin de tour automatique** :
+  - le bouton « Fin du tour de l'essaim » disparaît : le tour passe à la colonie dès que toutes les cases ont agi ;
+  - la colonie passe la main dès qu'aucune tourelle ne peut plus tirer, y compris quand aucune créature n'est à portée ;
+  - « Terminer le tour » reste, pour finir sans tirer à la main : il fait tirer automatiquement les tourelles restantes.
+- **Tir direct** : après avoir choisi une tourelle, on peut toucher une créature surlignée sur le plateau. La liste de cibles reste disponible.
+- **Tuiles en main** : grande illustration à gauche ; les capacités deviennent des pastilles, avec leur texte au survol (ou au toucher).
+- **Supports** : contour turquoise, en pointillés quand la tourelle a déjà tiré.
+
 ## v0.4.6 — 4 novembre 2026
 
 Interface seulement, sans changement de règles.

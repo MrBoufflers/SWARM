@@ -244,7 +244,7 @@
         const waiting = [...new Set(S.creatures.filter(c => !c.acted).map(SF.posKey))].filter(k => !ready.includes(k));
         body = ready.length ? `<p class="hint">Chaque case avance en bloc d'une case (deux pour les aggros mobiles) et attaque si elle est au contact ; dans une lane, les cases les plus proches de la fusée agissent d'abord.</p><div class="choices">` + ready.map(k => `<button data-a="act" data-k="${k}">${E(blockTxt(k))}</button>`).join("") + `</div>` +
           (waiting.length ? `<p class="small">En attente : ${waiting.map(k => E(blockTxt(k))).join(" · ")}</p>` : "") : `<p class="hint">Toutes les créatures ont agi.</p>`;
-        acts = (ready.length ? `<button data-a="actAll">Tout résoudre (les plus avancées d'abord)</button>` : "") + `<button data-a="endA" class="primary"${ready.length ? " disabled" : ""}>Fin du tour de l'essaim</button>`;
+        acts = ready.length ? `<button data-a="actAll">Tout résoudre (les plus avancées d'abord)</button>` : ""; // le tour passe seul quand toutes les cases ont agi
       }
     } else if (ph === "D_main") {
       body = spellBox("sup") + (UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
@@ -255,7 +255,7 @@
     } else if (ph === "D_fire") {
       if (UI.support) {
         const c = SF.supportTargets(S, UI.support);
-        body = `<p class="hint">Tourelle de niveau ${S.supports[UI.support]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : choisissez la cible.</p><div class="choices">` +
+        body = `<p class="hint">Tourelle de niveau ${S.supports[UI.support]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : touchez une créature surlignée sur le plateau, ou choisissez-la ici.</p><div class="choices">` +
           c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("") + `</div>`;
       } else {
         const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length);
@@ -377,7 +377,7 @@
     const t = SF.TILES[name], L = SF.LANE_NAME;
     const pv = t.pv === "ap" ? `2 (4 en lane ${L[t.dir]})` : t.pv === "front" ? "2 à 4" : t.pv === "reduit" ? "2 à 4" : t.pv;
     const caps = [];
-    const cap = (ic, n, txt) => caps.push(`<span class="capline">${icon(ic)}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`);
+    const cap = (ic, n, txt) => caps.push(`<span class="cap" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon(ic)}${E(n)}</span>`);
     if (t.aura) cap("epines", "Aura d'épines", "+1 Épines à chaque bâtiment des 8 cases autour (cumulable).");
     if (t.pv === "ap") cap("cardinal", "Avant-poste", `+2 PV si posé dans la lane ${L[t.dir]} (4 PV), sinon 2 PV.`);
     if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
@@ -390,8 +390,8 @@
     if (t.siphon) cap("biomasse", "Siphon", `révélé par une attaque de l'essaim, il lui retire ${t.siphon} biomasse (jamais sous ${SF.MIN_BIOMASS}). Ne se déclenche pas s'il a été vu par Vision ou Clairvoyance.`);
     if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par Avant-poste dans les 8 cases autour).`);
-    return `<b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
-      <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : " · sans Épines"}</span>${caps.join("")}`;
+    return `<span class="art ${imCls(name)}">${imCls(name) ? "" : icon("mur")}</span><b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
+      <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : ""}</span><span class="caps">${caps.join("")}</span>`;
   }
   // illustration d'une tuile, d'un support ou d'une créature : classe CSS « im im-… » ajoutée au build (vide si pas d'image)
   const imCls = n => (typeof IMG_CLASS !== "undefined" && IMG_CLASS[n]) || "";
@@ -400,8 +400,10 @@
     if (!crs.length) return "";
     return `<div class="toks">` + crs.map(c => {
       const t = SF.CREATURES[c.name].type;
-      const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${c.acted && S.phase === "A_attack" ? " done" : ""}${c.new ? " new" : ""}`;
-      return `<button class="${cls}" data-a="creature" data-id="${c.id}" title="${E(c.name)}"><span>${SF.effAtq(S, c)}</span><span>${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      // tourelle choisie : toucher une créature à portée la vise directement (Oni, 04/11/2026)
+      const tgt = S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c);
+      const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${c.acted && S.phase === "A_attack" ? " done" : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
+      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${tgt ? " : tirer dessus" : ""}"><span>${SF.effAtq(S, c)}</span><span>${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
   function detail() {
@@ -445,7 +447,7 @@
       ateliers += `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${slots}</div>${step}</div>`;
     }
     const hand = mine
-      ? `<div class="hand">${S.hand.map((t, i) => `<button data-a="tile" data-i="${i}" class="tcard${UI.sel === i ? " sel" : ""}"${S.phase === "D_main" ? "" : " disabled"}>${imCls(t) ? `<span class="thumb ${imCls(t)}"></span>` : ""}${tileCard(t)}</button>`).join("")}</div>`
+      ? `<div class="hand">${S.hand.map((t, i) => `<button data-a="tile" data-i="${i}" class="tcard${UI.sel === i ? " sel" : ""}"${S.phase === "D_main" ? "" : " disabled"}>${tileCard(t)}</button>`).join("")}</div>`
       : `<p class="hidden-hand">${S.hand.length} tuiles en main (cachées)</p>`;
     const spells = mine ? (S.spells.length ? `<div class="spells">${S.spells.map(s => spellCard(s)).join("")}</div>` : `<span class="muted">aucun</span>`) : `<span class="muted">${S.spells.length} en main (cachés)</span>`;
     return `<h3>${icon("fusee")} Colonie</h3>
