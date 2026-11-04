@@ -4,6 +4,13 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.12 — 4 novembre 2026
+
+Interface, sans changement de règles.
+
+- **Avancement de la fusée vu par l'essaim** : un encart en tête du résumé de la colonie indique l'étage en construction, une barre de progression, les points accumulés sur le coût de l'étage, le nombre de points que la colonie peut y mettre par tour, et le palier suivant avec son effet.
+- **Colonne d'étages** : les paliers (3, 6, 9, 12) ne sont plus encadrés comme des étages entamés ; seul l'étage en cours est marqué (pointillés), rempli selon les points déjà accumulés.
+
 ## v0.4.11 — 4 novembre 2026
 
 Aide pour les nouveaux joueurs, sans changement de règles.

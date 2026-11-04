@@ -429,3 +429,15 @@ table.rt:not(.rt-wrap .rt) { border: 1px solid var(--rule); border-radius: 8px; 
 .tc-body p { margin: 0 0 8px; font-size: .86rem; line-height: 1.45; }
 .tc-acts { display: flex; gap: 6px; flex-wrap: wrap; }
 @media (max-width: 680px) { .tipcard { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 45vh; overflow-y: auto; } .tc-img { width: 52px; height: 52px; } }
+
+/* avancement de la fusée vu par l'essaim (Oni, 04/11/2026) */
+.kprog { display: flex; flex-direction: column; gap: 4px; padding: 8px 9px; margin-bottom: 8px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--rule); border-left: 3px solid var(--colonie); cursor: help; }
+.kprog .kp-h { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; } .kprog .kp-h .i { width: 15px; height: 15px; align-self: center; color: var(--colonie); }
+.kprog .kp-h b { font: 700 1.05rem/1 var(--display); } .kprog small { font-size: .72rem; color: var(--ink-soft); }
+.kprog .bar { display: block; height: 7px; border-radius: 4px; background: var(--rule); overflow: hidden; }
+.kprog .bar i { display: block; height: 100%; background: var(--colonie); }
+.kprog .kp-t { font-size: .76rem; } .kprog .kp-n { font-size: .72rem; color: var(--ink-soft); line-height: 1.3; }
+/* colonne d'étages : les paliers ne sont plus encadrés (on les prenait pour des étages entamés) ; l'étage en cours est marqué */
+.floors.v .fl.ms { border-color: var(--rule); color: var(--ink-soft); font-weight: 700; }
+.floors.v .fl.ms.on { border-color: var(--colonie); color: #fff; }
+.floors.v .fl.cur { border: 1.5px dashed var(--hot); }
