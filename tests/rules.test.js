@@ -852,6 +852,21 @@ const fresh = () => {
   SF.apply(V, "essaim", "actAll");
   ok(v.k === 2 && !V.tiles["0,1"] && V.phase === "D_main", "Tout résoudre : avance d'une case, attaque devant, puis le tour passe");
 }
+// 60. Clairvoyance : les Œil-sonde sortent de la pioche ; ceux en main ou en jeu ne reviennent plus (Oni, 04/11/2026)
+{
+  const S = fresh(); S.phase = "A_deploy"; S.budget = 0; S.reserve = 0;
+  S.upgrades.soutien.r1 = "A"; S.invest = { "soutien:C2": SF.COST_R2 - 1 };
+  S.handA = [{ name: "Œil-sonde", free: false, uid: 900 }];
+  const eye = { id: 901, name: "Œil-sonde", lane: "N", u: 0, k: 4, hp: 2, acted: false }; S.creatures.push(eye);
+  ok(S.piles[1].includes("Œil-sonde"), "avant : des Œil-sonde dans la pioche de niveau 1");
+  S.budget = 1; SF.apply(S, "essaim", "invest", { t: "soutien", s: "C2", n: 1 });
+  ok(S.upgrades.soutien.r2 === "C" && !S.piles[1].includes("Œil-sonde"), "Clairvoyance acquise : plus aucun Œil-sonde dans la pioche");
+  ok(S.handA.length === 1 && S.creatures.includes(eye), "celui en main et celui sur le plateau restent");
+  SF.endDeploy(S);
+  ok(!S.piles[1].includes("Œil-sonde"), "la carte non jouée ne revient pas dans la pioche");
+  eye.hp = 0; SF.killCheck(S);
+  ok(!S.piles[1].includes("Œil-sonde") && S.piles[1].length > 0, "l'Œil-sonde mort ne revient pas non plus ; les autres cartes, si");
+}
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
   const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");

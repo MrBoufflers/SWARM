@@ -111,6 +111,7 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 - **Bug corrigé** (01/11) : `SF.migrate` remettait les tuiles de départ à Épines 2 (celles de la Haie d'épines de la pioche) après un rechargement ; elles reviennent à 1.
 - **Départ de l'essaim** (04/11) : **5 biomasse** ; premier tour (`S.startHand`, consommé par `attackerDraw`) : Écorcheur, Carapace et un soutien de niveau 1 au hasard, pris dans la pioche de niveau 1, payés normalement, **à la place** de la pioche. Le helper de tests `fresh()` supprime `startHand`.
 - **Œil-sonde** (04/11, définitif) : Vision permanente — tant qu'il est en vie, les tuiles camouflées de sa lane sont révélées, y compris celles posées ensuite (`visionSweep`, appelé à chaque pose) ; une tuile révélée le reste.
+- **Clairvoyance** (04/11, v0.4.12) : à l'acquisition, les Œil-sonde de la pioche sortent du jeu ; ceux en main ou en jeu restent mais ne reviennent plus dans la pioche (`toPile` / `retired`).
 - **Champ de stase** (04/11) : un seul bâtiment (`S.stase` = clés de tuiles) : aucun dégât ce tour, ses Épines suspendues. **Brouillage** (04/11) : n'importe quelle créature (via `resolveTarget`) ; `acted` + `jammed` : elle ne bouge ni n'attaque ce tour.
 - **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
 - **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).

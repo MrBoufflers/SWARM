@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.12 — 4 novembre 2026
+
+**Règle (Oni)** : quand l'essaim acquiert **Clairvoyance**, les Œil-sonde de la pioche sortent du jeu. Ceux en main ou sur le plateau restent jouables, mais ne reviennent plus dans la pioche (carte non jouée, créature morte, Nuke).
+
+**Interface** : au survol d'un étage de la fusée (résumé de la colonie et panneau de la colonie), la bulle indique son avancement, par exemple « Étage 5 : 1/4 travailleurs » (« achevé » pour les étages déjà construits).
+
 ## v0.4.11 — 4 novembre 2026
 
 Aide pour les nouveaux joueurs, sans changement de règles.

@@ -151,7 +151,9 @@
       9: `Palier 3 : Nuke, toutes les créatures sont détruites · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
       12: "Décollage : la colonie gagne",
     }[n];
-    return `Étage ${n} · ${cost} points\n+1 travailleur${extra ? "\n" + extra : ""}`;
+    // avancement (Oni, 04/11/2026) : « Étage 5 : 1/4 travailleurs » (points déjà investis sur le coût de l'étage)
+    const done = n <= S.floors ? cost : n === S.floors + 1 ? S.rocketPts : 0;
+    return `Étage ${n} : ${done}/${cost} travailleurs${n <= S.floors ? " (achevé)" : ""}\n+1 travailleur une fois achevé${extra ? "\n" + extra : ""}`;
   }
   // résumé de la colonie vu par l'essaim : chiffres clés, fusée en colonne, ateliers
   function colonySummary() {
