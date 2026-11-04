@@ -15,7 +15,7 @@ NOMS = {
     "Œil-sonde": "oeil sonde.jpg", "Glaneur": "glaneur.jpg", "Hurleur": "hurleur.jpg",
     "Phéromone": "phéromone.jpg", "Perforeur": "perforeur.jpg", "Catalyseur": "catalyseur.jpg",
     "Sapeur": "sapeur.jpg", "Sporeur": "sporeur.jpg",
-    "Barbelé": "barbelé.jpg", "Antenne": "antenne.jpg", "Bastion": "bastion.jpg", "Haie d'épines": "haie d'épines.jpg",
+    "Palissade": "palissade.jpg", "Barbelé": "barbelé.jpg", "Antenne": "antenne.jpg", "Bastion": "bastion.jpg", "Haie d'épines": "haie d'épines.jpg",
     "Laboratoire": "laboratoire.jpg", "Mur hérissé": "mur hérissé.jpg", "Muraille": "muraille.jpg",
     "Observatoire": "observatroire.jpg", "Rempart": "rempart.jpg", "Archives": "archive.jpg",
     "Baraquement": "baraquement.jpg", "Dortoir": "dortoir.jpg", "Égide": "egide.jpg", "Ligne de front": "ligne de front.jpg",
