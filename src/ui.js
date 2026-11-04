@@ -22,6 +22,14 @@
     try { if (window.SF_TEST || new URLSearchParams(location.search).has("test")) sessionStorage.setItem("swarm-steel-test", "1"); return sessionStorage.getItem("swarm-steel-test") === "1"; }
     catch (e) { return !!window.SF_TEST; }
   })();
+  // thème (Oni, 04/11/2026) : sombre par défaut, clair, ou auto (suit le système) ; mémorisé dans ce navigateur
+  const THEME_KEY = "swarm-steel-theme", THEMES = ["dark", "light", "auto"], THEME_NAME = { dark: "sombre", light: "clair", auto: "auto" };
+  let THEME = (() => { try { const t = localStorage.getItem(THEME_KEY); return THEMES.includes(t) ? t : "dark"; } catch (e) { return "dark"; } })();
+  const sysDark = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+  function applyTheme() { const r = document.documentElement; r.dataset.theme = THEME; r.classList.toggle("sys-dark", !!(sysDark && sysDark.matches)); }
+  applyTheme();
+  if (sysDark && sysDark.addEventListener) sysDark.addEventListener("change", applyTheme);
+  const themeBtn = () => `<button data-a="theme" class="ghost" title="Changer de thème">Thème : ${THEME_NAME[THEME]}</button>`;
   let STALE = null; // version plus récente du jeu annoncée par le serveur : la page doit être rechargée
   let STATS = null; // page Statistiques : { list, error, test, ver, plans: {id: svg} }
   // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
@@ -76,11 +84,11 @@
     const animBtn = `<button data-a="anim" class="ghost" aria-pressed="${animOn}">Animations : ${animOn ? "oui" : "non"}</button>`;
     return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v${SF.VERSION}</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
-      <div class="menu">${animBtn}${menu}</div></header>`;
+      <div class="menu">${animBtn}${themeBtn()}${menu}</div></header>`;
   }
   function homeHeader() {
     return `<header class="top"><div class="brand">${icon("fusee")}<b>Swarm &amp; Steel</b><span>prototype v${SF.VERSION}</span></div>
-      <div class="menu"><button data-a="help" class="ghost">Règles</button></div></header>`;
+      <div class="menu">${themeBtn()}<button data-a="help" class="ghost">Règles</button></div></header>`;
   }
   function staleBar() {
     return STALE ? `<div class="stale" role="alert"><span>Nouvelle version du jeu disponible (v${E(STALE)}). Rechargez la page pour continuer avec les règles à jour.</span><button data-a="reload" class="primary">Recharger</button></div>` : "";
@@ -89,7 +97,7 @@
   function home() {
     const saved = load();
     const preset = new URLSearchParams(location.search).get("code") || "";
-    return `<section class="handoff home"><div class="ho-card">${icon("fusee", "i big")}
+    return `<section class="handoff home ${imCls("Champ de bataille")}"><div class="ho-card">${icon("fusee", "i big")}
       <h2>Swarm &amp; Steel</h2>
       <p class="ho-k">Sur cet appareil</p>
       <div class="home-acts">${saved && saved.phase ? `<button data-a="resume" class="primary">Reprendre la partie locale</button>` : ""}
@@ -526,6 +534,7 @@
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
     if (a === "reload") { location.reload(); return; }
+    if (a === "theme") { THEME = THEMES[(THEMES.indexOf(THEME) + 1) % THEMES.length]; try { localStorage.setItem(THEME_KEY, THEME); } catch (e) { /* rien */ } applyTheme(); render(); return; }
     if (MODE === "stats") { statsAction(a, d); return; }
     if (a === "anim") { animOn = !animOn; try { localStorage.setItem(ANIM_KEY, animOn ? "1" : "0"); } catch (e) { /* rien */ } render(); return; }
     if (MODE === "home" || !S) { homeAction(a, d); return; }
