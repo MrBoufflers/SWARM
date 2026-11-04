@@ -8,6 +8,7 @@ const fresh = () => {
   const S = SF.newGame(); S.log = [];
   for (const k of Object.keys(S.tiles)) if (S.tiles[k].start && SF.ring(...SF.parse(k)) === 2) delete S.tiles[k];
   for (const k of Object.keys(S.supports)) if (S.supports[k] === 2) delete S.supports[k];
+  delete S.startHand; // pioche normale dès le premier tour (la main de départ a son propre test, n° 56)
   return S;
 };
 
@@ -755,6 +756,31 @@ const fresh = () => {
     S.creatures.push(c, e); SF.actCase(S, SF.posKey(c), [300, 301]); return [c.hp, e.hp];
   };
   ok(run(false).join() === "1,3" && run(true).join() === "3,3", "Provocation : la Carapace ne subit plus les Épines (3 PV), l'Écorcheur si (5 → 3)");
+}
+// 56. Départ de l'essaim (Oni, 04/11/2026) : 5 biomasse ; premier tour : une aggro, un tank, un soutien au hasard, payés
+//     normalement, à la place de la pioche ; ensuite la pioche normale reprend
+{
+  const S = SF.newGame();
+  ok(S.biomass === 5, "l'essaim commence avec 5 biomasse");
+  const n1 = S.piles[1].length;
+  ok(SF.apply(S, "essaim", "draw") === "" && S.handA.length === 3, "premier tour : 3 cartes en main");
+  ok(["aggro", "tank", "soutien"].every(t => S.handA.filter(c => SF.CREATURES[c.name].type === t).length === 1) && S.handA.every(c => SF.CREATURES[c.name].lvl === 1 && !c.free),
+    "une créature de chaque type, de niveau 1, payante : " + S.handA.map(c => c.name).join(", "));
+  ok(S.piles[1].length === n1 - 3 && S.budget === 5, "cartes prises dans la pioche de niveau 1 ; budget 5");
+  const seen = new Set(); for (let i = 0; i < 40; i++) { const T = SF.newGame(); SF.attackerDraw(T); seen.add(T.handA.find(c => SF.CREATURES[c.name].type === "soutien").name); }
+  ok(seen.size >= 2, "le soutien est tiré au hasard (vus : " + [...seen].join(", ") + ")");
+  ok(!("startHand" in S), "la main de départ ne sert qu'une fois");
+  SF.endDeploy(S); SF.attackerDraw(S);
+  ok(S.handA.length === 3 && S.log[0].msg.startsWith("Palier 1"), "tour suivant : pioche normale du palier (3 cartes de niveau 1)");
+  // Œil-sonde : Vision permanente sur sa lane, même pour les tuiles posées après lui
+  const V = fresh(); V.phase = "D_place"; V.supports = {};
+  V.creatures.push({ id: 400, name: "Œil-sonde", lane: "N", u: 0, k: 4, hp: 2 });
+  V.toPlace = [{ tile: "Muraille", lane: "N" }, { tile: "Muraille", lane: "E" }];
+  const kN = SF.placeTargets(V).find(k => SF.cellLane(...SF.parse(k)) === "N");
+  SF.placeTile(V, kN);
+  ok(V.tiles[kN].revealed, "Œil-sonde en vie dans la lane Nord : la Muraille posée ensuite est aussitôt révélée");
+  const kE = SF.placeTargets(V).find(k => SF.cellLane(...SF.parse(k)) === "E");
+  if (kE) { SF.placeTile(V, kE); ok(!V.tiles[kE].revealed, "lane Est (sans Œil-sonde) : la tuile reste cachée"); }
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

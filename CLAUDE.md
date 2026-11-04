@@ -96,6 +96,8 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 - **Sortilèges** (01/11) : un sortilège non joué reste en main tant qu'il n'est pas joué, offensif comme de soutien, sans limite (avant : défaussé à la fin de sa fenêtre).
 - **Créatures** (01/11) : aggros à 1 PV à tous les niveaux ; tanks à 1 ATQ à tous les niveaux. Carapace épaisse +1 PV, Blindage +2 PV (avant +2 / +4). **Phéromone** : Aura Leurre supprimée, remplacée par l'**Aura Butin** : quand une autre créature de sa case détruit un bâtiment (attaque, percée, spores), +1 biomasse en plus ; non cumulable (`destroyTile(S, k, why, by)`). **Sapeur** (01/11) : à son déploiement, détruit un bâtiment au choix de sa lane (`deploy(..., target)`, cible obligatoire si la lane a des bâtiments ; +1 biomasse ; avant : détruisait un chantier). Le journal ne nomme jamais une tuile camouflée détruite sans avoir été révélée. **Catalyseur** (02/11) : Aura Instinct supprimée (plus d'actions `instinct` / `instTarget`), remplacée par l'**Aura Cuirasse** : les créatures de sa case ne subissent pas les Épines (les pièges blessent toujours). La Furtivité ne vient plus que de Mue.
 - **Bug corrigé** (01/11) : `SF.migrate` remettait les tuiles de départ à Épines 2 (celles de la Haie d'épines de la pioche) après un rechargement ; elles reviennent à 1.
+- **Départ de l'essaim** (04/11) : **5 biomasse** ; premier tour (`S.startHand`, consommé par `attackerDraw`) : Écorcheur, Carapace et un soutien de niveau 1 au hasard, pris dans la pioche de niveau 1, payés normalement, **à la place** de la pioche. Le helper de tests `fresh()` supprime `startHand`.
+- **Œil-sonde** (04/11, définitif) : Vision permanente — tant qu'il est en vie, les tuiles camouflées de sa lane sont révélées, y compris celles posées ensuite (`visionSweep`, appelé à chaque pose) ; une tuile révélée le reste.
 - **Améliorations de l'essaim** : rang 1 = 6 biomasse, rang 2 = 12 (avant 8 / 16).
 - **Main de tuiles de la colonie** : 4, +1 à chaque palier de la fusée (étages 3, 6, 9) → 4 / 5 / 6 / 7 (`SF.handSize`). Le palier 6 donne toujours +1 chantier par lane mais ne double plus la main (avant : 8).
 - **Biomasse** : 1 par tuile détruite ou support tombé (règle d'origine ; du 30/10 au 01/11, une tuile rapportait sa durée de construction).
@@ -124,7 +126,6 @@ Marqués † dans le livret, ou repérés pendant la conception :
 - Barbelés posés face visible (non camouflés).
 - Percée qui atteint la fusée : 1 seul travailleur (interprétation).
 - Bâtiment achevé sans case valable : retour en main (interprétation).
-- Vision (Œil-sonde) révèle les tuiles camouflées de sa lane **au moment du déploiement** seulement.
 - Les compteurs de technologies et de travailleurs de la colonie sont publics.
 - Un cas « l'escalier n'a pas fonctionné (créature bloquée sans raison) » a été signalé une fois, non reproduit : les 20 chemins sont vérifiés ; le journal trace maintenant chaque déplacement (« X (lane N) : A3 → B2, devant C2 »).
 

@@ -289,7 +289,7 @@ const SF = (() => {
     "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 1 },
     "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
-    "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Révèle les tuiles camouflées de sa lane." },
+    "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Avance de 2 cases par tour, et les autres créatures de sa case d'1 case de plus." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
@@ -396,7 +396,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.2";
+  const VERSION = "0.4.3";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -458,7 +458,7 @@ const SF = (() => {
       tileDeck: [], tileDiscard: [], hand: [],
       spellDeck: [], spellDiscard: [], spells: [],
       alloc: { N: 0, E: 0, S: 0, O: 0 }, extraPts: 0, cadence: false, firedSupports: [],
-      biomass: 3, budget: 0, reserve: 0, famine: 0,
+      biomass: 5, budget: 0, reserve: 0, famine: 0, startHand: true, // départ : 5 biomasse (Oni, 04/11/2026 ; avant 3)
       piles: { 1: [], 2: [], 3: [] }, handA: [], creatures: [], reincQueue: [], reincUsed: false, raidUsed: false,
       upgrades: { aggro: { r1: null, r2: null }, tank: { r1: null, r2: null }, soutien: { r1: null, r2: null } }, invest: {},
       stase: [], log: [],
@@ -906,6 +906,20 @@ const SF = (() => {
   function attackerDraw(S) {
     const t = TIERS[tier(S)];
     S.handA = [];
+    // Premier tour (Oni, 04/11/2026) : à la place de la pioche, une créature de niveau 1 de chaque type (aggro, tank, et un
+    // soutien tiré au hasard), prises dans la pioche de niveau 1 et payées normalement
+    if (S.startHand) {
+      delete S.startHand;
+      for (const type of ["aggro", "tank", "soutien"]) {
+        const i = S.piles[1].findIndex(n => CREATURES[n].type === type); // pioche mélangée : le soutien est tiré au hasard
+        if (i >= 0) S.handA.push({ name: S.piles[1].splice(i, 1)[0], free: false, uid: S.nextId++ });
+      }
+      S.budget = S.famine ? famineBudget(S.biomass) : S.biomass;
+      fx(S, { t: "draw", n: S.handA.length });
+      S.phase = "A_deploy";
+      log(S, "essaim", `Main de départ : ${S.handA.map(c => c.name).join(", ")} ; budget ${S.budget}.`);
+      return;
+    }
     // Déploiement (aggro, centre du rang 2) : les 2 cartes gratuites de niveau 1 sont piochées EN PREMIER, sinon la pioche
     // normale (qui se rabat sur le niveau 1 quand les niveaux 2 et 3 sont vides) pouvait vider le niveau 1 avant elles.
     if (S.upgrades.aggro.r2 === "C") {
@@ -946,6 +960,12 @@ const SF = (() => {
     }
     if (card.name === "Œil-sonde") revealLane(S, lane);
     return true;
+  }
+  // Vision de l'Œil-sonde (Oni, 04/11/2026) : tant qu'il est en vie, les tuiles camouflées de sa lane sont révélées,
+  // y compris celles posées plus tard (appelé au déploiement et à chaque pose de la colonie). Une tuile révélée le reste.
+  function visionSweep(S) {
+    const lanes = new Set(S.creatures.filter(c => c.name === "Œil-sonde").map(c => c.lane));
+    for (const lane of lanes) if (laneTiles(S, lane).some(k => S.tiles[k].camo && !S.tiles[k].revealed)) revealLane(S, lane);
   }
   function revealLane(S, lane) {
     fx(S, { t: "vision", lane, keys: laneTiles(S, lane).filter(k => S.tiles[k].camo && !S.tiles[k].revealed) });
@@ -1185,6 +1205,7 @@ const SF = (() => {
     if (TILES[p.tile].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
     placeSupports(S); // un support apparaît dès que ses murs sont construits
     log(S, "colonie", TILES[p.tile].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[p.lane]}.` : `${p.tile} construit en lane ${LANE_NAME[p.lane]}.`);
+    visionSweep(S); // un Œil-sonde en vie dans la lane révèle aussitôt la nouvelle tuile camouflée
     skipUnplaceable(S);
     if (!S.toPlace.length) finishDefenderTurn(S);
     return true;
@@ -1782,7 +1803,7 @@ if (typeof module !== "undefined") module.exports = BILAN;
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
-    if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque ou par Vision / Clairvoyance.");
+    if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque, ou révélée par un Œil-sonde vivant dans sa lane ou par la Clairvoyance.");
     if (t.siphon) cap("biomasse", "Siphon", `révélé par une attaque de l'essaim, il lui retire ${t.siphon} biomasse (jamais sous ${SF.MIN_BIOMASS}). Ne se déclenche pas s'il a été vu par Vision ou Clairvoyance.`);
     if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour).`);
@@ -1904,7 +1925,7 @@ if (typeof module !== "undefined") module.exports = BILAN;
     return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card"><button data-a="help" class="x close" aria-label="Fermer">×</button>
       <h2>Règles en bref</h2>
       <p><b>But.</b> La colonie gagne quand le 12ᵉ étage de la fusée est achevé. L'essaim gagne quand la colonie n'a plus de travailleurs.</p>
-      <p><b>Essaim.</b> Budget = biomasse. Piochez selon le palier (départ, puis 9 · 15 · 21 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour ; l'Aura Mobilité du Glaneur donne +1 case aux autres créatures de sa case ; les plus rapides partent devant. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
+      <p><b>Essaim.</b> Budget = biomasse (5 au départ). Premier tour : une aggro, un tank et un soutien de niveau 1, au lieu de la pioche. Ensuite, piochez selon le palier (départ, puis 9 · 15 · 21 de biomasse), déployez sur une case d'entrée en respectant le plafond par lane (2 / 3 / 4 / 5 selon le palier, +3 avec Essaim agrandi), ou investissez dans un nœud d'amélioration (rang 1 : 6, rang 2 : 12, payable en plusieurs fois) ; le reste va à la réserve. Puis chaque case avance en bloc d'<b>une case par tour</b>, sans diagonale (les plus proches de la fusée d'abord) ; au contact d'une tuile ou de la fusée, ses créatures attaquent aussitôt, dans l'ordre choisi ; si la tuile tombe alors qu'il reste des créatures à faire frapper, le bloc entre dans la case libérée s'il n'a pas encore bougé ce tour (une attaque contre la fusée tue un seul travailleur). Mobilité : les aggros avancent de 2 cases par tour ; l'Aura Mobilité du Glaneur donne +1 case aux autres créatures de sa case ; les plus rapides partent devant. Les soutiens avancent aussi mais n'attaquent jamais. Une tuile détruite ou un support qui tombe rapporte 1 biomasse.</p>
       <p><b>Colonie.</b> Lancez une tuile par chantier libre : le chantier appartient à une lane. Quand il est achevé, posez le bâtiment sur une case de cette lane qui touche une tuile, un support ou la fusée ; les créatures présentes reculent d'une case vers le fond. Répartissez vos travailleurs : les points d'une lane avancent son chantier, le reste va à la fusée (2 points par étage, puis 3, 4 et 5 après les paliers 3, 6 et 9 ; +1 travailleur par étage ; étage 3 : +2 technologies, 6 : 2ᵉ chantier par lane, 9 : nuke ; la main de tuiles gagne +1 à chaque palier : 4, 5, 6 puis 7).</p>
       <p><b>Combat.</b> Épines : dégâts à la créature qui attaque la tuile (Barbelés, Baraquement, Ligne de front, Réduit : 1 ; Haie d'épines, Mur hérissé, Ronceraie : 2) ; +1 par support de niveau 2 et +1 par Avant-poste dans les 8 cases autour, cumulables. Renforcé X : 1 PV perdu par tranche complète de X dégâts d'une même attaque. Une aura ne profite qu'aux autres créatures de sa case (jamais à elle-même) et toutes les auras se cumulent. Les supports tirent à la toute fin du tour de la colonie (après la construction, l'apparition des nouveaux supports et la fusée) sur une créature des 8 cases qui les entourent (I : 1 dégât, +1 aux étages 3, 6 et 9 ; II : 2) et tombent quand tous leurs murs voisins ont disparu.</p>
       <p><b>Écrans de passage.</b> En partie locale, à chaque changement de camp, passez l'appareil : chaque joueur ne voit que sa main.</p>
