@@ -10,16 +10,25 @@ engine = (ROOT / "src/engine.js").read_text(encoding="utf-8")
 bilan = (ROOT / "src/bilan.js").read_text(encoding="utf-8")
 ui = (ROOT / "src/ui.js").read_text(encoding="utf-8")
 css = (ROOT / "src/style.css").read_text(encoding="utf-8")
+# illustrations (miniatures de tools/miniatures.py) : une classe CSS par nom du jeu (.im-ecorcheur…), table IMG_CLASS côté JS
+import base64
+mini = ROOT / "assets/miniatures"
+table = json.loads((mini / "table.json").read_text(encoding="utf-8")) if (mini / "table.json").exists() else {}
+img_css = "".join(
+    f".im-{f[:-5]}{{--img:url(data:image/webp;base64,{base64.b64encode((mini / f).read_bytes()).decode()})}}\n" for f in sorted(set(table.values())))
+img_js = "const IMG_CLASS = " + json.dumps({n: "im im-" + f[:-5] for n, f in table.items()}, ensure_ascii=False) + ";"
 
 page = f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Swarm &amp; Steel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
-<style>{css}</style></head><body>
+<style>{css}
+{img_css}</style></head><body>
 <div id="app"></div>
 <div id="flash" role="status" hidden></div>
 <script>{icons_js}
+{img_js}
 {engine}
 {bilan}
 {ui}</script>
