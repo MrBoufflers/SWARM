@@ -147,7 +147,7 @@ ICONS.update({
                  '<path d="M4 7L12 3L20 7V13.5L12 21L4 13.5Z"/><path d="M4 12.5L12 8.5L20 12.5M12 8.5V21"/>'),
     "masse": ("Masse vivante : +1 PV par autre créature de la case",
               '<circle cx="8.5" cy="9.5" r="4"/><circle cx="15.5" cy="9.5" r="4"/><circle cx="12" cy="15.5" r="4"/>'),
-    "mue": ("Mue : Furtivité et Aura +1 PV",
+    "mue": ("Mue : Aura Mobilité 1 et Aura +1 PV",
             '<circle cx="9" cy="8" r="3"/><path d="M3.5 20C3.5 16 5.8 13 9 13C12.2 13 14.5 16 14.5 20"/><circle cx="15.5" cy="8" r="3" stroke-dasharray="1.6 1.9"/><path d="M15.5 13C18.7 13 20.5 16 20.5 20" stroke-dasharray="1.6 1.9"/>'),
     "griffes": ("Griffes : +1 ATQ aux autres créatures de la case",
                 '<path d="M5 21C5 15 7.5 9 12.5 4.5M10 21C10 16 12 11.5 16.5 8M15 21C15 17.5 16.8 14.5 20.5 12.5"/>'),

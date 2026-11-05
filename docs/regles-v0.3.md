@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.12 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.13 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -172,7 +172,7 @@ Pendant ses attaques, l'essaim décide de ce que fait **chaque créature**, une 
 3. **Après une attaque**, la créature ne bouge plus ce tour.
 4. **Fin du tour** : l'essaim termine son tour quand il veut, et les créatures qui n'ont pas agi restent sur place. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
 
-**Mobilité** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1, +1 avec la Mobilité (aggros), +1 par Glaneur sur sa case à ce moment-là (le Glaneur lui-même fait 2).
+**Mobilité** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1, +1 avec la Mobilité (aggros), +1 par Glaneur sur sa case à ce moment-là, et +1 par soutien de sa case avec la Mue (le Glaneur lui-même fait 2).
 
 **Percée** : les dégâts en trop passent à la case suivante du **chemin** vers la fusée, à partir du bâtiment détruit (comme avant) †.
 
@@ -308,7 +308,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Béhémoth | Tank | 2 | 4 | 5 | 1 | — | 6 |
 | Colosse | Tank | 3 | 7 | 7 | 1 | — | 6 |
 | Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées après lui (une tuile révélée le reste) | 2 |
-| Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 1** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Avance de **2 cases** par tour. **Aura Mobilité 1** : les autres créatures de sa case avancent d'1 case de plus par tour | 2 |
+| Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 2** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV. Avance de **2 cases** par tour. **Aura Mobilité 1** : les autres créatures de sa case avancent d'1 case de plus par tour | 2 |
 | Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
 | Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus (cumulable : +1 par Phéromone) | 2 |
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
@@ -381,7 +381,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Férocité | +1 ATQ |
-| 1 | Côté B | Mobilité | les créatures aggro se déplacent de **2 cases** par tour au lieu d'1 |
+| 1 | Côté B | Mobilité | les créatures aggro se déplacent de **2 cases** par tour au lieu d'1 et gagnent la **Furtivité** † (elles ne peuvent pas être visées par une tourelle ni un sortilège tant qu'une créature non furtive est sur leur case) |
 | 2 | Côté A (après Férocité) | Carnage | +2 ATQ (total +3) |
 | 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † |
 | 2 | Côté B (après Mobilité) | Essaim agrandi | **+3 au plafond de population** de chaque lane |
@@ -400,9 +400,9 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
-| 1 | Côté A | Mue | tous les soutiens gagnent la **Furtivité** † (ne peuvent pas être visés par une tourelle ni un sortilège tant qu'une créature non furtive est sur leur case) et l'**Aura +1 PV** : +1 PV aux autres créatures de leur case (cumulable) |
+| 1 | Côté A | Mue | tous les soutiens gagnent l'**Aura Mobilité 1** (+1 case aux autres créatures de leur case) et l'**Aura +1 PV** (+1 PV aux autres créatures de leur case) ; cumulables |
 | 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) |
-| 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 3) |
+| 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 4) |
 | 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles ; les Œil-sonde de la pioche sortent du jeu (ceux en main ou en jeu restent, mais ne reviennent plus dans la pioche) |
 | 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim ; cumulable (deux soutiens sur la même créature : ×4 ; ou sur deux créatures différentes) |
 
