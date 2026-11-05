@@ -4,6 +4,13 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.13 — 5 novembre 2026
+
+**Équilibrage (Oni)**
+- **Glaneur** : **Aura Soin 2** (au lieu de 1). Il donne toujours +1 case aux autres créatures de sa case, et fait lui-même 2 cases.
+- **Mue** (soutien, côté A) : tous les soutiens gagnent l'**Aura Mobilité 1** (+1 case aux autres créatures de leur case) et gardent l'Aura +1 PV. Ils **perdent la Furtivité**. Les auras se cumulent : un Glaneur avec la Mue donne +2 cases.
+- **Mobilité** (aggro, côté B) : en plus des 2 cases par tour, les aggros gagnent la **Furtivité** (pas de tir de tourelle ni de sortilège sur elles tant qu'une créature non furtive est sur leur case).
+
 ## v0.4.12 — 4 novembre 2026
 
 **Règle (Oni)** : quand l'essaim acquiert **Clairvoyance**, les Œil-sonde de la pioche sortent du jeu. Ceux en main ou sur le plateau restent jouables, mais ne reviennent plus dans la pioche (carte non jouée, créature morte, Nuke).

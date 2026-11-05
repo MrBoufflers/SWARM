@@ -101,7 +101,7 @@ const AIDE = (() => {
         <li><b>Aggros</b> : grosse attaque, 1 PV. Elles meurent vite sur les Épines.</li>
         <li><b>Tanks</b> : beaucoup de PV, 1 ATQ. Ils encaissent les Épines et les tirs.</li>
         <li><b>Soutiens</b> : ils n'attaquent jamais, mais leurs <b>auras</b> renforcent les <b>autres</b> créatures de leur case ; toutes les auras se cumulent.</li>
-        <li><b>Vitesse</b> : 1 case par tour ; le Glaneur fait 2 cases et donne +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros. Le nombre de déplacements est fixé au premier pas du tour.</li>
+        <li><b>Vitesse</b> : 1 case par tour ; le Glaneur fait 2 cases et donne +1 case aux autres créatures de sa case ; avec la Mue, chaque soutien donne aussi +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros, et la Furtivité. Le nombre de déplacements est fixé au premier pas du tour.</li>
       </ul>
       ${creaturesTable(h)}
       <h3>Améliorations</h3>

@@ -416,7 +416,7 @@
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[c.name === "Glaneur" ? "vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur") ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
+    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[c.name === "Glaneur" ? "vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur" || (S.upgrades.soutien.r1 === "A" && SF.CREATURES[o.name].type === "soutien")) ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");

@@ -722,13 +722,13 @@ const fresh = () => {
   const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 7 PV max
   U.upgrades.soutien.r2 = "A"; // Régénération : Aura Soin 2 pour chaque soutien
   SF.endAttackerTurn(U);
-  ok(t1.hp === 7, "Régénération + 2 Glaneurs : soin 2 × (1 + 2) = 6 (Colosse 1 → 7 PV)");
+  ok(t1.hp === 7, "Régénération + 2 Glaneurs : soin (2 + 2) × 2 = 8, plafonné aux PV max (Colosse 1 → 7 PV)");
   // Mue : Furtivité + Aura +1 PV aux autres, cumulable ; plus de +1 PV au soutien lui-même
   const V = fresh(); V.upgrades.soutien.r1 = "A";
   const m = at(230, "Écorcheur", 4, 1), s1 = at(231, "Hurleur", 4, 2), s2 = at(232, "Œil-sonde", 4, 2);
   V.creatures.push(m, s1, s2);
   ok(SF.bonusHp(V, m) === 2 && SF.bonusHp(V, s1) === 1 && SF.maxHp(V, "Hurleur") === 2, "Mue : +1 PV par soutien de la case aux autres créatures (Écorcheur +2, Hurleur +1), plus de +1 PV propre");
-  ok(SF.isStealthy(V, s1) && !SF.isStealthy(V, m), "Mue : les soutiens ont la Furtivité");
+  ok(!SF.isStealthy(V, s1) && !SF.isStealthy(V, m), "Mue : plus de Furtivité pour les soutiens (Oni, 05/11/2026)");
   ok(SF.TREES.tank.B1[0] === "Provocation", "tank, côté B : « Provocation » (ancienne Protection)");
   // Bouclier → Renforcé : une ancienne partie est convertie
   const W = fresh(); W.tiles["3,0"] = { name: "Égide", hp: 3, max: 3, ep: 0, ren: 0, shield: 2, camo: 1, revealed: false }; SF.migrate(W);
@@ -866,6 +866,23 @@ const fresh = () => {
   ok(!S.piles[1].includes("Œil-sonde"), "la carte non jouée ne revient pas dans la pioche");
   eye.hp = 0; SF.killCheck(S);
   ok(!S.piles[1].includes("Œil-sonde") && S.piles[1].length > 0, "l'Œil-sonde mort ne revient pas non plus ; les autres cartes, si");
+}
+// 61. Équilibrage du 05/11/2026 (Oni) : Glaneur Aura Soin 2 ; Mue = Aura Mobilité 1 + Aura +1 PV pour tous les soutiens,
+//     sans Furtivité ; Mobilité donne la Furtivité aux aggros
+{
+  const at = (id, name, hp) => ({ id, name, lane: "N", u: 0, k: 4, hp, acted: false });
+  const S = fresh(); const c = at(950, "Colosse", 1); S.creatures.push(c, at(951, "Glaneur", 2));
+  SF.endAttackerTurn(S);
+  ok(c.hp === 3, "Glaneur : Aura Soin 2 (Colosse 1 → 3 PV)");
+  const T = fresh(); T.upgrades.soutien.r1 = "A";
+  const e = at(960, "Écorcheur", 1), h = at(961, "Hurleur", 2), o = at(962, "Œil-sonde", 2); T.creatures.push(e, h, o);
+  ok(SF.speedOf(T, e) === 3 && SF.speedOf(T, h) === 2, "Mue : chaque soutien donne +1 case aux autres (Écorcheur 1 + 2 = 3, Hurleur 1 + 1 = 2)");
+  ok(SF.bonusHp(T, e) === 2 && !SF.isStealthy(T, h), "Mue : l'Aura +1 PV reste, la Furtivité disparaît");
+  const G = fresh(); G.upgrades.soutien.r1 = "A"; const x = at(970, "Carapace", 3); G.creatures.push(x, at(971, "Glaneur", 2));
+  ok(SF.speedOf(G, x) === 3, "Glaneur avec la Mue : ses deux Auras Mobilité se cumulent (+2)");
+  const U = fresh(); U.upgrades.aggro.r1 = "B"; const a = at(980, "Ravageur", 1), t = at(981, "Béhémoth", 5); U.creatures.push(a, t);
+  ok(SF.isStealthy(U, a) && !SF.isStealthy(U, t) && SF.speedOf(U, a) === 2, "Mobilité : les aggros font 2 cases et gagnent la Furtivité");
+  ok(!SF.targetable(U, a) && SF.targetable(U, t), "Furtivité : le Ravageur ne peut pas être visé tant que le Béhémoth (non furtif) est sur sa case");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

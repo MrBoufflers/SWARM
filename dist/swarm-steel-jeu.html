@@ -495,7 +495,7 @@ const SF = (() => {
     "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
-    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 1 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 1 PV. Avance de 2 cases par tour, et les autres créatures de sa case d'1 case de plus." },
+    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV. Avance de 2 cases par tour, et les autres créatures de sa case d'1 case de plus." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
@@ -579,14 +579,14 @@ const SF = (() => {
     { min: 21, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Les créatures aggro se déplacent de 2 cases par tour au lieu d'1."],
+    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Les créatures aggro se déplacent de 2 cases par tour au lieu d'1 et gagnent la Furtivité."],
       A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "+1 PV."], B1: ["Provocation", "Les tirs visant une créature non tank de sa case visent ce tank. Les tanks ne subissent plus les dégâts d'Épines."],
       A2: ["Blindage", "+2 PV (total +3)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
-    soutien: { A1: ["Mue", "Tous les soutiens gagnent la Furtivité et l'Aura +1 PV : +1 PV aux autres créatures de leur case."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
+    soutien: { A1: ["Mue", "Tous les soutiens gagnent l'Aura Mobilité 1 (+1 case aux autres créatures de leur case) et l'Aura +1 PV (+1 PV aux autres créatures de leur case)."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2 (qui s'ajoute à leurs autres auras de soin)."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles. Les Œil-sonde de la pioche sortent du jeu."],
       B2: ["Frénésie", "Chaque soutien double les dégâts d'une autre créature de sa case, au choix (cumulable : deux Frénésies sur la même créature la quadruplent)."] },
   };
@@ -603,7 +603,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.12";
+  const VERSION = "0.4.13";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -719,7 +719,8 @@ const SF = (() => {
     return CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B";
   }
   function isStealthy(S, c) {
-    return CREATURES[c.name].type === "soutien" && S.upgrades.soutien.r1 === "A";
+    // Furtivité : donnée par la Mobilité aux aggros (Oni, 05/11/2026 ; avant : par la Mue aux soutiens)
+    return CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B";
   }
   function hasPercee(S, c) {
     return caseMates(S, c).some(o => o.name === "Perforeur");
@@ -775,7 +776,7 @@ const SF = (() => {
   function soinValue(S, c) { // somme des auras de soin des autres créatures de la case : Glaneur 1, Régénération 2 par soutien
     let v = 0;
     for (const o of caseMates(S, c)) {
-      if (o.name === "Glaneur") v += 1;
+      if (o.name === "Glaneur") v += 2; // Aura Soin 2 (Oni, 05/11/2026 ; avant 1)
       if (S.upgrades.soutien.r2 === "A" && isSoutien(o)) v += 2;
     }
     return v;
@@ -945,7 +946,9 @@ const SF = (() => {
   // d'une tuile ou de la fusée attaque aussitôt. Les aggros mobiles quittent leur case et agissent d'abord, en bloc à part.
   // Aura Mobilité du Glaneur (Oni, 02/11/2026) : +1 case par Glaneur de la case, pour les autres créatures (cumulable) ;
   // le Glaneur lui-même avance de 2 cases (vitesse de base 2) pour suivre le groupe.
-  const speedOf = (S, c) => (c.name === "Glaneur" ? 2 : 1) + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur");
+  // Aura Mobilité : +1 case par Glaneur de la case, et par soutien de la case avec la Mue (Oni, 05/11/2026) ; tout se cumule
+  const speedOf = (S, c) => (c.name === "Glaneur" ? 2 : 1) + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur")
+    + (S.upgrades.soutien.r1 === "A" ? countMates(S, c, isSoutien) : 0);
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
     const block = blockAt(S, key).filter(c => !c.acted);
@@ -1915,7 +1918,7 @@ const AIDE = (() => {
         <li><b>Aggros</b> : grosse attaque, 1 PV. Elles meurent vite sur les Épines.</li>
         <li><b>Tanks</b> : beaucoup de PV, 1 ATQ. Ils encaissent les Épines et les tirs.</li>
         <li><b>Soutiens</b> : ils n'attaquent jamais, mais leurs <b>auras</b> renforcent les <b>autres</b> créatures de leur case ; toutes les auras se cumulent.</li>
-        <li><b>Vitesse</b> : 1 case par tour ; le Glaneur fait 2 cases et donne +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros. Le nombre de déplacements est fixé au premier pas du tour.</li>
+        <li><b>Vitesse</b> : 1 case par tour ; le Glaneur fait 2 cases et donne +1 case aux autres créatures de sa case ; avec la Mue, chaque soutien donne aussi +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros, et la Furtivité. Le nombre de déplacements est fixé au premier pas du tour.</li>
       </ul>
       ${creaturesTable(h)}
       <h3>Améliorations</h3>
@@ -2468,7 +2471,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[c.name === "Glaneur" ? "vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur") ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
+    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[c.name === "Glaneur" ? "vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur" || (S.upgrades.soutien.r1 === "A" && SF.CREATURES[o.name].type === "soutien")) ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
