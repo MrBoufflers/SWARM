@@ -216,7 +216,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .tree .node .inv { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .tree .node .inv button { border: 1px solid var(--essaim); color: var(--essaim); background: var(--panel); border-radius: 4px; padding: 3px 8px; font-size: .76rem; font-weight: 600; }
 .tree .node.taken .bar { display: none; }
-.cell.hot .toks { pointer-events: none; }
+.cell.hot .toks, .cell.mv .toks, .cell.atk .toks { pointer-events: none; } /* une case où l'on peut agir reçoit le clic, même couverte de créatures (Oni, 06/11/2026) */
 .cghost:has(+ .toks) { justify-content: flex-start; padding-top: 2px; }
 .cghost:has(+ .toks) .i { width: 10px; height: 10px; }
 .tcard .capline .i { color: var(--wall); } .tcard .capline b { color: var(--wall); }

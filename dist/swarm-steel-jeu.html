@@ -222,7 +222,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .tree .node .inv { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .tree .node .inv button { border: 1px solid var(--essaim); color: var(--essaim); background: var(--panel); border-radius: 4px; padding: 3px 8px; font-size: .76rem; font-weight: 600; }
 .tree .node.taken .bar { display: none; }
-.cell.hot .toks { pointer-events: none; }
+.cell.hot .toks, .cell.mv .toks, .cell.atk .toks { pointer-events: none; } /* une case où l'on peut agir reçoit le clic, même couverte de créatures (Oni, 06/11/2026) */
 .cghost:has(+ .toks) { justify-content: flex-start; padding-top: 2px; }
 .cghost:has(+ .toks) .i { width: 10px; height: 10px; }
 .tcard .capline .i { color: var(--wall); } .tcard .capline b { color: var(--wall); }
@@ -865,7 +865,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.14";
+  const VERSION = "0.4.15";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -3152,7 +3152,11 @@ if (typeof module !== "undefined") module.exports = AIDE;
     switch (a) {
       // choix locaux (sans effet sur la partie)
       case "card": UI.sel = UI.sel === Number(d.uid) ? null : Number(d.uid); break;
-      case "creature": UI.selCreature = Number(d.id); UI.pop = Number(d.id); break;
+      case "creature": { // toucher à nouveau la créature choisie la relâche (pour pouvoir en choisir une autre sur une case où elle peut aller)
+        const id = Number(d.id);
+        if (UI.selCreature === id) { UI.selCreature = null; UI.pop = null; break; }
+        UI.selCreature = id; UI.pop = id; break;
+      }
       case "popClose": UI.pop = null; break;
       case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
