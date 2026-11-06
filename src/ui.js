@@ -680,6 +680,8 @@
   }
   // logo d'un camp (Oni, 06/11/2026) : silhouette en masque CSS, à la couleur du camp
   const sideLogo = side => `<span class="logo-mk ${side}" aria-hidden="true"></span>`;
+  // nom du camp dans la police du jeu (Ethnocentric, rendue en image : masque CSS, couleur du texte)
+  const sideName = side => `<span class="side-nm ${side}" role="img" aria-label="${side === "essaim" ? "Essaim" : "Colonie"}"></span>`;
   const bigStat = (n, lab, tip, cls = "") => `<div class="pc-big ${cls}" tabindex="0" data-tip="${E(tip)}"><b>${n}</b><span>${lab}</span></div>`;
   const box2 = (n, lab, tip, extra = "") => `<div class="pc-box" tabindex="0" data-tip="${E(tip)}"${extra}><b>${n}</b><span>${lab}</span></div>`;
   // zone d'action du panneau du joueur : étape en cours (explication au survol de ⓘ), consigne courte et choix ; boutons en bas
@@ -699,7 +701,7 @@
       ? bigStat(`${S.budget}<small>/${full}</small>`, "disponible / budget", `Biomasse disponible ce tour : ${S.budget} sur un budget de ${full}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}. Le reste ira à la réserve.`, "bio")
       : bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : " · dernier palier atteint"}`, "bio");
     return `<aside class="panel essaim pc-own">
-      <div class="po-head">${sideLogo("essaim")}<b class="nm">Essaim</b><span class="bigwrap" data-fx="budget">${big}</span></div>
+      <div class="po-head">${sideLogo("essaim")}${sideName("essaim")}<span class="bigwrap" data-fx="budget">${big}</span></div>
       <div class="pc-boxes">
         ${box2(S.reserve, "réserve", "Réserve : biomasse non investie, gardée d'un tour à l'autre")}
         ${deploy ? box2(S.biomass, "biomasse", `Biomasse totale : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`) : ""}
@@ -717,7 +719,7 @@
     const pts = SF.totalPoints(S), used = SF.allocated(S), bonus = SF.bonusWorkers(S);
     const { top } = pcAction("colonie");
     return `<aside class="panel colonie pc-own"><div class="po-main">
-      <div class="po-head">${sideLogo("colonie")}<b class="nm">Colonie</b>
+      <div class="po-head">${sideLogo("colonie")}${sideName("colonie")}
         ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "travailleurs", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}</div>
       ${pcRocket(false)}
       <div class="pc-boxes">
@@ -747,7 +749,7 @@
       return `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${blocks}</div></div>`;
     }).join("");
     return `<aside class="panel colonie mini pc-sum"><div class="ps-main">
-      <h3>${sideLogo("colonie")} Colonie</h3>
+      <h3>${sideLogo("colonie")}${sideName("colonie")}</h3>
       ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "pop.", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}
       <div class="ps-rows">
         <span tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b> techno</span>
@@ -773,7 +775,7 @@
       return `<div class="utree ${ty}"><span class="ut">${icon(ty)}<small>${ty}</small></span><div class="ur">${node("A1")}${node("B1")}</div><div class="ur r2">${node("A2")}${node("C2")}${node("B2")}</div></div>`;
     }).join("");
     return `<aside class="panel essaim mini pc-sum"><div class="ps-main">
-      <h3>${sideLogo("essaim")} Essaim</h3>
+      <h3>${sideLogo("essaim")}${sideName("essaim")}</h3>
       ${bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`, "bio")}
       <div class="ps-rows">
         ${turn ? `<span data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b> budget</span>` : ""}
