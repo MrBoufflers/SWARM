@@ -24,9 +24,12 @@ NOMS = {
     "Avant-poste du Sud": "avant poste.jpg", "Avant-poste de l'Ouest": "avant poste.jpg",
     "support 1": "support 1.jpg", "support 2": "support 2.jpg", "support 3": "support niveau 3.jpg",
     "Fusée": "fusée.jpg", "Champ de bataille": "champs de bataille.jpg",
+    "Passage colonie": "pop up tour colonie.webp", "Passage essaim": "pop up tour essaim.webp",
 }
 # taille particulière : le champ de bataille sert de fond à tout le plateau
-TAILLES = {"champs de bataille.jpg": (840, 55)}
+TAILLES = {"champs de bataille.jpg": (840, 55),
+           # cadres de l'écran de passage (fond transparent conservé)
+           "pop up tour colonie.webp": (900, 78), "pop up tour essaim.webp": (900, 78)}
 
 def slug(n):
     n = unicodedata.normalize("NFKD", n.replace("Œ", "Oe")).encode("ascii", "ignore").decode().lower()
@@ -42,7 +45,7 @@ def main():
             path = next((p for p in SRC.iterdir() if unicodedata.normalize("NFC", p.name) == src), None)
             if not path: print("absent :", fichier); continue
             taille, qualite = TAILLES.get(src, (TAILLE, QUALITE))
-            im = Image.open(path).convert("RGB"); im.thumbnail((taille, taille), Image.LANCZOS)
+            im = Image.open(path); im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB"); im.thumbnail((taille, taille), Image.LANCZOS)
             dest = OUT / (slug(src.rsplit(".", 1)[0]) + ".webp"); im.save(dest, "WEBP", quality=qualite, method=6)
             faits[src] = dest.name; total += dest.stat().st_size
         table[nom] = faits[src]

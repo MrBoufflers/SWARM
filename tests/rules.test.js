@@ -212,20 +212,20 @@ const fresh = () => {
   ok(SF.apply(S, "essaim", "deploy", { uid: S.handA[0].uid, lane: "N", u: 7 }) !== "", "colonne hors plateau refusée");
   ok(SF.apply(S, "essaim", "nimporte") !== "", "action inconnue refusée");
   S.creatures.push({ id: 990, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }); // une créature en jeu : sinon l'étape d'attaque passe d'elle-même
-  ok(SF.apply(S, "essaim", "endDeploy") === "" && SF.apply(S, "essaim", "toAttacks") === "", "fin de déploiement puis passage aux attaques");
+  ok(SF.apply(S, "essaim", "endDeploy") === "" && SF.apply(S, "essaim", "toAttacks") !== "", "fin du déploiement (et des améliorations) : passage direct aux attaques (Oni, 06/11/2026)");
   ok(S.phase === "A_attack" || S.phase === "A_react", "phase d'attaque (ou de réaction si la colonie tient un sortilège offensif)");
 }
 // 22. fenêtre de réaction : ouverte seulement si la colonie tient un sortilège offensif autre que Famine
 {
-  const S = fresh(); SF.apply(S, "essaim", "draw"); SF.apply(S, "essaim", "endDeploy");
+  const S = fresh(); SF.apply(S, "essaim", "draw");
   S.spells = ["Barrage"]; S.creatures.push({ id: 990, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false });
-  SF.apply(S, "essaim", "toAttacks");
+  SF.apply(S, "essaim", "endDeploy");
   ok(S.phase === "A_react", "Barrage en main → fenêtre de réaction");
   ok(SF.apply(S, "essaim", "endA") !== "", "l'essaim ne peut pas agir pendant la réaction");
   ok(SF.apply(S, "colonie", "spell", { i: 0, arg: "N" }) === "" && S.spells.length === 0, "la colonie joue Barrage");
   ok(SF.apply(S, "colonie", "reactDone") === "" && S.phase === "A_attack", "fin de la réaction");
-  const T = fresh(); SF.apply(T, "essaim", "draw"); SF.apply(T, "essaim", "endDeploy"); T.spells = ["Famine", "Effort"]; T.creatures.push({ id: 990, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false });
-  SF.apply(T, "essaim", "toAttacks");
+  const T = fresh(); SF.apply(T, "essaim", "draw"); T.spells = ["Famine", "Effort"]; T.creatures.push({ id: 990, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false });
+  SF.apply(T, "essaim", "endDeploy");
   ok(T.phase === "A_attack", "Famine ou sort de soutien seuls : pas de fenêtre de réaction");
 }
 // 23. Renouvellement : indices invalides refusés (sinon pioche gratuite)
@@ -678,7 +678,7 @@ const fresh = () => {
 {
   const setup = () => { const S = fresh(); S.phase = "A_attack"; S.supports = {}; return S; }; // Barbelé en C1 (0,1)
   const S = setup();
-  const c = { id: 180, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(c); // assez de PV pour survivre aux Épines
+  const c = { id: 180, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(c); // niveau 2 (vitesse 1), assez de PV pour survivre aux Épines
   ok(SF.apply(S, "essaim", "act", { key: SF.posKey(c) }) === "" && c.k === 3 && S.tiles["0,1"].hp === 1, "tour 1 : entrée → C3, pas encore au contact, pas d'attaque");
   c.acted = false; S.phase = "A_attack"; // le tour est passé tout seul (plus rien à faire) : on rejoue une phase d'attaque
   SF.apply(S, "essaim", "act", { key: SF.posKey(c) });
@@ -893,6 +893,19 @@ const fresh = () => {
   ok(a.k === 3 && a.u === -2 && !b.moved && b.k === 4, "elle avance seule d'une case sur son chemin (A4 → A3) ; l'autre n'a pas bougé");
   ok(SF.apply(S, "essaim", "actOne", { id: 990 }) !== "", "une créature qui a déjà agi ne peut pas agir une seconde fois");
   ok(SF.SUP3_WORKERS === 3, "support de niveau 3 : +3 travailleurs");
+}
+// 63. Oni, 06/11/2026 : créatures de niveau 3 à 2 cases de base ; déploiement et améliorations dans la même étape
+{
+  const S = fresh();
+  const at = (id, name) => ({ id, name, lane: "N", u: 0, k: 4, hp: 6, acted: false });
+  const m = at(995, "Massacreur"), b = at(996, "Béhémoth"), g = at(997, "Glaneur");
+  S.creatures.push(m); ok(SF.speedOf(S, m) === 2, "Massacreur (niveau 3) : 2 cases de base");
+  const T = fresh(); T.creatures.push(b); ok(SF.speedOf(T, b) === 1, "Béhémoth (niveau 2) : 1 case");
+  const U = fresh(); U.upgrades.aggro.r1 = "B"; const m2 = at(998, "Massacreur"); U.creatures.push(m2); ok(SF.speedOf(U, m2) === 3, "Massacreur avec la Mobilité : 2 + 1 = 3 cases");
+  const V = fresh(); SF.apply(V, "essaim", "draw"); V.reserve = 2;
+  ok(V.phase === "A_deploy" && SF.apply(V, "essaim", "invest", { t: "aggro", s: "A1", n: 99 }) === "", "améliorations possibles pendant le déploiement");
+  V.creatures.push(at(999, "Carapace"));
+  ok(SF.apply(V, "essaim", "endDeploy") === "" && ["A_attack", "A_react"].includes(V.phase), "fin de l'étape : directement aux attaques");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

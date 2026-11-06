@@ -4,6 +4,21 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.17 — 6 novembre 2026
+
+**Règles (Oni)**
+- **Créatures de niveau 3** (Massacreur, Colosse, Sapeur, Sporeur) : **2 cases de base** par tour (au lieu d'1) ; la Mobilité et les Auras Mobilité s'ajoutent.
+- **Pioche automatique** au début du tour de l'essaim.
+- **Déploiement et améliorations dans la même étape** : l'essaim répartit sa biomasse comme il veut entre cartes et améliorations, dans l'ordre qu'il veut ; « Passer aux attaques » termine l'étape (le budget restant va à la réserve).
+
+**Interface (Oni)**
+- **Arbres d'amélioration** redessinés en cartes (icône ronde, côté, nom, effet, barre « 2/6 ») ; toucher une carte ouverte y investit tout ce qui est possible, « +1 » pour investir un point.
+- **Pastilles d'effet** des soutiens : « +1 ATQ », « +1 DEF », « +2 HEAL », « +1 MOV »… sur les cartes en main et sur le jeton quand il est seul sur sa case (le jeton qui en profite affiche le total en violet).
+- **Aucun texte sous 1rem** (16 px) dans toute l'application.
+- Avant-postes abrégés « Poste N / E / S / O » sur le plateau.
+- **Écran de passage** : nouveaux cadres illustrés d'Oni (essaim : bouton sur l'orbe ; colonie : bouton sur la plaque jaune), avec la biomasse de l'essaim ou les travailleurs de la colonie ; arrivée et départ en 0,3 s avec une opacité progressive.
+- Téléphone : le minimum de 1rem ne s'applique pas encore dans les cases du plateau (trop petites), en attendant la version mobile.
+
 ## v0.4.16 — 6 novembre 2026
 
 **Règles (Oni, après test)**

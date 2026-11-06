@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.16 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.17 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -22,7 +22,7 @@ Repris du prototype jouable et validés par Oni :
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1, **Aura Mobilité 1** (+1 case aux autres créatures de sa case) et vitesse de base de 2 cases. **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B) ; les tanks ne subissent plus les Épines.
 - **Renforcé** remplace le Bouclier (Égide, Dortoir : Renforcé 2) : 1 PV perdu par tranche complète de X dégâts, plusieurs PV possibles d'un coup.
-- **Déplacement automatique, créature par créature** (06/11) : l'essaim choisit quelle créature agit et dans quel ordre ; elle avance seule sur son chemin vers la fusée (tout droit ou en escalier, 1 case par tour, 2 avec la Mobilité ou un Glaneur), puis attaque ce qui est devant elle.
+- **Déplacement automatique, créature par créature** (06/11) : l'essaim choisit quelle créature agit et dans quel ordre ; elle avance seule sur son chemin vers la fusée (tout droit ou en escalier, 1 case par tour, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou un Glaneur), puis attaque ce qui est devant elle. **Pioche automatique** au début du tour de l'essaim ; **déploiement et améliorations dans la même étape** (06/11).
 - **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros se déplacent de **2 cases** par tour (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 - **Départ de l'essaim** : **5 de biomasse** ; au premier tour, à la place de la pioche, une aggro, un tank et un soutien de niveau 1 (au hasard), payés normalement. **Œil-sonde** : Vision permanente sur sa lane tant qu'il est en vie.
 
@@ -112,13 +112,15 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite ou un support qui tombe rapporte **1 biomasse**. Si la colonie a joué **Famine**, votre budget de ce tour est votre biomasse **divisée par 2**, arrondie à l'inférieur.
 
-### 2. Pioche
+### 2. Pioche (automatique)
 
-Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe combien de cartes vous piochez dans chaque niveau, et combien de créatures peuvent attaquer une même lane. Si une pioche de niveau 2 ou 3 est vide, piochez à la place dans le niveau inférieur.
+La pioche se fait toute seule au début du tour. Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe combien de cartes vous piochez dans chaque niveau, et combien de créatures peuvent attaquer une même lane. Si une pioche de niveau 2 ou 3 est vide, piochez à la place dans le niveau inférieur.
 
 **Premier tour** : au lieu de piocher, l'essaim reçoit une créature de niveau 1 de chaque type : un Écorcheur (aggro), une Carapace (tank) et un soutien de niveau 1 tiré au hasard (Œil-sonde, Glaneur ou Hurleur). Elles se paient normalement avec le budget.
 
-### 3. Déploiement
+### 3. Déploiement et améliorations (une seule étape)
+
+Dans la même étape, répartissez votre biomasse comme vous voulez entre déploiement et améliorations, dans l'ordre que vous voulez (Oni, 06/11/2026).
 
 Pour chaque carte que vous jouez :
 
@@ -126,23 +128,21 @@ Pour chaque carte que vous jouez :
 2. Choisissez une lane, sans dépasser le **plafond de population** de votre palier sur cette lane (+3 avec l'amélioration Essaim agrandi).
 3. Placez sa figurine à l'entrée de la lane, devant l'une des 5 colonnes de la couronne 3, et la carte devant vous. Réglez son socle sur ses PV.
 
-### 4. Améliorations
-
-Chaque nœud d'amélioration coûte **6 biomasse au rang 1 †, 12 au rang 2 †**, et se paie **en plusieurs fois** : vous investissez des points dans un nœud précis, et l'amélioration est acquise dès que le total investi atteint son coût.
+**Améliorations** : chaque nœud d'amélioration coûte **6 biomasse au rang 1 †, 12 au rang 2 †**, et se paie **en plusieurs fois** : vous investissez des points dans un nœud précis, et l'amélioration est acquise dès que le total investi atteint son coût.
 
 - **Pendant le déploiement**, vous pouvez investir votre budget du tour et votre réserve (le budget est utilisé en premier).
-- À la fin du déploiement, le **budget non dépensé va à votre réserve**. Vous pouvez ensuite investir votre réserve, ou la garder pour un tour suivant.
+- À la fin de l'étape, le **budget non dépensé va à votre réserve**, gardée pour un tour suivant.
 - Les points investis dans un nœud y restent d'un tour à l'autre, jusqu'à ce que le nœud soit acquis.
 - **Commencer à investir dans un nœud ferme les autres choix du même rang** de cet arbre.
 - Chaque type (aggro, tank, soutien) a son arbre à deux rangs : un choix entre 2 au rang 1, puis un choix entre 3 au rang 2. Les arbres sont détaillés dans le Catalogue.
 - Acquérir le rang 1 d'un type ajoute toutes ses cartes de niveau 2 à leur pioche ; le rang 2, toutes ses cartes de niveau 3. Mélangez la pioche concernée.
 - L'effet s'applique aussi aux créatures déjà en jeu.
 
-### 5. Défausse
+### 4. Défausse
 
 Remettez les cartes non jouées dans leurs pioches et mélangez.
 
-### 6. Fin de tour : attaques
+### 5. Fin de tour : attaques
 
 La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis **chaque case avance d'une case et, si elle est au contact, ses créatures attaquent** (voir Déplacement et combat), les cases les plus proches de la fusée d'abord. Les créatures posées ce tour attaquent aussi.
 
@@ -167,12 +167,12 @@ Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coi
 
 Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, dans l'ordre qu'il veut (Oni, 06/11/2026).
 
-1. **Déplacement** : la créature avance seule sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut) : **une case** par tour, deux avec la Mobilité ou le Glaneur (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée. Elle ne passe jamais sur un bâtiment, un coin de support ou la fusée. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
+1. **Déplacement** : la créature avance seule sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut) : **une case** par tour (deux pour les créatures de niveau 3), +1 avec la Mobilité ou le Glaneur (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée. Elle ne passe jamais sur un bâtiment, un coin de support ou la fusée. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
 2. **Attaque** : elle attaque le bâtiment (ou la fusée) qui se trouve **devant elle** sur son chemin. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais.
 3. **Tout résoudre** : fait agir toutes les créatures restantes, les plus avancées d'abord.
 4. **Fin du tour** : l'essaim termine son tour quand il veut, et les créatures qui n'ont pas agi restent sur place. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
 
-**Mobilité** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1, +1 avec la Mobilité (aggros), +1 par Glaneur sur sa case à ce moment-là, et +1 par soutien de sa case avec la Mue (le Glaneur lui-même fait 2).
+**Mobilité** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1 (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros), +1 par Glaneur sur sa case à ce moment-là, et +1 par soutien de sa case avec la Mue (le Glaneur lui-même fait 2).
 
 **Percée** : les dégâts en trop passent à la case suivante du **chemin** vers la fusée, à partir du bâtiment détruit (comme avant) †.
 
@@ -436,11 +436,11 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | Essaim | Colonie |
 | --- | --- |
 | 1. Budget = biomasse | 1. Sorts de soutien |
-| 2. Pioche selon le palier | 2. Lancer des chantiers |
-| 3. Déployer | 3. Affecter les travailleurs |
-| 4. Réserve et améliorations | 4. Chantiers, débordement, supports |
+| 2. Pioche automatique selon le palier | 2. Lancer des chantiers |
+| 3. Déployer et améliorer (même étape) | 3. Affecter les travailleurs |
+| 4. Budget restant → réserve | 4. Chantiers, débordement, supports |
 | 5. Défausse | 5. Fusée |
-| 6. Sorts offensifs de la colonie, puis attaques bloc par bloc | 6. Tirs, puis pioche de tuiles et de sorts |
+| 6. Sorts offensifs de la colonie, puis attaques créature par créature | 6. Tirs, puis pioche de tuiles et de sorts |
 
 ## Points provisoires de cette version
 

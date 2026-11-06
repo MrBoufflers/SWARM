@@ -121,7 +121,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.16";
+  const VERSION = "0.4.17";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -465,7 +465,9 @@ const SF = (() => {
   // Aura Mobilité du Glaneur (Oni, 02/11/2026) : +1 case par Glaneur de la case, pour les autres créatures (cumulable) ;
   // le Glaneur lui-même avance de 2 cases (vitesse de base 2) pour suivre le groupe.
   // Aura Mobilité : +1 case par Glaneur de la case, et par soutien de la case avec la Mue (Oni, 05/11/2026) ; tout se cumule
-  const speedOf = (S, c) => (c.name === "Glaneur" ? 2 : 1) + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur")
+  // vitesse de base : 2 pour le Glaneur et toutes les créatures de niveau 3 (Oni, 06/11/2026), sinon 1
+  const baseSpeed = c => (c.name === "Glaneur" || CREATURES[c.name].lvl === 3 ? 2 : 1);
+  const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur")
     + (S.upgrades.soutien.r1 === "A" ? countMates(S, c, isSoutien) : 0);
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
@@ -1110,7 +1112,9 @@ const SF = (() => {
     draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } },
     frenzy: { phase: ["A_deploy", "A_upgrade", "A_attack"], run: (S, a) => isInt(a.src) && isInt(a.target) && setFrenzy(S, a.src, a.target) },
     deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && deploy(S, a.uid, a.lane, a.u, a.target) },
-    endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); return true; } },
+    // déploiement et améliorations dans la même étape (Oni, 06/11/2026) : terminer le déploiement passe directement aux attaques
+    // (la biomasse non dépensée va à la réserve) ; l'étape A_upgrade ne sert plus qu'aux parties enregistrées avant
+    endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); ACTIONS.toAttacks.run(S); return true; } },
     invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
     toAttacks: { phase: ["A_upgrade"], run(S) {
       startAttacks(S);
@@ -1238,7 +1242,7 @@ const SF = (() => {
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
     clairvoyance, reachable, strikeTargets, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
-    attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, startAttacks, attackOrder, endAttackerTurn,
+    attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };
