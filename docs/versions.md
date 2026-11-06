@@ -9,6 +9,7 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 **Interface (Oni)** : accueil et salle d'attente — le fond est centré sur le contenu (le cercle central du champ de bataille au centre de l'écran) ; le lent travelling zoome sans plus glisser de côté.
 - **Salle d'attente** : le logo et le nom du camp choisi (« ESSAIM » ou « COLONIE », en Ethnocentric rendu en image) remplacent ceux du jeu ; « Vous jouez … » reste, sans logo.
 - **En partie** : le nom du camp en tête des panneaux (« ESSAIM », « COLONIE ») est dans la police du jeu.
+- **Menu en partie** (et page Statistiques) dans le style de l'accueil : emblème et titre du jeu, boutons anguleux en capitales (« Nouvelle partie » / « Quitter » en jaune) ; languette « Menu » agrandie, plus facile à survoler.
 
 ## v0.4.25 — 6 novembre 2026
 

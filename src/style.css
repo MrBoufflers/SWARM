@@ -960,3 +960,25 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
 .po-head .side-nm { height: 1.45rem; }
 .pc-sum h3 .side-nm { height: 1.05rem; }
 .pc-sum h3 { gap: 8px; align-items: center; }
+
+/* menu en partie (et page Statistiques) dans le style de l'accueil (Oni, 06/11/2026) */
+.top { background: linear-gradient(180deg, rgba(20,16,14,.97), rgba(10,8,7,.97)); border-bottom: 1px solid rgba(255,255,255,.1); color: #efe7dd; padding-left: 18px; padding-right: 18px; }
+body:not(.pc):not(.on-home) .top { margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px))); }
+.brand { gap: 10px; }
+.brand-mk { width: 30px; height: 30px; flex: none; background: #fff; -webkit-mask: var(--logo-jeu) center / contain no-repeat; mask: var(--logo-jeu) center / contain no-repeat; }
+.brand-word { height: 1.15rem; aspect-ratio: 2551 / 200; background: #fff; -webkit-mask: var(--logo-titre) left center / contain no-repeat; mask: var(--logo-titre) left center / contain no-repeat; }
+.brand > span:last-child { color: rgba(232,224,214,.6); }
+.top .round { color: #efe7dd; }
+.top .menu button, .top .menu .code-chip { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; cursor: pointer; border-radius: 0;
+  font: 700 1rem/1.1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: #efe7dd;
+  background: linear-gradient(180deg, rgba(40,33,29,.95), rgba(18,14,12,.95)); border: 1px solid rgba(255,255,255,.14);
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px); transition: filter .15s, border-color .15s; }
+.top .menu button:hover { border-color: var(--hot); filter: brightness(1.2); }
+.top .menu .code-chip { cursor: default; color: #b9ad9f; } .top .menu .code-chip b { color: #fff; }
+.top .menu button[data-a="new"], .top .menu button[data-a="quit"] { color: #1b120a; background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); border-color: #ffdf9c; }
+/* languette « Menu » plus grande, plus facile à survoler (Oni, 06/11/2026) */
+body.pc .pc-hot { height: 12px; }
+body.pc .pc-hot span { height: 30px; padding: 0 30px; display: flex; align-items: center; gap: 8px; font: 700 1rem/1 var(--display); letter-spacing: .2em; color: #efe7dd;
+  background: linear-gradient(180deg, rgba(40,33,29,.96), rgba(18,14,12,.96)); border: 1px solid rgba(255,255,255,.16); border-top: 0; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,.45); cursor: pointer; }
+body.pc .pc-hot span::after { content: "▾"; font-size: .9rem; opacity: .8; }
+body.pc .pc-hot:hover span { border-color: var(--hot); }
