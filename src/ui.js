@@ -155,12 +155,12 @@
     const link = location.origin + location.pathname + "?code=" + NET.code;
     return `<section class="home2 h2-wait ${NET.side}">${homeBackdrop()}
       <div class="h2-top"><button data-a="help" class="h2-ic">Règles</button></div>
-      <div class="h2-hero small">
+      <div class="h2-hero small side-${NET.side}">
         <div class="h2-emblem" aria-hidden="true"><span class="h2-glow"></span><span class="h2-mark"></span></div>
-        <h1 class="h2-title"><span class="h2-word" aria-hidden="true"></span><span class="sr">Swarm &amp; Steel</span></h1>
+        <h1 class="h2-title"><span class="h2-word" aria-hidden="true"></span><span class="sr">${NET.side === "essaim" ? "Essaim" : "Colonie"}</span></h1>
       </div>
       <div class="h2-panel">
-        <p class="h2-side">${sideLogo(NET.side)}<span>Vous jouez <b>${SIDE[NET.side]}</b></span></p>
+        <p class="h2-side"><span>Vous jouez <b>${SIDE[NET.side]}</b></span></p>
         <p class="h2-k">Code de la partie</p>
         <p class="h2-code"><span class="bigcode" data-code="${E(NET.code)}">${E(NET.code)}</span></p>
         <p class="h2-help">Donnez ce code à votre adversaire, ou envoyez-lui ce lien :</p>
