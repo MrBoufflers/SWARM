@@ -823,3 +823,12 @@ body.pc .panel.essaim::before { --m: var(--logo-essaim); --c: var(--essaim); lef
 .ccard.sh > :not(.thumb) { position: relative; z-index: 1; }
 .ccard.sh > .cost { position: absolute; }
 .ccard.sh > b, .ccard.sh > small { padding-right: 0; text-shadow: 0 1px 3px var(--panel-2), 0 0 6px var(--panel-2); }
+/* fondu plus progressif (Oni, 06/11/2026) */
+.ccard.sh .thumb { -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%); }
+/* tuiles en main de la colonie : illustration sur la moitié gauche, en fondu vers la droite (même traitement que l'essaim) */
+body.pc .tcard { position: relative; display: flex; flex-direction: column; gap: 3px; padding: 8px 10px 8px 42%; min-height: 104px; overflow: hidden; }
+body.pc .tcard .art { position: absolute; left: 0; top: 0; bottom: 0; width: 50%; height: auto; border-radius: 6px 0 0 6px; box-shadow: none; background-size: cover; background-position: center 35%;
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%);
+  mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%); }
+body.pc .tcard > :not(.art) { position: relative; z-index: 1; text-shadow: 0 1px 3px var(--panel-2), 0 0 6px var(--panel-2); }
