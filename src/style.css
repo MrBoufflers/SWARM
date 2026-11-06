@@ -185,7 +185,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   .layout { grid-template-columns: 1fr; }
   .menu { margin-left: 0; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* animations coupées seulement quand le bouton « Animations » est sur « non » (par défaut « non » si le système demande moins d'animations) */
+:root[data-motion="off"] * { transition: none !important; animation: none !important; }
 
 .capline { display: flex; gap: 6px; align-items: flex-start; font-size: 1rem; line-height: 1.35; margin-top: 3px; color: var(--ink); }
 .capline .i { width: 16px; height: 16px; color: var(--soutien); margin-top: 1px; }

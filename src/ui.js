@@ -74,6 +74,7 @@
     autoDraw.busy = true; setTimeout(() => { autoDraw.busy = false; if (S && S.phase === "A_start" && !S.handoff) play("draw"); }, 250);
   }
   function render() {
+    document.documentElement.dataset.motion = animOn ? "on" : "off"; // animations CSS suivant le bouton « Animations »
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
     const bar = staleBar();
     if (MODE === "stats" || MODE === "home" || !S) document.body.classList.remove("pc");

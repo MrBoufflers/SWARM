@@ -191,7 +191,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   .layout { grid-template-columns: 1fr; }
   .menu { margin-left: 0; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* animations coupées seulement quand le bouton « Animations » est sur « non » (par défaut « non » si le système demande moins d'animations) */
+:root[data-motion="off"] * { transition: none !important; animation: none !important; }
 
 .capline { display: flex; gap: 6px; align-items: flex-start; font-size: 1rem; line-height: 1.35; margin-top: 3px; color: var(--ink); }
 .capline .i { width: 16px; height: 16px; color: var(--soutien); margin-top: 1px; }
@@ -1018,7 +1019,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.17";
+  const VERSION = "0.4.18";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -2554,6 +2555,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     autoDraw.busy = true; setTimeout(() => { autoDraw.busy = false; if (S && S.phase === "A_start" && !S.handoff) play("draw"); }, 250);
   }
   function render() {
+    document.documentElement.dataset.motion = animOn ? "on" : "off"; // animations CSS suivant le bouton « Animations »
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
     const bar = staleBar();
     if (MODE === "stats" || MODE === "home" || !S) document.body.classList.remove("pc");
