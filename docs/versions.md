@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.24 — 6 novembre 2026
+
+**Interface (Oni)** : salle d'attente en ligne — boutons « Copier le code » et « Copier le lien ».
+
 ## v0.4.23 — 6 novembre 2026
 
 **Interface (Oni)** : la **salle d'attente** en ligne reprend le style de l'accueil (champ de bataille animé, braises, emblème et titre), avec le logo du camp choisi, le code en grand, le lien d'invitation et « En attente de l'adversaire… » ; boutons Règles et Quitter en haut à droite.
