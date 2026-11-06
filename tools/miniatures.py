@@ -42,7 +42,7 @@ def main():
             path = next((p for p in SRC.iterdir() if unicodedata.normalize("NFC", p.name) == src), None)
             if not path: print("absent :", fichier); continue
             taille, qualite = TAILLES.get(src, (TAILLE, QUALITE))
-            im = Image.open(path).convert("RGB"); im.thumbnail((taille, taille), Image.LANCZOS)
+            im = Image.open(path); im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") else "RGB"); im.thumbnail((taille, taille), Image.LANCZOS)
             dest = OUT / (slug(src.rsplit(".", 1)[0]) + ".webp"); im.save(dest, "WEBP", quality=qualite, method=6)
             faits[src] = dest.name; total += dest.stat().st_size
         table[nom] = faits[src]

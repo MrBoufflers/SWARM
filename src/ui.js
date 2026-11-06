@@ -39,8 +39,8 @@
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
-    A_start: ["essaim", "Tour de l'essaim", "Piochez vos cartes selon votre palier."],
-    A_deploy: ["essaim", "Déploiement", "Choisissez une carte, puis une case d'entrée (bord du plateau) dans une lane. Vous pouvez aussi investir votre budget dans une amélioration (panneau Essaim). Le budget non dépensé ira à la réserve."],
+    A_start: ["essaim", "Tour de l'essaim", "Pioche automatique des cartes selon votre palier."],
+    A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
     A_attack: ["essaim", "Attaques", "Touchez une créature pour la faire agir : elle avance seule vers la fusée (1 case, 2 avec la Mobilité ou un Glaneur), tout droit ou en escalier, puis attaque le bâtiment ou la fusée devant elle. « Tout résoudre automatiquement » fait agir toutes les créatures restantes."],
@@ -67,6 +67,12 @@
   }
 
   // ---------------------------------------------------------------- rendu
+  // pioche automatique au début du tour de l'essaim (Oni, 06/11/2026) : dès que l'essaim regarde l'écran en phase A_start
+  function autoDraw() {
+    if (!S || S.winner || S.handoff || S.phase !== "A_start" || autoDraw.busy) return;
+    if (online() ? !myTurn() : S.view !== "essaim") return;
+    autoDraw.busy = true; setTimeout(() => { autoDraw.busy = false; if (S && S.phase === "A_start" && !S.handoff) play("draw"); }, 250);
+  }
   function render() {
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
     const bar = staleBar();
@@ -79,7 +85,7 @@
     if (pc) {
       const main = S.handoff && !online() ? pcHandoff() : pcLayout(false);
       $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + tipCard();
-      placePop();
+      placePop(); autoDraw();
       // carte de passage qui arrive en glissant : animation signalée comme les autres (data-anim), ou coupée
       const card = $(".pc-ho .ho-card:not(.leave)");
       if (card && !animOn) card.style.animation = "none";
@@ -92,6 +98,7 @@
     }
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
     $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + tipCard();
+    autoDraw();
   }
   function header() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
@@ -253,7 +260,7 @@
         SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;
     } else if (ph === "A_deploy") {
       body = UI.sel ? (sh ? `<p class="hint"><b>${E(cardOf(UI.sel).name)}</b> → cliquez une entrée surlignée.</p>` : `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez une case d'entrée surlignée.</p>`) : (sh ? `<p class="hint">Choisissez une carte de votre main.</p>` : "");
-      acts = `<button data-a="endDeploy" class="primary">Terminer les déploiements</button>`;
+      acts = `<button data-a="endDeploy" class="primary">Passer aux attaques</button>`;
     } else if (ph === "A_upgrade") {
       body = sh ? `<p class="hint">Réserve <b>${S.reserve}</b> : investissez-la dans un arbre, ou gardez-la.</p>` : `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
       acts = `<button data-a="toAttacks" class="primary">Passer aux attaques</button>`;
@@ -431,7 +438,7 @@
   }
   // illustration d'une tuile, d'un support ou d'une créature : classe CSS « im im-… » ajoutée au build (vide si pas d'image)
   const imCls = n => (typeof IMG_CLASS !== "undefined" && IMG_CLASS[n]) || "";
-  const short = n => ({ "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Av.-poste N", "Avant-poste de l'Est": "Av.-poste E", "Avant-poste du Sud": "Av.-poste S", "Avant-poste de l'Ouest": "Av.-poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
+  const short = n => ({ "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Poste N", "Avant-poste de l'Est": "Poste E", "Avant-poste du Sud": "Poste S", "Avant-poste de l'Ouest": "Poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
   function tokens(crs) {
     if (!crs.length) return "";
     return `<div class="toks" style="--n:${Math.ceil(Math.sqrt(crs.length))}">` + crs.map(c => {
@@ -440,8 +447,28 @@
       const tgt = S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c);
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" ? (SF.canAct(S, c) ? (S.view === "essaim" ? " go" : "") : " done") : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       const au = auraOf(c);
-      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? `<i class="au ${au.kind}">${icon(au.icon)}</i>` : ""}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
+  }
+  // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
+  const FX_LABEL = {
+    soin: () => ["+2 HEAL", "+1 MOV"], fureur: () => ["+1 ATQ"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
+    cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
+    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"],
+  };
+  // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
+  function sumLabels(list) {
+    const n = {}, other = [];
+    for (const l of list) { const m = /^\+(\d+) (.+)$/.exec(l); if (m) n[m[2]] = (n[m[2]] || 0) + Number(m[1]); else if (!other.includes(l)) other.push(l); }
+    return [...Object.entries(n).map(([u, v]) => `+${v} ${u}`), ...other];
+  }
+  // effets donnés par un soutien : sa capacité (si c'est une aura) et les améliorations de soutien acquises
+  function givenLabels(c) {
+    const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return [];
+    const out = AURA_CAPS.includes(b.cap) ? FX_LABEL[b.cap]() : [];
+    const u = S.upgrades.soutien;
+    for (const r of ["r1", "r2"]) if (u[r] && UP_AURA[r][u[r]]) out.push(...FX_LABEL[UP_AURA[r][u[r]]]());
+    return out;
   }
   // aura d'une créature (jetons) : un soutien qui en donne une (icône blanche), ou une créature qui en profite (icône violette)
   const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
@@ -455,18 +482,19 @@
   }
   function auraOf(c) {
     const g = auraGiven(c);
-    if (g) return { kind: "give", icon: g.icon, txt: `donne : ${g.name}` };
+    if (g) return { kind: "give", icon: g.icon, txt: `donne : ${g.name}`, lab: sumLabels(givenLabels(c)) };
     const got = SF.caseMates(S, c).map(auraGiven).filter(Boolean);
     if (!got.length) return null;
     const icons = [...new Set(got.map(x => x.icon))];
-    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: `profite de : ${[...new Set(got.map(x => x.name))].join(", ")}` };
+    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: `profite de : ${[...new Set(got.map(x => x.name))].join(", ")}`,
+      lab: sumLabels(SF.caseMates(S, c).flatMap(givenLabels)) };
   }
   function detail(id) {
     const c = S.creatures.find(o => o.id === (id === undefined ? UI.selCreature : id));
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[c.name === "Glaneur" ? "vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur" || (S.upgrades.soutien.r1 === "A" && SF.CREATURES[o.name].type === "soutien")) ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
+    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.baseSpeed(c) > 1 ? (c.name === "Glaneur" ? "vitesse de base 2" : "niveau 3 : vitesse de base 2") : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur" || (S.upgrades.soutien.r1 === "A" && SF.CREATURES[o.name].type === "soutien")) ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
@@ -534,7 +562,8 @@
       const b = SF.CREATURES[c.name];
       const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
       if (sh) { // mots-clés seulement, le détail au survol (comme les tuiles)
-        const chips = (b.cap ? b.capName.split(" · ").map(n => `<span class="cap" tabindex="0" data-tip="${E(b.capName + " : " + b.capText)}">${icon(capIcon(b.cap))}${E(n)}</span>`).join("") : "")
+        const capLab = b.cap ? (FX_LABEL[b.cap] ? FX_LABEL[b.cap]() : [b.capName]) : [];
+        const chips = capLab.map(l => `<span class="cap" tabindex="0" data-tip="${E(b.capName + " : " + b.capText)}">${icon(capIcon(b.cap))}${E(l)}</span>`).join("")
           + acquiredUps(b.type).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon("palier")}${E(n)}</span>`).join("");
         return `<button data-a="card" data-uid="${c.uid}" class="ccard sh ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
           <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
@@ -547,6 +576,8 @@
         ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
     }).join("")}</div>`;
   }
+  // arbres d'amélioration (maquette d'Oni, 06/11/2026) : une carte par nœud — icône ronde à gauche, côté et nom en haut,
+  // effet au centre, barre d'investissement « 2/6 » en bas ; toucher une carte ouverte y investit tout ce qui est possible
   function treesHtml(mine) {
     let trees = "";
     const POS = { A1: "Côté A", B1: "Côté B", A2: "Après A", C2: "Centre", B2: "Après B" };
@@ -556,18 +587,21 @@
         const st = SF.nodeState(S, ty, slot), cost = SF.nodeCost(slot), got = SF.invested(S, ty, slot);
         const avail = SF.investable(S);
         const canInv = mine && st === "open" && avail > 0 && ["A_deploy", "A_upgrade"].includes(S.phase);
-        let state, cls = st;
+        let state;
         if (st === "taken") state = "Acquis";
         else if (st === "closed") state = got ? "Fermé" : (u.r1 && !slot.endsWith("1") && slot !== "C2" && u.r1 !== slot[0] ? `Fermé : demande ${T[slot[0] + "1"][0]}` : "Fermé : biomasse déjà engagée sur l'autre choix de ce rang");
         else if (st === "needR1") state = "Demande d'abord un rang 1";
-        else state = `${got} / ${cost} investis`;
-        const bar = st === "open" || got ? `<span class="bar"><i style="width:${Math.round(100 * got / cost)}%"></i></span>` : "";
-        const btns = canInv ? `<span class="inv"><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1">+1</button><button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99">Tout investir (${Math.min(avail, cost - got)})</button></span>` : "";
-        return `<div class="node ${cls}${canInv ? " can" : ""}" data-node="${ty}:${slot}"><span class="np">${POS[slot]}</span><b>${E(T[slot][0])}</b><span class="nt">${E(T[slot][1])}</span>${bar}<span class="ns">${E(state)}</span>${btns}</div>`;
+        else state = canInv ? `Toucher pour investir ${Math.min(avail, cost - got)}` : `${got} / ${cost} investis`;
+        const pct = st === "taken" ? 100 : Math.round(100 * got / cost);
+        const inv = canInv ? ` data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99" role="button" tabindex="0"` : "";
+        return `<div class="node ucard ${st}${canInv ? " can" : ""}" data-node="${ty}:${slot}"${inv} title="${E(state)}">
+          <span class="uc-ic"><span>${icon(NODE_ICON[ty][slot])}</span></span>
+          <span class="uc-body"><span class="uc-top"><span class="uc-pos">${POS[slot]}</span><b class="uc-name">${E(T[slot][0])}</b></span>
+            <span class="uc-txt">${E(T[slot][1])}</span>
+            <span class="uc-foot"><span class="bar"><i style="width:${pct}%"></i></span>${canInv && cost - got > 1 ? `<button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1" class="uc-one" title="Investir 1">+1</button>` : ""}<b class="uc-n">${st === "taken" ? "Acquis" : `${got}/${cost}`}</b></span></span></div>`;
       };
-      trees += `<div class="tree ${ty}"><span class="tt">${icon(ty)}${ty}</span>
-        <span class="rk">Rang 1 · ${SF.COST_R1} biomasse · 1 choix sur 2 · ajoute les cartes de niveau 2</span><div class="r">${node("A1")}${node("B1")}</div>
-        <span class="rk">Rang 2 · ${SF.COST_R2} biomasse · 1 choix sur 3 · ajoute les cartes de niveau 3</span><div class="r r3">${node("A2")}${node("C2")}${node("B2")}</div></div>`;
+      trees += `<div class="utree2 ${ty}"><span class="tt">${icon(ty)}${ty}<small>rang 1 : ${SF.COST_R1} · rang 2 : ${SF.COST_R2}</small></span>
+        <div class="ur1">${node("A1")}${node("B1")}</div><div class="ur2">${node("A2")}${node("C2")}${node("B2")}</div></div>`;
     }
     return trees;
   }
@@ -590,11 +624,11 @@
   if (PC_MQ && PC_MQ.addEventListener) PC_MQ.addEventListener("change", () => render());
   // étapes du tour de chaque camp (chevrons) ; la réaction de la colonie a lieu pendant le tour de l'essaim
   const PC_STEPS = {
-    essaim: [["A_start", "Pioche"], ["A_deploy", "Déploiement"], ["A_upgrade", "Améliorations"], ["A_attack", "Attaques"]],
+    essaim: [["A_deploy", "Déployer & améliorer"], ["A_attack", "Attaques"]],
     colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_place", "Pose"], ["D_fire", "Tirs"]],
   };
   function pcSteps(side) {
-    const ph = S.phase === "A_famine" ? "A_react" : S.phase;
+    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase;
     const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
     const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
@@ -765,6 +799,7 @@
     return `<div class="pc-bg" aria-hidden="true" inert>${bgHtml}</div>
       <section class="pc-ho ${w}"><div class="ho-card from-${w === "colonie" ? "l" : "r"}${UI.leaving ? " leave" : ""}">${icon(w === "essaim" ? "spores" : "fusee", "i big")}
       <p class="ho-k">Manche ${S.round}</p><h2>C'est à ${SIDE[w]} de jouer</h2>
+      <p class="ho-stat">${w === "colonie" ? `${icon("travailleur")}<b>${S.workersBase + SF.bonusWorkers(S)}</b> travailleurs` : `${icon("biomasse")}<b>${S.biomass}</b> biomasse`}</p>
       <p>Passez l'appareil. Les mains et les tuiles camouflées de l'autre camp restent cachées.</p>
       <button data-a="reveal" class="primary">Je joue ${SIDE[w]}</button></div></section>`;
   }
@@ -828,7 +863,7 @@
       if (online() || UI.leaving) return;
       const go = () => { UI.leaving = false; S.view = S.handoff; S.handoff = null; save(); render(); };
       const card = document.querySelector(".pc-ho .ho-card");
-      if (card && animOn) { UI.leaving = true; card.classList.add("leave"); document.body.dataset.anim = "1"; setTimeout(() => { document.body.dataset.anim = "0"; go(); }, 380); } else go();
+      if (card && animOn) { UI.leaving = true; card.classList.add("leave"); document.body.dataset.anim = "1"; setTimeout(() => { document.body.dataset.anim = "0"; go(); }, 320); } else go();
       return;
     }
     if (S.winner) return;

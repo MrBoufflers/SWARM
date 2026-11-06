@@ -86,7 +86,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     }
     if (await click(page, '[data-a="famine"][data-v="1"]')) continue;
     if (await click(page, '[data-a="draw"]')) continue;
-    if (ph === 'Déploiement') { if (await click(page, '[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click(page, '[data-a="card"]:not([disabled])') && await click(page, '[data-a="deployAt"]')) continue; } await click(page, '[data-a="endDeploy"]'); continue; }
+    if (ph === 'Déploiement et améliorations') { if (await click(page, '[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click(page, '[data-a="card"]:not([disabled])') && await click(page, '[data-a="deployAt"]')) continue; } await click(page, '[data-a="invest"][data-n="99"]'); await click(page, '[data-a="endDeploy"]'); continue; }
     if (ph === 'Améliorations') { await click(page, '[data-a="invest"][data-n="99"]'); await click(page, '[data-a="toAttacks"]'); continue; }
     if (ph === 'Réaction de la colonie') { if (await click(page, '[data-a="spell"]')) { if (!(await click(page, '[data-a="spellArg"]'))) await click(page, '[data-a="spellCancel"]'); } await click(page, '[data-a="reactDone"]'); continue; }
     if (ph === 'Attaques') { if (await click(page, '.board .tok.go')) continue; if (await click(page, '[data-a="actAll"]')) continue; await click(page, '[data-a="endA"]'); continue; }

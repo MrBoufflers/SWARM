@@ -34,7 +34,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     if (await click('[data-a="draw"]')) continue;
     const ph = await phase();
     if (!shots[ph]) { shots[ph] = 1;  }
-    if (ph === 'Déploiement') { if (await click('[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click('[data-a="card"]:not([disabled])') && await click('[data-a="deployAt"]')) continue; } await click('[data-a="endDeploy"]'); continue; }
+    if (ph === 'Déploiement et améliorations') { if (await click('[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click('[data-a="card"]:not([disabled])') && await click('[data-a="deployAt"]')) continue; } await click('[data-a="invest"][data-n="99"]'); await click('[data-a="endDeploy"]'); continue; }
     if (ph === 'Améliorations') { await click('[data-a="invest"][data-n="99"]'); await click('[data-a="toAttacks"]'); continue; }
     if (ph === 'Réaction de la colonie') { if (await click('[data-a="spell"]')) { if (!(await click('[data-a="spellArg"]'))) await click('[data-a="spellCancel"]'); } await click('[data-a="reactDone"]'); continue; }
     if (ph === 'Attaques') { if (await click('.board .tok.go')) continue; if (await click('[data-a="actAll"]')) continue; await click('[data-a="endA"]'); continue; }
