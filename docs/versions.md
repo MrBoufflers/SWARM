@@ -10,6 +10,8 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 - **Déplacement automatique** : pendant les attaques, l'essaim choisit quelle créature agit en la touchant (cadre jaune) ; elle avance seule vers la fusée sur son chemin, tout droit ou en escalier (1 case, 2 avec la Mobilité ou un Glaneur), puis attaque le bâtiment ou la fusée devant elle. Plus de déplacement libre (côté, retraite) ni de choix de la cible. « Tout résoudre automatiquement » reste.
 - **Support de niveau 3** (couronne 3) : **+3 travailleurs** (au lieu de +2).
 
+**Correction (téléphone)** : quand plusieurs créatures partagent une case, leurs jetons se rangent en grille carrée dans la case (comme sur PC) ; avant, certains dépassaient et ne pouvaient pas être touchés.
+
 ## v0.4.15 — 6 novembre 2026
 
 **Correction (Oni)** : une case où l'on peut agir (déplacement d'une créature, déploiement, pose d'un bâtiment, cible d'attaque) reçoit le clic même quand des créatures la remplissent ; avant, le clic tombait sur le jeton. Toucher à nouveau la créature choisie la relâche, pour pouvoir en choisir une autre.

@@ -705,3 +705,8 @@ body.pc .tok .au .i { width: max(11px, calc(var(--cell) / var(--n) * .26)); heig
 /* attaques (Oni, 06/11/2026) : une créature qui peut encore agir se touche pour avancer et attaquer seule (jaune = actionnable) */
 .tok.go { cursor: pointer; outline: 2px solid var(--hot); outline-offset: -1px; }
 .tok.go:hover { filter: brightness(1.15); }
+/* téléphone et tablette (06/11/2026) : jetons en grille carrée dans la case, comme sur PC, pour que tous restent visibles et touchables */
+body:not(.pc) .toks { inset: 2px; display: grid; grid-template-columns: repeat(var(--n), 1fr); align-content: center; gap: 1px; }
+body:not(.pc) .tok { width: 100%; height: auto; aspect-ratio: 1; min-width: 0; min-height: 0; padding: 0 1px 1px; border-radius: 3px; align-items: flex-end;
+  font-size: max(8px, calc(var(--cell) / var(--n) * .3)); }
+body:not(.pc) .tok .au { display: none; }
