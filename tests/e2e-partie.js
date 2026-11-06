@@ -27,7 +27,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   const phase = () => page.evaluate(() => (document.querySelector('.ph-head b') || document.querySelector('.ho-card h2') || {}).textContent);
   const shots = {};
   for (let step = 0; step < 1600; step++) {
-    if (await page.$('.banner.win')) break;
+    if (await page.$('.banner.win, .pc-win')) break;
     if (await click('[data-a="local"]')) continue;
     if (await click('[data-a="reveal"]')) continue;
     if (await click('[data-a="famine"][data-v="1"]')) continue;
@@ -51,7 +51,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   const fxSeen = await page.evaluate(() => window.__fx);
   console.log('animations jouées :', JSON.stringify(fxSeen));
   const ok = !errs.length && !covered && await page.$('.banner.win') && fxSeen['déplacement'] > 0 && fxSeen['chiffre'] > 0;
-  console.log('erreurs :', errs.length ? errs : 'aucune', '| boutons masqués :', covered, '| fin :', await page.evaluate(() => (document.querySelector('.banner.win b') || {}).textContent || 'en cours'), '| phases vues :', Object.keys(shots).join(', '));
+  console.log('erreurs :', errs.length ? errs : 'aucune', '| boutons masqués :', covered, '| fin :', await page.evaluate(() => (document.querySelector('.banner.win b, .pc-win .hf-sub') || {}).textContent || 'en cours'), '| phases vues :', Object.keys(shots).join(', '));
   await browser.close();
   process.exit(ok ? 0 : 1);
 })();

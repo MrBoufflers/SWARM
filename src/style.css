@@ -838,3 +838,8 @@ body.pc .tcard > :not(.art) { position: relative; z-index: 1; text-shadow: 0 1px
 @keyframes myAnimOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.5); opacity: 0; } }
 .pc-ho .ho-card.from-l, .pc-ho .ho-card.from-r { animation: myAnim 0.3s cubic-bezier(0.64, 0, 0.78, 0) 0s 1 normal forwards; }
 .pc-ho .ho-card.from-l.leave, .pc-ho .ho-card.from-r.leave { animation: myAnimOut 0.3s cubic-bezier(0.64, 0, 0.78, 0) 0s 1 normal forwards; }
+/* écran de victoire (Oni, 06/11/2026) */
+.pc-win .hf-in h2 { font: 800 clamp(2.4rem, 4vw, 3.6rem)/1 var(--display); letter-spacing: .12em; }
+.pc-win.essaim .hf-in h2 { color: #e2c8ff; text-shadow: 0 0 18px rgba(167,127,217,.8), 0 2px 6px #000; }
+.pc-win.colonie .hf-in h2 { color: #bff5ea; text-shadow: 0 0 18px rgba(79,184,166,.8), 0 2px 6px #000; }
+.hf-sub { margin: 6px 0 0; font: 600 1.15rem/1.3 var(--body); color: #f3ece4; }

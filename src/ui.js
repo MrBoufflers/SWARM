@@ -770,7 +770,7 @@
       <div class="pc-corner ${roundSide} round"><span class="k">Manche</span><b>${S.round}</b></div>
       <div class="pc-corner ${roundSide === "l" ? "r" : "l"} turn ${p[0]}">${turn}</div>
       ${pcButtons()}
-      ${S.winner ? winner() : ""}</div>${UI.pop != null && S.creatures.some(o => o.id === UI.pop) ? `<div class="cpop" role="dialog" aria-label="Détail de la créature"><button data-a="popClose" class="x close" aria-label="Fermer">×</button>${detail(UI.pop)}</div>` : ""}</section>`;
+</div>${S.winner ? pcWin() : ""}${UI.pop != null && S.creatures.some(o => o.id === UI.pop) ? `<div class="cpop" role="dialog" aria-label="Détail de la créature"><button data-a="popClose" class="x close" aria-label="Fermer">×</button>${detail(UI.pop)}</div>` : ""}</section>`;
   }
   function pcLayout(bg) {
     const v = bg ? null : S.view;
@@ -801,6 +801,14 @@
     const el = e.target.closest && e.target.closest("[data-tip]"); if (el) tipShow(el); else tipHide();
   });
   document.addEventListener("mouseout", e => { if (!e.relatedTarget || !(e.relatedTarget.closest && e.relatedTarget.closest("[data-tip]"))) tipHide(); });
+  // écran de victoire (Oni, 06/11/2026) : le cadre du camp gagnant, « VICTOIRE », et le bouton pour rejouer
+  function pcWin() {
+    const w = S.winner;
+    const sub = w === "colonie" ? "La fusée décolle, la colonie est sauvée !" : "L'essaim a décimé la colonie !";
+    return `<section class="pc-ho pc-win ${w}"><div class="ho-card ho-frame ${imCls(w === "essaim" ? "Passage essaim" : "Passage colonie")} from-${w === "colonie" ? "l" : "r"}" role="dialog" aria-label="Victoire">
+        <div class="hf-in"><p class="ho-k">Manche ${S.round}</p><h2>VICTOIRE</h2><p class="hf-sub">${E(sub)}</p></div>
+        <button data-a="new" class="hf-go">Rejouer</button></div></section>`;
+  }
   // écran de passage : la partie en fond (vue publique, sans les mains), assombrie ; la carte arrive du côté du joueur
   function pcHandoff() {
     const w = S.handoff, keep = S.view;

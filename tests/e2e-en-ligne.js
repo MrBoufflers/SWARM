@@ -72,7 +72,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const pages = { essaim: pE, colonie: pC }, seen = {};
   let reloaded = false, resumed = null, steps = 0, stuck = 0;
   for (; steps < 2500; steps++) {
-    if (await pE.$('.banner.win') && await pC.$('.banner.win')) break;
+    if (await pE.$('.banner.win, .pc-win') && await pC.$('.banner.win, .pc-win')) break;
     let page = null;
     for (const s of ['essaim', 'colonie']) if ((await pages[s].evaluate(() => document.body.dataset.myturn)) === '1') page = pages[s];
     if (!page) { if (++stuck > 400) { console.log('personne ne joue'); break; } await sleep(60); continue; }
@@ -101,8 +101,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     console.log('bloqué :', ph); break;
   }
   await sleep(400);
-  const fin = await pE.evaluate(() => (document.querySelector('.banner.win b') || {}).textContent || 'en cours');
-  const finC = await pC.evaluate(() => (document.querySelector('.banner.win b') || {}).textContent || 'en cours');
+  const fin = await pE.evaluate(() => (document.querySelector('.banner.win b, .pc-win .hf-sub') || {}).textContent || 'en cours');
+  const finC = await pC.evaluate(() => (document.querySelector('.banner.win b, .pc-win .hf-sub') || {}).textContent || 'en cours');
   const fxE = await pE.evaluate(() => window.__fx), fxC = await pC.evaluate(() => window.__fx);
   console.log('animations jouées — essaim :', JSON.stringify(fxE), '| colonie :', JSON.stringify(fxC));
   // statistiques : la partie terminée est enregistrée (marquée test), la page s'affiche et montre le plateau final
