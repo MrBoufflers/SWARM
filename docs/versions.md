@@ -8,6 +8,8 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 
 **Correction (Oni)** : sur un ordinateur réglé pour « réduire les animations », les animations CSS (arrivée et départ de l'écran de passage, halo des étapes, bouton qui pulse…) restaient coupées même avec « Animations : oui » dans le jeu. Elles suivent maintenant le bouton du jeu (toujours « non » par défaut sur ces ordinateurs).
 
+**Écran de passage (Oni)** : la carte apparaît en zoom de 0,5 à 1 avec une opacité progressive (0,3 s, cubic-bezier(0.64, 0, 0.78, 0)), et disparaît à l'inverse.
+
 ## v0.4.17 — 6 novembre 2026
 
 **Règles (Oni)**

@@ -833,3 +833,8 @@ body.pc .tcard .art { position: absolute; left: 0; top: 0; bottom: 0; width: 50%
   -webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%);
   mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%); }
 body.pc .tcard > :not(.art) { position: relative; z-index: 1; text-shadow: 0 1px 3px var(--panel-2), 0 0 6px var(--panel-2); }
+/* écran de passage (Oni, 06/11/2026) : zoom de 0,5 à 1 avec opacité progressive (myAnim), l'inverse à la fermeture */
+@keyframes myAnim { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes myAnimOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.5); opacity: 0; } }
+.pc-ho .ho-card.from-l, .pc-ho .ho-card.from-r { animation: myAnim 0.3s cubic-bezier(0.64, 0, 0.78, 0) 0s 1 normal forwards; }
+.pc-ho .ho-card.from-l.leave, .pc-ho .ho-card.from-r.leave { animation: myAnimOut 0.3s cubic-bezier(0.64, 0, 0.78, 0) 0s 1 normal forwards; }
