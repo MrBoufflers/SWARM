@@ -79,7 +79,9 @@
     const bar = staleBar();
     if (MODE === "stats" || MODE === "home" || !S) document.body.classList.remove("pc");
     if (MODE === "stats") { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + statsPage(); return; }
-    document.body.classList.toggle("on-home", MODE === "home" || !S);
+    const waiting = MODE !== "stats" && MODE !== "home" && S && online() && !NET.full;
+    document.body.classList.toggle("on-home", MODE === "home" || !S || !!waiting);
+    if (waiting) { document.body.dataset.view = ""; document.body.classList.remove("pc"); $("#app").innerHTML = bar + waitingRoom() + (UI.help ? help() : ""); return; }
     if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = bar + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
     const pc = isPC() && !(online() && !NET.full);
@@ -125,10 +127,7 @@
     const saved = load();
     const preset = new URLSearchParams(location.search).get("code") || "";
     const resume = saved && saved.phase;
-    // braises qui montent (positions et durées fixes, pour un rendu stable)
-    const embers = Array.from({ length: 34 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${6 + (i * 7) % 9}s;--t:-${(i * 13) % 11}s;--s:${1 + (i % 2) * .8}px"></i>`).join("");
-    return `<section class="home2">
-      <div class="h2-bg ${imCls("Champ de bataille")}" aria-hidden="true"></div><div class="h2-embers" aria-hidden="true">${embers}</div><div class="h2-fog" aria-hidden="true"></div>
+    return `<section class="home2">${homeBackdrop()}
       <div class="h2-top"><button data-a="help" class="h2-ic" title="Règles">Règles</button>${themeBtn().replace('class="ghost"', 'class="h2-ic"')}</div>
       <div class="h2-hero">
         <div class="h2-emblem" aria-hidden="true"><span class="h2-glow"></span><span class="h2-mark"></span></div>
@@ -147,12 +146,29 @@
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
     </section>`;
   }
+  // salle d'attente en ligne (Oni, 06/11/2026) : même mise en scène que l'accueil
+  function homeBackdrop() {
+    const embers = Array.from({ length: 34 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${6 + (i * 7) % 9}s;--t:-${(i * 13) % 11}s;--s:${1 + (i % 2) * .8}px"></i>`).join("");
+    return `<div class="h2-bg ${imCls("Champ de bataille")}" aria-hidden="true"></div><div class="h2-embers" aria-hidden="true">${embers}</div><div class="h2-fog" aria-hidden="true"></div>`;
+  }
   function waitingRoom() {
     const link = location.origin + location.pathname + "?code=" + NET.code;
-    return `<section class="handoff ${NET.side}"><div class="ho-card">${icon(NET.side === "essaim" ? "spores" : "fusee", "i big")}
-      <p class="ho-k">Vous jouez ${SIDE[NET.side]}</p><h2>Code : <span class="bigcode" data-code="${E(NET.code)}">${E(NET.code)}</span></h2>
-      <p>Donnez ce code à votre adversaire, ou envoyez-lui ce lien :</p><p class="link">${E(link)}</p>
-      <p>En attente de l'adversaire…</p></div></section>`;
+    return `<section class="home2 h2-wait ${NET.side}">${homeBackdrop()}
+      <div class="h2-top"><button data-a="help" class="h2-ic">Règles</button><button data-a="quit" class="h2-ic">Quitter</button></div>
+      <div class="h2-hero small">
+        <div class="h2-emblem" aria-hidden="true"><span class="h2-glow"></span><span class="h2-mark"></span></div>
+        <h1 class="h2-title"><span class="h2-word" aria-hidden="true"></span><span class="sr">Swarm &amp; Steel</span></h1>
+      </div>
+      <div class="h2-panel">
+        <p class="h2-side">${sideLogo(NET.side)}<span>Vous jouez <b>${SIDE[NET.side]}</b></span></p>
+        <p class="h2-k">Code de la partie</p>
+        <p class="h2-code"><span class="bigcode" data-code="${E(NET.code)}">${E(NET.code)}</span></p>
+        <p class="h2-help">Donnez ce code à votre adversaire, ou envoyez-lui ce lien :</p>
+        <p class="h2-link">${E(link)}</p>
+        <p class="h2-waitmsg">En attente de l'adversaire<span class="h2-dots"><i>.</i><i>.</i><i>.</i></span></p>
+      </div>
+      <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
+    </section>`;
   }
   function handoff() {
     const w = S.handoff;
