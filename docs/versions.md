@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.20 — 6 novembre 2026
+
+**Interface (Oni)** : nouvel **écran de victoire** sur PC, avec le cadre illustré du camp gagnant : « VICTOIRE », puis « La fusée décolle, la colonie est sauvée ! » ou « L'essaim a décimé la colonie ! », et le bouton « Rejouer » (plaque jaune ou orbe). Même animation d'apparition que l'écran de passage.
+
 ## v0.4.19 — 6 novembre 2026
 
 **Règles (Oni)**
