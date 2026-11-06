@@ -843,3 +843,75 @@ body.pc .tcard > :not(.art) { position: relative; z-index: 1; text-shadow: 0 1px
 .pc-win.essaim .hf-in h2 { color: #e2c8ff; text-shadow: 0 0 18px rgba(167,127,217,.8), 0 2px 6px #000; }
 .pc-win.colonie .hf-in h2 { color: #bff5ea; text-shadow: 0 0 18px rgba(79,184,166,.8), 0 2px 6px #000; }
 .hf-sub { margin: 6px 0 0; font: 600 1.15rem/1.3 var(--body); color: #f3ece4; }
+
+/* ======================================================================
+   Écran d'accueil « cinématique » (Oni, 06/11/2026)
+   ====================================================================== */
+body.on-home { padding: 0; margin: 0; }
+body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20; margin: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.home2 { position: relative; min-height: 100vh; min-height: 100dvh; box-sizing: border-box; padding: clamp(16px, 4vh, 48px) 16px 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(14px, 3vh, 34px);
+  overflow: hidden; isolation: isolate; color: #f3ece4; background: #0b0908; }
+.h2-bg { position: absolute; inset: -6%; z-index: -4; background: var(--img) center / cover; filter: saturate(.85) contrast(1.15) brightness(.8); animation: h2Burns 38s ease-in-out infinite alternate; }
+@keyframes h2Burns { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.12) translate(-1.5%, -1%); } }
+.home2::before { content: ""; position: absolute; inset: 0; z-index: -3; pointer-events: none;
+  background: radial-gradient(ellipse 60% 55% at 50% 38%, rgba(0,0,0,0) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.92) 100%),
+              linear-gradient(to bottom, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 55%, rgba(8,5,4,.95) 100%); }
+.h2-fog { position: absolute; left: -20%; right: -20%; bottom: -5%; height: 45%; z-index: -2; pointer-events: none; opacity: .55;
+  background: radial-gradient(ellipse 40% 60% at 30% 100%, rgba(255,110,40,.22), transparent 70%), radial-gradient(ellipse 45% 55% at 75% 100%, rgba(167,127,217,.16), transparent 70%);
+  animation: h2Fog 14s ease-in-out infinite alternate; }
+@keyframes h2Fog { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+.h2-embers { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.h2-embers i { position: absolute; left: var(--x); bottom: -12px; width: var(--s); height: var(--s); border-radius: 50%; background: #ffb050; box-shadow: 0 0 6px 2px rgba(255,140,40,.8);
+  animation: h2Rise var(--d) linear var(--t) infinite; opacity: 0; }
+@keyframes h2Rise { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: .9; } 70% { opacity: .6; } 100% { transform: translate(40px, -105vh); opacity: 0; } }
+
+.h2-top { position: absolute; top: 14px; right: 16px; display: flex; gap: 8px; z-index: 2; }
+.h2-ic { border: 1px solid rgba(255,255,255,.18); background: rgba(10,8,7,.55); color: #e8e0d6; padding: 7px 13px; border-radius: 6px; font: 600 1rem/1.2 var(--body); backdrop-filter: blur(4px); }
+.h2-ic:hover { border-color: var(--hot); color: #fff; }
+
+.h2-hero { display: flex; flex-direction: column; align-items: center; gap: clamp(6px, 1.5vh, 16px); text-align: center; }
+.h2-emblem { position: relative; width: clamp(150px, 30vh, 360px); aspect-ratio: 1; animation: h2Enter 1.4s cubic-bezier(.2,.8,.2,1) both; }
+.h2-glow { position: absolute; inset: -18%; border-radius: 50%; background: radial-gradient(circle, rgba(255,120,40,.55) 0%, rgba(255,80,20,.18) 38%, rgba(167,127,217,.12) 55%, transparent 70%);
+  filter: blur(6px); animation: h2Pulse 4.5s ease-in-out infinite; }
+@keyframes h2Pulse { 0%, 100% { opacity: .75; transform: scale(.96); } 50% { opacity: 1; transform: scale(1.04); } }
+.h2-mark { position: absolute; inset: 0; -webkit-mask: var(--logo-jeu) center / contain no-repeat; mask: var(--logo-jeu) center / contain no-repeat;
+  background: linear-gradient(160deg, #ffffff 0%, #c9ced6 22%, #6d7580 45%, #2a2e35 62%, #8c3a14 82%, #ff7a2a 100%); }
+.h2-emblem::after { content: ""; position: absolute; inset: 0; -webkit-mask: var(--logo-jeu) center / contain no-repeat; mask: var(--logo-jeu) center / contain no-repeat;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.75) 50%, transparent 60%) 0 0 / 300% 100% no-repeat; animation: h2Shine 6s ease-in-out 1.4s infinite; mix-blend-mode: overlay; }
+@keyframes h2Shine { 0% { background-position: 120% 0; } 30%, 100% { background-position: -120% 0; } }
+@keyframes h2Enter { from { opacity: 0; transform: scale(1.25); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+
+.h2-title { margin: 0; filter: drop-shadow(0 4px 0 rgba(0,0,0,.7)) drop-shadow(0 0 22px rgba(255,110,40,.45)); animation: h2Title 1.6s cubic-bezier(.2,.8,.2,1) .25s both; }
+.h2-word { display: block; width: min(1100px, 90vw); aspect-ratio: 2551 / 200; -webkit-mask: var(--logo-titre) center / contain no-repeat; mask: var(--logo-titre) center / contain no-repeat;
+  background: linear-gradient(180deg, #ffffff 0%, #e4e7eb 30%, #9aa2ac 50%, #4b5058 51%, #c2551c 75%, #ffb050 100%); }
+@keyframes h2Title { from { opacity: 0; transform: scale(1.12); letter-spacing: .2em; filter: blur(8px); } to { opacity: 1; transform: none; } }
+.h2-tag { margin: 0; font: 600 clamp(1rem, 1.5vw, 1.25rem)/1.3 var(--display); letter-spacing: .32em; text-transform: uppercase; color: #d8cfc4; text-shadow: 0 2px 6px #000; animation: h2Fade 1.2s ease 1s both; }
+@keyframes h2Fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.h2-menu { width: min(460px, 100%); display: flex; flex-direction: column; gap: 10px; animation: h2Fade 1s ease 1.3s both; }
+.h2-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 13px 20px; cursor: pointer;
+  font: 700 1.15rem/1.1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: #efe7dd;
+  background: linear-gradient(180deg, rgba(40,33,29,.88), rgba(18,14,12,.92)); border: 1px solid rgba(255,255,255,.14);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); transition: filter .15s, transform .15s, border-color .15s; }
+.h2-btn small { font: 500 1rem/1 var(--body); letter-spacing: 0; text-transform: none; color: #b9ad9f; }
+.h2-btn:hover { border-color: var(--hot); filter: brightness(1.2); transform: translateY(-1px); }
+.h2-btn.main { color: #1b120a; background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); border-color: #ffdf9c; font-size: 1.35rem; padding: 17px 20px;
+  box-shadow: 0 0 24px rgba(240,164,58,.45); animation: goGlow 2.6s ease-in-out infinite; }
+.h2-btn.main small { color: #3a2508; }
+.h2-online { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: rgba(8,6,5,.55); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(3px); }
+.h2-k { font: 600 1rem/1 var(--display); letter-spacing: .3em; text-transform: uppercase; color: #a89b8e; text-align: center; }
+.h2-row { display: flex; gap: 8px; } .h2-row > * { flex: 1; min-width: 0; }
+.h2-btn.side { font-size: 1rem; padding: 11px 10px; }
+.h2-btn.side .logo-mk { width: 24px; height: 24px; }
+.h2-btn.side.essaim:hover { border-color: var(--essaim); box-shadow: 0 0 18px rgba(167,127,217,.4); } .h2-btn.side.colonie:hover { border-color: var(--colonie); box-shadow: 0 0 18px rgba(79,184,166,.4); }
+.h2-row.join input { font: 700 1.3rem/1 var(--display); letter-spacing: .3em; text-transform: uppercase; text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,.18); background: rgba(0,0,0,.5); color: #fff; }
+.h2-row.join .h2-btn { flex: 0 0 auto; width: auto; font-size: 1rem; }
+.h2-btn.ghost { font-size: 1rem; padding: 10px; background: rgba(10,8,7,.5); }
+.h2-btn.ghost.on { border-color: var(--hot); color: var(--hot); }
+.h2-ver { position: absolute; right: 16px; bottom: 12px; margin: 0; font: 500 1rem/1 var(--body); color: rgba(232,224,214,.55); }
+@media (max-width: 680px) { .h2-row:not(.join) { flex-direction: column; } .h2-tag { letter-spacing: .18em; } }
+.h2-bg { filter: saturate(.8) contrast(1.15) brightness(.62) blur(1.5px); }
+.h2-hero::before { content: ""; position: absolute; left: 50%; top: 38%; width: min(1100px, 95vw); height: 70vh; transform: translate(-50%, -50%); z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(0,0,0,.25) 45%, transparent 70%); }
+.h2-emblem { filter: drop-shadow(0 14px 28px rgba(0,0,0,.85)) drop-shadow(0 0 2px rgba(0,0,0,.9)); }

@@ -79,7 +79,8 @@
     const bar = staleBar();
     if (MODE === "stats" || MODE === "home" || !S) document.body.classList.remove("pc");
     if (MODE === "stats") { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + statsPage(); return; }
-    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + home() + (UI.help ? help() : ""); return; }
+    document.body.classList.toggle("on-home", MODE === "home" || !S);
+    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = bar + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
     const pc = isPC() && !(online() && !NET.full);
     document.body.classList.toggle("pc", pc);
@@ -119,23 +120,32 @@
     return STALE ? `<div class="stale" role="alert"><span>Nouvelle version du jeu disponible (v${E(STALE)}). Rechargez la page pour continuer avec les règles à jour.</span><button data-a="reload" class="primary">Recharger</button></div>` : "";
   }
   // ---------------------------------------------------------------- accueil et salle d'attente (jeu en ligne)
+  // écran d'accueil « cinématique » (Oni, 06/11/2026) : champ de bataille en plein écran, emblème et titre massifs, menu de jeu
   function home() {
     const saved = load();
     const preset = new URLSearchParams(location.search).get("code") || "";
-    return `<section class="handoff home ${imCls("Champ de bataille")}"><div class="ho-card">${icon("fusee", "i big")}
-      <h2>Swarm &amp; Steel</h2>
-      <div class="home-acts disc"><button data-a="disc" aria-pressed="${DISC}" class="${DISC ? "on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button></div>
-      <p class="small">Conseils au fil de la partie, pour apprendre les règles en jouant.</p>
-      <p class="ho-k">Sur cet appareil</p>
-      <div class="home-acts">${saved && saved.phase ? `<button data-a="resume" class="primary">Reprendre la partie locale</button>` : ""}
-        <button data-a="local"${saved && saved.phase ? "" : ` class="primary"`}>Nouvelle partie locale</button></div>
-      <p class="ho-k">En ligne · créer une partie</p>
-      <div class="home-acts"><button data-a="create" data-side="essaim">Je joue l'essaim</button><button data-a="create" data-side="colonie">Je joue la colonie</button></div>
-      <p class="ho-k">En ligne · rejoindre</p>
-      <div class="home-acts join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="primary">Rejoindre</button></div>
-      ${HTTP ? `<p class="ho-k">Équilibrage</p><div class="home-acts"><button data-a="stats">Statistiques des parties</button></div>` : ""}
-      <p class="small">Version v${E(SF.VERSION)}</p>
-    </div></section>`;
+    const resume = saved && saved.phase;
+    // braises qui montent (positions et durées fixes, pour un rendu stable)
+    const embers = Array.from({ length: 34 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${6 + (i * 7) % 9}s;--t:-${(i * 13) % 11}s;--s:${2 + (i % 3)}px"></i>`).join("");
+    return `<section class="home2">
+      <div class="h2-bg ${imCls("Champ de bataille")}" aria-hidden="true"></div><div class="h2-embers" aria-hidden="true">${embers}</div><div class="h2-fog" aria-hidden="true"></div>
+      <div class="h2-top"><button data-a="help" class="h2-ic" title="Règles">Règles</button>${themeBtn().replace('class="ghost"', 'class="h2-ic"')}</div>
+      <div class="h2-hero">
+        <div class="h2-emblem" aria-hidden="true"><span class="h2-glow"></span><span class="h2-mark"></span></div>
+        <h1 class="h2-title"><span class="h2-word" aria-hidden="true"></span><span class="sr">Swarm &amp; Steel</span></h1>
+        <p class="h2-tag">L'essaim dévore · La colonie bâtit · Un seul camp survivra</p>
+      </div>
+      <nav class="h2-menu" aria-label="Menu principal">
+        ${resume ? `<button data-a="resume" class="h2-btn main">Reprendre la partie</button>` : ""}
+        <button data-a="local" class="h2-btn${resume ? "" : " main"}">Nouvelle partie <small>sur cet appareil</small></button>
+        <div class="h2-online"><span class="h2-k">En ligne</span>
+          <div class="h2-row"><button data-a="create" data-side="essaim" class="h2-btn side essaim">${sideLogo("essaim")}Jouer l'essaim</button><button data-a="create" data-side="colonie" class="h2-btn side colonie">${sideLogo("colonie")}Jouer la colonie</button></div>
+          <div class="h2-row join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CODE" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="h2-btn">Rejoindre</button></div>
+        </div>
+        <div class="h2-row small"><button data-a="disc" aria-pressed="${DISC}" class="h2-btn ghost${DISC ? " on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button>${HTTP ? `<button data-a="stats" class="h2-btn ghost">Statistiques</button>` : ""}</div>
+      </nav>
+      <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
+    </section>`;
   }
   function waitingRoom() {
     const link = location.origin + location.pathname + "?code=" + NET.code;
