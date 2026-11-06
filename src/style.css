@@ -455,18 +455,20 @@ body.pc .pc-layout.me-essaim { grid-template-columns: minmax(var(--side-sum), 1f
 body.pc .pc-layout.me-colonie { grid-template-columns: minmax(var(--side-own), 1.6fr) auto minmax(var(--side-sum), 1fr); }
 body.pc .pc-layout.me-none { grid-template-columns: minmax(var(--side-sum), 1fr) auto minmax(var(--side-sum), 1fr); }
 body.pc .panel { height: 100%; box-sizing: border-box; min-height: 0; display: flex; flex-direction: column; padding: 12px; overflow: visible; }
-body.pc .panel.colonie { border-top: 0; border-left: 4px solid var(--colonie); flex-direction: row; gap: 10px; }
+body.pc .panel.colonie { border-top: 0; border-left: 4px solid var(--colonie); }
 body.pc .panel.essaim { border-top: 0; border-right: 4px solid var(--essaim); }
 body.pc .po-main, body.pc .ps-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 body.pc .panel h4 { margin: 12px 0 6px; font-size: .78rem; }
 
-/* fusée en colonne, toute la hauteur, à l'extrême gauche du panneau de la colonie */
-.pc-rocket { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 38px; flex: none; }
-.pc-rocket > .i { width: 22px; height: 22px; color: var(--colonie); }
-.pc-rocket .floors.v { width: 38px; flex: 1; gap: 4px; }
-.pc-rocket .floors.v .fl { font-size: 11px; min-height: 0; border-radius: 4px; }
-.pc-rocket .fl.ms { border-width: 2px; }
-.pc-rocket .rk-lab { font-size: 11px; } .pc-rocket .rk-lab b { font-size: 1rem; }
+/* fusée horizontale : étage 1 à gauche ; 6 × 2 dans le résumé étroit */
+.pc-rocket { margin-top: 10px; }
+.pc-rocket .rk-lab { display: flex; align-items: center; gap: 4px; font: 600 12px/1 var(--body); color: var(--ink-soft); margin-bottom: 5px; }
+.pc-rocket .rk-lab .i { width: 15px; height: 15px; color: var(--colonie); } .pc-rocket .rk-lab b { color: var(--ink); font-size: 15px; }
+.floors.h { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 0; }
+.pc-rocket.grid .floors.h { grid-template-columns: repeat(6, 1fr); }
+.floors.h .fl { font: 700 11px/1 var(--body); padding: 7px 0; border-radius: 4px; cursor: help; position: relative; }
+.floors.h .fl.ms { border-width: 2px; }
+.floors.h .fl.cur { background: linear-gradient(to right, color-mix(in srgb, var(--colonie) 45%, transparent) var(--p), transparent var(--p)); color: var(--ink); }
 
 /* en-têtes : logo, nom, gros chiffre */
 .po-head { display: flex; align-items: center; gap: 8px; }
@@ -580,8 +582,14 @@ body.pc .rng .i { width: max(11px, calc(var(--cell) * .14)); height: max(11px, c
 :root[data-theme="dark"] body.pc .rng, :root[data-theme="auto"].sys-dark body.pc .rng { background: rgba(20,70,63,.85); box-shadow: 0 0 0 1px #5fd4c0; }
 /* jetons de créature : carrés, ils remplissent la case et rétrécissent avec le nombre */
 body.pc .toks { inset: 3px; display: grid; grid-template-columns: repeat(var(--n), 1fr); align-content: center; justify-items: stretch; gap: 3px; }
-body.pc .tok { width: 100%; height: auto; aspect-ratio: 1; min-width: 0; min-height: 0; padding: 0 3px 2px; border-radius: 6px; align-items: flex-end;
-  font-size: max(9px, calc(var(--cell) / var(--n) * .24)); }
+body.pc .tok { width: 100%; height: auto; aspect-ratio: 1; min-width: 0; min-height: 0; padding: 0 4px 3px; border-radius: 6px; align-items: flex-end;
+  font: 800 max(11px, calc(var(--cell) / var(--n) * .3))/1 var(--body); }
+body.pc .tok .ta, body.pc .tok .tp { text-shadow: 0 0 3px #000, 0 1px 2px #000; }
+body.pc .tok .ta { color: #ffd2c4; } body.pc .tok .tp { color: #fff; }
+body.pc .tok .au { display: flex; align-self: flex-end; margin-bottom: 1px; padding: 2px; border-radius: 50%; }
+body.pc .tok .au .i { width: max(10px, calc(var(--cell) / var(--n) * .24)); height: max(10px, calc(var(--cell) / var(--n) * .24)); stroke-width: 2.6; }
+body.pc .tok .au.give { color: #fff; background: rgba(0,0,0,.55); box-shadow: 0 0 0 1.5px #fff; }
+body.pc .tok .au.get { color: #d9b8ff; background: rgba(40,10,70,.75); box-shadow: 0 0 0 1.5px #b383f0, 0 0 6px #b383f0; }
 body.pc .tok.im { box-shadow: inset 0 0 0 max(2px, calc(var(--cell) / var(--n) * .04)) var(--tc), 0 2px 5px rgba(0,0,0,.5); }
 
 /* écran de passage : la partie en fond, assombrie (plus fort au centre, derrière la carte) */
@@ -600,3 +608,43 @@ body.pc .tok.im { box-shadow: inset 0 0 0 max(2px, calc(var(--cell) / var(--n) *
 @keyframes hoOutL { to { transform: translateX(-75vw) rotate(-3deg); opacity: 0; } }
 /* conseil du mode découverte : du côté de l'adversaire, pour ne pas cacher les boutons du joueur */
 body.pc[data-view="essaim"] .tipcard { right: auto; left: 16px; }
+
+/* ---- retours d'Oni (06/11/2026) : tuiles, supports, cartes à mots-clés, phase compacte, détail en fenêtre ---- */
+/* bâtiments : nom en haut, PV au centre, capacités en bas, tout plus gros */
+body.pc .tile.im, body.pc .tile { justify-content: space-between; padding: 4px 2px 4px; gap: 0; }
+body.pc .tile .tn { font: 700 max(11px, calc(var(--cell) * .14))/1.1 var(--body); }
+body.pc .tile .hp { font: 800 max(20px, calc(var(--cell) * .34))/1 var(--body); }
+body.pc .tile .hp small { font-size: max(11px, calc(var(--cell) * .15)); font-weight: 700; }
+body.pc .tile .tb { font: 800 max(12px, calc(var(--cell) * .17))/1 var(--body); gap: 4px; min-height: 1em; }
+body.pc .tile .tb .i { width: max(13px, calc(var(--cell) * .19)); height: max(13px, calc(var(--cell) * .19)); stroke-width: 2.4; }
+/* supports : icône et dégâts plus gros */
+body.pc .cell.sup { gap: 2px; }
+body.pc .cell.sup .i { width: calc(var(--cell) * .42); height: calc(var(--cell) * .42); }
+body.pc .cell.sup b { font: 800 max(16px, calc(var(--cell) * .28))/1 var(--body); }
+body.pc .cell .lv { font: 800 max(11px, calc(var(--cell) * .14))/1 var(--body); }
+/* cartes de créatures à déployer : mots-clés, détail au survol */
+.ccard.sh { padding: 7px 56px 7px 40px; gap: 3px; min-height: 0; }
+.ccard.sh .thumb { width: 44px; height: 44px; }
+.ccard.sh .stats { display: flex; gap: 10px; font: 800 1rem/1 var(--body); }
+.ccard.sh .st { display: inline-flex; align-items: center; gap: 3px; } .ccard.sh .st .i { width: 15px; height: 15px; }
+.ccard.sh .st.atq { color: var(--aggro); }
+.ccard .caps { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.ccard .cap { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 600; color: var(--soutien); background: color-mix(in srgb, var(--soutien) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--soutien) 40%, transparent); border-radius: 99px; padding: 2px 7px; cursor: help; }
+.ccard .cap.up { color: var(--essaim); }
+.ccard .cap .i { width: 12px; height: 12px; }
+/* phase compacte : nom de l'étape, ⓘ pour l'explication complète, consigne courte */
+body.pc .po-scroll .phase .hint { margin: 5px 0 2px; font-size: .86rem; }
+.ph-head .info { margin-left: auto; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--ink-soft); color: var(--ink-soft); display: inline-flex; align-items: center; justify-content: center;
+  font: italic 700 11px/1 Georgia, serif; cursor: help; flex: none; }
+.spells.sh { flex-direction: row; flex-wrap: wrap; } .spells.sh .spell { padding: 6px 10px; }
+/* détail d'une créature : fenêtre à côté de son jeton ; un clic ailleurs la ferme */
+.cpop { position: fixed; z-index: 35; width: 300px; filter: drop-shadow(0 14px 30px rgba(0,0,0,.6)); }
+.cpop .detail { margin: 0; max-width: none; box-shadow: none; }
+.cpop .close { position: absolute; top: 6px; right: 8px; z-index: 1; border: 0; background: none; font-size: 1.3rem; color: var(--ink-soft); }
+/* info-bulle flottante (PC) : remplace les bulles CSS, jamais coupée */
+body.pc [data-tip]:hover::after, body.pc [data-tip]:focus::after, body.pc [data-tip]:focus-visible::after { display: none; }
+#tipbox { position: fixed; z-index: 70; max-width: 260px; white-space: pre-line; background: var(--ink); color: var(--panel); font: 500 .8rem/1.45 var(--body);
+  padding: 8px 10px; border-radius: 7px; box-shadow: 0 6px 18px rgba(0,0,0,.4); pointer-events: none; }
+:root[data-theme="dark"] #tipbox, :root[data-theme="auto"].sys-dark #tipbox { background: #f1e9de; color: #1b1612; }
+.ps-rows .hidden-hand { font-style: normal; }

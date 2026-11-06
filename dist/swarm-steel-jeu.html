@@ -461,18 +461,20 @@ body.pc .pc-layout.me-essaim { grid-template-columns: minmax(var(--side-sum), 1f
 body.pc .pc-layout.me-colonie { grid-template-columns: minmax(var(--side-own), 1.6fr) auto minmax(var(--side-sum), 1fr); }
 body.pc .pc-layout.me-none { grid-template-columns: minmax(var(--side-sum), 1fr) auto minmax(var(--side-sum), 1fr); }
 body.pc .panel { height: 100%; box-sizing: border-box; min-height: 0; display: flex; flex-direction: column; padding: 12px; overflow: visible; }
-body.pc .panel.colonie { border-top: 0; border-left: 4px solid var(--colonie); flex-direction: row; gap: 10px; }
+body.pc .panel.colonie { border-top: 0; border-left: 4px solid var(--colonie); }
 body.pc .panel.essaim { border-top: 0; border-right: 4px solid var(--essaim); }
 body.pc .po-main, body.pc .ps-main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 body.pc .panel h4 { margin: 12px 0 6px; font-size: .78rem; }
 
-/* fusée en colonne, toute la hauteur, à l'extrême gauche du panneau de la colonie */
-.pc-rocket { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 38px; flex: none; }
-.pc-rocket > .i { width: 22px; height: 22px; color: var(--colonie); }
-.pc-rocket .floors.v { width: 38px; flex: 1; gap: 4px; }
-.pc-rocket .floors.v .fl { font-size: 11px; min-height: 0; border-radius: 4px; }
-.pc-rocket .fl.ms { border-width: 2px; }
-.pc-rocket .rk-lab { font-size: 11px; } .pc-rocket .rk-lab b { font-size: 1rem; }
+/* fusée horizontale : étage 1 à gauche ; 6 × 2 dans le résumé étroit */
+.pc-rocket { margin-top: 10px; }
+.pc-rocket .rk-lab { display: flex; align-items: center; gap: 4px; font: 600 12px/1 var(--body); color: var(--ink-soft); margin-bottom: 5px; }
+.pc-rocket .rk-lab .i { width: 15px; height: 15px; color: var(--colonie); } .pc-rocket .rk-lab b { color: var(--ink); font-size: 15px; }
+.floors.h { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 0; }
+.pc-rocket.grid .floors.h { grid-template-columns: repeat(6, 1fr); }
+.floors.h .fl { font: 700 11px/1 var(--body); padding: 7px 0; border-radius: 4px; cursor: help; position: relative; }
+.floors.h .fl.ms { border-width: 2px; }
+.floors.h .fl.cur { background: linear-gradient(to right, color-mix(in srgb, var(--colonie) 45%, transparent) var(--p), transparent var(--p)); color: var(--ink); }
 
 /* en-têtes : logo, nom, gros chiffre */
 .po-head { display: flex; align-items: center; gap: 8px; }
@@ -586,8 +588,14 @@ body.pc .rng .i { width: max(11px, calc(var(--cell) * .14)); height: max(11px, c
 :root[data-theme="dark"] body.pc .rng, :root[data-theme="auto"].sys-dark body.pc .rng { background: rgba(20,70,63,.85); box-shadow: 0 0 0 1px #5fd4c0; }
 /* jetons de créature : carrés, ils remplissent la case et rétrécissent avec le nombre */
 body.pc .toks { inset: 3px; display: grid; grid-template-columns: repeat(var(--n), 1fr); align-content: center; justify-items: stretch; gap: 3px; }
-body.pc .tok { width: 100%; height: auto; aspect-ratio: 1; min-width: 0; min-height: 0; padding: 0 3px 2px; border-radius: 6px; align-items: flex-end;
-  font-size: max(9px, calc(var(--cell) / var(--n) * .24)); }
+body.pc .tok { width: 100%; height: auto; aspect-ratio: 1; min-width: 0; min-height: 0; padding: 0 4px 3px; border-radius: 6px; align-items: flex-end;
+  font: 800 max(11px, calc(var(--cell) / var(--n) * .3))/1 var(--body); }
+body.pc .tok .ta, body.pc .tok .tp { text-shadow: 0 0 3px #000, 0 1px 2px #000; }
+body.pc .tok .ta { color: #ffd2c4; } body.pc .tok .tp { color: #fff; }
+body.pc .tok .au { display: flex; align-self: flex-end; margin-bottom: 1px; padding: 2px; border-radius: 50%; }
+body.pc .tok .au .i { width: max(10px, calc(var(--cell) / var(--n) * .24)); height: max(10px, calc(var(--cell) / var(--n) * .24)); stroke-width: 2.6; }
+body.pc .tok .au.give { color: #fff; background: rgba(0,0,0,.55); box-shadow: 0 0 0 1.5px #fff; }
+body.pc .tok .au.get { color: #d9b8ff; background: rgba(40,10,70,.75); box-shadow: 0 0 0 1.5px #b383f0, 0 0 6px #b383f0; }
 body.pc .tok.im { box-shadow: inset 0 0 0 max(2px, calc(var(--cell) / var(--n) * .04)) var(--tc), 0 2px 5px rgba(0,0,0,.5); }
 
 /* écran de passage : la partie en fond, assombrie (plus fort au centre, derrière la carte) */
@@ -606,6 +614,46 @@ body.pc .tok.im { box-shadow: inset 0 0 0 max(2px, calc(var(--cell) / var(--n) *
 @keyframes hoOutL { to { transform: translateX(-75vw) rotate(-3deg); opacity: 0; } }
 /* conseil du mode découverte : du côté de l'adversaire, pour ne pas cacher les boutons du joueur */
 body.pc[data-view="essaim"] .tipcard { right: auto; left: 16px; }
+
+/* ---- retours d'Oni (06/11/2026) : tuiles, supports, cartes à mots-clés, phase compacte, détail en fenêtre ---- */
+/* bâtiments : nom en haut, PV au centre, capacités en bas, tout plus gros */
+body.pc .tile.im, body.pc .tile { justify-content: space-between; padding: 4px 2px 4px; gap: 0; }
+body.pc .tile .tn { font: 700 max(11px, calc(var(--cell) * .14))/1.1 var(--body); }
+body.pc .tile .hp { font: 800 max(20px, calc(var(--cell) * .34))/1 var(--body); }
+body.pc .tile .hp small { font-size: max(11px, calc(var(--cell) * .15)); font-weight: 700; }
+body.pc .tile .tb { font: 800 max(12px, calc(var(--cell) * .17))/1 var(--body); gap: 4px; min-height: 1em; }
+body.pc .tile .tb .i { width: max(13px, calc(var(--cell) * .19)); height: max(13px, calc(var(--cell) * .19)); stroke-width: 2.4; }
+/* supports : icône et dégâts plus gros */
+body.pc .cell.sup { gap: 2px; }
+body.pc .cell.sup .i { width: calc(var(--cell) * .42); height: calc(var(--cell) * .42); }
+body.pc .cell.sup b { font: 800 max(16px, calc(var(--cell) * .28))/1 var(--body); }
+body.pc .cell .lv { font: 800 max(11px, calc(var(--cell) * .14))/1 var(--body); }
+/* cartes de créatures à déployer : mots-clés, détail au survol */
+.ccard.sh { padding: 7px 56px 7px 40px; gap: 3px; min-height: 0; }
+.ccard.sh .thumb { width: 44px; height: 44px; }
+.ccard.sh .stats { display: flex; gap: 10px; font: 800 1rem/1 var(--body); }
+.ccard.sh .st { display: inline-flex; align-items: center; gap: 3px; } .ccard.sh .st .i { width: 15px; height: 15px; }
+.ccard.sh .st.atq { color: var(--aggro); }
+.ccard .caps { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.ccard .cap { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 600; color: var(--soutien); background: color-mix(in srgb, var(--soutien) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--soutien) 40%, transparent); border-radius: 99px; padding: 2px 7px; cursor: help; }
+.ccard .cap.up { color: var(--essaim); }
+.ccard .cap .i { width: 12px; height: 12px; }
+/* phase compacte : nom de l'étape, ⓘ pour l'explication complète, consigne courte */
+body.pc .po-scroll .phase .hint { margin: 5px 0 2px; font-size: .86rem; }
+.ph-head .info { margin-left: auto; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--ink-soft); color: var(--ink-soft); display: inline-flex; align-items: center; justify-content: center;
+  font: italic 700 11px/1 Georgia, serif; cursor: help; flex: none; }
+.spells.sh { flex-direction: row; flex-wrap: wrap; } .spells.sh .spell { padding: 6px 10px; }
+/* détail d'une créature : fenêtre à côté de son jeton ; un clic ailleurs la ferme */
+.cpop { position: fixed; z-index: 35; width: 300px; filter: drop-shadow(0 14px 30px rgba(0,0,0,.6)); }
+.cpop .detail { margin: 0; max-width: none; box-shadow: none; }
+.cpop .close { position: absolute; top: 6px; right: 8px; z-index: 1; border: 0; background: none; font-size: 1.3rem; color: var(--ink-soft); }
+/* info-bulle flottante (PC) : remplace les bulles CSS, jamais coupée */
+body.pc [data-tip]:hover::after, body.pc [data-tip]:focus::after, body.pc [data-tip]:focus-visible::after { display: none; }
+#tipbox { position: fixed; z-index: 70; max-width: 260px; white-space: pre-line; background: var(--ink); color: var(--panel); font: 500 .8rem/1.45 var(--body);
+  padding: 8px 10px; border-radius: 7px; box-shadow: 0 6px 18px rgba(0,0,0,.4); pointer-events: none; }
+:root[data-theme="dark"] #tipbox, :root[data-theme="auto"].sys-dark #tipbox { background: #f1e9de; color: #1b1612; }
+.ps-rows .hidden-hand { font-style: normal; }
 
 .im-antenne{--img:url(data:image/webp;base64,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)}
 .im-archive{--img:url(data:image/webp;base64,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)}
@@ -2305,6 +2353,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (pc) {
       const main = S.handoff && !online() ? pcHandoff() : pcLayout(false);
       $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + tipCard();
+      placePop();
       // carte de passage qui arrive en glissant : animation signalée comme les autres (data-anim), ou coupée
       const card = $(".pc-ho .ho-card:not(.leave)");
       if (card && !animOn) card.style.animation = "none";
@@ -2464,7 +2513,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
       <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
   }
   // contenu de la boîte d'action (consignes, choix, boutons) : partagé par la mise en page mobile et la mise en page PC
-  function phaseParts() {
+  function phaseParts(sh) { // sh : textes courts (mise en page PC, le détail est au survol)
     const p = PHASE_TXT[S.phase];
     if (online() && !myTurn()) return { p, body: "", acts: "", waiting: true };
     let body = "", acts = "";
@@ -2474,16 +2523,16 @@ if (typeof module !== "undefined") module.exports = AIDE;
     } else if (ph === "A_start") {
       acts = `<button data-a="draw" class="primary">Piocher (palier ${SF.tier(S) + 1})</button>`;
     } else if (ph === "A_deploy" && UI.sap) {
-      body = `<p class="hint">Sapeur : choisissez le bâtiment à détruire dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
+      body = `<p class="hint">Sapeur : ${sh ? "bâtiment à détruire" : "choisissez le bâtiment à détruire"} dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
         SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;
     } else if (ph === "A_deploy") {
-      body = UI.sel ? `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez une case d'entrée surlignée.</p>` : "";
+      body = UI.sel ? (sh ? `<p class="hint"><b>${E(cardOf(UI.sel).name)}</b> → cliquez une entrée surlignée.</p>` : `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez une case d'entrée surlignée.</p>`) : (sh ? `<p class="hint">Choisissez une carte de votre main.</p>` : "");
       acts = `<button data-a="endDeploy" class="primary">Terminer les déploiements</button>`;
     } else if (ph === "A_upgrade") {
-      body = `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
+      body = sh ? `<p class="hint">Réserve <b>${S.reserve}</b> : investissez-la dans un arbre, ou gardez-la.</p>` : `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
       acts = `<button data-a="toAttacks" class="primary">Passer aux attaques</button>`;
     } else if (ph === "A_react") {
-      body = spellBox("off");
+      body = spellBox("off", sh);
       acts = `<button data-a="reactDone" class="primary">Terminer la réaction</button>`;
     } else if (ph === "A_attack") {
       // déplacements au choix (Oni, 04/11/2026) : toucher une créature, puis une case surlignée ou un bâtiment encadré
@@ -2491,36 +2540,37 @@ if (typeof module !== "undefined") module.exports = AIDE;
       const left = S.creatures.filter(c => SF.canAct(S, c)).length;
       if (sel) {
         const t = SF.strikeTargets(S, sel), n = SF.stepsLeft(S, sel);
-        body = `<p class="hint"><b>${E(sel.name)}</b> · ${posTxt(sel)} : ${n ? `encore ${n} déplacement${n > 1 ? "s" : ""} (cases surlignées, retraite comprise)` : "plus de déplacement ce tour"}${SF.attacks(sel) ? (t.length ? ", ou attaquez une cible encadrée" : "") : " · un soutien n'attaque pas"}.</p>` +
+        body = sh ? `<p class="hint"><b>${E(sel.name)}</b> : ${n ? `${n} déplacement${n > 1 ? "s" : ""} (cases surlignées)` : "plus de déplacement"}${SF.attacks(sel) ? (t.length ? " · cibles encadrées" : "") : " · n'attaque pas"}.</p>` + (t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "") : `<p class="hint"><b>${E(sel.name)}</b> · ${posTxt(sel)} : ${n ? `encore ${n} déplacement${n > 1 ? "s" : ""} (cases surlignées, retraite comprise)` : "plus de déplacement ce tour"}${SF.attacks(sel) ? (t.length ? ", ou attaquez une cible encadrée" : "") : " · un soutien n'attaque pas"}.</p>` +
           (t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "");
-      } else body = `<p class="hint">Touchez une créature, puis une case surlignée pour la déplacer (en avant, sur le côté ou en retraite), ou une cible encadrée pour attaquer. ${left ? `${left} créature${left > 1 ? "s peuvent" : " peut"} encore agir.` : ""}</p>`;
+      } else body = sh ? `<p class="hint">Touchez une créature pour la déplacer ou attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>` : `<p class="hint">Touchez une créature, puis une case surlignée pour la déplacer (en avant, sur le côté ou en retraite), ou une cible encadrée pour attaquer. ${left ? `${left} créature${left > 1 ? "s peuvent" : " peut"} encore agir.` : ""}</p>`;
       acts = `<button data-a="actAll">Tout résoudre automatiquement</button><button data-a="endA" class="primary">Fin du tour</button>`;
     } else if (ph === "D_main") {
-      body = spellBox("sup") + (UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
+      body = spellBox("sup", sh) + (UI.sel !== null && sh ? `<p class="hint"><b>${E(S.hand[UI.sel])}</b> → « Construire » dans un atelier.</p>` : UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
       acts = `<button data-a="build" class="primary">Construire, puis passer aux tirs</button>`;
     } else if (ph === "D_place") {
       const p = S.toPlace[0];
-      body = p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
+      body = p && sh ? `<p class="hint"><b>${E(p.tile)}</b> achevé : cliquez une case surlignée${S.toPlace.length > 1 ? ` (encore ${S.toPlace.length - 1})` : ""}.</p>` : p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
     } else if (ph === "D_fire") {
       if (UI.support) {
         const c = SF.supportTargets(S, UI.support);
-        body = `<p class="hint">Tourelle de niveau ${S.supports[UI.support]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : touchez une créature surlignée sur le plateau, ou choisissez-la ici.</p><div class="choices">` +
+        body = `<p class="hint">Tourelle ${["", "I", "II"][S.supports[UI.support]]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : ${sh ? "touchez une cible" : "touchez une créature surlignée sur le plateau, ou choisissez-la ici"}.</p><div class="choices">` +
           c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("") + `</div>`;
       } else {
         const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length);
-        body = ready.length ? `<p class="hint">Tourelles prêtes : cliquez une tourelle surlignée sur le plateau.</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
+        body = ready.length ? `<p class="hint">${sh ? "Cliquez une tourelle surlignée." : "Tourelles prêtes : cliquez une tourelle surlignée sur le plateau."}</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
       }
       acts = `<button data-a="autoFire">Tirs automatiques</button><button data-a="endD" class="primary">Terminer le tour</button>`;
     }
     return { p, body, acts, waiting: false };
   }
-  function spellBox(kind) {
+  function spellBox(kind, sh) {
     const list = S.spells.map((s, i) => [s, i]).filter(([s]) => SF.SPELLS[s].kind === kind && !(kind === "off" && s === "Famine"));
-    if (UI.spell !== null) return spellTargeting();
+    if (UI.spell !== null) return spellTargeting(sh);
     if (!list.length) return kind === "sup" ? "" : `<p class="hint">Aucun sortilège offensif jouable.</p>`;
+    if (sh) return `<div class="spells sh">` + list.map(([s, i]) => `<button data-a="spell" data-i="${i}" class="spell ${kind}" data-tip="${E(SF.SPELLS[s].text)}">${icon(spellIcon(s))}<span><b>${E(s)}</b></span></button>`).join("") + `</div>`;
     return `<div class="spells">` + list.map(([s, i]) => `<button data-a="spell" data-i="${i}" class="spell ${kind}">${icon(spellIcon(s))}<span><b>${E(s)}</b><small>${E(SF.SPELLS[s].text)}</small></span></button>`).join("") + `</div>`;
   }
-  function spellTargeting() {
+  function spellTargeting(sh) {
     const name = S.spells[UI.spell];
     const cancel = `<button data-a="spellCancel">Annuler</button>`;
     const crs = list => `<div class="choices">${list.map(c => `<button data-a="spellArg" data-v="${c.id}">${E(c.name)} · ${c.hp} PV · ${posTxt(c)}</button>`).join("")}${cancel}</div>`;
@@ -2551,7 +2601,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
         break;
       default: inner = `<div class="choices"><button data-a="spellArg" data-v="go" class="primary">Jouer ${E(name)}</button>${cancel}</div>`;
     }
-    return `<div class="targeting"><p class="hint"><b>${E(name)}</b> : ${E(SF.SPELLS[name].text)}</p>${inner}</div>`;
+    return `<div class="targeting"><p class="hint"${sh ? ` data-tip="${E(SF.SPELLS[name].text)}"` : ""}><b>${E(name)}</b>${sh ? "" : ` : ${E(SF.SPELLS[name].text)}`}</p>${inner}</div>`;
   }
   // carte de sortilège en main : type, moment où le jouer, effet complet
   function spellCard(s) {
@@ -2663,11 +2713,30 @@ if (typeof module !== "undefined") module.exports = AIDE;
       // tourelle choisie : toucher une créature à portée la vise directement (Oni, 04/11/2026)
       const tgt = S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c);
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" && !SF.canAct(S, c) ? " done" : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
-      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${tgt ? " : tirer dessus" : ""}"><span>${SF.effAtq(S, c)}</span><span>${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      const au = auraOf(c);
+      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}"><span class="ta">${SF.effAtq(S, c)}</span>${au ? `<i class="au ${au.kind}">${icon(au.icon)}</i>` : ""}<span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
-  function detail() {
-    const c = S.creatures.find(o => o.id === UI.selCreature);
+  // aura d'une créature (jetons) : un soutien qui en donne une (icône blanche), ou une créature qui en profite (icône violette)
+  const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
+  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "frenesie" } };
+  function auraGiven(c) { // icône et nom de l'aura donnée par ce soutien, ou null
+    const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return null;
+    if (AURA_CAPS.includes(b.cap)) return { icon: capIcon(b.cap), name: b.capName };
+    const u = S.upgrades.soutien;
+    for (const r of ["r1", "r2"]) if (u[r] && UP_AURA[r][u[r]]) return { icon: UP_AURA[r][u[r]], name: SF.TREES.soutien[u[r] + r[1]][0] };
+    return null;
+  }
+  function auraOf(c) {
+    const g = auraGiven(c);
+    if (g) return { kind: "give", icon: g.icon, txt: `donne : ${g.name}` };
+    const got = SF.caseMates(S, c).map(auraGiven).filter(Boolean);
+    if (!got.length) return null;
+    const icons = [...new Set(got.map(x => x.icon))];
+    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: `profite de : ${[...new Set(got.map(x => x.name))].join(", ")}` };
+  }
+  function detail(id) {
+    const c = S.creatures.find(o => o.id === (id === undefined ? UI.selCreature : id));
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
@@ -2732,12 +2801,19 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (u.r2) out.push(SF.TREES[ty][u.r2 + "2"]);
     return out;
   };
-  function swarmHandHtml(mine) {
+  function swarmHandHtml(mine, sh) {
     if (!mine) return `<p class="hidden-hand">${S.handA.length} cartes en main (cachées)</p>`;
     if (!S.handA.length) return `<p class="muted">Pas de cartes en main.</p>`;
     return `<div class="hand">${S.handA.map(c => {
       const b = SF.CREATURES[c.name];
       const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
+      if (sh) { // mots-clés seulement, le détail au survol (comme les tuiles)
+        const chips = (b.cap ? b.capName.split(" · ").map(n => `<span class="cap" tabindex="0" data-tip="${E(b.capName + " : " + b.capText)}">${icon(capIcon(b.cap))}${E(n)}</span>`).join("") : "")
+          + acquiredUps(b.type).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon("palier")}${E(n)}</span>`).join("");
+        return `<button data-a="card" data-uid="${c.uid}" class="ccard sh ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
+          <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
+          <span class="stats"><span class="st atq">${icon("atq")}${b.type === "soutien" ? 0 : atq}</span><span class="st pv">${icon("pv")}${pv}</span></span>${chips ? `<span class="caps">${chips}</span>` : ""}</button>`;
+      }
       const ups = acquiredUps(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
       return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
         <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
@@ -2797,43 +2873,45 @@ if (typeof module !== "undefined") module.exports = AIDE;
     const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
   }
-  // fusée en colonne sur toute la hauteur (étage 1 en bas) : info-bulle de chaque étage
-  function pcRocket() {
+  // fusée horizontale (étage 1 à gauche) ; grid : 6 × 2 dans le résumé étroit ; info-bulle de chaque étage
+  function pcRocket(grid) {
     const fl = Array.from({ length: 12 }, (_, i) => {
       const n = i + 1, on = n <= S.floors, cur = n === S.floors + 1;
       const fill = cur ? Math.round(100 * S.rocketPts / SF.floorCost(S)) : 0;
       return `<i class="fl${on ? " on" : ""}${n % 3 === 0 ? " ms" : ""}${cur ? " cur" : ""}" tabindex="0" data-tip="${E(floorTip(n))}"${cur ? ` style="--p:${fill}%"` : ""}>${n}</i>`;
     }).join("");
-    return `<div class="pc-rocket" aria-label="Fusée : ${S.floors} étages sur 12">${icon("fusee")}<div class="floors v">${fl}</div><span class="rk-lab"><b>${S.floors}</b>/12</span></div>`;
+    return `<div class="pc-rocket${grid ? " grid" : ""}" aria-label="Fusée : ${S.floors} étages sur 12"><span class="rk-lab">${icon("fusee")}<b>${S.floors}</b>/12 · ${S.rocketPts}/${SF.floorCost(S)} pts</span><div class="floors h">${fl}</div></div>`;
   }
   const bigStat = (n, lab, tip, cls = "") => `<div class="pc-big ${cls}" tabindex="0" data-tip="${E(tip)}"><b>${n}</b><span>${lab}</span></div>`;
   const box2 = (n, lab, tip, extra = "") => `<div class="pc-box" tabindex="0" data-tip="${E(tip)}"${extra}><b>${n}</b><span>${lab}</span></div>`;
-  // zone d'action du panneau du joueur : étape en cours, consignes et choix (défilants), boutons en bas
+  // zone d'action du panneau du joueur : étape en cours (explication au survol de ⓘ), consigne courte et choix ; boutons en bas
   function pcAction(side) {
     if (S.winner) return { top: "", acts: "" };
-    const { p, body, acts, waiting } = phaseParts();
-    const mineNow = p[0] === side;
-    const head = `<div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>`;
-    if (waiting) return { top: `<section class="phase ${p[0]} waiting">${head}<p class="ph-txt">En attente de votre adversaire…</p></section>`, acts: "" };
-    return { top: `<section class="phase ${p[0]}">${head}<p class="ph-txt">${E(p[2])}</p>${body}</section>`, acts: mineNow || !online() ? acts : "" };
+    const { p, body, acts, waiting } = phaseParts(true);
+    const head = `<div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="info" tabindex="0" data-tip="${E(p[2])}">i</span></div>`;
+    if (waiting) return { top: `<section class="phase ${p[0]} waiting">${head}<p class="hint">En attente de votre adversaire…</p></section>`, acts: "" };
+    return { top: `<section class="phase ${p[0]}">${head}${body}</section>`, acts: p[0] === side || !online() ? acts : "" };
   }
   function pcSwarmOwn() {
     const t = SF.TIERS[SF.tier(S)], next = SF.TIERS[SF.tier(S) + 1];
-    const turn = ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase);
+    const deploy = S.phase === "A_deploy";
+    const full = S.famine ? SF.famineBudget(S.biomass) : S.biomass; // budget du tour (Famine : biomasse ÷ 2)
     const { top, acts } = pcAction("essaim");
+    const big = deploy
+      ? bigStat(`${S.budget}<small>/${full}</small>`, "disponible / budget", `Biomasse disponible ce tour : ${S.budget} sur un budget de ${full}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}. Le reste ira à la réserve.`, "bio")
+      : bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : " · dernier palier atteint"}`, "bio");
     return `<aside class="panel essaim pc-own">
-      <div class="po-head">${icon("spores", "i logo")}<b class="nm">Essaim</b>
-        ${bigStat(`${S.biomass}${next ? `<small>/${next.min}</small>` : ""}`, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : " · dernier palier atteint"}`, "bio")}</div>
+      <div class="po-head">${icon("spores", "i logo")}<b class="nm">Essaim</b><span data-fx="budget">${big}</span></div>
       <div class="pc-boxes">
         ${box2(S.reserve, "réserve", "Réserve : biomasse non investie, gardée d'un tour à l'autre")}
-        ${turn ? box2(S.budget, "budget", `Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}`, ` data-fx="budget"`) : ""}
-        ${box2(SF.tier(S) + 1, "palier", `Palier ${SF.tier(S) + 1} : plafond ${SF.capOf(S)} créatures par lane`)}
+        ${deploy ? box2(S.biomass, "biomasse", `Biomasse totale : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`) : ""}
+        ${box2(SF.tier(S) + 1, "palier", `Palier ${SF.tier(S) + 1}${next ? ` · palier suivant à ${next.min} biomasse` : ""}`)}
         ${box2(SF.capOf(S), "max / lane", "Plafond de créatures par lane")}
       </div>
       <div class="pc-lines"><span>Niveau de pioche <b>${t.n.join(" / ")}</b></span><span>Pioche N1 / N2 / N3 <b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></span></div>
       ${pcSteps("essaim")}
-      <div class="po-scroll">${top}${pcDetail()}
-        <h4>Main <span class="small">${S.handA.length} carte${S.handA.length > 1 ? "s" : ""}</span></h4>${swarmHandHtml(true)}
+      <div class="po-scroll">${top}
+        <h4>Main <span class="small">${S.handA.length} carte${S.handA.length > 1 ? "s" : ""}</span></h4>${swarmHandHtml(true, true)}
         <h4>Arbres d'amélioration</h4>${treesHtml(true)}
         ${logPanel()}</div>
       ${acts ? `<div class="po-acts acts">${acts}</div>` : ""}</aside>`;
@@ -2841,18 +2919,19 @@ if (typeof module !== "undefined") module.exports = AIDE;
   function pcColonyOwn() {
     const pts = SF.totalPoints(S), used = SF.allocated(S), bonus = SF.bonusWorkers(S);
     const { top, acts } = pcAction("colonie");
-    return `<aside class="panel colonie pc-own">${pcRocket()}<div class="po-main">
+    return `<aside class="panel colonie pc-own"><div class="po-main">
       <div class="po-head">${icon("fusee", "i logo")}<b class="nm">Colonie</b>
         ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "travailleurs", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}</div>
+      ${pcRocket(false)}
       <div class="pc-boxes">
         ${box2(SF.tech(S), "techno", `Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour`)}
         ${box2(SF.spellsPerTurn(S), "sorts / tour", "Sortilèges piochés par tour")}
-        ${box2(`${S.rocketPts}<small>/${SF.floorCost(S)}</small>`, "fusée", `Fusée : ${S.rocketPts} / ${SF.floorCost(S)} points vers l'étage ${Math.min(12, S.floors + 1)}`)}
+        ${box2(S.spells.length, "sorts en main", "Sortilèges en main")}
       </div>
       <h4 data-fx="ateliers">Ateliers ${S.phase === "D_main" && S.view === "colonie" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>
       <div class="pc-ateliers">${ateliersHtml(S.view === "colonie", true)}</div>
       ${pcSteps("colonie")}
-      <div class="po-scroll">${top}${pcDetail()}
+      <div class="po-scroll">${top}
         <h4 data-fx="tilehand">Main de tuiles <span class="small">${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}</span></h4>${tileHandHtml(true)}
         <h4>Sortilèges</h4>${spellsHtml(true)}
         ${logPanel()}</div>
@@ -2871,15 +2950,15 @@ if (typeof module !== "undefined") module.exports = AIDE;
       }).join("");
       return `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${blocks}</div></div>`;
     }).join("");
-    return `<aside class="panel colonie mini pc-sum">${pcRocket()}<div class="ps-main">
+    return `<aside class="panel colonie mini pc-sum"><div class="ps-main">
       <h3>${icon("fusee")} Colonie</h3>
       ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "pop.", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}
       <div class="ps-rows">
         <span tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b> techno</span>
         <span tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b> sort${S.spells.length > 1 ? "s" : ""}</span>
         <span tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b> tuiles</span>
-        <span tabindex="0" data-tip="Fusée : ${S.rocketPts} / ${SF.floorCost(S)} points vers l'étage ${Math.min(12, S.floors + 1)}">${icon("fusee")}<b>${S.rocketPts}/${SF.floorCost(S)}</b> pts</span>
       </div>
+      ${pcRocket(true)}
       <h4 data-fx="ateliers">Ateliers</h4><div class="pc-ateliers sum">${at}</div></div></aside>`;
   }
   // résumé de l'essaim vu par la colonie (colonne de droite) : améliorations en grosses icônes
@@ -2908,7 +2987,6 @@ if (typeof module !== "undefined") module.exports = AIDE;
       </div>
       <h4>Améliorations</h4><div class="utrees big">${trees}</div></div></aside>`;
   }
-  const pcDetail = () => S.creatures.some(o => o.id === UI.selCreature) ? detail() : "";
   // plateau au centre, manche et camp qui joue dans les angles morts du haut
   function pcCenter() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
@@ -2917,7 +2995,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     return `<section class="pc-center"><div class="board-wrap">${board()}
       <div class="pc-corner ${roundSide} round"><span class="k">Manche</span><b>${S.round}</b></div>
       <div class="pc-corner ${roundSide === "l" ? "r" : "l"} turn ${p[0]}">${turn}</div>
-      ${S.winner ? winner() : ""}</div></section>`;
+      ${S.winner ? winner() : ""}</div>${UI.pop != null && S.creatures.some(o => o.id === UI.pop) ? `<div class="cpop" role="dialog" aria-label="Détail de la créature"><button data-a="popClose" class="x close" aria-label="Fermer">×</button>${detail(UI.pop)}</div>` : ""}</section>`;
   }
   function pcLayout(bg) {
     const v = bg ? null : S.view;
@@ -2925,6 +3003,29 @@ if (typeof module !== "undefined") module.exports = AIDE;
     const right = v === "essaim" ? pcSwarmOwn() : pcSwarmSum();
     return `<main class="pc-layout ${v === "colonie" ? "me-colonie" : v === "essaim" ? "me-essaim" : "me-none"}">${left}${pcCenter()}${right}</main>`;
   }
+  // fenêtre de détail d'une créature : à côté de son jeton, sans sortir de l'écran
+  function placePop() {
+    const pop = $(".cpop"), tok = pop && $(`.board .tok[data-id="${UI.pop}"]`); if (!pop || !tok) return;
+    const r = tok.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    let x = r.right + 12; if (x + w > innerWidth - 8) x = r.left - w - 12; x = Math.max(8, x);
+    const y = Math.min(Math.max(8, r.top + r.height / 2 - h / 2), innerHeight - h - 8);
+    pop.style.left = x + "px"; pop.style.top = y + "px";
+  }
+  // info-bulles en PC : une bulle flottante (jamais coupée par une zone défilante)
+  function tipShow(el) {
+    let t = $("#tipbox"); if (!t) { t = document.createElement("div"); t.id = "tipbox"; document.body.appendChild(t); }
+    t.textContent = el.dataset.tip; t.hidden = false;
+    const r = el.getBoundingClientRect(), w = t.offsetWidth, h = t.offsetHeight;
+    let x = r.right + 10; if (x + w > innerWidth - 8) x = r.left - w - 10; if (x < 8) x = Math.min(innerWidth - w - 8, Math.max(8, r.left));
+    let y = r.top + r.height / 2 - h / 2; if (x === r.left || (x > r.left && x < r.right)) y = r.bottom + 8;
+    t.style.left = x + "px"; t.style.top = Math.min(Math.max(8, y), innerHeight - h - 8) + "px";
+  }
+  const tipHide = () => { const t = $("#tipbox"); if (t) t.hidden = true; };
+  for (const ev of ["mouseover", "focusin"]) document.addEventListener(ev, e => {
+    if (!document.body.classList.contains("pc")) return;
+    const el = e.target.closest && e.target.closest("[data-tip]"); if (el) tipShow(el); else tipHide();
+  });
+  document.addEventListener("mouseout", e => { if (!e.relatedTarget || !(e.relatedTarget.closest && e.relatedTarget.closest("[data-tip]"))) tipHide(); });
   // écran de passage : la partie en fond (vue publique, sans les mains), assombrie ; la carte arrive du côté du joueur
   function pcHandoff() {
     const w = S.handoff, keep = S.view;
@@ -3003,7 +3104,8 @@ if (typeof module !== "undefined") module.exports = AIDE;
     switch (a) {
       // choix locaux (sans effet sur la partie)
       case "card": UI.sel = UI.sel === Number(d.uid) ? null : Number(d.uid); break;
-      case "creature": UI.selCreature = Number(d.id); break;
+      case "creature": UI.selCreature = Number(d.id); UI.pop = Number(d.id); break;
+      case "popClose": UI.pop = null; break;
       case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
       case "spellCancel": UI.spell = null; UI.picks = []; UI.recoHand = null; break;
@@ -3487,6 +3589,9 @@ if (typeof module !== "undefined") module.exports = AIDE;
   document.addEventListener("click", e => {
     if (FX.playing) { FX.skip = true; return; } // un toucher pendant une animation la termine
     const el = e.target.closest("[data-a]");
+    tipHide();
+    // fenêtre de détail d'une créature : un clic ailleurs la ferme (la créature reste choisie pour ses déplacements)
+    if (UI.pop != null && !e.target.closest(".cpop") && !(el && el.dataset.a === "creature")) { UI.pop = null; if (!el || el.disabled) { render(); return; } }
     if (!el || el.disabled) return;
     handle(el.dataset.a, el.dataset);
   });
