@@ -797,11 +797,10 @@
     S.view = "essaim"; // fond rendu comme le voit l'essaim : tuiles camouflées cachées, aucune main affichée
     let bgHtml; try { bgHtml = pcLayout(true); } finally { S.view = keep; }
     return `<div class="pc-bg" aria-hidden="true" inert>${bgHtml}</div>
-      <section class="pc-ho ${w}"><div class="ho-card from-${w === "colonie" ? "l" : "r"}${UI.leaving ? " leave" : ""}">${icon(w === "essaim" ? "spores" : "fusee", "i big")}
-      <p class="ho-k">Manche ${S.round}</p><h2>C'est à ${SIDE[w]} de jouer</h2>
-      <p class="ho-stat">${w === "colonie" ? `${icon("travailleur")}<b>${S.workersBase + SF.bonusWorkers(S)}</b> travailleurs` : `${icon("biomasse")}<b>${S.biomass}</b> biomasse`}</p>
-      <p>Passez l'appareil. Les mains et les tuiles camouflées de l'autre camp restent cachées.</p>
-      <button data-a="reveal" class="primary">Je joue ${SIDE[w]}</button></div></section>`;
+      <section class="pc-ho ${w}"><div class="ho-card ho-frame ${imCls(w === "essaim" ? "Passage essaim" : "Passage colonie")} from-${w === "colonie" ? "l" : "r"}${UI.leaving ? " leave" : ""}" role="dialog" aria-label="C'est à ${SIDE[w]} de jouer">
+        <div class="hf-in"><p class="ho-k">Manche ${S.round}</p><h2>C'est à ${SIDE[w]} de jouer</h2>
+          <p class="ho-stat">${w === "colonie" ? `${icon("travailleur")}<b>${S.workersBase + SF.bonusWorkers(S)}</b> travailleurs` : `${icon("biomasse")}<b>${S.biomass}</b> biomasse`}</p></div>
+        <button data-a="reveal" class="hf-go" aria-label="Je joue ${SIDE[w]}">${w === "colonie" ? "Je joue la colonie" : "Jouer"}</button></div></section>`;
   }
   function logPanel() {
     return `<h4>Journal</h4><ol class="log">${S.log.slice(0, 40).map(l => `<li class="${l.who}"><span>M${l.r}</span>${E(l.msg)}</li>`).join("")}</ol>`;

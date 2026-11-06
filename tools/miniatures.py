@@ -24,9 +24,12 @@ NOMS = {
     "Avant-poste du Sud": "avant poste.jpg", "Avant-poste de l'Ouest": "avant poste.jpg",
     "support 1": "support 1.jpg", "support 2": "support 2.jpg", "support 3": "support niveau 3.jpg",
     "Fusée": "fusée.jpg", "Champ de bataille": "champs de bataille.jpg",
+    "Passage colonie": "pop up tour colonie.webp", "Passage essaim": "pop up tour essaim.webp",
 }
 # taille particulière : le champ de bataille sert de fond à tout le plateau
-TAILLES = {"champs de bataille.jpg": (840, 55)}
+TAILLES = {"champs de bataille.jpg": (840, 55),
+           # cadres de l'écran de passage (fond transparent conservé)
+           "pop up tour colonie.webp": (900, 78), "pop up tour essaim.webp": (900, 78)}
 
 def slug(n):
     n = unicodedata.normalize("NFKD", n.replace("Œ", "Oe")).encode("ascii", "ignore").decode().lower()
