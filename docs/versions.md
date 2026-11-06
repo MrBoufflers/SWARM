@@ -7,6 +7,7 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 ## v0.4.26 — 6 novembre 2026
 
 **Interface (Oni)** : accueil et salle d'attente — le fond est centré sur le contenu (le cercle central du champ de bataille au centre de l'écran) ; le lent travelling zoome sans plus glisser de côté.
+- **Salle d'attente** : le logo et le nom du camp choisi (« ESSAIM » ou « COLONIE », en Ethnocentric rendu en image) remplacent ceux du jeu ; « Vous jouez … » reste, sans logo.
 
 ## v0.4.25 — 6 novembre 2026
 

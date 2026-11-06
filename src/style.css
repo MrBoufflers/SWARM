@@ -946,3 +946,11 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
    est calé au centre de l'écran ; le travelling ne fait plus que zoomer, sans glisser */
 .h2-bg { inset: -4%; background-position: 50% 47.5%; transform-origin: 50% 50%; animation-name: h2Burns2; }
 @keyframes h2Burns2 { from { transform: scale(1); } to { transform: scale(1.1); } }
+/* salle d'attente : logo et nom du camp à la place de ceux du jeu (Oni, 06/11/2026) */
+.h2-hero.side-colonie .h2-mark, .h2-hero.side-colonie .h2-emblem::after { -webkit-mask-image: var(--logo-colonie); mask-image: var(--logo-colonie); }
+.h2-hero.side-essaim .h2-mark, .h2-hero.side-essaim .h2-emblem::after { -webkit-mask-image: var(--logo-essaim); mask-image: var(--logo-essaim); }
+.h2-hero.side-colonie .h2-word { -webkit-mask-image: var(--logo-titre-colonie); mask-image: var(--logo-titre-colonie); aspect-ratio: var(--ar-colonie); width: auto; height: clamp(40px, 7vh, 72px); }
+.h2-hero.side-essaim .h2-word { -webkit-mask-image: var(--logo-titre-essaim); mask-image: var(--logo-titre-essaim); aspect-ratio: var(--ar-essaim); width: auto; height: clamp(40px, 7vh, 72px); }
+.h2-hero.side-colonie .h2-glow { background: radial-gradient(circle, rgba(79,184,166,.5) 0%, rgba(79,184,166,.15) 40%, transparent 70%); }
+.h2-hero.side-essaim .h2-glow { background: radial-gradient(circle, rgba(167,127,217,.55) 0%, rgba(167,127,217,.15) 40%, transparent 70%); }
+:root { --ar-colonie: 1334 / 201; --ar-essaim: 1235 / 200; }
