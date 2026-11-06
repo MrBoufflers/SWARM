@@ -810,3 +810,9 @@ body.pc .panel.pc-own::before, body.pc .panel.pc-sum::before { content: ""; posi
   background: var(--c); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
 body.pc .panel.colonie::before { --m: var(--logo-colonie); --c: var(--colonie); right: 0; }
 body.pc .panel.essaim::before { --m: var(--logo-essaim); --c: var(--essaim); left: 0; transform: translate(-50%, -50%); }
+/* cartes d'amélioration : visage d'une créature derrière l'icône, au lieu de l'aplat de couleur (Oni, 06/11/2026) */
+.uc-ic.im { width: 92px; background: linear-gradient(to right, rgba(0,0,0,.05), rgba(0,0,0,.35)), var(--img) center / cover; box-shadow: inset -3px 0 0 var(--c); }
+.uc-ic.im > span { width: 40px; height: 40px; background: rgba(255,255,255,.92); }
+.ucard.closed .uc-ic.im, .ucard.needR1 .uc-ic.im { filter: grayscale(.7); }
+.uc-top { flex-wrap: wrap; row-gap: 0; } .uc-name { overflow-wrap: normal; word-break: normal; hyphens: manual; flex: 1 1 auto; }
+.ur1 .uc-ic.im { width: 74px; }

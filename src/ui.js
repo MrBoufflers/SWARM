@@ -578,6 +578,13 @@
   }
   // arbres d'amélioration (maquette d'Oni, 06/11/2026) : une carte par nœud — icône ronde à gauche, côté et nom en haut,
   // effet au centre, barre d'investissement « 2/6 » en bas ; toucher une carte ouverte y investit tout ce qui est possible
+  // fond de l'icône de chaque nœud (Oni, 06/11/2026) : visage d'une créature que ce rang ajoute à la pioche
+  // (rang 1 → niveau 2, rang 2 → niveau 3)
+  const NODE_FACE = {
+    aggro: { A1: "Ravageur", B1: "Ravageur", A2: "Massacreur", C2: "Massacreur", B2: "Massacreur" },
+    tank: { A1: "Béhémoth", B1: "Béhémoth", A2: "Colosse", C2: "Colosse", B2: "Colosse" },
+    soutien: { A1: "Phéromone", B1: "Perforeur", A2: "Sapeur", C2: "Sporeur", B2: "Sapeur" },
+  };
   function treesHtml(mine) {
     let trees = "";
     const POS = { A1: "Côté A", B1: "Côté B", A2: "Après A", C2: "Centre", B2: "Après B" };
@@ -595,7 +602,7 @@
         const pct = st === "taken" ? 100 : Math.round(100 * got / cost);
         const inv = canInv ? ` data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99" role="button" tabindex="0"` : "";
         return `<div class="node ucard ${st}${canInv ? " can" : ""}" data-node="${ty}:${slot}"${inv} title="${E(state)}">
-          <span class="uc-ic"><span>${icon(NODE_ICON[ty][slot])}</span></span>
+          <span class="uc-ic ${imCls("Visage " + NODE_FACE[ty][slot])}"><span>${icon(NODE_ICON[ty][slot])}</span></span>
           <span class="uc-body"><span class="uc-top"><span class="uc-pos">${POS[slot]}</span><b class="uc-name">${E(T[slot][0])}</b></span>
             <span class="uc-txt">${E(T[slot][1])}</span>
             <span class="uc-foot"><span class="bar"><i style="width:${pct}%"></i></span>${canInv && cost - got > 1 ? `<button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1" class="uc-one" title="Investir 1">+1</button>` : ""}<b class="uc-n">${st === "taken" ? "Acquis" : `${got}/${cost}`}</b></span></span></div>`;
