@@ -619,7 +619,7 @@ const fresh = () => {
   SF.apply(T, "colonie", "endD");
   ok(!T.doubleFire || T.phase !== "D_main", "l'effet ne dure qu'un tour");
   const U = fresh(); const w = SF.bonusWorkers(U); U.supports["3,3"] = 3;
-  ok(SF.bonusWorkers(U) === w + 3, "support de niveau 3 : +3 travailleurs (Oni, 06/11/2026)");
+  ok(SF.bonusWorkers(U) === w + 2, "support de niveau 3 : +2 travailleurs (Oni, 06/11/2026 soir)");
 }
 // 49. Renforcé : plusieurs PV d'un coup (règle d'origine, rétablie le 02/11/2026) ; Famine : biomasse ÷ 2 ; soutiens 2 / 4 / 6 PV (Oni, 02/11/2026)
 {
@@ -709,15 +709,15 @@ const fresh = () => {
   const at = (id, name, k = 4, hp = 9) => ({ id, name, lane: "N", u: 0, k, hp, acted: false });
   const e = at(200, "Écorcheur"), g = at(201, "Glaneur"), h = at(202, "Glaneur");
   S.creatures.push(e, g);
-  ok(SF.speedOf(S, e) === 2 && SF.speedOf(S, g) === 2, "Glaneur : +1 case aux autres créatures de sa case ; lui-même a une vitesse de base de 2");
+  ok(SF.speedOf(S, e) === 1 && SF.speedOf(S, g) === 1, "Glaneur (06/11/2026) : plus d'Aura Mobilité ni de vitesse 2");
   S.creatures.push(h);
-  ok(SF.speedOf(S, e) === 3 && SF.speedOf(S, g) === 3, "deux Glaneurs : +2 (cumulable) ; chaque Glaneur (base 2) profite de l'autre");
+  ok(SF.speedOf(S, e) === 1 && SF.speedOf(S, g) === 1, "deux Glaneurs : toujours 1 case");
   S.upgrades.aggro.r1 = "B";
-  ok(SF.speedOf(S, e) === 4, "cumulable avec la Mobilité des aggros (1 + 1 + 2)");
+  ok(SF.speedOf(S, e) === 2, "Mobilité des aggros : 1 + 1");
   const T = fresh(); T.phase = "A_attack"; T.supports = {}; // Barbelé en C1
   const x = at(210, "Carapace"), y = at(211, "Glaneur"); T.creatures.push(x, y);
   SF.apply(T, "essaim", "act", { key: SF.posKey(x) });
-  ok(x.k === 2 && y.k === 2, "la Carapace (aura) et le Glaneur (base 2) avancent ensemble de 2 cases, au contact du Barbelé");
+  ok(x.k === 3 && y.k === 3, "la Carapace et le Glaneur avancent ensemble d'une case");
   // soins cumulés
   const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 7 PV max
   U.upgrades.soutien.r2 = "A"; // Régénération : Aura Soin 2 pour chaque soutien
@@ -843,7 +843,8 @@ const fresh = () => {
   const U = fresh(); U.phase = "A_attack"; U.supports = {}; delete U.tiles["0,1"];
   const g = { id: 820, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, acted: false }, e = { id: 821, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
   U.creatures.push(g, e);
-  ok(SF.stepsLeft(U, e) === 2 && SF.stepsLeft(U, g) === 2, "Glaneur : 2 cases ; l'Écorcheur de sa case aussi (Aura Mobilité)");
+  U.upgrades.soutien.r1 = "A"; // Mue : le Glaneur (soutien) donne l'Aura Mobilité 1
+  ok(SF.stepsLeft(U, e) === 2 && SF.stepsLeft(U, g) === 1, "Mue : l'Écorcheur de la case du Glaneur fait 2 cases, le Glaneur 1");
   SF.apply(U, "essaim", "move", { id: 821, u: 0, k: 3 });
   ok(SF.stepsLeft(U, e) === 1, "après un pas loin du Glaneur, il lui reste quand même 1 déplacement (fixé au premier pas)");
   // Tout résoudre : l'ancien comportement automatique, créature par créature
@@ -879,7 +880,7 @@ const fresh = () => {
   ok(SF.speedOf(T, e) === 3 && SF.speedOf(T, h) === 2, "Mue : chaque soutien donne +1 case aux autres (Écorcheur 1 + 2 = 3, Hurleur 1 + 1 = 2)");
   ok(SF.bonusHp(T, e) === 2 && !SF.isStealthy(T, h), "Mue : l'Aura +1 PV reste, la Furtivité disparaît");
   const G = fresh(); G.upgrades.soutien.r1 = "A"; const x = at(970, "Carapace", 3); G.creatures.push(x, at(971, "Glaneur", 2));
-  ok(SF.speedOf(G, x) === 3, "Glaneur avec la Mue : ses deux Auras Mobilité se cumulent (+2)");
+  ok(SF.speedOf(G, x) === 2, "Glaneur avec la Mue : une seule Aura Mobilité (+1), celle de la Mue");
   const U = fresh(); U.upgrades.aggro.r1 = "B"; const a = at(980, "Ravageur", 1), t = at(981, "Béhémoth", 5); U.creatures.push(a, t);
   ok(SF.isStealthy(U, a) && !SF.isStealthy(U, t) && SF.speedOf(U, a) === 2, "Mobilité : les aggros font 2 cases et gagnent la Furtivité");
   ok(!SF.targetable(U, a) && SF.targetable(U, t), "Furtivité : le Ravageur ne peut pas être visé tant que le Béhémoth (non furtif) est sur sa case");
@@ -892,7 +893,7 @@ const fresh = () => {
   ok(SF.apply(S, "essaim", "actOne", { id: 990 }) === "", "actOne : la créature choisie agit");
   ok(a.k === 3 && a.u === -2 && !b.moved && b.k === 4, "elle avance seule d'une case sur son chemin (A4 → A3) ; l'autre n'a pas bougé");
   ok(SF.apply(S, "essaim", "actOne", { id: 990 }) !== "", "une créature qui a déjà agi ne peut pas agir une seconde fois");
-  ok(SF.SUP3_WORKERS === 3, "support de niveau 3 : +3 travailleurs");
+  ok(SF.SUP3_WORKERS === 2, "support de niveau 3 : +2 travailleurs (retour du 06/11 au soir)");
 }
 // 63. Oni, 06/11/2026 : créatures de niveau 3 à 2 cases de base ; déploiement et améliorations dans la même étape
 {
@@ -906,6 +907,17 @@ const fresh = () => {
   ok(V.phase === "A_deploy" && SF.apply(V, "essaim", "invest", { t: "aggro", s: "A1", n: 99 }) === "", "améliorations possibles pendant le déploiement");
   V.creatures.push(at(999, "Carapace"));
   ok(SF.apply(V, "essaim", "endDeploy") === "" && ["A_attack", "A_react"].includes(V.phase), "fin de l'étape : directement aux attaques");
+}
+// 64. Oni, 06/11/2026 (soir) : « Tout résoudre » fait agir les soutiens d'abord ; les créatures de leur case de départ
+//     les rejoignent et profitent de leurs auras en attaquant
+{
+  const S = fresh(); S.phase = "A_attack"; S.supports = {}; delete S.tiles["0,1"];
+  S.tiles["0,2"] = { ...SF.tileStats("Muraille", 0, 2), hp: 20, max: 20, ren: 0, ep: 0 }; // C2 : cible solide, sans Renforcé ni Épines
+  const e = { id: 1990, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 9, acted: false }, h = { id: 1991, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 9, acted: false };
+  S.creatures.push(e, h); // l'Écorcheur est le premier de la liste : sans la règle, il partirait seul
+  const atq = SF.effAtq(S, e); // 1 + Fureur tant que le Hurleur est sur sa case
+  SF.apply(S, "essaim", "actAll");
+  ok(h.k === 3 && e.k === 3 && S.tiles["0,2"].hp === 20 - atq, "le Hurleur avance d'abord en C3, l'Écorcheur le rejoint et frappe avec l'Aura Fureur (" + atq + " dégâts)");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

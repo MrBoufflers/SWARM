@@ -916,7 +916,7 @@ const SF = (() => {
     "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
-    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV. Avance de 2 cases par tour, et les autres créatures de sa case d'1 case de plus." },
+    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
@@ -1024,7 +1024,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.18";
+  const VERSION = "0.4.19";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1125,7 +1125,7 @@ const SF = (() => {
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
   // support de niveau 3 : +3 travailleurs tant qu'il tient (Oni, 02/11/2026 ; avant +2)
-  const SUP3_WORKERS = 3; // Oni, 06/11/2026 (+2 du 04/11 au 06/11, +3 du 02/11 au 04/11)
+  const SUP3_WORKERS = 2; // Oni, 06/11/2026 soir (+3 le 06/11 en journée, +2 du 04/11 au 06/11, +3 du 02/11 au 04/11)
   const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + SUP3_WORKERS * Object.values(S.supports).filter(l => l === 3).length;
   const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
   const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
@@ -1369,8 +1369,9 @@ const SF = (() => {
   // le Glaneur lui-même avance de 2 cases (vitesse de base 2) pour suivre le groupe.
   // Aura Mobilité : +1 case par Glaneur de la case, et par soutien de la case avec la Mue (Oni, 05/11/2026) ; tout se cumule
   // vitesse de base : 2 pour le Glaneur et toutes les créatures de niveau 3 (Oni, 06/11/2026), sinon 1
-  const baseSpeed = c => (c.name === "Glaneur" || CREATURES[c.name].lvl === 3 ? 2 : 1);
-  const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur")
+  // (le Glaneur a perdu sa vitesse de 2 et son Aura Mobilité 1 le 06/11/2026, Oni)
+  const baseSpeed = c => (CREATURES[c.name].lvl === 3 ? 2 : 1);
+  const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0)
     + (S.upgrades.soutien.r1 === "A" ? countMates(S, c, isSoutien) : 0);
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
@@ -2046,7 +2047,10 @@ const SF = (() => {
       autoCreature(S, c); return true;
     } },
     actAll: { phase: ["A_attack"], run(S) { // les créatures qui n'ont pas encore agi avancent et attaquent devant elles, les plus avancées d'abord
-      const todo = S.creatures.filter(c => !c.acted).sort((a, b) => pathLen(a.u, a.k) - pathLen(b.u, b.k) || a.id - b.id);
+      // les soutiens agissent d'abord (Oni, 06/11/2026) : les créatures de leur case de départ qui les suivent profitent
+      // encore de leurs auras quand elles attaquent ; puis les plus avancées d'abord
+      const sup = c => (CREATURES[c.name].type === "soutien" ? 0 : 1);
+      const todo = S.creatures.filter(c => !c.acted).sort((a, b) => sup(a) - sup(b) || pathLen(a.u, a.k) - pathLen(b.u, b.k) || a.id - b.id);
       for (const c of todo) { if (S.winner) break; if (S.creatures.includes(c)) autoCreature(S, c); }
       return true;
     } },
@@ -2338,7 +2342,7 @@ const AIDE = (() => {
         <li><b>Réaction de la colonie</b> : si elle tient un sortilège offensif, elle peut le jouer maintenant.</li>
         <li><b>Attaques</b> : pour chaque créature, dans l'ordre que vous voulez :
           <ul>
-            <li><b>Déplacement</b> : elle avance seule vers la fusée sur le chemin le plus court, tout droit ou en escalier (1 case, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou un Glaneur), sans diagonale. Elle s'arrête devant un bâtiment ou la fusée.</li>
+            <li><b>Déplacement</b> : elle avance seule vers la fusée sur le chemin le plus court, tout droit ou en escalier (1 case, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou la Mue), sans diagonale. Elle s'arrête devant un bâtiment ou la fusée.</li>
             <li><b>Attaque</b> : elle frappe le bâtiment (ou la fusée) qui se trouve devant elle. Les soutiens n'attaquent jamais.</li>
           </ul>
           Touchez une créature pour la faire agir. « Tout résoudre automatiquement » fait agir toutes les créatures restantes ; « Fin du tour » termine le tour (les créatures qui n'ont pas agi ne font rien).</li>
@@ -2349,7 +2353,7 @@ const AIDE = (() => {
         <li><b>Aggros</b> : grosse attaque, 1 PV. Elles meurent vite sur les Épines.</li>
         <li><b>Tanks</b> : beaucoup de PV, 1 ATQ. Ils encaissent les Épines et les tirs.</li>
         <li><b>Soutiens</b> : ils n'attaquent jamais, mais leurs <b>auras</b> renforcent les <b>autres</b> créatures de leur case ; toutes les auras se cumulent.</li>
-        <li><b>Vitesse</b> : 1 case par tour, 2 pour les créatures de niveau 3 ; le Glaneur fait 2 cases et donne +1 case aux autres créatures de sa case ; avec la Mue, chaque soutien donne aussi +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros, et la Furtivité. Le nombre de déplacements est fixé au premier pas du tour.</li>
+        <li><b>Vitesse</b> : 1 case par tour, 2 pour les créatures de niveau 3 ; avec la Mue, chaque soutien donne +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros, et la Furtivité. Le nombre de déplacements est fixé au premier pas du tour. En résolution automatique (« Tout résoudre »), les soutiens agissent en premier : les créatures parties de la même case les suivent et profitent encore de leurs auras quand elles attaquent.</li>
       </ul>
       ${creaturesTable(h)}
       <h3>Améliorations</h3>
@@ -2529,7 +2533,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
-    A_attack: ["essaim", "Attaques", "Touchez une créature pour la faire agir : elle avance seule vers la fusée (1 case, 2 avec la Mobilité ou un Glaneur), tout droit ou en escalier, puis attaque le bâtiment ou la fusée devant elle. « Tout résoudre automatiquement » fait agir toutes les créatures restantes."],
+    A_attack: ["essaim", "Attaques", "Touchez une créature pour la faire agir : elle avance seule vers la fusée (1 case, 2 pour le niveau 3, +1 avec la Mobilité ou la Mue), tout droit ou en escalier, puis attaque le bâtiment ou la fusée devant elle. « Tout résoudre automatiquement » fait agir toutes les créatures restantes."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
@@ -2939,7 +2943,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
   const FX_LABEL = {
-    soin: () => ["+2 HEAL", "+1 MOV"], fureur: () => ["+1 ATQ"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
+    soin: () => ["+2 HEAL"], fureur: () => ["+1 ATQ"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
     mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"],
   };
@@ -2981,7 +2985,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.baseSpeed(c) > 1 ? (c.name === "Glaneur" ? "vitesse de base 2" : "niveau 3 : vitesse de base 2") : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur" || (S.upgrades.soutien.r1 === "A" && SF.CREATURES[o.name].type === "soutien")) ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
+    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.baseSpeed(c) > 1 ? "niveau 3 : vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", S.upgrades.soutien.r1 === "A" && SF.caseMates(S, c).some(o => SF.CREATURES[o.name].type === "soutien") ? "Aura Mobilité (Mue)" : ""].filter(Boolean).join(" + ")})`); }
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");

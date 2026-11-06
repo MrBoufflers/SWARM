@@ -89,7 +89,7 @@ const AIDE = (() => {
         <li><b>Réaction de la colonie</b> : si elle tient un sortilège offensif, elle peut le jouer maintenant.</li>
         <li><b>Attaques</b> : pour chaque créature, dans l'ordre que vous voulez :
           <ul>
-            <li><b>Déplacement</b> : elle avance seule vers la fusée sur le chemin le plus court, tout droit ou en escalier (1 case, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou un Glaneur), sans diagonale. Elle s'arrête devant un bâtiment ou la fusée.</li>
+            <li><b>Déplacement</b> : elle avance seule vers la fusée sur le chemin le plus court, tout droit ou en escalier (1 case, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou la Mue), sans diagonale. Elle s'arrête devant un bâtiment ou la fusée.</li>
             <li><b>Attaque</b> : elle frappe le bâtiment (ou la fusée) qui se trouve devant elle. Les soutiens n'attaquent jamais.</li>
           </ul>
           Touchez une créature pour la faire agir. « Tout résoudre automatiquement » fait agir toutes les créatures restantes ; « Fin du tour » termine le tour (les créatures qui n'ont pas agi ne font rien).</li>
@@ -100,7 +100,7 @@ const AIDE = (() => {
         <li><b>Aggros</b> : grosse attaque, 1 PV. Elles meurent vite sur les Épines.</li>
         <li><b>Tanks</b> : beaucoup de PV, 1 ATQ. Ils encaissent les Épines et les tirs.</li>
         <li><b>Soutiens</b> : ils n'attaquent jamais, mais leurs <b>auras</b> renforcent les <b>autres</b> créatures de leur case ; toutes les auras se cumulent.</li>
-        <li><b>Vitesse</b> : 1 case par tour, 2 pour les créatures de niveau 3 ; le Glaneur fait 2 cases et donne +1 case aux autres créatures de sa case ; avec la Mue, chaque soutien donne aussi +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros, et la Furtivité. Le nombre de déplacements est fixé au premier pas du tour.</li>
+        <li><b>Vitesse</b> : 1 case par tour, 2 pour les créatures de niveau 3 ; avec la Mue, chaque soutien donne +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros, et la Furtivité. Le nombre de déplacements est fixé au premier pas du tour. En résolution automatique (« Tout résoudre »), les soutiens agissent en premier : les créatures parties de la même case les suivent et profitent encore de leurs auras quand elles attaquent.</li>
       </ul>
       ${creaturesTable(h)}
       <h3>Améliorations</h3>

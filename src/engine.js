@@ -13,7 +13,7 @@ const SF = (() => {
     "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
-    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2 · Aura Mobilité 1", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV. Avance de 2 cases par tour, et les autres créatures de sa case d'1 case de plus." },
+    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV." },
     "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
@@ -121,7 +121,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.18";
+  const VERSION = "0.4.19";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -222,7 +222,7 @@ const SF = (() => {
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
   // support de niveau 3 : +3 travailleurs tant qu'il tient (Oni, 02/11/2026 ; avant +2)
-  const SUP3_WORKERS = 3; // Oni, 06/11/2026 (+2 du 04/11 au 06/11, +3 du 02/11 au 04/11)
+  const SUP3_WORKERS = 2; // Oni, 06/11/2026 soir (+3 le 06/11 en journée, +2 du 04/11 au 06/11, +3 du 02/11 au 04/11)
   const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + SUP3_WORKERS * Object.values(S.supports).filter(l => l === 3).length;
   const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
   const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
@@ -466,8 +466,9 @@ const SF = (() => {
   // le Glaneur lui-même avance de 2 cases (vitesse de base 2) pour suivre le groupe.
   // Aura Mobilité : +1 case par Glaneur de la case, et par soutien de la case avec la Mue (Oni, 05/11/2026) ; tout se cumule
   // vitesse de base : 2 pour le Glaneur et toutes les créatures de niveau 3 (Oni, 06/11/2026), sinon 1
-  const baseSpeed = c => (c.name === "Glaneur" || CREATURES[c.name].lvl === 3 ? 2 : 1);
-  const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0) + countMates(S, c, o => o.name === "Glaneur")
+  // (le Glaneur a perdu sa vitesse de 2 et son Aura Mobilité 1 le 06/11/2026, Oni)
+  const baseSpeed = c => (CREATURES[c.name].lvl === 3 ? 2 : 1);
+  const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0)
     + (S.upgrades.soutien.r1 === "A" ? countMates(S, c, isSoutien) : 0);
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
@@ -1143,7 +1144,10 @@ const SF = (() => {
       autoCreature(S, c); return true;
     } },
     actAll: { phase: ["A_attack"], run(S) { // les créatures qui n'ont pas encore agi avancent et attaquent devant elles, les plus avancées d'abord
-      const todo = S.creatures.filter(c => !c.acted).sort((a, b) => pathLen(a.u, a.k) - pathLen(b.u, b.k) || a.id - b.id);
+      // les soutiens agissent d'abord (Oni, 06/11/2026) : les créatures de leur case de départ qui les suivent profitent
+      // encore de leurs auras quand elles attaquent ; puis les plus avancées d'abord
+      const sup = c => (CREATURES[c.name].type === "soutien" ? 0 : 1);
+      const todo = S.creatures.filter(c => !c.acted).sort((a, b) => sup(a) - sup(b) || pathLen(a.u, a.k) - pathLen(b.u, b.k) || a.id - b.id);
       for (const c of todo) { if (S.winner) break; if (S.creatures.includes(c)) autoCreature(S, c); }
       return true;
     } },
