@@ -17,6 +17,9 @@ mini = ROOT / "assets/miniatures"
 table = json.loads((mini / "table.json").read_text(encoding="utf-8")) if (mini / "table.json").exists() else {}
 img_css = "".join(
     f".im-{f[:-5]}{{--img:url(data:image/webp;base64,{base64.b64encode((mini / f).read_bytes()).decode()})}}\n" for f in sorted(set(table.values())))
+# logos des camps (tools/logos.js) : masques CSS --logo-colonie / --logo-essaim (la couleur vient du camp)
+logos = ROOT / "assets/logos"
+img_css += ":root{" + "".join(f"--logo-{k}:url(data:image/png;base64,{base64.b64encode((logos / (k + '.png')).read_bytes()).decode()});" for k in ("colonie", "essaim") if (logos / (k + ".png")).exists()) + "}\n"
 img_js = "const IMG_CLASS = " + json.dumps({n: "im im-" + f[:-5] for n, f in table.items()}, ensure_ascii=False) + ";"
 
 page = f"""<!doctype html>

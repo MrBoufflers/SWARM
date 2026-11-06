@@ -798,3 +798,15 @@ body:not(.pc) .board .tile .tn { line-height: 1.1; flex: none; }
 .hf-go:hover { filter: brightness(1.25) drop-shadow(0 0 12px rgba(255,190,90,.8)); background: rgba(255,200,90,.12); }
 .pc-ho.essaim .hf-go:hover { transform: translate(-50%, -50%) scale(1.05); }
 .hf-go:focus-visible { outline: 3px solid var(--hot); outline-offset: 3px; }
+
+/* ---- logos des camps (Oni, 06/11/2026) : silhouettes en masque, à la couleur du camp ---- */
+.logo-mk { display: inline-block; flex: none; width: 34px; height: 34px; background: var(--c); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; vertical-align: middle; }
+.logo-mk.colonie { --m: var(--logo-colonie); --c: var(--colonie); } .logo-mk.essaim { --m: var(--logo-essaim); --c: var(--essaim); }
+.pc-sum h3 .logo-mk { width: 26px; height: 26px; }
+/* filigrane : le logo en très grand, en transparence, coupé par le bord du panneau côté plateau (on n'en voit que la moitié) */
+body.pc .panel.pc-own, body.pc .panel.pc-sum { position: relative; isolation: isolate; overflow: hidden; }
+body.pc .panel.pc-own::before, body.pc .panel.pc-sum::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
+  top: 50%; height: 92%; aspect-ratio: 1; transform: translate(50%, -50%); opacity: .14;
+  background: var(--c); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+body.pc .panel.colonie::before { --m: var(--logo-colonie); --c: var(--colonie); right: 0; }
+body.pc .panel.essaim::before { --m: var(--logo-essaim); --c: var(--essaim); left: 0; transform: translate(-50%, -50%); }
