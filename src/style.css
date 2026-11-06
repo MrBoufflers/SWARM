@@ -648,3 +648,35 @@ body.pc [data-tip]:hover::after, body.pc [data-tip]:focus::after, body.pc [data-
   padding: 8px 10px; border-radius: 7px; box-shadow: 0 6px 18px rgba(0,0,0,.4); pointer-events: none; }
 :root[data-theme="dark"] #tipbox, :root[data-theme="auto"].sys-dark #tipbox { background: #f1e9de; color: #1b1612; }
 .ps-rows .hidden-hand { font-style: normal; }
+
+/* ---- retours d'Oni (06/11/2026, 3) ---- */
+/* étapes du tour et consigne : toujours en bas du panneau du joueur */
+.po-bottom { flex: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rule); }
+.po-bottom .pc-steps { margin: 0 0 8px; }
+.po-bottom .phase { margin: 0; max-width: none; padding: 9px 11px; border-left-width: 4px; box-shadow: none; background: var(--panel-2); max-height: 34vh; overflow-y: auto; box-sizing: border-box; }
+.po-bottom .phase .hint { margin: 5px 0 2px; font-size: .9rem; }
+.chev li { height: 36px; font-size: 13px; }
+.chev li.on { font-weight: 700; }
+/* boutons de l'étape : sur le plateau, dans l'angle mort du bas, côté joueur */
+.pc-go { position: absolute; bottom: 9px; width: calc(var(--cell) * 2 + 2px); min-height: var(--cell); box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; z-index: 3; margin: 0; }
+.pc-go.l { left: 9px; } .pc-go.r { right: 9px; }
+.pc-go button { width: 100%; padding: 8px 10px; border-radius: 9px; font: 600 .85rem/1.1 var(--body); background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--rule); box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+.pc-go button.primary { position: relative; padding: 14px 12px; font: 700 1.05rem/1.1 var(--display); letter-spacing: .07em; text-transform: uppercase; color: #1b120a;
+  background: linear-gradient(180deg, #ffc75f, var(--hot) 55%, #c97a1a); border: 0; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 10px 50%);
+  box-shadow: none; animation: goPulse 2.6s ease-in-out infinite; }
+.pc-go.colonie button.primary { background: linear-gradient(180deg, #7fe0cf, var(--colonie) 55%, #237a6c); }
+.pc-go.essaim button.primary { background: linear-gradient(180deg, #d2b3ff, var(--essaim) 55%, #5c3d8f); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+.pc-go.colonie button.primary { color: #062421; }
+.pc-go button.primary:hover { filter: brightness(1.12); }
+@keyframes goPulse { 0%, 100% { filter: drop-shadow(0 0 2px rgba(255,190,90,.3)); } 50% { filter: drop-shadow(0 0 10px rgba(255,190,90,.7)); } }
+/* biomasse calée à droite */
+.po-head .bigwrap { margin-left: auto; } .po-head .bigwrap .pc-big { margin-left: 0; }
+/* jetons : attaque et défense plus grandes, icône d'aura en haut à droite */
+body.pc .tok { font-size: max(12px, calc(var(--cell) / var(--n) * .38)); position: relative; padding: 0 4px 2px; }
+body.pc .tok .au { position: absolute; top: 3px; right: 3px; margin: 0; }
+body.pc .tok .au .i { width: max(11px, calc(var(--cell) / var(--n) * .26)); height: max(11px, calc(var(--cell) / var(--n) * .26)); }
+/* info-bulle : suit le thème */
+#tipbox, :root[data-theme="dark"] #tipbox, :root[data-theme="auto"].sys-dark #tipbox { background: var(--panel-2); color: var(--ink); border: 1px solid var(--rule); box-shadow: 0 8px 22px rgba(0,0,0,.45); }
+/* encart du tour (haut du plateau) : écritures plus grandes */
+.pc-corner .k { font-size: max(12px, calc(var(--cell) * .13)); }
+.pc-corner.turn b { font-size: max(18px, calc(var(--cell) * .27)); }
