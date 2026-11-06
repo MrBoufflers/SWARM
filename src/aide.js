@@ -90,10 +90,10 @@ const AIDE = (() => {
         <li><b>Réaction de la colonie</b> : si elle tient un sortilège offensif, elle peut le jouer maintenant.</li>
         <li><b>Attaques</b> : pour chaque créature, dans l'ordre que vous voulez :
           <ul>
-            <li><b>Déplacement</b> : 1 case vers n'importe quelle case voisine de sa lane, sans diagonale (vers la fusée, sur le côté ou en retraite). Jamais sur un bâtiment, un coin ni la fusée.</li>
-            <li><b>Attaque, facultative</b> : un bâtiment qui touche sa case (sans diagonale), au choix, ou la fusée si elle la touche. Après une attaque, la créature ne bouge plus.</li>
+            <li><b>Déplacement</b> : elle avance seule vers la fusée sur le chemin le plus court, tout droit ou en escalier (1 case, 2 avec la Mobilité ou un Glaneur), sans diagonale. Elle s'arrête devant un bâtiment ou la fusée.</li>
+            <li><b>Attaque</b> : elle frappe le bâtiment (ou la fusée) qui se trouve devant elle. Les soutiens n'attaquent jamais.</li>
           </ul>
-          Touchez une créature : ses cases possibles sont surlignées et ses cibles encadrées. « Fin du tour » quand vous avez fini ; « Tout résoudre automatiquement » fait avancer les créatures restantes et attaquer ce qui est devant elles.</li>
+          Touchez une créature pour la faire agir. « Tout résoudre automatiquement » fait agir toutes les créatures restantes ; « Fin du tour » termine le tour (les créatures qui n'ont pas agi ne font rien).</li>
         <li><b>Fin du tour</b> : les auras de soin agissent.</li>
       </ol>
       <h3>Vos créatures</h3>
@@ -185,7 +185,7 @@ const AIDE = (() => {
     { id: "e-ameli", side: "essaim", img: "Béhémoth", title: "Améliorations", when: S => S.phase === "A_upgrade",
       text: () => `Investissez votre budget ou votre réserve dans un nœud des arbres d'amélioration (panneau Essaim) : ${SF.COST_R1} biomasse au rang 1, ${SF.COST_R2} au rang 2, payables en plusieurs tours. Un rang 1 ajoute les cartes de niveau 2 de ce type à votre pioche, un rang 2 celles de niveau 3.` },
     { id: "e-attaque", side: "essaim", img: "Ravageur", title: "Déplacer et attaquer", when: S => S.phase === "A_attack",
-      text: () => `Touchez une créature : les cases surlignées montrent où elle peut aller (1 case, sans diagonale : en avant, sur le côté ou en retraite). Ensuite, si vous le voulez, touchez un bâtiment encadré qui touche sa case pour l'attaquer. Après une attaque, elle ne bouge plus. « Fin du tour » quand vous avez fini.` },
+      text: () => `Touchez une créature (cadre jaune) : elle avance seule vers la fusée, tout droit ou en escalier, puis attaque ce qui est devant elle. Vous choisissez l'ordre dans lequel elles agissent. « Tout résoudre automatiquement » fait agir toutes les autres.` },
     { id: "e-camo", side: "essaim", img: "Piège", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
       text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être un piège (${SF.TRAP_DMG} dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez de la biomasse). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
     { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),

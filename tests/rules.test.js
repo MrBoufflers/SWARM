@@ -619,7 +619,7 @@ const fresh = () => {
   SF.apply(T, "colonie", "endD");
   ok(!T.doubleFire || T.phase !== "D_main", "l'effet ne dure qu'un tour");
   const U = fresh(); const w = SF.bonusWorkers(U); U.supports["3,3"] = 3;
-  ok(SF.bonusWorkers(U) === w + 2, "support de niveau 3 : +2 travailleurs (Oni, 04/11/2026)");
+  ok(SF.bonusWorkers(U) === w + 3, "support de niveau 3 : +3 travailleurs (Oni, 06/11/2026)");
 }
 // 49. Renforcé : plusieurs PV d'un coup (règle d'origine, rétablie le 02/11/2026) ; Famine : biomasse ÷ 2 ; soutiens 2 / 4 / 6 PV (Oni, 02/11/2026)
 {
@@ -883,6 +883,16 @@ const fresh = () => {
   const U = fresh(); U.upgrades.aggro.r1 = "B"; const a = at(980, "Ravageur", 1), t = at(981, "Béhémoth", 5); U.creatures.push(a, t);
   ok(SF.isStealthy(U, a) && !SF.isStealthy(U, t) && SF.speedOf(U, a) === 2, "Mobilité : les aggros font 2 cases et gagnent la Furtivité");
   ok(!SF.targetable(U, a) && SF.targetable(U, t), "Furtivité : le Ravageur ne peut pas être visé tant que le Béhémoth (non furtif) est sur sa case");
+}
+// 62. Oni, 06/11/2026 : déplacement automatique au choix de la créature (action actOne) ; support de niveau 3 : +3 travailleurs
+{
+  const S = fresh(); S.phase = "A_attack";
+  const a = { id: 990, name: "Écorcheur", lane: "N", u: -2, k: 4, hp: 1, acted: false }, b = { id: 991, name: "Écorcheur", lane: "N", u: 2, k: 4, hp: 1, acted: false };
+  S.creatures.push(a, b);
+  ok(SF.apply(S, "essaim", "actOne", { id: 990 }) === "", "actOne : la créature choisie agit");
+  ok(a.k === 3 && a.u === -2 && !b.moved && b.k === 4, "elle avance seule d'une case sur son chemin (A4 → A3) ; l'autre n'a pas bougé");
+  ok(SF.apply(S, "essaim", "actOne", { id: 990 }) !== "", "une créature qui a déjà agi ne peut pas agir une seconde fois");
+  ok(SF.SUP3_WORKERS === 3, "support de niveau 3 : +3 travailleurs");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
