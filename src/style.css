@@ -922,3 +922,20 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
 /* braises plus discrètes (Oni, 06/11/2026) : plus petites, moins lumineuses, éteintes aux 3/4 de la hauteur */
 .h2-embers i { box-shadow: 0 0 4px 1px rgba(255,140,40,.55); animation-name: h2Rise2; }
 @keyframes h2Rise2 { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: .55; } 55% { opacity: .35; } 100% { transform: translate(28px, -75vh); opacity: 0; } }
+/* salle d'attente en ligne, dans le style de l'accueil (Oni, 06/11/2026) */
+.h2-hero.small .h2-emblem { width: clamp(110px, 20vh, 220px); }
+.h2-hero.small .h2-word { width: min(720px, 86vw); }
+.h2-panel { width: min(520px, 100%); box-sizing: border-box; padding: 22px 24px; text-align: center; background: rgba(8,6,5,.62); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(4px);
+  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px); animation: h2Fade 1s ease .8s both; }
+.h2-panel p { margin: 0; }
+.h2-side { display: flex; align-items: center; justify-content: center; gap: 10px; font: 600 1.1rem/1.2 var(--body); color: #e8e0d6; margin-bottom: 14px !important; }
+.h2-side .logo-mk { width: 34px; height: 34px; }
+.h2-wait.essaim .h2-side b { color: var(--essaim); } .h2-wait.colonie .h2-side b { color: var(--colonie); }
+.h2-code { margin: 6px 0 12px !important; }
+.h2-code .bigcode { display: inline-block; padding: 8px 22px; font: 800 clamp(2.4rem, 6vw, 3.6rem)/1 var(--display); letter-spacing: .3em; padding-right: calc(22px - .3em); color: #fff;
+  background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18); text-shadow: 0 0 18px rgba(255,140,40,.55); }
+.h2-help { font: 400 1rem/1.4 var(--body); color: #b9ad9f; }
+.h2-link { margin-top: 4px !important; font: 500 1rem/1.4 var(--body); color: #f0d7b0; word-break: break-all; user-select: all; }
+.h2-waitmsg { margin-top: 16px !important; font: 600 1.1rem/1 var(--display); letter-spacing: .25em; text-transform: uppercase; color: #e8e0d6; }
+.h2-dots i { font-style: normal; animation: h2Dot 1.4s ease-in-out infinite; } .h2-dots i:nth-child(2) { animation-delay: .2s; } .h2-dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes h2Dot { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
