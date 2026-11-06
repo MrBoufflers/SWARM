@@ -816,3 +816,10 @@ body.pc .panel.essaim::before { --m: var(--logo-essaim); --c: var(--essaim); lef
 .ucard.closed .uc-ic.im, .ucard.needR1 .uc-ic.im { filter: grayscale(.7); }
 .uc-top { flex-wrap: wrap; row-gap: 0; } .uc-name { overflow-wrap: normal; word-break: normal; hyphens: manual; flex: 1 1 auto; }
 .ur1 .uc-ic.im { width: 74px; }
+/* cartes de créatures en main (Oni, 06/11/2026) : l'illustration occupe la moitié droite de la carte et s'efface vers la gauche */
+.ccard.sh { padding-right: 12px; min-height: 96px; overflow: hidden; }
+.ccard.sh .thumb { top: 0; right: 0; bottom: 0; width: 50%; height: auto; border-radius: 0 6px 6px 0; box-shadow: none; background-position: center 30%; background-size: cover;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.55) 45%, #000 85%); mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.55) 45%, #000 85%); }
+.ccard.sh > :not(.thumb) { position: relative; z-index: 1; }
+.ccard.sh > .cost { position: absolute; }
+.ccard.sh > b, .ccard.sh > small { padding-right: 0; text-shadow: 0 1px 3px var(--panel-2), 0 0 6px var(--panel-2); }
