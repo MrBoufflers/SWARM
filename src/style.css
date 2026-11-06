@@ -982,3 +982,16 @@ body.pc .pc-hot span { height: 30px; padding: 0 30px; display: flex; align-items
   background: linear-gradient(180deg, rgba(40,33,29,.96), rgba(18,14,12,.96)); border: 1px solid rgba(255,255,255,.16); border-top: 0; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,.45); cursor: pointer; }
 body.pc .pc-hot span::after { content: "▾"; font-size: .9rem; opacity: .8; }
 body.pc .pc-hot:hover span { border-color: var(--hot); }
+/* boutons de l'étape sur le plateau dans le style de l'accueil, double flèche en fond (Oni, 06/11/2026) */
+.pc-go button { border-radius: 0; font: 700 1rem/1.1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: #efe7dd;
+  background: linear-gradient(180deg, rgba(40,33,29,.95), rgba(18,14,12,.95)); border: 1px solid rgba(255,255,255,.14);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+.pc-go button:hover { border-color: var(--hot); filter: brightness(1.2); }
+.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary {
+  border-radius: 0; clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  padding: 16px 14px; font: 800 1.15rem/1.1 var(--display); letter-spacing: .14em; color: #1b120a;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' preserveAspectRatio='xMaxYMid meet'%3E%3Cpath d='M22 40 H108 Q124 40 133 53 L249 240 Q258 256 249 272 L133 459 Q124 472 108 472 H22 Q2 472 13 455 L122 256 L13 57 Q2 40 22 40 Z' fill='%237a3f00' fill-opacity='.3'/%3E%3Cpath d='M22 40 H108 Q124 40 133 53 L249 240 Q258 256 249 272 L133 459 Q124 472 108 472 H22 Q2 472 13 455 L122 256 L13 57 Q2 40 22 40 Z' transform='translate%28256 0%29' fill='%237a3f00' fill-opacity='.3'/%3E%3C/svg%3E") right 6px center / auto 92% no-repeat,
+    linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%);
+  border: 1px solid #ffdf9c; }
+.pc-go button.primary::after { content: none; }

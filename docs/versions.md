@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.27 — 6 novembre 2026
+
+**Interface (Oni)** : boutons de l'étape (coin du plateau) dans le style de l'accueil ; le bouton principal jaune porte une grande double flèche en fond (dessin d'Oni).
+
 ## v0.4.26 — 6 novembre 2026
 
 **Interface (Oni)** : accueil et salle d'attente — le fond est centré sur le contenu (le cercle central du champ de bataille au centre de l'écran) ; le lent travelling zoome sans plus glisser de côté.
