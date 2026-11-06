@@ -43,7 +43,7 @@
     A_deploy: ["essaim", "Déploiement", "Choisissez une carte, puis une case d'entrée (bord du plateau) dans une lane. Vous pouvez aussi investir votre budget dans une amélioration (panneau Essaim). Le budget non dépensé ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
-    A_attack: ["essaim", "Attaques", "Déplacez chaque créature où vous voulez dans sa lane (1 case, 2 avec la Mobilité ou un Glaneur), puis attaquez si vous le souhaitez un bâtiment qui touche sa case, ou la fusée."],
+    A_attack: ["essaim", "Attaques", "Touchez une créature pour la faire agir : elle avance seule vers la fusée (1 case, 2 avec la Mobilité ou un Glaneur), tout droit ou en escalier, puis attaque le bâtiment ou la fusée devant elle. « Tout résoudre automatiquement » fait agir toutes les créatures restantes."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
@@ -268,7 +268,7 @@
         const t = SF.strikeTargets(S, sel), n = SF.stepsLeft(S, sel);
         body = sh ? `<p class="hint"><b>${E(sel.name)}</b> : ${n ? `${n} déplacement${n > 1 ? "s" : ""} (cases surlignées)` : "plus de déplacement"}${SF.attacks(sel) ? (t.length ? " · cibles encadrées" : "") : " · n'attaque pas"}.</p>` + (t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "") : `<p class="hint"><b>${E(sel.name)}</b> · ${posTxt(sel)} : ${n ? `encore ${n} déplacement${n > 1 ? "s" : ""} (cases surlignées, retraite comprise)` : "plus de déplacement ce tour"}${SF.attacks(sel) ? (t.length ? ", ou attaquez une cible encadrée" : "") : " · un soutien n'attaque pas"}.</p>` +
           (t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "");
-      } else body = sh ? `<p class="hint">Touchez une créature pour la déplacer ou attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>` : `<p class="hint">Touchez une créature, puis une case surlignée pour la déplacer (en avant, sur le côté ou en retraite), ou une cible encadrée pour attaquer. ${left ? `${left} créature${left > 1 ? "s peuvent" : " peut"} encore agir.` : ""}</p>`;
+      } else body = sh ? `<p class="hint">Touchez une créature : elle avance et attaque seule${left ? ` (${left} peuvent agir)` : ""}.</p>` : `<p class="hint">Touchez une créature pour la faire agir (elle avance et attaque seule). ${left ? `${left} créature${left > 1 ? "s peuvent" : " peut"} encore agir.` : ""}</p>`;
       acts = `<button data-a="actAll">Tout résoudre automatiquement</button><button data-a="endA" class="primary">Fin du tour</button>`;
     } else if (ph === "D_main") {
       body = spellBox("sup", sh) + (UI.sel !== null && sh ? `<p class="hint"><b>${E(S.hand[UI.sel])}</b> → « Construire » dans un atelier.</p>` : UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
@@ -438,7 +438,7 @@
       const t = SF.CREATURES[c.name].type;
       // tourelle choisie : toucher une créature à portée la vise directement (Oni, 04/11/2026)
       const tgt = S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c);
-      const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" && !SF.canAct(S, c) ? " done" : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
+      const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" ? (SF.canAct(S, c) ? (S.view === "essaim" ? " go" : "") : " done") : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       const au = auraOf(c);
       return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? `<i class="au ${au.kind}">${icon(au.icon)}</i>` : ""}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
@@ -837,6 +837,10 @@
       case "card": UI.sel = UI.sel === Number(d.uid) ? null : Number(d.uid); break;
       case "creature": { // toucher à nouveau la créature choisie la relâche (pour pouvoir en choisir une autre sur une case où elle peut aller)
         const id = Number(d.id);
+        // attaques (Oni, 06/11/2026) : toucher une créature qui peut agir la fait avancer et attaquer seule
+        const cr = S.creatures.find(o => o.id === id);
+        if (S.phase === "A_attack" && S.view === "essaim" && cr && SF.canAct(S, cr)) { UI.pop = null; UI.selCreature = null; return play("actOne", { id }); }
+        if (S.phase === "A_attack") { UI.pop = UI.pop === id ? null : id; break; }
         if (UI.selCreature === id) { UI.selCreature = null; UI.pop = null; break; }
         UI.selCreature = id; UI.pop = id; break;
       }

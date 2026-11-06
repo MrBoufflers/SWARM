@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.13 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.4.16 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -17,12 +17,12 @@ Repris du prototype jouable et validés par Oni :
 - **Fusée** : un étage coûte 2, 4, 6 puis 8 points selon le palier atteint.
 - **Main de tuiles** : 4, +1 à chaque palier de la fusée (4 / 5 / 6 / 7).
 - **Sortilèges** : un sortilège non joué reste en main tant qu'il n'est pas joué (pas de limite). **Famine** : ce tour, le budget de l'essaim est sa biomasse divisée par 2 (arrondie à l'inférieur). **Brouillage** : se joue avant les attaques, sur n'importe quelle créature : ce tour, elle ne bouge pas et n'attaque pas. **Champ de stase** : protège un seul bâtiment ce tour (aucun dégât, et ses Épines sont suspendues).
-- **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +2 travailleurs.
+- **Feu nourri** (nouveau sort de soutien, 2 ex.) : ce tour, chaque tourelle tire 2 fois. **Support de niveau 3** : +3 travailleurs (06/11).
 - **Fin du tour de la colonie** : chantiers, nouveaux supports, fusée, puis **tirs des tourelles**, puis pioches.
 - **Créatures** : aggros à **1 PV** à tous les niveaux ; tanks à **1 ATQ** à tous les niveaux ; soutiens à **2 / 4 / 6 PV** selon le niveau ; **Phéromone** : l'Aura Leurre est remplacée par l'**Aura Butin** (+1 biomasse quand une créature de sa case détruit un bâtiment) ; **Sapeur** : à son déploiement, détruit un bâtiment au choix de sa lane (au lieu d'un chantier) ; **Catalyseur** : l'Aura Instinct est remplacée par l'**Aura Cuirasse** (pas de dégâts d'Épines sur sa case).
 - **Auras** : une aura ne profite qu'aux **autres** créatures de sa case, et **toutes les auras se cumulent** (2 Hurleurs = +2 ATQ, 2 Phéromones = +2 biomasse, 2 Frénésies sur la même créature = ×4, etc.). **Spores** : 2 dégâts par Sporeur. **Glaneur** : Aura Soin 1, **Aura Mobilité 1** (+1 case aux autres créatures de sa case) et vitesse de base de 2 cases. **Mue** (soutien, côté A) : Furtivité et **Aura +1 PV**. **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur. **Provocation** : nouveau nom de la Protection (tank, côté B) ; les tanks ne subissent plus les Épines.
 - **Renforcé** remplace le Bouclier (Égide, Dortoir : Renforcé 2) : 1 PV perdu par tranche complète de X dégâts, plusieurs PV possibles d'un coup.
-- **Déplacements au choix** : chaque créature se déplace seule d'une case par tour (deux avec la Mobilité ou un Glaneur) vers n'importe quelle case voisine de sa lane, en avant, sur le côté ou en retraite ; puis elle attaque, si l'essaim le veut, un bâtiment qui touche sa case (au choix) ou la fusée.
+- **Déplacement automatique, créature par créature** (06/11) : l'essaim choisit quelle créature agit et dans quel ordre ; elle avance seule sur son chemin vers la fusée (tout droit ou en escalier, 1 case par tour, 2 avec la Mobilité ou un Glaneur), puis attaque ce qui est devant elle.
 - **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros se déplacent de **2 cases** par tour (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 - **Départ de l'essaim** : **5 de biomasse** ; au premier tour, à la place de la pioche, une aggro, un tank et un soutien de niveau 1 (au hasard), payés normalement. **Œil-sonde** : Vision permanente sur sa lane tant qu'il est en vie.
 
@@ -163,13 +163,13 @@ Exemple depuis la colonne A : A3 → B3 → B2 → C2 → C1 → fusée. Un pas 
 
 Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coin de support, donc la créature de la colonne A fait d'abord un pas de côté vers B3.
 
-### Déplacer puis attaquer (déplacements au choix)
+### Faire agir les créatures (déplacement automatique)
 
-Pendant ses attaques, l'essaim décide de ce que fait **chaque créature**, une par une, dans l'ordre qu'il veut.
+Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, dans l'ordre qu'il veut (Oni, 06/11/2026).
 
-1. **Déplacement** : la créature se déplace d'**une case** (deux avec la Mobilité ou le Glaneur, voir plus bas) vers **n'importe quelle case voisine de sa lane**, sans diagonale : vers la fusée, sur le côté, ou **en retraite** jusqu'aux cases d'entrée. Elle ne passe jamais sur un bâtiment, un coin de support ou la fusée. Plusieurs créatures peuvent partager une case ; chacune bouge séparément.
-2. **Attaque (facultative)** : ensuite, si elle le veut, elle attaque **un bâtiment qui touche sa case** (sans diagonale), au choix, ou la fusée si elle la touche. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais.
-3. **Après une attaque**, la créature ne bouge plus ce tour.
+1. **Déplacement** : la créature avance seule sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut) : **une case** par tour, deux avec la Mobilité ou le Glaneur (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée. Elle ne passe jamais sur un bâtiment, un coin de support ou la fusée. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
+2. **Attaque** : elle attaque le bâtiment (ou la fusée) qui se trouve **devant elle** sur son chemin. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais.
+3. **Tout résoudre** : fait agir toutes les créatures restantes, les plus avancées d'abord.
 4. **Fin du tour** : l'essaim termine son tour quand il veut, et les créatures qui n'ont pas agi restent sur place. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
 
 **Mobilité** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1, +1 avec la Mobilité (aggros), +1 par Glaneur sur sa case à ce moment-là, et +1 par soutien de sa case avec la Mue (le Glaneur lui-même fait 2).
@@ -429,7 +429,7 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | --- | --- | --- |
 | 1 | 1 | tourelle : 1 dégât par tour, +1 aux étages 3, 6 et 9 de la fusée |
 | 2 | 2 | tourelle : 2 dégâts par tour |
-| 3 | 3 | pas de tir ; **+2 travailleurs** tant qu'il tient |
+| 3 | 3 | pas de tir ; **+3 travailleurs** tant qu'il tient |
 
 ### Résumé du tour
 

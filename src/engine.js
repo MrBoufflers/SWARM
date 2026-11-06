@@ -121,7 +121,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.15";
+  const VERSION = "0.4.16";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -222,7 +222,7 @@ const SF = (() => {
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
   // support de niveau 3 : +3 travailleurs tant qu'il tient (Oni, 02/11/2026 ; avant +2)
-  const SUP3_WORKERS = 2; // Oni, 04/11/2026 (+3 du 02/11 au 04/11)
+  const SUP3_WORKERS = 3; // Oni, 06/11/2026 (+2 du 04/11 au 06/11, +3 du 02/11 au 04/11)
   const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + SUP3_WORKERS * Object.values(S.supports).filter(l => l === 3).length;
   const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
   const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
@@ -1131,6 +1131,13 @@ const SF = (() => {
     // déplacements au choix (Oni, 04/11/2026)
     move: { phase: ["A_attack"], run: (S, a) => isInt(a.id) && isInt(a.u) && isInt(a.k) && moveCreature(S, a.id, a.u, a.k) },
     strike: { phase: ["A_attack"], run: (S, a) => isInt(a.id) && (a.target === "fusee" || (typeof a.target === "string" && /^-?\d,-?\d$/.test(a.target))) && strikeAt(S, a.id, a.target) },
+    // déplacement automatique au choix de la créature (Oni, 06/11/2026) : l'essaim choisit quelle créature agit ;
+    // elle suit seule son chemin vers la fusée (tout droit ou en escalier), puis attaque ce qui est devant elle
+    actOne: { phase: ["A_attack"], run(S, a) {
+      const c = isInt(a.id) && S.creatures.find(o => o.id === a.id);
+      if (!c || !canAct(S, c)) return false;
+      autoCreature(S, c); return true;
+    } },
     actAll: { phase: ["A_attack"], run(S) { // les créatures qui n'ont pas encore agi avancent et attaquent devant elles, les plus avancées d'abord
       const todo = S.creatures.filter(c => !c.acted).sort((a, b) => pathLen(a.u, a.k) - pathLen(b.u, b.k) || a.id - b.id);
       for (const c of todo) { if (S.winner) break; if (S.creatures.includes(c)) autoCreature(S, c); }

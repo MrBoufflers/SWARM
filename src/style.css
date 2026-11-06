@@ -702,3 +702,6 @@ body.pc .tok .au .i { width: max(11px, calc(var(--cell) / var(--n) * .26)); heig
 .chev li.on { position: relative; z-index: 1; animation: stepHaloOn 2.6s ease-in-out infinite; }
 .chev li.on > span { background: var(--c); color: #fff; }
 @keyframes stepHaloOn { 0%, 100% { filter: drop-shadow(0 0 2px var(--c)); } 50% { filter: drop-shadow(0 0 9px var(--c)) drop-shadow(0 0 3px var(--c)); } }
+/* attaques (Oni, 06/11/2026) : une créature qui peut encore agir se touche pour avancer et attaquer seule (jaune = actionnable) */
+.tok.go { cursor: pointer; outline: 2px solid var(--hot); outline-offset: -1px; }
+.tok.go:hover { filter: brightness(1.15); }
