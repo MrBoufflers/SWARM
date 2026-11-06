@@ -942,3 +942,7 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
 .h2-copy { display: flex; justify-content: center; gap: 8px; margin-top: 10px !important; flex-wrap: wrap; }
 .h2-copy .h2-ic { cursor: pointer; }
 .h2-menu.h2-quit { width: min(520px, 100%); animation-delay: 1s; }
+/* fond centré sur le contenu (Oni, 06/11/2026) : le cercle central de l'illustration (un peu au-dessus du milieu de l'image)
+   est calé au centre de l'écran ; le travelling ne fait plus que zoomer, sans glisser */
+.h2-bg { inset: -4%; background-position: 50% 47.5%; transform-origin: 50% 50%; animation-name: h2Burns2; }
+@keyframes h2Burns2 { from { transform: scale(1); } to { transform: scale(1.1); } }
