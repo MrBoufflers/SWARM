@@ -919,3 +919,6 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
 .h2-mark, .h2-word { background: #ffffff; }
 .h2-emblem::after { mix-blend-mode: normal; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.0) 50%, transparent 60%); animation: none; }
 .h2-title { filter: drop-shadow(0 4px 0 rgba(0,0,0,.7)) drop-shadow(0 0 22px rgba(0,0,0,.6)); }
+/* braises plus discrètes (Oni, 06/11/2026) : plus petites, moins lumineuses, éteintes aux 3/4 de la hauteur */
+.h2-embers i { box-shadow: 0 0 4px 1px rgba(255,140,40,.55); animation-name: h2Rise2; }
+@keyframes h2Rise2 { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: .55; } 55% { opacity: .35; } 100% { transform: translate(28px, -75vh); opacity: 0; } }

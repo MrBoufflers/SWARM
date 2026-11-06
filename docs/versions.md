@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.22 — 6 novembre 2026
+
+**Interface (Oni)** : écran d'accueil — braises plus discrètes (plus petites, moins lumineuses) qui s'éteignent aux trois quarts de la hauteur de l'écran.
+
 ## v0.4.21 — 6 novembre 2026
 
 **Interface (Oni)** : nouvel **écran d'accueil** façon jeu vidéo : champ de bataille en plein écran (lent travelling, braises, brume), emblème du jeu et titre « SWARM & STEEL » en blanc (police Ethnocentric, livrée en image fixe comme le permet sa licence), accroche, et menu massif (nouvelle partie ou reprise, en ligne, mode découverte, statistiques ; règles et thème en haut à droite).

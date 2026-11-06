@@ -126,7 +126,7 @@
     const preset = new URLSearchParams(location.search).get("code") || "";
     const resume = saved && saved.phase;
     // braises qui montent (positions et durées fixes, pour un rendu stable)
-    const embers = Array.from({ length: 34 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${6 + (i * 7) % 9}s;--t:-${(i * 13) % 11}s;--s:${2 + (i % 3)}px"></i>`).join("");
+    const embers = Array.from({ length: 34 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${6 + (i * 7) % 9}s;--t:-${(i * 13) % 11}s;--s:${1 + (i % 2) * .8}px"></i>`).join("");
     return `<section class="home2">
       <div class="h2-bg ${imCls("Champ de bataille")}" aria-hidden="true"></div><div class="h2-embers" aria-hidden="true">${embers}</div><div class="h2-fog" aria-hidden="true"></div>
       <div class="h2-top"><button data-a="help" class="h2-ic" title="Règles">Règles</button>${themeBtn().replace('class="ghost"', 'class="h2-ic"')}</div>
