@@ -578,6 +578,13 @@
   }
   // arbres d'amélioration (maquette d'Oni, 06/11/2026) : une carte par nœud — icône ronde à gauche, côté et nom en haut,
   // effet au centre, barre d'investissement « 2/6 » en bas ; toucher une carte ouverte y investit tout ce qui est possible
+  // fond de l'icône de chaque nœud (Oni, 06/11/2026) : visage d'une créature que ce rang ajoute à la pioche
+  // (rang 1 → niveau 2, rang 2 → niveau 3)
+  const NODE_FACE = {
+    aggro: { A1: "Ravageur", B1: "Ravageur", A2: "Massacreur", C2: "Massacreur", B2: "Massacreur" },
+    tank: { A1: "Béhémoth", B1: "Béhémoth", A2: "Colosse", C2: "Colosse", B2: "Colosse" },
+    soutien: { A1: "Phéromone", B1: "Perforeur", A2: "Sapeur", C2: "Sporeur", B2: "Sapeur" },
+  };
   function treesHtml(mine) {
     let trees = "";
     const POS = { A1: "Côté A", B1: "Côté B", A2: "Après A", C2: "Centre", B2: "Après B" };
@@ -595,7 +602,7 @@
         const pct = st === "taken" ? 100 : Math.round(100 * got / cost);
         const inv = canInv ? ` data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99" role="button" tabindex="0"` : "";
         return `<div class="node ucard ${st}${canInv ? " can" : ""}" data-node="${ty}:${slot}"${inv} title="${E(state)}">
-          <span class="uc-ic"><span>${icon(NODE_ICON[ty][slot])}</span></span>
+          <span class="uc-ic ${imCls("Visage " + NODE_FACE[ty][slot])}"><span>${icon(NODE_ICON[ty][slot])}</span></span>
           <span class="uc-body"><span class="uc-top"><span class="uc-pos">${POS[slot]}</span><b class="uc-name">${E(T[slot][0])}</b></span>
             <span class="uc-txt">${E(T[slot][1])}</span>
             <span class="uc-foot"><span class="bar"><i style="width:${pct}%"></i></span>${canInv && cost - got > 1 ? `<button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1" class="uc-one" title="Investir 1">+1</button>` : ""}<b class="uc-n">${st === "taken" ? "Acquis" : `${got}/${cost}`}</b></span></span></div>`;
@@ -642,6 +649,8 @@
     }).join("");
     return `<div class="pc-rocket${grid ? " grid" : ""}" aria-label="Fusée : ${S.floors} étages sur 12"><span class="rk-lab">${icon("fusee")}<b>${S.floors}</b>/12 · ${S.rocketPts}/${SF.floorCost(S)} pts</span><div class="floors h">${fl}</div></div>`;
   }
+  // logo d'un camp (Oni, 06/11/2026) : silhouette en masque CSS, à la couleur du camp
+  const sideLogo = side => `<span class="logo-mk ${side}" aria-hidden="true"></span>`;
   const bigStat = (n, lab, tip, cls = "") => `<div class="pc-big ${cls}" tabindex="0" data-tip="${E(tip)}"><b>${n}</b><span>${lab}</span></div>`;
   const box2 = (n, lab, tip, extra = "") => `<div class="pc-box" tabindex="0" data-tip="${E(tip)}"${extra}><b>${n}</b><span>${lab}</span></div>`;
   // zone d'action du panneau du joueur : étape en cours (explication au survol de ⓘ), consigne courte et choix ; boutons en bas
@@ -661,7 +670,7 @@
       ? bigStat(`${S.budget}<small>/${full}</small>`, "disponible / budget", `Biomasse disponible ce tour : ${S.budget} sur un budget de ${full}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}. Le reste ira à la réserve.`, "bio")
       : bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : " · dernier palier atteint"}`, "bio");
     return `<aside class="panel essaim pc-own">
-      <div class="po-head">${icon("spores", "i logo")}<b class="nm">Essaim</b><span class="bigwrap" data-fx="budget">${big}</span></div>
+      <div class="po-head">${sideLogo("essaim")}<b class="nm">Essaim</b><span class="bigwrap" data-fx="budget">${big}</span></div>
       <div class="pc-boxes">
         ${box2(S.reserve, "réserve", "Réserve : biomasse non investie, gardée d'un tour à l'autre")}
         ${deploy ? box2(S.biomass, "biomasse", `Biomasse totale : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`) : ""}
@@ -679,7 +688,7 @@
     const pts = SF.totalPoints(S), used = SF.allocated(S), bonus = SF.bonusWorkers(S);
     const { top } = pcAction("colonie");
     return `<aside class="panel colonie pc-own"><div class="po-main">
-      <div class="po-head">${icon("fusee", "i logo")}<b class="nm">Colonie</b>
+      <div class="po-head">${sideLogo("colonie")}<b class="nm">Colonie</b>
         ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "travailleurs", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}</div>
       ${pcRocket(false)}
       <div class="pc-boxes">
@@ -709,7 +718,7 @@
       return `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${blocks}</div></div>`;
     }).join("");
     return `<aside class="panel colonie mini pc-sum"><div class="ps-main">
-      <h3>${icon("fusee")} Colonie</h3>
+      <h3>${sideLogo("colonie")} Colonie</h3>
       ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "pop.", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}
       <div class="ps-rows">
         <span tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b> techno</span>
@@ -735,7 +744,7 @@
       return `<div class="utree ${ty}"><span class="ut">${icon(ty)}<small>${ty}</small></span><div class="ur">${node("A1")}${node("B1")}</div><div class="ur r2">${node("A2")}${node("C2")}${node("B2")}</div></div>`;
     }).join("");
     return `<aside class="panel essaim mini pc-sum"><div class="ps-main">
-      <h3>${icon("spores")} Essaim</h3>
+      <h3>${sideLogo("essaim")} Essaim</h3>
       ${bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`, "bio")}
       <div class="ps-rows">
         ${turn ? `<span data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b> budget</span>` : ""}

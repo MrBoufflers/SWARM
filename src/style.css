@@ -798,3 +798,37 @@ body:not(.pc) .board .tile .tn { line-height: 1.1; flex: none; }
 .hf-go:hover { filter: brightness(1.25) drop-shadow(0 0 12px rgba(255,190,90,.8)); background: rgba(255,200,90,.12); }
 .pc-ho.essaim .hf-go:hover { transform: translate(-50%, -50%) scale(1.05); }
 .hf-go:focus-visible { outline: 3px solid var(--hot); outline-offset: 3px; }
+
+/* ---- logos des camps (Oni, 06/11/2026) : silhouettes en masque, à la couleur du camp ---- */
+.logo-mk { display: inline-block; flex: none; width: 34px; height: 34px; background: var(--c); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; vertical-align: middle; }
+.logo-mk.colonie { --m: var(--logo-colonie); --c: var(--colonie); } .logo-mk.essaim { --m: var(--logo-essaim); --c: var(--essaim); }
+.pc-sum h3 .logo-mk { width: 26px; height: 26px; }
+/* filigrane : le logo en très grand, en transparence, coupé par le bord du panneau côté plateau (on n'en voit que la moitié) */
+body.pc .panel.pc-own, body.pc .panel.pc-sum { position: relative; isolation: isolate; overflow: hidden; }
+body.pc .panel.pc-own::before, body.pc .panel.pc-sum::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
+  top: 50%; height: 92%; aspect-ratio: 1; transform: translate(50%, -50%); opacity: .14;
+  background: var(--c); -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+body.pc .panel.colonie::before { --m: var(--logo-colonie); --c: var(--colonie); right: 0; }
+body.pc .panel.essaim::before { --m: var(--logo-essaim); --c: var(--essaim); left: 0; transform: translate(-50%, -50%); }
+/* cartes d'amélioration : visage d'une créature derrière l'icône, au lieu de l'aplat de couleur (Oni, 06/11/2026) */
+.uc-ic.im { width: 92px; background: linear-gradient(to right, rgba(0,0,0,.05), rgba(0,0,0,.35)), var(--img) center / cover; box-shadow: inset -3px 0 0 var(--c); }
+.uc-ic.im > span { width: 40px; height: 40px; background: rgba(255,255,255,.92); }
+.ucard.closed .uc-ic.im, .ucard.needR1 .uc-ic.im { filter: grayscale(.7); }
+.uc-top { flex-wrap: wrap; row-gap: 0; } .uc-name { overflow-wrap: normal; word-break: normal; hyphens: manual; flex: 1 1 auto; }
+.ur1 .uc-ic.im { width: 74px; }
+/* cartes de créatures en main (Oni, 06/11/2026) : l'illustration occupe la moitié droite de la carte et s'efface vers la gauche */
+.ccard.sh { padding-right: 12px; min-height: 96px; overflow: hidden; }
+.ccard.sh .thumb { top: 0; right: 0; bottom: 0; width: 50%; height: auto; border-radius: 0 6px 6px 0; box-shadow: none; background-position: center 30%; background-size: cover;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.55) 45%, #000 85%); mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.55) 45%, #000 85%); }
+.ccard.sh > :not(.thumb) { position: relative; z-index: 1; }
+.ccard.sh > .cost { position: absolute; }
+.ccard.sh > b, .ccard.sh > small { padding-right: 0; text-shadow: 0 1px 3px var(--panel-2), 0 0 6px var(--panel-2); }
+/* fondu plus progressif (Oni, 06/11/2026) */
+.ccard.sh .thumb { -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%); }
+/* tuiles en main de la colonie : illustration sur la moitié gauche, en fondu vers la droite (même traitement que l'essaim) */
+body.pc .tcard { position: relative; display: flex; flex-direction: column; gap: 3px; padding: 8px 10px 8px 42%; min-height: 104px; overflow: hidden; }
+body.pc .tcard .art { position: absolute; left: 0; top: 0; bottom: 0; width: 50%; height: auto; border-radius: 6px 0 0 6px; box-shadow: none; background-size: cover; background-position: center 35%;
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%);
+  mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.08) 15%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.78) 78%, #000 100%); }
+body.pc .tcard > :not(.art) { position: relative; z-index: 1; text-shadow: 0 1px 3px var(--panel-2), 0 0 6px var(--panel-2); }

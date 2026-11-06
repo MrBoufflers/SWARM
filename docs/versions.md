@@ -18,6 +18,9 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 - Avant-postes abrégés « Poste N / E / S / O » sur le plateau.
 - **Écran de passage** : nouveaux cadres illustrés d'Oni (essaim : bouton sur l'orbe ; colonie : bouton sur la plaque jaune), avec la biomasse de l'essaim ou les travailleurs de la colonie ; arrivée et départ en 0,3 s avec une opacité progressive.
 - Téléphone : le minimum de 1rem ne s'applique pas encore dans les cases du plateau (trop petites), en attendant la version mobile.
+- **Logos des camps** (Oni) en haut des panneaux, et en filigrane très grand dans le fond, coupé par le bord côté plateau.
+- **Cartes d'amélioration** : visage d'une créature du niveau débloqué derrière l'icône (rang 1 : niveau 2, rang 2 : niveau 3).
+- **Mains** : l'illustration occupe la moitié de la carte, en fondu progressif (à droite pour les créatures de l'essaim, à gauche pour les tuiles de la colonie).
 
 ## v0.4.16 — 6 novembre 2026
 

@@ -31,6 +31,14 @@ TAILLES = {"champs de bataille.jpg": (840, 55),
            # cadres de l'écran de passage (fond transparent conservé)
            "pop up tour colonie.webp": (900, 78), "pop up tour essaim.webp": (900, 78)}
 
+# vignettes recadrées sur le visage des créatures (cartes d'amélioration, Oni 06/11/2026) :
+# nom → (centre x, centre y, côté du carré), en fraction de la largeur de l'illustration
+VISAGES = {
+    "Ravageur": (.59, .30, .34), "Massacreur": (.60, .27, .34), "Béhémoth": (.60, .52, .36), "Colosse": (.67, .52, .36),
+    "Phéromone": (.63, .41, .34), "Perforeur": (.52, .44, .34), "Catalyseur": (.67, .42, .30), "Sapeur": (.74, .50, .30), "Sporeur": (.63, .60, .34),
+}
+TAILLE_VISAGE = 180
+
 def slug(n):
     n = unicodedata.normalize("NFKD", n.replace("Œ", "Oe")).encode("ascii", "ignore").decode().lower()
     return "".join(c if c.isalnum() else "-" for c in n).strip("-")
@@ -49,6 +57,14 @@ def main():
             dest = OUT / (slug(src.rsplit(".", 1)[0]) + ".webp"); im.save(dest, "WEBP", quality=qualite, method=6)
             faits[src] = dest.name; total += dest.stat().st_size
         table[nom] = faits[src]
+    for nom, (cx, cy, cote) in VISAGES.items():
+        src = unicodedata.normalize("NFC", NOMS[nom])
+        path = next(p for p in SRC.iterdir() if unicodedata.normalize("NFC", p.name) == src)
+        im = Image.open(path).convert("RGB"); w, h = im.size; c = cote * w
+        box = [round(cx * w - c / 2), round(cy * h - c / 2)]; box = [max(0, min(box[0], w - c)), max(0, min(box[1], h - c))]
+        im = im.crop((box[0], box[1], box[0] + c, box[1] + c)).resize((TAILLE_VISAGE, TAILLE_VISAGE), Image.LANCZOS)
+        dest = OUT / ("visage-" + slug(nom) + ".webp"); im.save(dest, "WEBP", quality=QUALITE, method=6)
+        table["Visage " + nom] = dest.name; total += dest.stat().st_size
     (OUT / "table.json").write_text(json.dumps(table, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"{len(faits)} miniatures pour {len(table)} noms, {total // 1024} Ko au total")
 
