@@ -995,3 +995,17 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
     linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%);
   border: 1px solid #ffdf9c; }
 .pc-go button.primary::after { content: none; }
+/* bouton principal : double flèche dessinée dans le bouton (Oni, 06/11/2026) */
+.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary { background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); overflow: hidden; }
+.pc-go .go-arr { position: absolute; right: 6px; top: 4%; height: 92%; width: auto; aspect-ratio: 1; fill: #7a3f00; fill-opacity: .3; pointer-events: none; }
+.pc-go .go-lab { position: relative; z-index: 1; }
+/* étapes du tour : textes bien plus grands, presque toute la hauteur du chevron */
+.pc-steps .chev li { height: 58px; }
+.pc-steps .chev li > span { font: 800 clamp(1rem, 1.35vw, 1.5rem)/.95 var(--display); letter-spacing: .02em; text-transform: uppercase; padding: 0 8px 0 16px; }
+.pc-steps .chev li:first-child > span { padding-left: 10px; }
+/* cartes d'amélioration : plus de rond blanc ; l'icône en grand, discrète, derrière le texte */
+.uc-ic.im > span { display: none; }
+.uc-ic.im, .ur1 .uc-ic.im { width: 84px; }
+.uc-body { position: relative; isolation: isolate; overflow: hidden; }
+.uc-bgic { position: absolute; z-index: -1; right: 8px; top: 50%; transform: translateY(-50%); width: 76px; height: 76px; color: var(--c); opacity: .16; pointer-events: none; }
+.uc-bgic .i { width: 100%; height: 100%; stroke-width: 1.6; }
