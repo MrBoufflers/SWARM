@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.21 — 6 novembre 2026
+
+**Interface (Oni)** : nouvel **écran d'accueil** façon jeu vidéo : champ de bataille en plein écran (lent travelling, braises, brume), emblème du jeu et titre « SWARM & STEEL » en blanc (police Ethnocentric, livrée en image fixe comme le permet sa licence), accroche, et menu massif (nouvelle partie ou reprise, en ligne, mode découverte, statistiques ; règles et thème en haut à droite).
+
 ## v0.4.20 — 6 novembre 2026
 
 **Interface (Oni)** : nouvel **écran de victoire** sur PC, avec le cadre illustré du camp gagnant : « VICTOIRE », puis « La fusée décolle, la colonie est sauvée ! » ou « L'essaim a décimé la colonie ! », et le bouton « Rejouer » (plaque jaune ou orbe). Même animation d'apparition que l'écran de passage.
