@@ -680,3 +680,14 @@ body.pc .tok .au .i { width: max(11px, calc(var(--cell) / var(--n) * .26)); heig
 /* encart du tour (haut du plateau) : écritures plus grandes */
 .pc-corner .k { font-size: max(12px, calc(var(--cell) * .13)); }
 .pc-corner.turn b { font-size: max(18px, calc(var(--cell) * .27)); }
+/* bouton de passage (Oni, 06/11/2026) : jaune comme tous les éléments actionnables, sans forme de flèche */
+.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary {
+  clip-path: none; border-radius: 12px; padding: 14px 34px 14px 14px; color: #1b120a; text-shadow: none;
+  background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 48%, #d98a1e 100%);
+  border: 1px solid #ffdf9c; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45);
+  animation: goGlow 2.6s ease-in-out infinite; filter: none; }
+.pc-go button.primary::after { content: "»"; position: absolute; right: 12px; top: 50%; transform: translateY(-52%); font: 800 1.5rem/1 var(--body); opacity: .75; }
+.pc-go button.primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.pc-go button.primary:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(120,60,0,.35), 0 3px 8px rgba(0,0,0,.4); }
+@keyframes goGlow { 0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 0 rgba(240,164,58,0); }
+  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 18px rgba(240,164,58,.65); } }
