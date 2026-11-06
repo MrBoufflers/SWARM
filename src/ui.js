@@ -835,7 +835,11 @@
     switch (a) {
       // choix locaux (sans effet sur la partie)
       case "card": UI.sel = UI.sel === Number(d.uid) ? null : Number(d.uid); break;
-      case "creature": UI.selCreature = Number(d.id); UI.pop = Number(d.id); break;
+      case "creature": { // toucher à nouveau la créature choisie la relâche (pour pouvoir en choisir une autre sur une case où elle peut aller)
+        const id = Number(d.id);
+        if (UI.selCreature === id) { UI.selCreature = null; UI.pop = null; break; }
+        UI.selCreature = id; UI.pop = id; break;
+      }
       case "popClose": UI.pop = null; break;
       case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;

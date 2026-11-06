@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.15 — 6 novembre 2026
+
+**Correction (Oni)** : une case où l'on peut agir (déplacement d'une créature, déploiement, pose d'un bâtiment, cible d'attaque) reçoit le clic même quand des créatures la remplissent ; avant, le clic tombait sur le jeton. Toucher à nouveau la créature choisie la relâche, pour pouvoir en choisir une autre.
+
 ## v0.4.14 — 6 novembre 2026
 
 **Interface PC (Oni, d'après ses maquettes)** : sur un écran d'au moins 1100 px de large, nouvelle mise en page « jeu PC ». L'affichage sur téléphone et tablette ne change pas. Aucune règle modifiée.
