@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.18 — 6 novembre 2026
+
+**Correction (Oni)** : sur un ordinateur réglé pour « réduire les animations », les animations CSS (arrivée et départ de l'écran de passage, halo des étapes, bouton qui pulse…) restaient coupées même avec « Animations : oui » dans le jeu. Elles suivent maintenant le bouton du jeu (toujours « non » par défaut sur ces ordinateurs).
+
 ## v0.4.17 — 6 novembre 2026
 
 **Règles (Oni)**
