@@ -165,6 +165,7 @@
         <p class="h2-code"><span class="bigcode" data-code="${E(NET.code)}">${E(NET.code)}</span></p>
         <p class="h2-help">Donnez ce code à votre adversaire, ou envoyez-lui ce lien :</p>
         <p class="h2-link">${E(link)}</p>
+        <p class="h2-copy"><button data-a="copy" data-v="${E(NET.code)}" data-what="Code" class="h2-ic">Copier le code</button><button data-a="copy" data-v="${E(link)}" data-what="Lien" class="h2-ic">Copier le lien</button></p>
         <p class="h2-waitmsg">En attente de l'adversaire<span class="h2-dots"><i>.</i><i>.</i><i>.</i></span></p>
       </div>
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
@@ -892,6 +893,11 @@
     if (a === "tipOk") { SEEN.add(d.id); saveDisc(); render(); return; }
     if (a === "tipOff") { DISC = false; saveDisc(); flash("Conseils désactivés. Vous pouvez les réactiver dans « Règles »."); render(); return; }
     if (a === "reload") { location.reload(); return; }
+    if (a === "copy") { // salle d'attente : copier le code ou le lien d'invitation
+      const ok = () => flash(`${d.what} copié : ${d.v}`), ko = () => flash("Copie impossible : sélectionnez le texte à la main.");
+      try { navigator.clipboard.writeText(d.v).then(ok, ko); } catch (e) { ko(); }
+      return;
+    }
     if (a === "theme") { THEME = THEMES[(THEMES.indexOf(THEME) + 1) % THEMES.length]; try { localStorage.setItem(THEME_KEY, THEME); } catch (e) { /* rien */ } applyTheme(); render(); return; }
     if (MODE === "stats") { statsAction(a, d); return; }
     if (a === "anim") { animOn = !animOn; try { localStorage.setItem(ANIM_KEY, animOn ? "1" : "0"); } catch (e) { /* rien */ } render(); return; }
