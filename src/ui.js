@@ -61,9 +61,14 @@
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true; S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
-  function setPhaseHandoff() { // passe la main si le joueur actif change
+  // fenêtres de réaction (Oni, 06/11/2026) : pas d'écran de passage pour entrer dans la réaction de la colonie (A_react)
+  // ni pour en sortir ; un bandeau « RÉACTIONS ! » traverse l'écran à la place
+  const REACT = ["A_famine", "A_react"];
+  function setPhaseHandoff(prev) { // passe la main si le joueur actif change
     const w = who();
-    if (S.view !== w) { S.handoff = w; UI = { ...resetUI(), help: UI.help }; }
+    if (S.view === w) return;
+    if (S.phase === "A_react" || prev === "A_react") { S.view = w; S.handoff = null; UI = { ...resetUI(), help: UI.help }; return; }
+    S.handoff = w; UI = { ...resetUI(), help: UI.help };
   }
 
   // ---------------------------------------------------------------- rendu
@@ -884,13 +889,15 @@
   function play(type, args, onOk) {
     if (online()) { send(type, args, onOk); return; }
     S.fx = [];
+    const prev = S.phase;
     const refused = SF.apply(S, who(), type, args || {});
     const events = S.fx; delete S.fx;
     if (!refused && onOk) onOk();
-    if (!S.winner) setPhaseHandoff();
+    if (!S.winner) setPhaseHandoff(prev);
     save();
     if (S.winner) recordLocal();
-    animate(events).then(() => { render(); afterRender(events); });
+    const reacts = !REACT.includes(prev) && REACT.includes(S.phase);
+    animate(events).then(() => { render(); afterRender(events); if (reacts) reactBanner(); });
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
@@ -1264,6 +1271,16 @@
       if (e.t === "chantier") { const sl = document.querySelectorAll(`.atelier.lane-${e.lane} .slot:not(.empty)`); pop(sl[sl.length - 1]); }
     }
   }
+  // bandeau « RÉACTIONS ! » (Oni, 06/11/2026) : arrive de la droite, reste 1 s au centre, repart vers la gauche
+  function reactBanner() {
+    const old = document.querySelector(".react-banner"); if (old) old.remove();
+    const b = document.createElement("div");
+    b.className = "react-banner" + (animOn ? "" : " still");
+    b.setAttribute("role", "status");
+    b.innerHTML = `<div class="rb-band"></div><div class="rb-txt"><b>RÉACTIONS !</b><span>${S.phase === "A_famine" ? "La colonie peut jouer Famine" : "La colonie peut jouer un sortilège offensif"}</span></div>`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), animOn ? 2300 : 1600);
+  }
   function banner(text) { // bandeau de changement de tour (jeu en ligne)
     const b = document.createElement("div");
     b.className = "turn-banner " + (SF.actor(S) || ""); b.textContent = text;
@@ -1355,6 +1372,7 @@
   }
   function receive(j) { // nouvel état envoyé par le serveur (vue filtrée pour notre camp)
     if (!j || !j.S) return;
+    if (S && !REACT.includes(S.phase) && REACT.includes(j.S.phase)) NET.react = true;
     if (Number.isInteger(j.fxN)) NET.fx = j.fxN;
     const had = !!S, turnBefore = had && myTurn();
     if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help };
@@ -1367,6 +1385,7 @@
     receive(j);
     if (j.ok && onOk) onOk(); // ex. désélectionner la carte jouée, avant de redessiner
     render(); afterRender(j.fx || []);
+    if (NET.react) { NET.react = false; NET.banner = false; reactBanner(); }
     if (NET.banner) { NET.banner = false; banner(`À vous de jouer · ${PHASE_TXT[S.phase][1]}`); }
   }
   async function withBusy(f) {
