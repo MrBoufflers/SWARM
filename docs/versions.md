@@ -4,6 +4,19 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.14 — 6 novembre 2026
+
+**Interface PC (Oni, d'après ses maquettes)** : sur un écran d'au moins 1100 px de large, nouvelle mise en page « jeu PC ». L'affichage sur téléphone et tablette ne change pas. Aucune règle modifiée.
+- Plateau sur toute la hauteur de l'écran ; la colonie toujours à gauche, l'essaim toujours à droite ; le camp qui joue a son panneau complet, l'adversaire un résumé (améliorations de l'essaim en grosses icônes). La page ne défile plus : la main, les arbres et le journal défilent dans le panneau.
+- Menu du haut escamotable : il descend par-dessus le jeu quand la souris touche le haut de l'écran.
+- Manche et camp qui joue affichés dans les angles vides du haut du plateau ; bouton de fin d'étape (jaune) dans l'angle vide du bas, côté joueur.
+- Étapes du tour en chevrons (l'étape en cours a un halo qui pulse doucement) et consigne courte en bas du panneau ; l'explication complète est au survol du « i ».
+- Pendant le déploiement, l'essaim voit « biomasse disponible / budget du tour ». Fusée horizontale (12 étages).
+- Tuiles : nom en haut, PV au centre, capacités en bas, en plus gros. Supports : icône et dégâts agrandis. Repère de portée des tourelles sur les cases visées.
+- Créatures : jetons carrés qui remplissent la case et rétrécissent avec leur nombre ; attaque et PV en gros ; icône d'aura en haut à droite (blanche sur le soutien qui la donne, violette sur les créatures qui en profitent). Un clic sur une créature ouvre sa fiche à côté de son jeton ; un clic ailleurs la ferme.
+- Cartes de créatures en main : mots-clés seulement, détail au survol. Info-bulles qui suivent le thème clair / sombre.
+- Écran de passage : la partie en fond, assombrie ; la carte arrive du côté du joueur et repart de l'autre côté.
+
 ## v0.4.13 — 5 novembre 2026
 
 **Équilibrage (Oni)**

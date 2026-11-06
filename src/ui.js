@@ -70,9 +70,26 @@
   function render() {
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
     const bar = staleBar();
+    if (MODE === "stats" || MODE === "home" || !S) document.body.classList.remove("pc");
     if (MODE === "stats") { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + statsPage(); return; }
     if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + home() + (UI.help ? help() : ""); return; }
     document.body.dataset.view = S.view || "";
+    const pc = isPC() && !(online() && !NET.full);
+    document.body.classList.toggle("pc", pc);
+    if (pc) {
+      const main = S.handoff && !online() ? pcHandoff() : pcLayout(false);
+      $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + tipCard();
+      placePop();
+      // carte de passage qui arrive en glissant : animation signalée comme les autres (data-anim), ou coupée
+      const card = $(".pc-ho .ho-card:not(.leave)");
+      if (card && !animOn) card.style.animation = "none";
+      else if (card) {
+        document.body.dataset.anim = "1";
+        const done = () => { if (!FX.playing && !UI.leaving) document.body.dataset.anim = "0"; };
+        card.addEventListener("animationend", done, { once: true }); setTimeout(done, 700);
+      }
+      return;
+    }
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
     $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + tipCard();
   }
@@ -215,9 +232,16 @@
   // ---------------------------------------------------------------- boîte d'action
   function phaseBox() {
     if (S.winner) return "";
-    const p = PHASE_TXT[S.phase];
-    if (online() && !myTurn()) return `<section class="phase ${p[0]} waiting"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
+    const { p, body, acts, waiting } = phaseParts();
+    if (waiting) return `<section class="phase ${p[0]} waiting"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
       <p class="ph-txt">Au tour de ${E(SIDE[p[0]])} : en attente de votre adversaire…</p></section>`;
+    return `<section class="phase ${p[0]}"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
+      <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
+  }
+  // contenu de la boîte d'action (consignes, choix, boutons) : partagé par la mise en page mobile et la mise en page PC
+  function phaseParts(sh) { // sh : textes courts (mise en page PC, le détail est au survol)
+    const p = PHASE_TXT[S.phase];
+    if (online() && !myTurn()) return { p, body: "", acts: "", waiting: true };
     let body = "", acts = "";
     const ph = S.phase;
     if (ph === "A_famine") {
@@ -225,16 +249,16 @@
     } else if (ph === "A_start") {
       acts = `<button data-a="draw" class="primary">Piocher (palier ${SF.tier(S) + 1})</button>`;
     } else if (ph === "A_deploy" && UI.sap) {
-      body = `<p class="hint">Sapeur : choisissez le bâtiment à détruire dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
+      body = `<p class="hint">Sapeur : ${sh ? "bâtiment à détruire" : "choisissez le bâtiment à détruire"} dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
         SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;
     } else if (ph === "A_deploy") {
-      body = UI.sel ? `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez une case d'entrée surlignée.</p>` : "";
+      body = UI.sel ? (sh ? `<p class="hint"><b>${E(cardOf(UI.sel).name)}</b> → cliquez une entrée surlignée.</p>` : `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez une case d'entrée surlignée.</p>`) : (sh ? `<p class="hint">Choisissez une carte de votre main.</p>` : "");
       acts = `<button data-a="endDeploy" class="primary">Terminer les déploiements</button>`;
     } else if (ph === "A_upgrade") {
-      body = `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
+      body = sh ? `<p class="hint">Réserve <b>${S.reserve}</b> : investissez-la dans un arbre, ou gardez-la.</p>` : `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
       acts = `<button data-a="toAttacks" class="primary">Passer aux attaques</button>`;
     } else if (ph === "A_react") {
-      body = spellBox("off");
+      body = spellBox("off", sh);
       acts = `<button data-a="reactDone" class="primary">Terminer la réaction</button>`;
     } else if (ph === "A_attack") {
       // déplacements au choix (Oni, 04/11/2026) : toucher une créature, puis une case surlignée ou un bâtiment encadré
@@ -242,37 +266,37 @@
       const left = S.creatures.filter(c => SF.canAct(S, c)).length;
       if (sel) {
         const t = SF.strikeTargets(S, sel), n = SF.stepsLeft(S, sel);
-        body = `<p class="hint"><b>${E(sel.name)}</b> · ${posTxt(sel)} : ${n ? `encore ${n} déplacement${n > 1 ? "s" : ""} (cases surlignées, retraite comprise)` : "plus de déplacement ce tour"}${SF.attacks(sel) ? (t.length ? ", ou attaquez une cible encadrée" : "") : " · un soutien n'attaque pas"}.</p>` +
+        body = sh ? `<p class="hint"><b>${E(sel.name)}</b> : ${n ? `${n} déplacement${n > 1 ? "s" : ""} (cases surlignées)` : "plus de déplacement"}${SF.attacks(sel) ? (t.length ? " · cibles encadrées" : "") : " · n'attaque pas"}.</p>` + (t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "") : `<p class="hint"><b>${E(sel.name)}</b> · ${posTxt(sel)} : ${n ? `encore ${n} déplacement${n > 1 ? "s" : ""} (cases surlignées, retraite comprise)` : "plus de déplacement ce tour"}${SF.attacks(sel) ? (t.length ? ", ou attaquez une cible encadrée" : "") : " · un soutien n'attaque pas"}.</p>` +
           (t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "");
-      } else body = `<p class="hint">Touchez une créature, puis une case surlignée pour la déplacer (en avant, sur le côté ou en retraite), ou une cible encadrée pour attaquer. ${left ? `${left} créature${left > 1 ? "s peuvent" : " peut"} encore agir.` : ""}</p>`;
+      } else body = sh ? `<p class="hint">Touchez une créature pour la déplacer ou attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>` : `<p class="hint">Touchez une créature, puis une case surlignée pour la déplacer (en avant, sur le côté ou en retraite), ou une cible encadrée pour attaquer. ${left ? `${left} créature${left > 1 ? "s peuvent" : " peut"} encore agir.` : ""}</p>`;
       acts = `<button data-a="actAll">Tout résoudre automatiquement</button><button data-a="endA" class="primary">Fin du tour</button>`;
     } else if (ph === "D_main") {
-      body = spellBox("sup") + (UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
+      body = spellBox("sup", sh) + (UI.sel !== null && sh ? `<p class="hint"><b>${E(S.hand[UI.sel])}</b> → « Construire » dans un atelier.</p>` : UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
       acts = `<button data-a="build" class="primary">Construire, puis passer aux tirs</button>`;
     } else if (ph === "D_place") {
       const p = S.toPlace[0];
-      body = p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
+      body = p && sh ? `<p class="hint"><b>${E(p.tile)}</b> achevé : cliquez une case surlignée${S.toPlace.length > 1 ? ` (encore ${S.toPlace.length - 1})` : ""}.</p>` : p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
     } else if (ph === "D_fire") {
       if (UI.support) {
         const c = SF.supportTargets(S, UI.support);
-        body = `<p class="hint">Tourelle de niveau ${S.supports[UI.support]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : touchez une créature surlignée sur le plateau, ou choisissez-la ici.</p><div class="choices">` +
+        body = `<p class="hint">Tourelle ${["", "I", "II"][S.supports[UI.support]]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : ${sh ? "touchez une cible" : "touchez une créature surlignée sur le plateau, ou choisissez-la ici"}.</p><div class="choices">` +
           c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("") + `</div>`;
       } else {
         const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length);
-        body = ready.length ? `<p class="hint">Tourelles prêtes : cliquez une tourelle surlignée sur le plateau.</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
+        body = ready.length ? `<p class="hint">${sh ? "Cliquez une tourelle surlignée." : "Tourelles prêtes : cliquez une tourelle surlignée sur le plateau."}</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
       }
       acts = `<button data-a="autoFire">Tirs automatiques</button><button data-a="endD" class="primary">Terminer le tour</button>`;
     }
-    return `<section class="phase ${p[0]}"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
-      <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
+    return { p, body, acts, waiting: false };
   }
-  function spellBox(kind) {
+  function spellBox(kind, sh) {
     const list = S.spells.map((s, i) => [s, i]).filter(([s]) => SF.SPELLS[s].kind === kind && !(kind === "off" && s === "Famine"));
-    if (UI.spell !== null) return spellTargeting();
+    if (UI.spell !== null) return spellTargeting(sh);
     if (!list.length) return kind === "sup" ? "" : `<p class="hint">Aucun sortilège offensif jouable.</p>`;
+    if (sh) return `<div class="spells sh">` + list.map(([s, i]) => `<button data-a="spell" data-i="${i}" class="spell ${kind}" data-tip="${E(SF.SPELLS[s].text)}">${icon(spellIcon(s))}<span><b>${E(s)}</b></span></button>`).join("") + `</div>`;
     return `<div class="spells">` + list.map(([s, i]) => `<button data-a="spell" data-i="${i}" class="spell ${kind}">${icon(spellIcon(s))}<span><b>${E(s)}</b><small>${E(SF.SPELLS[s].text)}</small></span></button>`).join("") + `</div>`;
   }
-  function spellTargeting() {
+  function spellTargeting(sh) {
     const name = S.spells[UI.spell];
     const cancel = `<button data-a="spellCancel">Annuler</button>`;
     const crs = list => `<div class="choices">${list.map(c => `<button data-a="spellArg" data-v="${c.id}">${E(c.name)} · ${c.hp} PV · ${posTxt(c)}</button>`).join("")}${cancel}</div>`;
@@ -303,7 +327,7 @@
         break;
       default: inner = `<div class="choices"><button data-a="spellArg" data-v="go" class="primary">Jouer ${E(name)}</button>${cancel}</div>`;
     }
-    return `<div class="targeting"><p class="hint"><b>${E(name)}</b> : ${E(SF.SPELLS[name].text)}</p>${inner}</div>`;
+    return `<div class="targeting"><p class="hint"${sh ? ` data-tip="${E(SF.SPELLS[name].text)}"` : ""}><b>${E(name)}</b>${sh ? "" : ` : ${E(SF.SPELLS[name].text)}`}</p>${inner}</div>`;
   }
   // carte de sortilège en main : type, moment où le jouer, effet complet
   function spellCard(s) {
@@ -331,6 +355,13 @@
     const mover = S.phase === "A_attack" && S.view === "essaim" ? S.creatures.find(c => c.id === UI.selCreature && !c.acted) : null;
     const R = mover ? SF.reachable(S, mover) : {}, T = mover ? SF.strikeTargets(S, mover) : [];
     const mvAttr = k => R[k] ? ` data-a="moveTo" data-u="${R[k].u}" data-k="${R[k].k}"` : "";
+    // portée des tourelles (supports I et II) : les 8 cases autour ; repère affiché sur les cases sans bâtiment (PC)
+    const RNG = {};
+    for (const [sk, l] of Object.entries(S.supports)) if (l < 3) {
+      const [sx, sy] = SF.parse(sk);
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (dx || dy) { const kk = SF.key(sx + dx, sy + dy); RNG[kk] = (RNG[kk] || 0) + 1; }
+    }
+    const rng = k => RNG[k] && !S.tiles[k] ? `<span class="rng" title="À portée de ${RNG[k]} tourelle${RNG[k] > 1 ? "s" : ""}">${icon("tourelle")}${RNG[k] > 1 ? `<b>${RNG[k]}</b>` : ""}</span>` : "";
     let html = "";
     for (let y = 4; y >= -4; y--) for (let x = -4; x <= 4; x++) {
       const r = SF.ring(x, y), k = SF.key(x, y);
@@ -341,7 +372,7 @@
         if (Math.abs(u) > 2) { html += `<div class="cell void"></div>`; continue; }
         const crs = S.creatures.filter(c => c.lane === lane && c.k === 4 && c.u === u);
         const hot = canDeployHere(lane, u);
-        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}${R[k] ? " mv" : ""}" data-xy="${k}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : mvAttr(k)}><span class="col">${SF.COLS[u + 2]}</span>${tokens(crs)}</div>`;
+        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}${R[k] ? " mv" : ""}" data-xy="${k}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : mvAttr(k)}><span class="col">${SF.COLS[u + 2]}</span>${rng(k)}${tokens(crs)}</div>`;
         continue;
       }
       if (x === 0 && y === 0) {
@@ -372,7 +403,7 @@
       }
       const stased = S.stase.includes(k);
       const atk = !target && T.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -403,16 +434,35 @@
   const short = n => ({ "Haie d'épines": "Haie", "Mur hérissé": "Hérissé", "Avant-poste du Nord": "Av.-poste N", "Avant-poste de l'Est": "Av.-poste E", "Avant-poste du Sud": "Av.-poste S", "Avant-poste de l'Ouest": "Av.-poste O", "Ligne de front": "Front", "Observatoire": "Observ.", "Laboratoire": "Labo", "Baraquement": "Baraq." }[n] || n);
   function tokens(crs) {
     if (!crs.length) return "";
-    return `<div class="toks">` + crs.map(c => {
+    return `<div class="toks" style="--n:${Math.ceil(Math.sqrt(crs.length))}">` + crs.map(c => {
       const t = SF.CREATURES[c.name].type;
       // tourelle choisie : toucher une créature à portée la vise directement (Oni, 04/11/2026)
       const tgt = S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c);
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" && !SF.canAct(S, c) ? " done" : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
-      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${tgt ? " : tirer dessus" : ""}"><span>${SF.effAtq(S, c)}</span><span>${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      const au = auraOf(c);
+      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? `<i class="au ${au.kind}">${icon(au.icon)}</i>` : ""}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
-  function detail() {
-    const c = S.creatures.find(o => o.id === UI.selCreature);
+  // aura d'une créature (jetons) : un soutien qui en donne une (icône blanche), ou une créature qui en profite (icône violette)
+  const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
+  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "frenesie" } };
+  function auraGiven(c) { // icône et nom de l'aura donnée par ce soutien, ou null
+    const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return null;
+    if (AURA_CAPS.includes(b.cap)) return { icon: capIcon(b.cap), name: b.capName };
+    const u = S.upgrades.soutien;
+    for (const r of ["r1", "r2"]) if (u[r] && UP_AURA[r][u[r]]) return { icon: UP_AURA[r][u[r]], name: SF.TREES.soutien[u[r] + r[1]][0] };
+    return null;
+  }
+  function auraOf(c) {
+    const g = auraGiven(c);
+    if (g) return { kind: "give", icon: g.icon, txt: `donne : ${g.name}` };
+    const got = SF.caseMates(S, c).map(auraGiven).filter(Boolean);
+    if (!got.length) return null;
+    const icons = [...new Set(got.map(x => x.icon))];
+    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: `profite de : ${[...new Set(got.map(x => x.name))].join(", ")}` };
+  }
+  function detail(id) {
+    const c = S.creatures.find(o => o.id === (id === undefined ? UI.selCreature : id));
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
@@ -434,54 +484,70 @@
   }
 
   // ---------------------------------------------------------------- panneaux
+  // ateliers de la colonie : une ligne par lane (emplacements de chantier + travailleurs affectés) ;
+  // pc : toujours 2 emplacements, le second verrouillé tant que le palier 6 n'est pas atteint
+  function ateliersHtml(mine, pc) {
+    let out = "";
+    for (const l of SF.LANES) {
+      const chs = S.chantiers[l];
+      const n = pc ? Math.max(2, S.chPerLane) : S.chPerLane;
+      const slots = Array.from({ length: n }, (_, i) => {
+        const ch = chs[i];
+        if (i >= S.chPerLane) return `<div class="slot empty lock" title="Second chantier au palier 6 de la fusée">${pc ? icon("fusee") + "6" : ""}</div>`;
+        if (!ch) return mine && S.phase === "D_main" && UI.sel !== null && UI.spell === null && chs.length < S.chPerLane
+          ? `<button data-a="startCh" data-l="${l}" class="slot empty go">${pc ? `Construire<small>${E(short(S.hand[UI.sel]))}</small>` : `Construire ici : ${E(S.hand[UI.sel])}`}</button>` : `<div class="slot empty">libre</div>`;
+        const hide = !ch.tile || (SF.TILES[ch.tile].camo && !mine);
+        const x = mine && ch.fresh && S.phase === "D_main" ? ` <button data-a="cancelCh" data-l="${l}" data-i="${i}" class="x" aria-label="Annuler">×</button>` : "";
+        return pc ? `<div class="slot" title="${E(hide ? "Tuile cachée" : ch.tile)} : ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}"><span class="sn">${E(hide ? "?" : short(ch.tile))}</span><b>${ch.left}</b>${x}</div>`
+          : `<div class="slot">${E(hide ? "?" : ch.tile)} · ${ch.left} pt${ch.left > 1 ? "s" : ""}${x}</div>`;
+      }).join("");
+      const step = mine && S.phase === "D_main" ? `<span class="step"><button data-a="alloc" data-l="${l}" data-d="-1" aria-label="Retirer un point">−</button><b>${S.alloc[l]}</b><button data-a="alloc" data-l="${l}" data-d="1" aria-label="Ajouter un point">+</button></span>` : `<b class="pts">${S.alloc[l]}</b>`;
+      out += `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${slots}</div>${mine || !pc ? step : ""}</div>`;
+    }
+    return out;
+  }
+  const tileHandHtml = mine => mine
+    ? `<div class="hand">${S.hand.map((t, i) => `<button data-a="tile" data-i="${i}" class="tcard${UI.sel === i ? " sel" : ""}"${S.phase === "D_main" ? "" : " disabled"}>${tileCard(t)}</button>`).join("")}</div>`
+    : `<p class="hidden-hand">${S.hand.length} tuiles en main (cachées)</p>`;
+  const spellsHtml = mine => mine ? (S.spells.length ? `<div class="spells">${S.spells.map(s => spellCard(s)).join("")}</div>` : `<span class="muted">aucun</span>`) : `<span class="muted">${S.spells.length} en main (cachés)</span>`;
   function colonyPanel() {
     const mine = S.view === "colonie";
     const pts = SF.totalPoints(S), used = SF.allocated(S);
     const floors = Array.from({ length: 12 }, (_, i) => `<i class="fl${i < S.floors ? " on" : ""}${[2, 5, 8, 11].includes(i) ? " ms" : ""}" tabindex="0" data-tip="${E(floorTip(i + 1))}">${i + 1}</i>`).join("");
-    let ateliers = "";
-    for (const l of SF.LANES) {
-      const chs = S.chantiers[l];
-      const slots = Array.from({ length: S.chPerLane }, (_, i) => {
-        const ch = chs[i];
-        if (!ch) return mine && S.phase === "D_main" && UI.sel !== null && UI.spell === null && chs.length < S.chPerLane
-          ? `<button data-a="startCh" data-l="${l}" class="slot empty go">Construire ici : ${E(S.hand[UI.sel])}</button>` : `<div class="slot empty">libre</div>`;
-        const hide = !ch.tile || (SF.TILES[ch.tile].camo && !mine);
-        return `<div class="slot">${E(hide ? "?" : ch.tile)} · ${ch.left} pt${ch.left > 1 ? "s" : ""}${mine && ch.fresh && S.phase === "D_main" ? ` <button data-a="cancelCh" data-l="${l}" data-i="${i}" class="x" aria-label="Annuler">×</button>` : ""}</div>`;
-      }).join("");
-      const step = mine && S.phase === "D_main" ? `<span class="step"><button data-a="alloc" data-l="${l}" data-d="-1" aria-label="Retirer un point">−</button><b>${S.alloc[l]}</b><button data-a="alloc" data-l="${l}" data-d="1" aria-label="Ajouter un point">+</button></span>` : `<b class="pts">${S.alloc[l]}</b>`;
-      ateliers += `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${slots}</div>${step}</div>`;
-    }
-    const hand = mine
-      ? `<div class="hand">${S.hand.map((t, i) => `<button data-a="tile" data-i="${i}" class="tcard${UI.sel === i ? " sel" : ""}"${S.phase === "D_main" ? "" : " disabled"}>${tileCard(t)}</button>`).join("")}</div>`
-      : `<p class="hidden-hand">${S.hand.length} tuiles en main (cachées)</p>`;
-    const spells = mine ? (S.spells.length ? `<div class="spells">${S.spells.map(s => spellCard(s)).join("")}</div>` : `<span class="muted">aucun</span>`) : `<span class="muted">${S.spells.length} en main (cachés)</span>`;
     return `<h3>${icon("fusee")} Colonie</h3>
       <div class="kv"><span>Travailleurs</span><b>${S.workersBase}${SF.bonusWorkers(S) ? ` + ${SF.bonusWorkers(S)}` : ""}</b></div>
       <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
       <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 2 points (étages 1 à 3), puis 4, 6 et 8 après les paliers 3 · 6 · 9.</p>
-      <h4 data-fx="ateliers">Ateliers ${mine && S.phase === "D_main" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>${ateliers}
-      <h4 data-fx="tilehand">Main de tuiles</h4>${hand}<h4>Sortilèges</h4>${spells}`;
+      <h4 data-fx="ateliers">Ateliers ${mine && S.phase === "D_main" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>${ateliersHtml(mine, false)}
+      <h4 data-fx="tilehand">Main de tuiles</h4>${tileHandHtml(mine)}<h4>Sortilèges</h4>${spellsHtml(mine)}`;
   }
-  function swarmPanel() {
-    const mine = S.view === "essaim";
-    const t = SF.TIERS[SF.tier(S)];
-    const acquired = ty => { // améliorations acquises pour ce type
-      const u = S.upgrades[ty], out = [];
-      if (u.r1) out.push(SF.TREES[ty][u.r1 + "1"]);
-      if (u.r2) out.push(SF.TREES[ty][u.r2 + "2"]);
-      return out;
-    };
-    const hand = mine
-      ? (S.handA.length ? `<div class="hand">${S.handA.map(c => {
-        const b = SF.CREATURES[c.name];
-        const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
-        const ups = acquired(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
-        return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
+  const acquiredUps = ty => { // améliorations acquises pour ce type
+    const u = S.upgrades[ty], out = [];
+    if (u.r1) out.push(SF.TREES[ty][u.r1 + "1"]);
+    if (u.r2) out.push(SF.TREES[ty][u.r2 + "2"]);
+    return out;
+  };
+  function swarmHandHtml(mine, sh) {
+    if (!mine) return `<p class="hidden-hand">${S.handA.length} cartes en main (cachées)</p>`;
+    if (!S.handA.length) return `<p class="muted">Pas de cartes en main.</p>`;
+    return `<div class="hand">${S.handA.map(c => {
+      const b = SF.CREATURES[c.name];
+      const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
+      if (sh) { // mots-clés seulement, le détail au survol (comme les tuiles)
+        const chips = (b.cap ? b.capName.split(" · ").map(n => `<span class="cap" tabindex="0" data-tip="${E(b.capName + " : " + b.capText)}">${icon(capIcon(b.cap))}${E(n)}</span>`).join("") : "")
+          + acquiredUps(b.type).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon("palier")}${E(n)}</span>`).join("");
+        return `<button data-a="card" data-uid="${c.uid}" class="ccard sh ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
           <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
-          <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""}</span>
-          ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
-      }).join("")}</div>` : `<p class="muted">Pas de cartes en main.</p>`)
-      : `<p class="hidden-hand">${S.handA.length} cartes en main (cachées)</p>`;
+          <span class="stats"><span class="st atq">${icon("atq")}${b.type === "soutien" ? 0 : atq}</span><span class="st pv">${icon("pv")}${pv}</span></span>${chips ? `<span class="caps">${chips}</span>` : ""}</button>`;
+      }
+      const ups = acquiredUps(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
+      return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
+        <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
+        <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""}</span>
+        ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
+    }).join("")}</div>`;
+  }
+  function treesHtml(mine) {
     let trees = "";
     const POS = { A1: "Côté A", B1: "Côté B", A2: "Après A", C2: "Centre", B2: "Après B" };
     for (const ty of ["aggro", "tank", "soutien"]) {
@@ -503,13 +569,204 @@
         <span class="rk">Rang 1 · ${SF.COST_R1} biomasse · 1 choix sur 2 · ajoute les cartes de niveau 2</span><div class="r">${node("A1")}${node("B1")}</div>
         <span class="rk">Rang 2 · ${SF.COST_R2} biomasse · 1 choix sur 3 · ajoute les cartes de niveau 3</span><div class="r r3">${node("A2")}${node("C2")}${node("B2")}</div></div>`;
     }
+    return trees;
+  }
+  function swarmPanel() {
+    const mine = S.view === "essaim";
+    const t = SF.TIERS[SF.tier(S)];
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
       <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${t.n.join("/")} · plafond ${SF.capOf(S)}</b></div>
       <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
-      <h4>Main</h4>${hand}<h4>Arbres d'amélioration</h4>${trees}`;
+      <h4>Main</h4>${swarmHandHtml(mine)}<h4>Arbres d'amélioration</h4>${treesHtml(mine)}`;
+  }
+  // ================================================================ mise en page PC (Oni, 06/11/2026)
+  // Écran ≥ 1100 px : plateau sur toute la hauteur, panneau du joueur d'un côté, résumé de l'adversaire de l'autre
+  // (colonie toujours à gauche, essaim toujours à droite), menu escamotable en haut, rien ne fait défiler la page.
+  const PC_MQ = window.matchMedia ? matchMedia("(min-width: 1100px) and (min-height: 620px)") : null;
+  const isPC = () => !!(PC_MQ && PC_MQ.matches);
+  if (PC_MQ && PC_MQ.addEventListener) PC_MQ.addEventListener("change", () => render());
+  // étapes du tour de chaque camp (chevrons) ; la réaction de la colonie a lieu pendant le tour de l'essaim
+  const PC_STEPS = {
+    essaim: [["A_start", "Pioche"], ["A_deploy", "Déploiement"], ["A_upgrade", "Améliorations"], ["A_attack", "Attaques"]],
+    colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_place", "Pose"], ["D_fire", "Tirs"]],
+  };
+  function pcSteps(side) {
+    const ph = S.phase === "A_famine" ? "A_react" : S.phase;
+    const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
+    const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
+    return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
+  }
+  // fusée horizontale (étage 1 à gauche) ; grid : 6 × 2 dans le résumé étroit ; info-bulle de chaque étage
+  function pcRocket(grid) {
+    const fl = Array.from({ length: 12 }, (_, i) => {
+      const n = i + 1, on = n <= S.floors, cur = n === S.floors + 1;
+      const fill = cur ? Math.round(100 * S.rocketPts / SF.floorCost(S)) : 0;
+      return `<i class="fl${on ? " on" : ""}${n % 3 === 0 ? " ms" : ""}${cur ? " cur" : ""}" tabindex="0" data-tip="${E(floorTip(n))}"${cur ? ` style="--p:${fill}%"` : ""}>${n}</i>`;
+    }).join("");
+    return `<div class="pc-rocket${grid ? " grid" : ""}" aria-label="Fusée : ${S.floors} étages sur 12"><span class="rk-lab">${icon("fusee")}<b>${S.floors}</b>/12 · ${S.rocketPts}/${SF.floorCost(S)} pts</span><div class="floors h">${fl}</div></div>`;
+  }
+  const bigStat = (n, lab, tip, cls = "") => `<div class="pc-big ${cls}" tabindex="0" data-tip="${E(tip)}"><b>${n}</b><span>${lab}</span></div>`;
+  const box2 = (n, lab, tip, extra = "") => `<div class="pc-box" tabindex="0" data-tip="${E(tip)}"${extra}><b>${n}</b><span>${lab}</span></div>`;
+  // zone d'action du panneau du joueur : étape en cours (explication au survol de ⓘ), consigne courte et choix ; boutons en bas
+  function pcAction(side) {
+    if (S.winner) return { top: "", acts: "" };
+    const { p, body, acts, waiting } = phaseParts(true);
+    const head = `<div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="info" tabindex="0" data-tip="${E(p[2])}">i</span></div>`;
+    if (waiting) return { top: `<section class="phase ${p[0]} waiting">${head}<p class="hint">En attente de votre adversaire…</p></section>`, acts: "" };
+    return { top: `<section class="phase ${p[0]}">${head}${body}</section>`, acts: p[0] === side || !online() ? acts : "" };
+  }
+  function pcSwarmOwn() {
+    const t = SF.TIERS[SF.tier(S)], next = SF.TIERS[SF.tier(S) + 1];
+    const deploy = S.phase === "A_deploy";
+    const full = S.famine ? SF.famineBudget(S.biomass) : S.biomass; // budget du tour (Famine : biomasse ÷ 2)
+    const { top } = pcAction("essaim");
+    const big = deploy
+      ? bigStat(`${S.budget}<small>/${full}</small>`, "disponible / budget", `Biomasse disponible ce tour : ${S.budget} sur un budget de ${full}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}. Le reste ira à la réserve.`, "bio")
+      : bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : " · dernier palier atteint"}`, "bio");
+    return `<aside class="panel essaim pc-own">
+      <div class="po-head">${icon("spores", "i logo")}<b class="nm">Essaim</b><span class="bigwrap" data-fx="budget">${big}</span></div>
+      <div class="pc-boxes">
+        ${box2(S.reserve, "réserve", "Réserve : biomasse non investie, gardée d'un tour à l'autre")}
+        ${deploy ? box2(S.biomass, "biomasse", `Biomasse totale : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`) : ""}
+        ${box2(SF.tier(S) + 1, "palier", `Palier ${SF.tier(S) + 1}${next ? ` · palier suivant à ${next.min} biomasse` : ""}`)}
+        ${box2(SF.capOf(S), "max / lane", "Plafond de créatures par lane")}
+      </div>
+      <div class="pc-lines"><span>Niveau de pioche <b>${t.n.join(" / ")}</b></span><span>Pioche N1 / N2 / N3 <b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></span></div>
+      <div class="po-scroll">
+        <h4>Main <span class="small">${S.handA.length} carte${S.handA.length > 1 ? "s" : ""}</span></h4>${swarmHandHtml(true, true)}
+        <h4>Arbres d'amélioration</h4>${treesHtml(true)}
+        ${logPanel()}</div>
+      <div class="po-bottom">${pcSteps("essaim")}${top}</div></aside>`;
+  }
+  function pcColonyOwn() {
+    const pts = SF.totalPoints(S), used = SF.allocated(S), bonus = SF.bonusWorkers(S);
+    const { top } = pcAction("colonie");
+    return `<aside class="panel colonie pc-own"><div class="po-main">
+      <div class="po-head">${icon("fusee", "i logo")}<b class="nm">Colonie</b>
+        ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "travailleurs", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}</div>
+      ${pcRocket(false)}
+      <div class="pc-boxes">
+        ${box2(SF.tech(S), "techno", `Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour`)}
+        ${box2(SF.spellsPerTurn(S), "sorts / tour", "Sortilèges piochés par tour")}
+        ${box2(S.spells.length, "sorts en main", "Sortilèges en main")}
+      </div>
+      <h4 data-fx="ateliers">Ateliers ${S.phase === "D_main" && S.view === "colonie" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>
+      <div class="pc-ateliers">${ateliersHtml(S.view === "colonie", true)}</div>
+      <div class="po-scroll">
+        <h4 data-fx="tilehand">Main de tuiles <span class="small">${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}</span></h4>${tileHandHtml(true)}
+        <h4>Sortilèges</h4>${spellsHtml(true)}
+        ${logPanel()}</div>
+      <div class="po-bottom">${pcSteps("colonie")}${top}</div></div></aside>`;
+  }
+  // résumé de la colonie vu par l'essaim (colonne de gauche)
+  function pcColonySum() {
+    const bonus = SF.bonusWorkers(S);
+    const at = SF.LANES.map(l => {
+      const chs = S.chantiers[l];
+      const blocks = Array.from({ length: Math.max(2, S.chPerLane) }, (_, i) => {
+        if (i >= S.chPerLane) return `<span class="slot empty lock" title="Second chantier au palier 6"></span>`;
+        const ch = chs[i]; if (!ch) return `<span class="slot empty"></span>`;
+        const hide = !ch.tile || SF.TILES[ch.tile].camo;
+        return `<span class="slot" tabindex="0" data-tip="${E(`${hide ? "Tuile cachée" : ch.tile} : ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}`)}"><span class="sn">${E(hide ? "?" : short(ch.tile))}</span><b>${ch.left}</b></span>`;
+      }).join("");
+      return `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${blocks}</div></div>`;
+    }).join("");
+    return `<aside class="panel colonie mini pc-sum"><div class="ps-main">
+      <h3>${icon("fusee")} Colonie</h3>
+      ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "pop.", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}
+      <div class="ps-rows">
+        <span tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b> techno</span>
+        <span tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b> sort${S.spells.length > 1 ? "s" : ""}</span>
+        <span tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b> tuiles</span>
+      </div>
+      ${pcRocket(true)}
+      <h4 data-fx="ateliers">Ateliers</h4><div class="pc-ateliers sum">${at}</div></div></aside>`;
+  }
+  // résumé de l'essaim vu par la colonie (colonne de droite) : améliorations en grosses icônes
+  function pcSwarmSum() {
+    const next = SF.TIERS[SF.tier(S) + 1];
+    const turn = ["A_deploy", "A_upgrade", "A_attack", "A_react"].includes(S.phase);
+    const POS = { A1: "rang 1, côté A", B1: "rang 1, côté B", A2: "rang 2, après A", C2: "rang 2, centre", B2: "rang 2, après B" };
+    const trees = ["aggro", "tank", "soutien"].map(ty => {
+      const T = SF.TREES[ty];
+      const node = slot => {
+        const st = SF.nodeState(S, ty, slot), cost = SF.nodeCost(slot), got = SF.invested(S, ty, slot);
+        const state = st === "taken" ? "acquis" : st === "closed" ? "fermé" : st === "needR1" ? "demande d'abord un rang 1" : got ? `${got} / ${cost} investis` : `${cost} biomasse`;
+        return `<span class="node un ${st}${got && st !== "taken" ? " prog" : ""}" data-node="${ty}:${slot}" tabindex="0"
+          data-tip="${E(`${T[slot][0]} (${POS[slot]}) : ${T[slot][1]}\n${state}`)}">${icon(NODE_ICON[ty][slot])}<span class="bar"><i style="width:${Math.round(100 * got / cost)}%"></i></span></span>`;
+      };
+      return `<div class="utree ${ty}"><span class="ut">${icon(ty)}<small>${ty}</small></span><div class="ur">${node("A1")}${node("B1")}</div><div class="ur r2">${node("A2")}${node("C2")}${node("B2")}</div></div>`;
+    }).join("");
+    return `<aside class="panel essaim mini pc-sum"><div class="ps-main">
+      <h3>${icon("spores")} Essaim</h3>
+      ${bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`, "bio")}
+      <div class="ps-rows">
+        ${turn ? `<span data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b> budget</span>` : ""}
+        <span tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b> réserve</span>
+        <span tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche ${SF.TIERS[SF.tier(S)].n.join(" / ")} (niveaux 1 / 2 / 3)">${icon("palier")}<b>${SF.capOf(S)}</b> max / lane</span>
+        <span class="hidden-hand" tabindex="0" data-tip="${S.handA.length} cartes en main (cachées) · pioches ${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}">${icon("sort")}<b>${S.handA.length}</b> cartes</span>
+      </div>
+      <h4>Améliorations</h4><div class="utrees big">${trees}</div></div></aside>`;
+  }
+  // plateau au centre, manche et camp qui joue dans les angles morts du haut
+  // boutons de l'étape en cours : dans l'angle mort en bas du plateau, du côté du joueur
+  function pcButtons() {
+    if (!S.view || S.winner || S.handoff) return "";
+    const { acts } = pcAction(S.view);
+    return acts ? `<div class="pc-go ${S.view === "colonie" ? "l" : "r"} ${S.view} acts">${acts}</div>` : "";
+  }
+  function pcCenter() {
+    const p = PHASE_TXT[S.phase] || ["", "", ""];
+    const roundSide = S.view === "colonie" ? "l" : "r";
+    const turn = S.winner ? `<b>Partie terminée</b>` : `<span class="k">À ${E(SIDE[p[0]])} de jouer</span><b>${E(p[1])}</b>`;
+    return `<section class="pc-center"><div class="board-wrap">${board()}
+      <div class="pc-corner ${roundSide} round"><span class="k">Manche</span><b>${S.round}</b></div>
+      <div class="pc-corner ${roundSide === "l" ? "r" : "l"} turn ${p[0]}">${turn}</div>
+      ${pcButtons()}
+      ${S.winner ? winner() : ""}</div>${UI.pop != null && S.creatures.some(o => o.id === UI.pop) ? `<div class="cpop" role="dialog" aria-label="Détail de la créature"><button data-a="popClose" class="x close" aria-label="Fermer">×</button>${detail(UI.pop)}</div>` : ""}</section>`;
+  }
+  function pcLayout(bg) {
+    const v = bg ? null : S.view;
+    const left = v === "colonie" ? pcColonyOwn() : pcColonySum();
+    const right = v === "essaim" ? pcSwarmOwn() : pcSwarmSum();
+    return `<main class="pc-layout ${v === "colonie" ? "me-colonie" : v === "essaim" ? "me-essaim" : "me-none"}">${left}${pcCenter()}${right}</main>`;
+  }
+  // fenêtre de détail d'une créature : à côté de son jeton, sans sortir de l'écran
+  function placePop() {
+    const pop = $(".cpop"), tok = pop && $(`.board .tok[data-id="${UI.pop}"]`); if (!pop || !tok) return;
+    const r = tok.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    let x = r.right + 12; if (x + w > innerWidth - 8) x = r.left - w - 12; x = Math.max(8, x);
+    const y = Math.min(Math.max(8, r.top + r.height / 2 - h / 2), innerHeight - h - 8);
+    pop.style.left = x + "px"; pop.style.top = y + "px";
+  }
+  // info-bulles en PC : une bulle flottante (jamais coupée par une zone défilante)
+  function tipShow(el) {
+    let t = $("#tipbox"); if (!t) { t = document.createElement("div"); t.id = "tipbox"; document.body.appendChild(t); }
+    t.textContent = el.dataset.tip; t.hidden = false;
+    const r = el.getBoundingClientRect(), w = t.offsetWidth, h = t.offsetHeight;
+    let x = r.right + 10; if (x + w > innerWidth - 8) x = r.left - w - 10; if (x < 8) x = Math.min(innerWidth - w - 8, Math.max(8, r.left));
+    let y = r.top + r.height / 2 - h / 2; if (x === r.left || (x > r.left && x < r.right)) y = r.bottom + 8;
+    t.style.left = x + "px"; t.style.top = Math.min(Math.max(8, y), innerHeight - h - 8) + "px";
+  }
+  const tipHide = () => { const t = $("#tipbox"); if (t) t.hidden = true; };
+  for (const ev of ["mouseover", "focusin"]) document.addEventListener(ev, e => {
+    if (!document.body.classList.contains("pc")) return;
+    const el = e.target.closest && e.target.closest("[data-tip]"); if (el) tipShow(el); else tipHide();
+  });
+  document.addEventListener("mouseout", e => { if (!e.relatedTarget || !(e.relatedTarget.closest && e.relatedTarget.closest("[data-tip]"))) tipHide(); });
+  // écran de passage : la partie en fond (vue publique, sans les mains), assombrie ; la carte arrive du côté du joueur
+  function pcHandoff() {
+    const w = S.handoff, keep = S.view;
+    S.view = "essaim"; // fond rendu comme le voit l'essaim : tuiles camouflées cachées, aucune main affichée
+    let bgHtml; try { bgHtml = pcLayout(true); } finally { S.view = keep; }
+    return `<div class="pc-bg" aria-hidden="true" inert>${bgHtml}</div>
+      <section class="pc-ho ${w}"><div class="ho-card from-${w === "colonie" ? "l" : "r"}${UI.leaving ? " leave" : ""}">${icon(w === "essaim" ? "spores" : "fusee", "i big")}
+      <p class="ho-k">Manche ${S.round}</p><h2>C'est à ${SIDE[w]} de jouer</h2>
+      <p>Passez l'appareil. Les mains et les tuiles camouflées de l'autre camp restent cachées.</p>
+      <button data-a="reveal" class="primary">Je joue ${SIDE[w]}</button></div></section>`;
   }
   function logPanel() {
     return `<h4>Journal</h4><ol class="log">${S.log.slice(0, 40).map(l => `<li class="${l.who}"><span>M${l.r}</span>${E(l.msg)}</li>`).join("")}</ol>`;
@@ -567,12 +824,19 @@
       if (online()) { if (S.winner) send("rematch", {}); return; }
       if (!S || S.winner || confirmNew()) { clearSave(); newGame(); } return;
     }
-    if (a === "reveal") { if (online()) return; S.view = S.handoff; S.handoff = null; save(); render(); return; }
+    if (a === "reveal") {
+      if (online() || UI.leaving) return;
+      const go = () => { UI.leaving = false; S.view = S.handoff; S.handoff = null; save(); render(); };
+      const card = document.querySelector(".pc-ho .ho-card");
+      if (card && animOn) { UI.leaving = true; card.classList.add("leave"); document.body.dataset.anim = "1"; setTimeout(() => { document.body.dataset.anim = "0"; go(); }, 380); } else go();
+      return;
+    }
     if (S.winner) return;
     switch (a) {
       // choix locaux (sans effet sur la partie)
       case "card": UI.sel = UI.sel === Number(d.uid) ? null : Number(d.uid); break;
-      case "creature": UI.selCreature = Number(d.id); break;
+      case "creature": UI.selCreature = Number(d.id); UI.pop = Number(d.id); break;
+      case "popClose": UI.pop = null; break;
       case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
       case "spellCancel": UI.spell = null; UI.picks = []; UI.recoHand = null; break;
@@ -1056,6 +1320,9 @@
   document.addEventListener("click", e => {
     if (FX.playing) { FX.skip = true; return; } // un toucher pendant une animation la termine
     const el = e.target.closest("[data-a]");
+    tipHide();
+    // fenêtre de détail d'une créature : un clic ailleurs la ferme (la créature reste choisie pour ses déplacements)
+    if (UI.pop != null && !e.target.closest(".cpop") && !(el && el.dataset.a === "creature")) { UI.pop = null; if (!el || el.disabled) { render(); return; } }
     if (!el || el.disabled) return;
     handle(el.dataset.a, el.dataset);
   });
