@@ -941,3 +941,4 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
 @keyframes h2Dot { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
 .h2-copy { display: flex; justify-content: center; gap: 8px; margin-top: 10px !important; flex-wrap: wrap; }
 .h2-copy .h2-ic { cursor: pointer; }
+.h2-menu.h2-quit { width: min(520px, 100%); animation-delay: 1s; }

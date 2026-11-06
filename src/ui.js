@@ -154,7 +154,7 @@
   function waitingRoom() {
     const link = location.origin + location.pathname + "?code=" + NET.code;
     return `<section class="home2 h2-wait ${NET.side}">${homeBackdrop()}
-      <div class="h2-top"><button data-a="help" class="h2-ic">Règles</button><button data-a="quit" class="h2-ic">Quitter</button></div>
+      <div class="h2-top"><button data-a="help" class="h2-ic">Règles</button></div>
       <div class="h2-hero small">
         <div class="h2-emblem" aria-hidden="true"><span class="h2-glow"></span><span class="h2-mark"></span></div>
         <h1 class="h2-title"><span class="h2-word" aria-hidden="true"></span><span class="sr">Swarm &amp; Steel</span></h1>
@@ -168,6 +168,7 @@
         <p class="h2-copy"><button data-a="copy" data-v="${E(NET.code)}" data-what="Code" class="h2-ic">Copier le code</button><button data-a="copy" data-v="${E(link)}" data-what="Lien" class="h2-ic">Copier le lien</button></p>
         <p class="h2-waitmsg">En attente de l'adversaire<span class="h2-dots"><i>.</i><i>.</i><i>.</i></span></p>
       </div>
+      <div class="h2-menu h2-quit"><button data-a="quit" class="h2-btn">Quitter</button></div>
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
     </section>`;
   }
