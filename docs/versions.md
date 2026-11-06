@@ -4,6 +4,14 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.4.28 — 6 novembre 2026
+
+**Interface (Oni)**
+- **Réactions** : quand la colonie peut réagir (Famine, sortilèges offensifs), un bandeau « RÉACTIONS ! » traverse l'écran (arrivée par la droite, 1 s au centre, départ par la gauche). Sur un même appareil, plus d'écran de passage pour entrer dans la réaction de la colonie ni pour en sortir (choix d'Oni : l'essaim peut alors voir la main de la colonie). En ligne, le bandeau s'affiche chez les deux joueurs.
+- Double flèche du bouton de passage dessinée dans le bouton (elle ne s'affichait pas sur tous les navigateurs) ; bouton de la colonie raccourci en « Construire » (la construction et les tirs sont deux étapes).
+- Étapes du tour en chevrons : textes bien plus grands.
+- Cartes d'amélioration : plus de rond blanc ; l'icône est en grand, discrète, derrière le texte.
+
 ## v0.4.27 — 6 novembre 2026
 
 **Interface (Oni)** : boutons de l'étape (coin du plateau) dans le style de l'accueil ; le bouton principal jaune porte une grande double flèche en fond (dessin d'Oni).

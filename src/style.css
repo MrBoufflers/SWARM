@@ -995,3 +995,44 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
     linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%);
   border: 1px solid #ffdf9c; }
 .pc-go button.primary::after { content: none; }
+/* bouton principal : double flèche dessinée dans le bouton (Oni, 06/11/2026) */
+.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary { background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); overflow: hidden; }
+.pc-go .go-arr { position: absolute; right: 6px; top: 4%; height: 92%; width: auto; aspect-ratio: 1; fill: #7a3f00; fill-opacity: .3; pointer-events: none; }
+.pc-go .go-lab { position: relative; z-index: 1; }
+/* étapes du tour : textes bien plus grands, presque toute la hauteur du chevron */
+.pc-steps .chev li { height: 58px; }
+.pc-steps .chev li > span { font: 800 clamp(1rem, 1.35vw, 1.5rem)/.95 var(--display); letter-spacing: .02em; text-transform: uppercase; padding: 0 8px 0 16px; }
+.pc-steps .chev li:first-child > span { padding-left: 10px; }
+/* cartes d'amélioration : plus de rond blanc ; l'icône en grand, discrète, derrière le texte */
+.uc-ic.im > span { display: none; }
+.uc-ic.im, .ur1 .uc-ic.im { width: 84px; }
+.uc-body { position: relative; isolation: isolate; overflow: hidden; }
+.uc-bgic { position: absolute; z-index: -1; right: 8px; top: 50%; transform: translateY(-50%); width: 76px; height: 76px; color: var(--c); opacity: .16; pointer-events: none; }
+.uc-bgic .i { width: 100%; height: 100%; stroke-width: 1.6; }
+
+/* bandeau « RÉACTIONS ! » (Oni, 06/11/2026) : entrée par la droite, 1 s au centre, sortie par la gauche, sans bloquer le jeu */
+.react-banner { position: fixed; inset: 0; z-index: 45; pointer-events: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.rb-band { position: absolute; left: 0; right: 0; top: 50%; height: clamp(120px, 22vh, 220px); transform: translateY(-50%) scaleY(0);
+  background: linear-gradient(90deg, transparent 0%, rgba(10,6,4,.88) 12%, rgba(10,6,4,.92) 50%, rgba(10,6,4,.88) 88%, transparent 100%);
+  box-shadow: 0 -2px 0 rgba(240,164,58,.55), 0 2px 0 rgba(240,164,58,.55), 0 0 60px rgba(240,120,40,.25);
+  animation: rbBand 2.3s cubic-bezier(.2,.8,.2,1) forwards; }
+.rb-band::before, .rb-band::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #ffd27a 30%, #fff 50%, #ffd27a 70%, transparent);
+  animation: rbStreak 2.3s ease-in-out forwards; }
+.rb-band::before { top: -2px; } .rb-band::after { bottom: -2px; animation-direction: reverse; }
+.rb-txt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; animation: rbTxt 2.3s cubic-bezier(.6,0,.4,1) forwards; }
+.rb-txt b { font: 800 clamp(3rem, 9vw, 8rem)/.9 var(--display); letter-spacing: .08em; color: #fff;
+  text-shadow: 0 0 24px rgba(255,140,40,.85), 0 0 60px rgba(255,90,20,.5), 0 6px 0 rgba(0,0,0,.6); }
+.rb-txt span { font: 600 clamp(1rem, 1.6vw, 1.4rem)/1.2 var(--display); letter-spacing: .3em; text-transform: uppercase; color: #f0d7b0; }
+@keyframes rbBand { 0% { transform: translateY(-50%) scaleY(0); opacity: 0; } 12% { transform: translateY(-50%) scaleY(1); opacity: 1; } 82% { transform: translateY(-50%) scaleY(1); opacity: 1; } 100% { transform: translateY(-50%) scaleY(0); opacity: 0; } }
+@keyframes rbStreak { 0% { transform: translateX(100%); } 50% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+/* 0 → 0,45 s : arrivée rapide depuis la droite (flou de vitesse) ; 0,45 → 1,45 s : au centre (léger glissement) ; puis départ vers la gauche */
+@keyframes rbTxt {
+  0% { transform: translateX(110vw) skewX(-14deg); filter: blur(8px); opacity: 0; }
+  19% { transform: translateX(-1.5vw) skewX(4deg); filter: blur(0); opacity: 1; }
+  24% { transform: translateX(0) skewX(0); }
+  63% { transform: translateX(-1vw) skewX(0); filter: blur(0); opacity: 1; }
+  100% { transform: translateX(-115vw) skewX(14deg); filter: blur(8px); opacity: 0; } }
+.react-banner.still .rb-band { transform: translateY(-50%); animation: none; } .react-banner.still .rb-txt { animation: none; }
+/* colonie : 4 étapes, libellés un peu moins grands pour que « Construction » tienne */
+.pc-steps.colonie .chev li > span { font-size: clamp(1rem, .95vw, 1.15rem); letter-spacing: 0; padding: 0 4px 0 12px; }
+.pc-steps.colonie .chev li.on { flex: 1.2; }

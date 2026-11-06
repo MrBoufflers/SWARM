@@ -61,9 +61,14 @@
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true; S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
-  function setPhaseHandoff() { // passe la main si le joueur actif change
+  // fenêtres de réaction (Oni, 06/11/2026) : pas d'écran de passage pour entrer dans la réaction de la colonie (A_react)
+  // ni pour en sortir ; un bandeau « RÉACTIONS ! » traverse l'écran à la place
+  const REACT = ["A_famine", "A_react"];
+  function setPhaseHandoff(prev) { // passe la main si le joueur actif change
     const w = who();
-    if (S.view !== w) { S.handoff = w; UI = { ...resetUI(), help: UI.help }; }
+    if (S.view === w) return;
+    if (S.phase === "A_react" || prev === "A_react") { S.view = w; S.handoff = null; UI = { ...resetUI(), help: UI.help }; return; }
+    S.handoff = w; UI = { ...resetUI(), help: UI.help };
   }
 
   // ---------------------------------------------------------------- rendu
@@ -308,7 +313,7 @@
       acts = `<button data-a="actAll">Tout résoudre automatiquement</button><button data-a="endA" class="primary">Fin du tour</button>`;
     } else if (ph === "D_main") {
       body = spellBox("sup", sh) + (UI.sel !== null && sh ? `<p class="hint"><b>${E(S.hand[UI.sel])}</b> → « Construire » dans un atelier.</p>` : UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
-      acts = `<button data-a="build" class="primary">Construire, puis passer aux tirs</button>`;
+      acts = `<button data-a="build" class="primary">Construire</button>`;
     } else if (ph === "D_place") {
       const p = S.toPlace[0];
       body = p && sh ? `<p class="hint"><b>${E(p.tile)}</b> achevé : cliquez une case surlignée${S.toPlace.length > 1 ? ` (encore ${S.toPlace.length - 1})` : ""}.</p>` : p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
@@ -631,8 +636,8 @@
         const pct = st === "taken" ? 100 : Math.round(100 * got / cost);
         const inv = canInv ? ` data-a="invest" data-t="${ty}" data-s="${slot}" data-n="99" role="button" tabindex="0"` : "";
         return `<div class="node ucard ${st}${canInv ? " can" : ""}" data-node="${ty}:${slot}"${inv} title="${E(state)}">
-          <span class="uc-ic ${imCls("Visage " + NODE_FACE[ty][slot])}"><span>${icon(NODE_ICON[ty][slot])}</span></span>
-          <span class="uc-body"><span class="uc-top"><span class="uc-pos">${POS[slot]}</span><b class="uc-name">${E(T[slot][0])}</b></span>
+          <span class="uc-ic ${imCls("Visage " + NODE_FACE[ty][slot])}"></span>
+          <span class="uc-body"><span class="uc-bgic" aria-hidden="true">${icon(NODE_ICON[ty][slot])}</span><span class="uc-top"><span class="uc-pos">${POS[slot]}</span><b class="uc-name">${E(T[slot][0])}</b></span>
             <span class="uc-txt">${E(T[slot][1])}</span>
             <span class="uc-foot"><span class="bar"><i style="width:${pct}%"></i></span>${canInv && cost - got > 1 ? `<button data-a="invest" data-t="${ty}" data-s="${slot}" data-n="1" class="uc-one" title="Investir 1">+1</button>` : ""}<b class="uc-n">${st === "taken" ? "Acquis" : `${got}/${cost}`}</b></span></span></div>`;
       };
@@ -787,10 +792,14 @@
   }
   // plateau au centre, manche et camp qui joue dans les angles morts du haut
   // boutons de l'étape en cours : dans l'angle mort en bas du plateau, du côté du joueur
+  const CHEV = "M22 40 H108 Q124 40 133 53 L249 240 Q258 256 249 272 L133 459 Q124 472 108 472 H22 Q2 472 13 455 L122 256 L13 57 Q2 40 22 40 Z";
   function pcButtons() {
     if (!S.view || S.winner || S.handoff) return "";
     const { acts } = pcAction(S.view);
-    return acts ? `<div class="pc-go ${S.view === "colonie" ? "l" : "r"} ${S.view} acts">${acts}</div>` : "";
+    // double flèche d'Oni dessinée dans le bouton principal (une image de fond CSS ne s'affichait pas partout)
+    const arrows = `<svg class="go-arr" viewBox="0 0 512 512" aria-hidden="true"><path d="${CHEV}"/><path d="${CHEV}" transform="translate(256 0)"/></svg>`;
+    const html = acts.replace(/(<button [^>]*class="primary"[^>]*>)/, `$1${arrows}<span class="go-lab">`).replace(/(class="primary"[^>]*>[\s\S]*?)<\/button>/, "$1</span></button>");
+    return acts ? `<div class="pc-go ${S.view === "colonie" ? "l" : "r"} ${S.view} acts">${html}</div>` : "";
   }
   function pcCenter() {
     const p = PHASE_TXT[S.phase] || ["", "", ""];
@@ -880,13 +889,15 @@
   function play(type, args, onOk) {
     if (online()) { send(type, args, onOk); return; }
     S.fx = [];
+    const prev = S.phase;
     const refused = SF.apply(S, who(), type, args || {});
     const events = S.fx; delete S.fx;
     if (!refused && onOk) onOk();
-    if (!S.winner) setPhaseHandoff();
+    if (!S.winner) setPhaseHandoff(prev);
     save();
     if (S.winner) recordLocal();
-    animate(events).then(() => { render(); afterRender(events); });
+    const reacts = !REACT.includes(prev) && REACT.includes(S.phase);
+    animate(events).then(() => { render(); afterRender(events); if (reacts) reactBanner(); });
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
@@ -1260,6 +1271,16 @@
       if (e.t === "chantier") { const sl = document.querySelectorAll(`.atelier.lane-${e.lane} .slot:not(.empty)`); pop(sl[sl.length - 1]); }
     }
   }
+  // bandeau « RÉACTIONS ! » (Oni, 06/11/2026) : arrive de la droite, reste 1 s au centre, repart vers la gauche
+  function reactBanner() {
+    const old = document.querySelector(".react-banner"); if (old) old.remove();
+    const b = document.createElement("div");
+    b.className = "react-banner" + (animOn ? "" : " still");
+    b.setAttribute("role", "status");
+    b.innerHTML = `<div class="rb-band"></div><div class="rb-txt"><b>RÉACTIONS !</b><span>${S.phase === "A_famine" ? "La colonie peut jouer Famine" : "La colonie peut jouer un sortilège offensif"}</span></div>`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), animOn ? 2300 : 1600);
+  }
   function banner(text) { // bandeau de changement de tour (jeu en ligne)
     const b = document.createElement("div");
     b.className = "turn-banner " + (SF.actor(S) || ""); b.textContent = text;
@@ -1351,6 +1372,7 @@
   }
   function receive(j) { // nouvel état envoyé par le serveur (vue filtrée pour notre camp)
     if (!j || !j.S) return;
+    if (S && !REACT.includes(S.phase) && REACT.includes(j.S.phase)) NET.react = true;
     if (Number.isInteger(j.fxN)) NET.fx = j.fxN;
     const had = !!S, turnBefore = had && myTurn();
     if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help };
@@ -1363,6 +1385,7 @@
     receive(j);
     if (j.ok && onOk) onOk(); // ex. désélectionner la carte jouée, avant de redessiner
     render(); afterRender(j.fx || []);
+    if (NET.react) { NET.react = false; NET.banner = false; reactBanner(); }
     if (NET.banner) { NET.banner = false; banner(`À vous de jouer · ${PHASE_TXT[S.phase][1]}`); }
   }
   async function withBusy(f) {
