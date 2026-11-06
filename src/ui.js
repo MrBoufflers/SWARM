@@ -43,7 +43,7 @@
     A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
-    A_attack: ["essaim", "Attaques", "Touchez une créature pour la faire agir : elle avance seule vers la fusée (1 case, 2 avec la Mobilité ou un Glaneur), tout droit ou en escalier, puis attaque le bâtiment ou la fusée devant elle. « Tout résoudre automatiquement » fait agir toutes les créatures restantes."],
+    A_attack: ["essaim", "Attaques", "Touchez une créature pour la faire agir : elle avance seule vers la fusée (1 case, 2 pour le niveau 3, +1 avec la Mobilité ou la Mue), tout droit ou en escalier, puis attaque le bâtiment ou la fusée devant elle. « Tout résoudre automatiquement » fait agir toutes les créatures restantes."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
@@ -453,7 +453,7 @@
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
   const FX_LABEL = {
-    soin: () => ["+2 HEAL", "+1 MOV"], fureur: () => ["+1 ATQ"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
+    soin: () => ["+2 HEAL"], fureur: () => ["+1 ATQ"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
     mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"],
   };
@@ -495,7 +495,7 @@
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.baseSpeed(c) > 1 ? (c.name === "Glaneur" ? "vitesse de base 2" : "niveau 3 : vitesse de base 2") : "", SF.hasMobility(S, c) ? "Mobilité" : "", SF.caseMates(S, c).some(o => o.name === "Glaneur" || (S.upgrades.soutien.r1 === "A" && SF.CREATURES[o.name].type === "soutien")) ? "Aura Mobilité" : ""].filter(Boolean).join(" + ")})`); }
+    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.baseSpeed(c) > 1 ? "niveau 3 : vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", S.upgrades.soutien.r1 === "A" && SF.caseMates(S, c).some(o => SF.CREATURES[o.name].type === "soutien") ? "Aura Mobilité (Mue)" : ""].filter(Boolean).join(" + ")})`); }
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
