@@ -954,3 +954,9 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
 .h2-hero.side-colonie .h2-glow { background: radial-gradient(circle, rgba(79,184,166,.5) 0%, rgba(79,184,166,.15) 40%, transparent 70%); }
 .h2-hero.side-essaim .h2-glow { background: radial-gradient(circle, rgba(167,127,217,.55) 0%, rgba(167,127,217,.15) 40%, transparent 70%); }
 :root { --ar-colonie: 1334 / 201; --ar-essaim: 1235 / 200; }
+/* nom du camp en tête des panneaux de jeu, dans la police du jeu (Oni, 06/11/2026) */
+.side-nm { display: inline-block; flex: none; height: 1.25rem; background: var(--ink); -webkit-mask: var(--m) left center / contain no-repeat; mask: var(--m) left center / contain no-repeat; }
+.side-nm.colonie { --m: var(--logo-titre-colonie); aspect-ratio: var(--ar-colonie); } .side-nm.essaim { --m: var(--logo-titre-essaim); aspect-ratio: var(--ar-essaim); }
+.po-head .side-nm { height: 1.45rem; }
+.pc-sum h3 .side-nm { height: 1.05rem; }
+.pc-sum h3 { gap: 8px; align-items: center; }
