@@ -22,22 +22,28 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     await el.evaluate(e => e.scrollIntoView({ block: 'center' }));
     const top = await el.evaluate(e => { const r = e.getBoundingClientRect(); const h = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return h === e || e.contains(h); });
     if (!top) covered++;
-    await el.click(); await new Promise(r => setTimeout(r, 30)); await calm(); return true;
+    try { await el.click(); } catch (e) { if (!/not attached|detached/i.test(e.message)) throw e; return false; } // page redessinée pendant le clic
+    await new Promise(r => setTimeout(r, 30)); await calm(); return true;
   };
   const phase = () => page.evaluate(() => (document.querySelector('.ph-head b') || document.querySelector('.ho-card h2') || {}).textContent);
   const shots = {};
-  for (let step = 0; step < 1600; step++) {
+  for (let step = 0; step < 7000; step++) {
     if (await page.$('.banner.win, .pc-win')) break;
     if (await click('[data-a="local"]')) continue;
     if (await click('[data-a="reveal"]')) continue;
     if (await click('[data-a="famine"][data-v="1"]')) continue;
     if (await click('[data-a="draw"]')) continue;
+    if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="pickAdd"]:not([disabled])')]; if (!b.length) return false; b[b.length - 1 - Math.floor(Math.random() * Math.min(3, b.length))].dataset.robot = '1'; return true; }) && await click('[data-a="pickAdd"][data-robot]')) continue; // pioche au choix : prendre le maximum de cartes
+    if (await click('[data-a="pickGo"]')) continue;
     const ph = await phase();
     if (!shots[ph]) { shots[ph] = 1;  }
     if (ph === 'Déploiement et améliorations') { if (await click('[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click('[data-a="card"]:not([disabled])') && await click('[data-a="deployAt"]')) continue; } await click('[data-a="invest"][data-n="99"]'); await click('[data-a="endDeploy"]'); continue; }
     if (ph === 'Améliorations') { await click('[data-a="invest"][data-n="99"]'); await click('[data-a="toAttacks"]'); continue; }
     if (ph === 'Réaction de la colonie') { if (await click('[data-a="spell"]')) { if (!(await click('[data-a="spellArg"]'))) await click('[data-a="spellCancel"]'); } await click('[data-a="reactDone"]'); continue; }
-    if (ph === 'Attaques') { if (await click('.board .tok.go')) continue; if (await click('[data-a="actAll"]')) continue; await click('[data-a="endA"]'); continue; }
+    if (ph === 'Attaques') { // une créature à la main (chemin, puis attaque), puis « Tout résoudre et finir le tour »
+      if (await click('.board .cell.mv')) continue; if (await click('[data-a="strike"]')) continue; if (await click('[data-a="rest"]')) continue;
+      if (!(await page.$('.board .tok.go[data-done-robot]')) && await page.evaluate(() => { const t = document.querySelector('.board .tok.go'); if (!t || window.__robotOne) return false; window.__robotOne = 1; return true; }) && await click('.board .tok.go')) continue;
+      await page.evaluate(() => { window.__robotOne = 0; }); await click('[data-a="actAll"]'); continue; }
     if (ph === 'Tour de la colonie') {
       if (!(await page.$('.tcard.sel'))) { if (await click('[data-a="tile"]:not([disabled])') && await click('[data-a="startCh"]')) continue; }
       for (let i = 0; i < 4; i++) { await calm(); const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; await bs[i].click(); await new Promise(r => setTimeout(r, 20)); }
@@ -50,7 +56,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   console.log('journal :', await page.evaluate(() => [...document.querySelectorAll('.log li')].map(l => l.textContent).filter(t => /construit|→|reste en|fusée :|tourelle/.test(t)).slice(0, 10)));
   const fxSeen = await page.evaluate(() => window.__fx);
   console.log('animations jouées :', JSON.stringify(fxSeen));
-  const ok = !errs.length && !covered && await page.$('.banner.win') && fxSeen['déplacement'] > 0 && fxSeen['chiffre'] > 0;
+  const ok = !errs.length && !covered && await page.$('.banner.win, .pc-win') && fxSeen['déplacement'] > 0 && fxSeen['chiffre'] > 0;
   console.log('erreurs :', errs.length ? errs : 'aucune', '| boutons masqués :', covered, '| fin :', await page.evaluate(() => (document.querySelector('.banner.win b, .pc-win .hf-sub') || {}).textContent || 'en cours'), '| phases vues :', Object.keys(shots).join(', '));
   await browser.close();
   process.exit(ok ? 0 : 1);

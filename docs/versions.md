@@ -4,6 +4,25 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.0 — 7 novembre 2026
+
+**Règles (Oni)**
+- **Pioche au choix** : le palier donne un nombre de cartes (somme de ses quotas : 3, 5, 7 puis 10) et les niveaux accessibles ; l'essaim choisit combien de cartes il pioche dans chaque pile (niveau 1, 2, 3), les créatures étant tirées au hasard dans la pile (toujours le total exact du palier, sauf si les piles n'ont plus assez de cartes). Le premier tour garde la main de départ imposée, **sans Œil-sonde**.
+- **Soutiens parachutés** : n'importe quelle case libre de leur lane (plafond de population inchangé), puis ils se déplacent normalement.
+- **Déplacements** : la vitesse est un maximum ; chaque créature avance de 1 case à sa vitesse, au choix, uniquement sur son chemin en escalier vers la fusée (plus de pas de côté ni de retraite) ; elle doit avancer d'au moins 1 case si elle le peut.
+- **Attaque facultative** de n'importe quel bâtiment qui touche sa case par un côté (4 côtés), ou de la fusée.
+- **Améliorations** : Mobilité = +1 déplacement aux aggros (plus de Furtivité) ; l'Aura Mobilité de la Mue profite aussi au soutien qui la donne ; Provocation = les tanks subissent 1 dégât de moins des tourelles ; Carapace épaisse = +1 PV et plus de dégâts d'Épines pour les tanks ; Réincarnation = le tank revient là où il est mort ; Carnage = les aggros attaquent 2 fois (plus de +2 ATQ).
+- **Créatures** : Colosse et Massacreur coûtent 6 (au lieu de 7) ; Catalyseur passe au niveau 1 (0 / 2) ; Hurleur passe au niveau 2 (0 / 4), Aura Fureur +2 ATQ.
+- **Champ de stase** : l'attaque fait 0 dégât au bâtiment, mais toute l'attaque passe en percée et les spores touchent les tuiles voisines.
+
+**Interface**
+- Écran de pioche : + / − par pile (niveau 1, 2, 3).
+- Attaques : toucher une créature montre les cases où elle peut aller et les bâtiments qu'elle peut frapper ; boutons « Ne pas bouger » / « Terminer pour cette créature ». Un seul bouton de fin : **« Tout résoudre et finir le tour »**.
+- Parachutage : les cases possibles s'allument quand un soutien est choisi.
+- Les mots Nord, Est, Sud, Ouest prennent la couleur de leur lane partout dans le jeu.
+- Les parties en cours sont mises à jour (Hurleur et Catalyseur changent de pioche).
+- Après une attaque, une créature ne propose plus de cases où aller (avec Carnage, la cible détruite libérait le chemin : impasse corrigée).
+
 ## v0.4.28 — 6 novembre 2026
 
 **Interface (Oni)**

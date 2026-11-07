@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.4.28 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.0 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -25,6 +25,16 @@ Repris du prototype jouable et validés par Oni :
 - **Déplacement automatique, créature par créature** (06/11) : l'essaim choisit quelle créature agit et dans quel ordre ; elle avance seule sur son chemin vers la fusée (tout droit ou en escalier, 1 case par tour, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou la Mue), puis attaque ce qui est devant elle. **Pioche automatique** au début du tour de l'essaim ; **déploiement et améliorations dans la même étape** (06/11).
 - **Essaim** : **4 paliers** : départ (plafond de 2 créatures par lane), puis 9, 15 et 21 de biomasse ; améliorations payables en plusieurs fois, **6** au rang 1 et **12** au rang 2 ; **Mobilité** (aggro, rang 1) : les aggros se déplacent de **2 cases** par tour (plus de changement de lane) ; **Essaim agrandi** (aggro, rang 2, ancien Raid) : +3 au plafond de population ; **Déploiement** : les 2 cartes gratuites sont piochées avant la pioche normale ; **Carapace épaisse** +1 PV et **Blindage** +2 PV.
 - **Départ de l'essaim** : **5 de biomasse** ; au premier tour, à la place de la pioche, une aggro, un tank et un soutien de niveau 1 (au hasard), payés normalement. **Œil-sonde** : Vision permanente sur sa lane tant qu'il est en vie.
+
+## Changements de la v0.5 (7 novembre 2026)
+
+- **Pioche au choix** : le palier donne un nombre de cartes (3, 5, 7 puis 10) et les niveaux accessibles ; l'essaim choisit combien il en pioche dans chaque pile (niveau 1, 2, 3), les créatures étant tirées au hasard dans la pile (le premier tour garde sa main de départ, sans Œil-sonde).
+- **Soutiens parachutés** : un soutien peut être déployé sur n'importe quelle case libre de sa lane (plafond de population inchangé), puis se déplace comme les autres.
+- **Déplacements** : la vitesse est un maximum ; la créature avance de 1 case à sa vitesse, au choix, sur son chemin en escalier (jamais en arrière ni sur les côtés). Elle doit avancer d'au moins 1 case si elle le peut.
+- **Attaque facultative** de n'importe quel bâtiment qui touche sa case par un côté (ou la fusée). Bouton unique « Tout résoudre et finir le tour ».
+- **Améliorations** : Mobilité = +1 déplacement aux aggros ; Mue (Aura Mobilité 1) profite aussi au soutien qui la donne ; Provocation : les tanks subissent 1 dégât de moins des tourelles ; Carapace épaisse : +1 PV et les tanks ne subissent plus les Épines ; Réincarnation : le tank revient là où il est mort ; Carnage : les aggros attaquent 2 fois.
+- **Créatures** : Colosse et Massacreur coûtent 6 ; Catalyseur passe au niveau 1 (0 ATQ / 2 PV) ; Hurleur passe au niveau 2 (0 ATQ / 4 PV, Aura Fureur +2 ATQ).
+- **Champ de stase** : l'attaque fait 0 dégât au bâtiment, mais toute l'attaque passe en percée et les spores touchent les tuiles voisines.
 
 ## Le jeu en bref
 
@@ -112,11 +122,11 @@ Chaque camp résout **ses propres attaques à la fin de son propre tour** : les 
 
 Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais dépensée : elle ne fait que monter : une tuile détruite ou un support qui tombe rapporte **1 biomasse**. Si la colonie a joué **Famine**, votre budget de ce tour est votre biomasse **divisée par 2**, arrondie à l'inférieur.
 
-### 2. Pioche (automatique)
+### 2. Pioche (au choix)
 
-La pioche se fait toute seule au début du tour. Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe combien de cartes vous piochez dans chaque niveau, et combien de créatures peuvent attaquer une même lane. Si une pioche de niveau 2 ou 3 est vide, piochez à la place dans le niveau inférieur.
+Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe le **nombre de cartes** que vous prenez (la somme de ses quotas : 3, 5, 7 puis 10), les **niveaux accessibles** (ceux dont le quota n'est pas nul) et combien de créatures peuvent attaquer une même lane. Vous répartissez ce nombre comme vous voulez entre les piles de ces niveaux (Oni, 07/11/2026) : vous choisissez **de quelle pile** vous piochez, pas les créatures — chaque pile mélange les types débloqués par vos améliorations, et les cartes sont tirées au hasard. Vous devez piocher **exactement** ce nombre de cartes (Oni, 07/11/2026), sans jamais prendre plus de cartes qu'une pile n'en contient ; si les piles accessibles n'en ont pas assez, vous piochez tout ce qu'elles contiennent.
 
-**Premier tour** : au lieu de piocher, l'essaim reçoit une créature de niveau 1 de chaque type : un Écorcheur (aggro), une Carapace (tank) et un soutien de niveau 1 tiré au hasard (Œil-sonde, Glaneur ou Hurleur). Elles se paient normalement avec le budget.
+**Premier tour** : au lieu de choisir, l'essaim reçoit une créature de niveau 1 de chaque type : un Écorcheur (aggro), une Carapace (tank) et un soutien de niveau 1 tiré au hasard, jamais l'Œil-sonde (Glaneur ou Catalyseur). Elles se paient normalement avec le budget.
 
 ### 3. Déploiement et améliorations (une seule étape)
 
@@ -127,6 +137,8 @@ Pour chaque carte que vous jouez :
 1. Payez son coût sur votre budget.
 2. Choisissez une lane, sans dépasser le **plafond de population** de votre palier sur cette lane (+3 avec l'amélioration Essaim agrandi).
 3. Placez sa figurine à l'entrée de la lane, devant l'une des 5 colonnes de la couronne 3, et la carte devant vous. Réglez son socle sur ses PV.
+
+**Soutiens parachutés** : un soutien peut être posé sur **n'importe quelle case libre** de sa lane (sans bâtiment, coin de support ni fusée), pas seulement à l'entrée ; le plafond de population s'applique comme d'habitude. Ensuite il se déplace comme les autres créatures.
 
 **Améliorations** : chaque nœud d'amélioration coûte **6 biomasse au rang 1 †, 12 au rang 2 †**, et se paie **en plusieurs fois** : vous investissez des points dans un nœud précis, et l'amélioration est acquise dès que le total investi atteint son coût.
 
@@ -144,7 +156,7 @@ Remettez les cartes non jouées dans leurs pioches et mélangez.
 
 ### 5. Fin de tour : attaques
 
-La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis **chaque case avance d'une case et, si elle est au contact, ses créatures attaquent** (voir Déplacement et combat), les cases les plus proches de la fusée d'abord. Les créatures posées ce tour attaquent aussi.
+La colonie peut d'abord jouer ses **sortilèges offensifs**, dont Brouillage (Famine se joue, elle, au début du tour). Puis l'essaim fait agir ses créatures, une par une (voir Déplacement et combat). Les créatures posées ce tour agissent aussi.
 
 ## Déplacement et combat
 
@@ -163,16 +175,15 @@ Exemple depuis la colonne A : A3 → B3 → B2 → C2 → C1 → fusée. Un pas 
 
 Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coin de support, donc la créature de la colonne A fait d'abord un pas de côté vers B3.
 
-### Faire agir les créatures (déplacement automatique)
+### Faire agir les créatures
 
 Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, dans l'ordre qu'il veut (Oni, 06/11/2026).
 
-1. **Déplacement** : la créature avance seule sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut) : **une case** par tour (deux pour les créatures de niveau 3), +1 avec la Mobilité ou la Mue (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée. Elle ne passe jamais sur un bâtiment, un coin de support ou la fusée. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
-2. **Attaque** : elle attaque le bâtiment (ou la fusée) qui se trouve **devant elle** sur son chemin. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais.
-3. **Tout résoudre** : fait agir toutes les créatures restantes, **les soutiens d'abord** (les créatures parties de la même case les suivent et profitent encore de leurs auras en attaquant), puis les plus avancées.
-4. **Fin du tour** : l'essaim termine son tour quand il veut, et les créatures qui n'ont pas agi restent sur place. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
+1. **Déplacement** (Oni, 07/11/2026) : la vitesse est un **maximum** : la créature avance de **1 case jusqu'à sa vitesse**, au choix, sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut ; jamais en arrière ni sur les côtés). Vitesse : **1** (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros) ou la Mue (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée, et ne passe jamais sur un bâtiment, un coin de support ou la fusée. Si elle peut avancer, elle doit avancer d'au moins une case avant d'attaquer. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
+2. **Attaque (facultative)** : elle peut attaquer **n'importe quel bâtiment qui touche sa case par un côté** (4 côtés), ou la fusée si elle la touche. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais. Après une attaque, elle ne bouge plus (avec **Carnage**, une aggro peut attaquer une 2ᵉ fois).
+3. **Tout résoudre et finir le tour** : fait agir toutes les créatures restantes (chacune avance au maximum puis attaque devant elle), **les soutiens d'abord** (les créatures parties de la même case les suivent et profitent encore de leurs auras en attaquant), puis les plus avancées ; puis le tour de l'essaim se termine. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
 
-**Mobilité** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1 (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros) et +1 par soutien de sa case avec la Mue (le Glaneur lui-même fait 2).
+**Vitesse** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1 (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros) et +1 par soutien de sa case avec la Mue, le soutien lui-même compris.
 
 **Percée** : les dégâts en trop passent à la case suivante du **chemin** vers la fusée, à partir du bâtiment détruit (comme avant) †.
 
@@ -303,16 +314,16 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Écorcheur | Aggro | 1 | 3 | 1 | 3 | — | 6 |
 | Ravageur | Aggro | 2 | 4 | 1 | 5 | — | 6 |
-| Massacreur | Aggro | 3 | 7 | 1 | 7 | — | 6 |
+| Massacreur | Aggro | 3 | 6 | 1 | 7 | — | 6 |
 | Carapace | Tank | 1 | 3 | 3 | 1 | — | 6 |
 | Béhémoth | Tank | 2 | 4 | 5 | 1 | — | 6 |
-| Colosse | Tank | 3 | 7 | 7 | 1 | — | 6 |
+| Colosse | Tank | 3 | 6 | 7 | 1 | — | 6 |
 | Œil-sonde | Soutien | 1 | 2 | 2 | 0 | **Vision** : tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées après lui (une tuile révélée le reste) | 2 |
 | Glaneur | Soutien | 1 | 2 | 2 | 0 | **Aura Soin 2** : en fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV. | 2 |
-| Hurleur | Soutien | 1 | 2 | 2 | 0 | **Aura Fureur** : +1 ATQ aux autres créatures de sa case | 2 |
+| Catalyseur | Soutien | 1 | 2 | 2 | 0 | **Aura Cuirasse** : les autres créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
 | Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus (cumulable : +1 par Phéromone) | 2 |
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
-| Catalyseur | Soutien | 2 | 3 | 4 | 0 | **Aura Cuirasse** : les autres créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
+| Hurleur | Soutien | 2 | 3 | 4 | 0 | **Aura Fureur** : +2 ATQ aux autres créatures de sa case | 2 |
 | Sapeur | Soutien | 3 | 5 | 6 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
 | Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit **2 dégâts par Sporeur** de la case, en une seule attaque (sauf une tuile encore camouflée et non visible) | 3 |
 
@@ -355,9 +366,9 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Salve | Offensif | 2 dégâts à 2 créatures de la même case | 3 |
 | Barrage | Offensif | 1 dégât à chaque créature d'une lane | 2 |
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
-| Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines | 2 |
+| Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines ; une attaque sur lui a quand même lieu : toute l'attaque passe en percée à la case suivante et les spores touchent les tuiles voisines (v0.5) | 2 |
 | Famine | Offensif | à jouer au début du tour de l'essaim : ce tour, son budget est sa biomasse **divisée par 2**, arrondie à l'inférieur (sa biomasse ne change pas) | 2 |
-| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation et Furtivité s'appliquent) : ce tour, elle ne bouge pas et n'attaque pas | 2 |
+| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation s'applique) : ce tour, elle ne bouge pas et n'attaque pas | 2 |
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |
 | Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 2 |
@@ -373,7 +384,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 - **Choix exclusifs** : commencer à investir dans une amélioration ferme les autres du même rang.
 - **Prérequis** : un côté du rang 2 demande le même côté au rang 1. Le **centre** est accessible depuis l'un ou l'autre côté.
 - **Cartes** : le rang 1 ajoute toutes les cartes de niveau 2 du type à leur pioche ; le rang 2, toutes celles de niveau 3.
-- **Cumul** : les bonus des deux rangs s'additionnent (+1 puis +2 ATQ donnent +3 ATQ ; +1 puis +2 PV donnent +3 PV).
+- **Cumul** : les bonus des deux rangs s'additionnent (+1 puis +2 PV donnent +3 PV).
 - L'effet s'applique à toutes les créatures du type, y compris celles déjà en jeu.
 
 #### Aggro
@@ -381,8 +392,8 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Férocité | +1 ATQ |
-| 1 | Côté B | Mobilité | les créatures aggro se déplacent de **2 cases** par tour au lieu d'1 et gagnent la **Furtivité** † (elles ne peuvent pas être visées par une tourelle ni un sortilège tant qu'une créature non furtive est sur leur case) |
-| 2 | Côté A (après Férocité) | Carnage | +2 ATQ (total +3) |
+| 1 | Côté B | Mobilité | **+1 déplacement** pour les créatures aggro |
+| 2 | Côté A (après Férocité) | Carnage | les créatures aggro peuvent **attaquer 2 fois** par tour |
 | 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † |
 | 2 | Côté B (après Mobilité) | Essaim agrandi | **+3 au plafond de population** de chaque lane |
 
@@ -390,17 +401,17 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
-| 1 | Côté A | Carapace épaisse | +1 PV |
-| 1 | Côté B | Provocation | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place ; les tanks ne subissent plus les dégâts d'Épines |
+| 1 | Côté A | Carapace épaisse | +1 PV ; les tanks ne subissent plus les dégâts d'Épines |
+| 1 | Côté B | Provocation | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place ; les tanks subissent **1 dégât de moins** des tourelles |
 | 2 | Côté A (après Carapace épaisse) | Blindage | +2 PV (total +3) |
-| 2 | Centre | Réincarnation | une fois par tour, quand un tank meurt, redéployez-le gratuitement au début de votre prochain tour, PV pleins, à l'entrée de sa lane |
+| 2 | Centre | Réincarnation | une fois par tour, quand un tank meurt, redéployez-le gratuitement au début de votre prochain tour, PV pleins, **là où il est mort** (à l'entrée de sa colonne si un bâtiment occupe désormais cette case) |
 | 2 | Côté B (après Provocation) | Masse vivante | +1 PV par autre créature sur sa case, tant qu'elle y reste |
 
 #### Soutien
 
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
-| 1 | Côté A | Mue | tous les soutiens gagnent l'**Aura Mobilité 1** (+1 case aux autres créatures de leur case) et l'**Aura +1 PV** (+1 PV aux autres créatures de leur case) ; cumulables |
+| 1 | Côté A | Mue | tous les soutiens gagnent l'**Aura Mobilité 1** (+1 case à toutes les créatures de leur case, eux compris) et l'**Aura +1 PV** (+1 PV aux autres créatures de leur case) ; cumulables |
 | 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) |
 | 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 4) |
 | 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles ; les Œil-sonde de la pioche sortent du jeu (ceux en main ou en jeu restent, mais ne reviennent plus dans la pioche) |
@@ -436,7 +447,7 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | Essaim | Colonie |
 | --- | --- |
 | 1. Budget = biomasse | 1. Sorts de soutien |
-| 2. Pioche automatique selon le palier | 2. Lancer des chantiers |
+| 2. Pioche au choix selon le palier | 2. Lancer des chantiers |
 | 3. Déployer et améliorer (même étape) | 3. Affecter les travailleurs |
 | 4. Budget restant → réserve | 4. Chantiers, débordement, supports |
 | 5. Défausse | 5. Fusée |
@@ -448,7 +459,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 
 ### Nouveau contenu v0.3
 
-- [ ] **Coûts des aggros et des tanks** : tu ne les as pas donnés ; j'ai gardé 3 / 4 / 7 selon le niveau. Avec des stats de 4 / 7 / 10 points, le niveau 3 rapporte moins de stats par biomasse que le niveau 2.
+- [ ] **Coûts des aggros et des tanks** : tu ne les as pas donnés ; j'ai gardé 3 / 4 / 7 selon le niveau (6 au niveau 3 depuis la v0.5). Avec des stats de 4 / 7 / 10 points, le niveau 3 rapporte moins de stats par biomasse que le niveau 2.
 - [x] **Colosse (tank niveau 3)** : 7 PV / 1 ATQ (tous les tanks à 1 ATQ, décidé le 01/11/2026).
 - [ ] **Soutiens** : 2 exemplaires de chaque carte de niveau 1 et 2, 3 de chaque carte de niveau 3, pour arriver à 6 par niveau comme les autres types.
 - [x] **Catalyseur** : l'Aura Instinct est remplacée par l'Aura Cuirasse (décidé le 02/11/2026).
@@ -458,7 +469,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Barème des créatures** : aggros à 1 PV et tanks à 1 ATQ à tous les niveaux ; le barème PV + ATQ = 4 / 7 / 10 ne tient plus.
 - [ ] **Barème des forteresses** : la colonne « Points » comptait une Épines 1 gratuite pour toutes les tuiles ; à recalculer depuis sa suppression.
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
-- [ ] **Furtivité** : non ciblable tant qu'une créature non furtive est sur sa case.
+- [x] **Furtivité** : plus aucune créature ne l'a depuis la v0.5 (Mobilité ne la donne plus).
 - [x] **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur (décidé le 02/11/2026).
 - [x] **Aura Frénésie** : cumulable, cible au choix ; deux Frénésies sur la même créature la quadruplent (décidé le 02/11/2026).
 - [ ] Un **piège rendu visible** par Vision ou Clairvoyance ne se déclenche plus.

@@ -71,7 +71,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   // 2. partie complète : on joue sur la page dont c'est le tour
   const pages = { essaim: pE, colonie: pC }, seen = {};
   let reloaded = false, resumed = null, steps = 0, stuck = 0;
-  for (; steps < 2500; steps++) {
+  for (; steps < 9000; steps++) {
     if (await pE.$('.banner.win, .pc-win') && await pC.$('.banner.win, .pc-win')) break;
     let page = null;
     for (const s of ['essaim', 'colonie']) if ((await pages[s].evaluate(() => document.body.dataset.myturn)) === '1') page = pages[s];
@@ -86,10 +86,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     }
     if (await click(page, '[data-a="famine"][data-v="1"]')) continue;
     if (await click(page, '[data-a="draw"]')) continue;
+    if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="pickAdd"]:not([disabled])')]; if (!b.length) return false; b[b.length - 1 - Math.floor(Math.random() * Math.min(3, b.length))].dataset.robot = '1'; return true; }) && await click(page, '[data-a="pickAdd"][data-robot]')) continue; // pioche au choix : prendre le maximum de cartes
+    if (await click(page, '[data-a="pickGo"]')) continue;
     if (ph === 'Déploiement et améliorations') { if (await click(page, '[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click(page, '[data-a="card"]:not([disabled])') && await click(page, '[data-a="deployAt"]')) continue; } await click(page, '[data-a="invest"][data-n="99"]'); await click(page, '[data-a="endDeploy"]'); continue; }
     if (ph === 'Améliorations') { await click(page, '[data-a="invest"][data-n="99"]'); await click(page, '[data-a="toAttacks"]'); continue; }
     if (ph === 'Réaction de la colonie') { if (await click(page, '[data-a="spell"]')) { if (!(await click(page, '[data-a="spellArg"]'))) await click(page, '[data-a="spellCancel"]'); } await click(page, '[data-a="reactDone"]'); continue; }
-    if (ph === 'Attaques') { if (await click(page, '.board .tok.go')) continue; if (await click(page, '[data-a="actAll"]')) continue; await click(page, '[data-a="endA"]'); continue; }
+    if (ph === 'Attaques') { // une créature à la main (chemin, puis attaque), puis « Tout résoudre et finir le tour »
+      if (await click(page, '.board .cell.mv')) continue; if (await click(page, '[data-a="strike"]')) continue; if (await click(page, '[data-a="rest"]')) continue;
+      if (!(await page.$('.board .tok.go[data-done-robot]')) && await page.evaluate(() => { const t = document.querySelector('.board .tok.go'); if (!t || window.__robotOne) return false; window.__robotOne = 1; return true; }) && await click(page, '.board .tok.go')) continue;
+      await page.evaluate(() => { window.__robotOne = 0; }); await click(page, '[data-a="actAll"]'); continue; }
     if (ph === 'Tour de la colonie') {
       if (!(await page.$('.tcard.sel'))) { if (await click(page, '[data-a="tile"]:not([disabled])') && await click(page, '[data-a="startCh"]')) continue; }
       for (let i = 0; i < 4; i++) { const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; try { await bs[i].click(); } catch (e) { if (!detached(e)) throw e; } await sleep(20); await idle(page); }
