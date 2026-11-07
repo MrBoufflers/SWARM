@@ -30,6 +30,25 @@
   applyTheme();
   if (sysDark && sysDark.addEventListener) sysDark.addEventListener("change", applyTheme);
   const themeBtn = () => `<button data-a="theme" class="ghost" title="Changer de thème">Thème : ${THEME_NAME[THEME]}</button>`;
+  // musique (Oni, 07/11/2026) : bande originale en boucle dès l'accueil, puis en jeu ; coupure et volume mémorisés.
+  // Les navigateurs bloquent le son tant que la page n'a pas été touchée : la musique démarre alors au premier geste.
+  const MUSIC = (() => {
+    const KEY = "swarm-steel-musique";
+    let on = true, vol = 0.5;
+    try { const m = JSON.parse(localStorage.getItem(KEY) || "{}"); if (m.on === false) on = false; if (typeof m.vol === "number") vol = Math.min(1, Math.max(0, m.vol)); } catch (e) { /* rien */ }
+    const a = new Audio(); a.loop = true; a.preload = "auto"; a.src = "__MUSIC__"; a.volume = vol;
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ on, vol })); } catch (e) { /* rien */ } };
+    const tryPlay = () => { if (on && a.paused) { const p = a.play(); if (p && p.catch) p.catch(() => { /* attend un geste */ }); } };
+    for (const ev of ["pointerdown", "keydown", "touchstart"]) document.addEventListener(ev, tryPlay, { capture: true, passive: true });
+    tryPlay();
+    return {
+      get on() { return on; }, get vol() { return vol; },
+      toggle() { on = !on; save(); if (on) tryPlay(); else a.pause(); },
+      setVol(v) { vol = Math.min(1, Math.max(0, v)); a.volume = vol; save(); },
+    };
+  })();
+  const musicCtl = (cls = "ghost") => `<span class="music"><button data-a="music" class="${cls}" aria-pressed="${MUSIC.on}" title="${MUSIC.on ? "Couper la musique" : "Remettre la musique"}">Musique : ${MUSIC.on ? "oui" : "non"}</button><input type="range" class="music-vol" min="0" max="100" step="5" value="${Math.round(MUSIC.vol * 100)}" aria-label="Volume de la musique" title="Volume"></span>`;
+  document.addEventListener("input", e => { if (e.target.classList && e.target.classList.contains("music-vol")) MUSIC.setVol(Number(e.target.value) / 100); });
   let STALE = null; // version plus récente du jeu annoncée par le serveur : la page doit être rechargée
   let STATS = null; // page Statistiques : { list, error, test, ver, plans: {id: svg} }
   // session en ligne : code de la partie, jeton du joueur (conservé pour la reconnexion), camp, version de l'état
@@ -136,7 +155,7 @@
     const animBtn = `<button data-a="anim" class="ghost" aria-pressed="${animOn}">Animations : ${animOn ? "oui" : "non"}</button>`;
     return `<header class="top"><div class="brand"><span class="brand-mk" aria-hidden="true"></span><span class="brand-word" role="img" aria-label="Swarm &amp; Steel"></span><span>prototype v${SF.VERSION}</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
-      <div class="menu">${animBtn}${themeBtn()}${menu}</div></header>`;
+      <div class="menu">${animBtn}${themeBtn()}${musicCtl()}${menu}</div></header>`;
   }
   function homeHeader() {
     return `<header class="top"><div class="brand"><span class="brand-mk" aria-hidden="true"></span><span class="brand-word" role="img" aria-label="Swarm &amp; Steel"></span><span>prototype v${SF.VERSION}</span></div>
@@ -167,6 +186,7 @@
         </div>
         <div class="h2-row small"><button data-a="disc" aria-pressed="${DISC}" class="h2-btn ghost${DISC ? " on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button>${HTTP ? `<button data-a="stats" class="h2-btn ghost">Statistiques</button>` : ""}</div>
       </nav>
+      <div class="h2-music">${musicCtl("h2-ic")}</div>
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
     </section>`;
   }
@@ -193,6 +213,7 @@
         <p class="h2-waitmsg">En attente de l'adversaire<span class="h2-dots"><i>.</i><i>.</i><i>.</i></span></p>
       </div>
       <div class="h2-menu h2-quit"><button data-a="quit" class="h2-btn">Quitter</button></div>
+      <div class="h2-music">${musicCtl("h2-ic")}</div>
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
     </section>`;
   }
@@ -948,6 +969,7 @@
       try { navigator.clipboard.writeText(d.v).then(ok, ko); } catch (e) { ko(); }
       return;
     }
+    if (a === "music") { MUSIC.toggle(); render(); return; }
     if (a === "theme") { THEME = THEMES[(THEMES.indexOf(THEME) + 1) % THEMES.length]; try { localStorage.setItem(THEME_KEY, THEME); } catch (e) { /* rien */ } applyTheme(); render(); return; }
     if (MODE === "stats") { statsAction(a, d); return; }
     if (a === "anim") { animOn = !animOn; try { localStorage.setItem(ANIM_KEY, animOn ? "1" : "0"); } catch (e) { /* rien */ } render(); return; }

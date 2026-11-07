@@ -40,9 +40,11 @@ page = f"""<!doctype html>
 {ui}</script>
 </body></html>
 """
+# musique (assets/audio/musique.mp3, trop lourde pour être intégrée) : fichier à côté de la page
+MUSIC = ROOT / "assets/audio/musique.mp3"
 out = ROOT / "dist/swarm-steel-jeu.html"
 out.parent.mkdir(exist_ok=True)
-out.write_text(page, encoding="utf-8")
+out.write_text(page.replace("__MUSIC__", "../assets/audio/musique.mp3"), encoding="utf-8")
 print("ok", out.relative_to(ROOT), len(page) // 1024, "Ko")
 
 # « --site » : dossier de publication Netlify, recréé à neuf à chaque build (page servie à la racine)
@@ -51,5 +53,6 @@ if "--site" in sys.argv:
     site = ROOT / "site"
     shutil.rmtree(site, ignore_errors=True)
     site.mkdir()
-    (site / "index.html").write_text(page, encoding="utf-8")
+    (site / "index.html").write_text(page.replace("__MUSIC__", "musique.mp3"), encoding="utf-8")
+    if MUSIC.exists(): shutil.copy(MUSIC, site / "musique.mp3")
     print("ok", (site / "index.html").relative_to(ROOT))

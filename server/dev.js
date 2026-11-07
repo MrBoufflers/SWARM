@@ -25,6 +25,10 @@ function start(port) {
       return;
     }
     if (url.pathname === "/" || url.pathname === "/index.html") { res.writeHead(200, { "content-type": "text/html; charset=utf-8" }); res.end(page()); return; }
+    if (url.pathname === "/assets/audio/musique.mp3") { // musique (la page de dist/ la cherche dans ../assets/audio/)
+      const f = path.join(__dirname, "../assets/audio/musique.mp3");
+      if (fs.existsSync(f)) { res.writeHead(200, { "content-type": "audio/mpeg", "cache-control": "max-age=86400" }); fs.createReadStream(f).pipe(res); return; }
+    }
     res.writeHead(404); res.end("introuvable");
   });
   return new Promise(ok => server.listen(port, () => ok(server)));
