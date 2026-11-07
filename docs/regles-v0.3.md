@@ -124,7 +124,7 @@ Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais d
 
 ### 2. Pioche (au choix)
 
-Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe le **nombre de cartes** que vous prenez (la somme de ses quotas : 3, 5, 7 puis 10), les **niveaux accessibles** (ceux dont le quota n'est pas nul) et combien de créatures peuvent attaquer une même lane. Vous répartissez ce nombre comme vous voulez entre les piles de ces niveaux (Oni, 07/11/2026) : vous choisissez **de quelle pile** vous piochez, pas les créatures — chaque pile mélange les types débloqués par vos améliorations, et les cartes sont tirées au hasard. Vous pouvez en prendre moins, et jamais plus que la pile n'en contient.
+Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe le **nombre de cartes** que vous prenez (la somme de ses quotas : 3, 5, 7 puis 10), les **niveaux accessibles** (ceux dont le quota n'est pas nul) et combien de créatures peuvent attaquer une même lane. Vous répartissez ce nombre comme vous voulez entre les piles de ces niveaux (Oni, 07/11/2026) : vous choisissez **de quelle pile** vous piochez, pas les créatures — chaque pile mélange les types débloqués par vos améliorations, et les cartes sont tirées au hasard. Vous devez piocher **exactement** ce nombre de cartes (Oni, 07/11/2026), sans jamais prendre plus de cartes qu'une pile n'en contient ; si les piles accessibles n'en ont pas assez, vous piochez tout ce qu'elles contiennent.
 
 **Premier tour** : au lieu de choisir, l'essaim reçoit une créature de niveau 1 de chaque type : un Écorcheur (aggro), une Carapace (tank) et un soutien de niveau 1 tiré au hasard, jamais l'Œil-sonde (Glaneur ou Catalyseur). Elles se paient normalement avec le budget.
 

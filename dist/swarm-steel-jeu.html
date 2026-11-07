@@ -1877,11 +1877,16 @@ const SF = (() => {
   // Pioche au choix (Oni, 07/11/2026) : le palier donne un nombre total de cartes (somme de ses quotas) et les niveaux
   // accessibles (ceux dont le quota n'est pas nul) ; l'essaim choisit combien de cartes il pioche dans chaque pile
   // (niveau 1, 2, 3). Les cartes sont tirées au hasard dans la pile : il ne choisit pas les créatures.
-  const pickRule = S => { const t = TIERS[tier(S)]; return { total: t.n.reduce((a, b) => a + b, 0), levels: [1, 2, 3].filter(l => t.n[l - 1] > 0) }; };
+  // le total est obligatoire (Oni, 07/11/2026) : il ne baisse que si les piles accessibles n'ont pas assez de cartes
+  const pickRule = S => {
+    const t = TIERS[tier(S)], levels = [1, 2, 3].filter(l => t.n[l - 1] > 0);
+    const total = Math.min(t.n.reduce((a, b) => a + b, 0), levels.reduce((a, l) => a + S.piles[l].length, 0));
+    return { total, levels };
+  };
   function attackerPick(S, counts) {
     if (S.startHand) { attackerDraw(S); return true; } // premier tour : main de départ imposée
     const { total, levels } = pickRule(S);
-    if (counts.reduce((a, b) => a + b, 0) > total) return false;
+    if (counts.reduce((a, b) => a + b, 0) !== total) return false; // ni plus ni moins que le palier
     for (const l of [1, 2, 3]) if (counts[l - 1] && (!levels.includes(l) || counts[l - 1] > S.piles[l].length)) return false;
     S.handA = [];
     for (const l of [1, 2, 3]) for (let i = 0; i < counts[l - 1]; i++) S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ });
@@ -2700,7 +2705,7 @@ const AIDE = (() => {
     { id: "e-but", side: "essaim", img: "Massacreur", title: "Vous jouez l'essaim", when: () => true,
       text: () => `Votre but : tuer tous les travailleurs de la colonie en frappant sa fusée, au centre du plateau. Elle gagne si elle achève ses ${SF.FLOORS} étages avant. Chaque tour : vous choisissez vos cartes, puis vous déployez et améliorez (dans la même étape), puis vos créatures avancent et attaquent. Le bouton « Règles » détaille tout.` },
     { id: "e-pioche", side: "essaim", img: "Écorcheur", title: "La pioche au choix", when: S => S.phase === "A_start" && !S.startHand,
-      text: () => `Votre palier, fixé par votre biomasse, vous donne un nombre de cartes et les niveaux auxquels vous avez accès. Répartissez-les entre les piles de niveau 1, 2 et 3 avec + et −, puis « Piocher » : les créatures sont tirées au hasard dans chaque pile. Au premier tour, vous avez reçu à la place une aggro, un tank et un soutien.` },
+      text: () => `Votre palier, fixé par votre biomasse, vous donne un nombre de cartes et les niveaux auxquels vous avez accès. Répartissez-les toutes entre les piles de niveau 1, 2 et 3 avec + et −, puis « Piocher » : les créatures sont tirées au hasard dans chaque pile. Au premier tour, vous avez reçu à la place une aggro, un tank et un soutien.` },
     { id: "e-deploy", side: "essaim", img: "Carapace", title: "Déployer", when: S => S.phase === "A_deploy",
       text: S => `Touchez une carte, puis une case d'entrée (lettres A à E au bord) d'une lane ; un soutien se parachute sur n'importe quelle case libre. Chaque carte coûte de la biomasse. Votre budget du tour égale votre biomasse (${S.biomass}) : elle n'est jamais dépensée et revient chaque tour. Au plus ${SF.capOf(S)} créatures par lane. Dans la même étape, vous pouvez aussi investir dans les arbres d'amélioration. Le budget non dépensé va à la réserve.` },
     { id: "e-types", side: "essaim", img: "Hurleur", title: "Aggros, tanks et soutiens", when: S => S.phase === "A_deploy" && S.handA.length > 0,
@@ -3078,8 +3083,8 @@ if (typeof module !== "undefined") module.exports = AIDE;
         return `<div class="pick-row lvl${l}${open ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${open ? `${left} carte${left > 1 ? "s" : ""} dans la pile` : "palier trop bas"}</small></span>
           <span class="step"><button data-a="pickDel" data-v="${l}" aria-label="Retirer"${q ? "" : " disabled"}>−</button><b>${q}</b><button data-a="pickAdd" data-v="${l}" aria-label="Ajouter"${open && n < total && q < left ? "" : " disabled"}>+</button></span></div>`;
       }).join("");
-      body = `<p class="hint">Palier ${SF.tier(S) + 1} : piochez jusqu'à <b>${total}</b> carte${total > 1 ? "s" : ""} (${n}/${total}), réparties comme vous voulez entre les piles ; les créatures sont tirées au hasard.</p><div class="pick">${rows}</div>`;
-      acts = `<button data-a="pickGo" class="primary">Piocher ${n} carte${n > 1 ? "s" : ""}</button>`;
+      body = `<p class="hint">Palier ${SF.tier(S) + 1} : piochez <b>${total}</b> carte${total > 1 ? "s" : ""} (${n}/${total}), réparties comme vous voulez entre les piles ; les créatures sont tirées au hasard.</p><div class="pick">${rows}</div>`;
+      acts = `<button data-a="pickGo" class="primary"${n === total ? "" : " disabled"}>${n === total ? `Piocher ${n} carte${n > 1 ? "s" : ""}` : `Encore ${total - n} carte${total - n > 1 ? "s" : ""} à répartir`}</button>`;
     } else if (ph === "A_deploy" && UI.sap) {
       body = `<p class="hint">Sapeur : ${sh ? "bâtiment à détruire" : "choisissez le bâtiment à détruire"} dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
         SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;

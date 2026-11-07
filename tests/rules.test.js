@@ -941,9 +941,12 @@ const fresh = () => {
   ok(SF.apply(P, "essaim", "pick", { n: [4, 0, 0] }) !== "", "plus de cartes que le palier : refusé");
   P.piles[2] = ["Ravageur", "Ravageur"];
   ok(SF.apply(P, "essaim", "pick", { n: [0, 1, 0] }) !== "", "pile de niveau 2 au palier 1 : refusé");
-  const n1 = P.piles[1].length, top = P.piles[1].slice(-2).reverse();
-  ok(SF.apply(P, "essaim", "pick", { n: [2, 0, 0] }) === "" && P.handA.map(c => c.name).join() === top.join() && P.phase === "A_deploy" && P.piles[1].length === n1 - 2,
-    "moins de cartes possible : 2 cartes du dessus de la pile de niveau 1 (au hasard), étape de déploiement");
+  ok(SF.apply(P, "essaim", "pick", { n: [2, 0, 0] }) !== "", "moins de cartes que le palier : refusé (Oni, 07/11/2026)");
+  const n1 = P.piles[1].length, top = P.piles[1].slice(-3).reverse();
+  ok(SF.apply(P, "essaim", "pick", { n: [3, 0, 0] }) === "" && P.handA.map(c => c.name).join() === top.join() && P.phase === "A_deploy" && P.piles[1].length === n1 - 3,
+    "exactement 3 cartes : celles du dessus de la pile de niveau 1 (au hasard), étape de déploiement");
+  const R = fresh(); R.piles[1] = R.piles[1].slice(0, 2);
+  ok(SF.pickRule(R).total === 2 && SF.apply(R, "essaim", "pick", { n: [2, 0, 0] }) === "", "pile presque vide : le total baisse au nombre de cartes disponibles (2)");
   const Q = fresh(); Q.biomass = 9; Q.piles[2] = ["Ravageur"];
   ok(SF.pickRule(Q).total === 5 && SF.pickRule(Q).levels.join() === "1,2", "palier 2 : 5 cartes, niveaux 1 et 2");
   ok(SF.apply(Q, "essaim", "pick", { n: [0, 2, 0] }) !== "", "pas plus de cartes que la pile n'en contient");

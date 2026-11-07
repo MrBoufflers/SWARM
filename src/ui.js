@@ -317,8 +317,8 @@
         return `<div class="pick-row lvl${l}${open ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${open ? `${left} carte${left > 1 ? "s" : ""} dans la pile` : "palier trop bas"}</small></span>
           <span class="step"><button data-a="pickDel" data-v="${l}" aria-label="Retirer"${q ? "" : " disabled"}>−</button><b>${q}</b><button data-a="pickAdd" data-v="${l}" aria-label="Ajouter"${open && n < total && q < left ? "" : " disabled"}>+</button></span></div>`;
       }).join("");
-      body = `<p class="hint">Palier ${SF.tier(S) + 1} : piochez jusqu'à <b>${total}</b> carte${total > 1 ? "s" : ""} (${n}/${total}), réparties comme vous voulez entre les piles ; les créatures sont tirées au hasard.</p><div class="pick">${rows}</div>`;
-      acts = `<button data-a="pickGo" class="primary">Piocher ${n} carte${n > 1 ? "s" : ""}</button>`;
+      body = `<p class="hint">Palier ${SF.tier(S) + 1} : piochez <b>${total}</b> carte${total > 1 ? "s" : ""} (${n}/${total}), réparties comme vous voulez entre les piles ; les créatures sont tirées au hasard.</p><div class="pick">${rows}</div>`;
+      acts = `<button data-a="pickGo" class="primary"${n === total ? "" : " disabled"}>${n === total ? `Piocher ${n} carte${n > 1 ? "s" : ""}` : `Encore ${total - n} carte${total - n > 1 ? "s" : ""} à répartir`}</button>`;
     } else if (ph === "A_deploy" && UI.sap) {
       body = `<p class="hint">Sapeur : ${sh ? "bâtiment à détruire" : "choisissez le bâtiment à détruire"} dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
         SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;

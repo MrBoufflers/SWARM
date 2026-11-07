@@ -765,11 +765,16 @@ const SF = (() => {
   // Pioche au choix (Oni, 07/11/2026) : le palier donne un nombre total de cartes (somme de ses quotas) et les niveaux
   // accessibles (ceux dont le quota n'est pas nul) ; l'essaim choisit combien de cartes il pioche dans chaque pile
   // (niveau 1, 2, 3). Les cartes sont tirées au hasard dans la pile : il ne choisit pas les créatures.
-  const pickRule = S => { const t = TIERS[tier(S)]; return { total: t.n.reduce((a, b) => a + b, 0), levels: [1, 2, 3].filter(l => t.n[l - 1] > 0) }; };
+  // le total est obligatoire (Oni, 07/11/2026) : il ne baisse que si les piles accessibles n'ont pas assez de cartes
+  const pickRule = S => {
+    const t = TIERS[tier(S)], levels = [1, 2, 3].filter(l => t.n[l - 1] > 0);
+    const total = Math.min(t.n.reduce((a, b) => a + b, 0), levels.reduce((a, l) => a + S.piles[l].length, 0));
+    return { total, levels };
+  };
   function attackerPick(S, counts) {
     if (S.startHand) { attackerDraw(S); return true; } // premier tour : main de départ imposée
     const { total, levels } = pickRule(S);
-    if (counts.reduce((a, b) => a + b, 0) > total) return false;
+    if (counts.reduce((a, b) => a + b, 0) !== total) return false; // ni plus ni moins que le palier
     for (const l of [1, 2, 3]) if (counts[l - 1] && (!levels.includes(l) || counts[l - 1] > S.piles[l].length)) return false;
     S.handA = [];
     for (const l of [1, 2, 3]) for (let i = 0; i < counts[l - 1]; i++) S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ });

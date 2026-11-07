@@ -7,7 +7,7 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 ## v0.5.0 — 7 novembre 2026
 
 **Règles (Oni)**
-- **Pioche au choix** : le palier donne un nombre de cartes (somme de ses quotas : 3, 5, 7 puis 10) et les niveaux accessibles ; l'essaim choisit combien de cartes il pioche dans chaque pile (niveau 1, 2, 3), les créatures étant tirées au hasard dans la pile (il peut en prendre moins). Le premier tour garde la main de départ imposée, **sans Œil-sonde**.
+- **Pioche au choix** : le palier donne un nombre de cartes (somme de ses quotas : 3, 5, 7 puis 10) et les niveaux accessibles ; l'essaim choisit combien de cartes il pioche dans chaque pile (niveau 1, 2, 3), les créatures étant tirées au hasard dans la pile (toujours le total exact du palier, sauf si les piles n'ont plus assez de cartes). Le premier tour garde la main de départ imposée, **sans Œil-sonde**.
 - **Soutiens parachutés** : n'importe quelle case libre de leur lane (plafond de population inchangé), puis ils se déplacent normalement.
 - **Déplacements** : la vitesse est un maximum ; chaque créature avance de 1 case à sa vitesse, au choix, uniquement sur son chemin en escalier vers la fusée (plus de pas de côté ni de retraite) ; elle doit avancer d'au moins 1 case si elle le peut.
 - **Attaque facultative** de n'importe quel bâtiment qui touche sa case par un côté (4 côtés), ou de la fusée.
