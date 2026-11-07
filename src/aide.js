@@ -24,9 +24,9 @@ const AIDE = (() => {
       if (t.ren) caps.push(`Renforcé ${t.ren}`);
       if (t.tech) caps.push(`+${t.tech} technologie${t.tech > 1 ? "s" : ""}`);
       if (t.temp) caps.push("+1 travailleur");
-      if (t.trap) caps.push(`mine (${t.trap} dégât${t.trap > 1 ? "s" : ""})`);
+      if (t.trap) caps.push(`Mine ${t.trap} (${t.trap} dégât${t.trap > 1 ? "s" : ""})`);
       if (t.shield) caps.push("Bouclier");
-      if (t.siphon) caps.push(`Siphon (−${t.siphon} biomasse)`);
+      if (t.siphon) caps.push(`Siphon ${t.siphon} (−${t.siphon} biomasse)`);
       if (t.aura) caps.push("Aura d'épines");
       return `<tr><td><span class="rt-n">${h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${t.d}</td><td>${tilePv(t)}</td><td>${h.E(caps.join(" · ") || "—")}</td><td>${t.n}</td></tr>`;
     }).join("");
