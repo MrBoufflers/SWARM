@@ -1060,6 +1060,9 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
 .h2-music { position: absolute; left: 16px; bottom: 10px; z-index: 2; }
 .h2-music .h2-ic { cursor: pointer; }
 .h2-music .music { padding: 4px 10px 4px 4px; border-radius: 6px; background: rgba(10,8,7,.55); backdrop-filter: blur(4px); }
+/* Bouclier (Abri blindé, Oni 07/11/2026) : jeton tant qu'il n'a pas servi */
+.tile .tb .shield-tk { color: #7fc8ff; filter: drop-shadow(0 0 3px rgba(127,200,255,.8)); }
+.pick.col .pick-row { --c: var(--colonie); }
 
 .im-antenne{--img:url(data:image/webp;base64,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)}
 .im-archive{--img:url(data:image/webp;base64,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)}
@@ -1116,7 +1119,7 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
 <div id="app"></div>
 <div id="flash" role="status" hidden></div>
 <script>const ICONS = {"atq": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "pv": "<path d=\"M12 20C4.5 14.5 2.5 10 5.5 6.2C7.9 3.6 10.8 4.6 12 7.2C13.2 4.6 16.1 3.6 18.5 6.2C21.5 10 19.5 14.5 12 20Z\" fill=\"currentColor\" stroke=\"none\"/>", "biomasse": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><circle cx=\"10\" cy=\"14\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14\" cy=\"16.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "duree": "<path d=\"M6 3H18M6 21H18M7.5 3C7.5 9 12 10 12 12C12 14 7.5 15 7.5 21M16.5 3C16.5 9 12 10 12 12C12 14 16.5 15 16.5 21\"/>", "travailleur": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M7.5 7.2H16.5M4.5 21C4.5 16.5 7.8 13.8 12 13.8C16.2 13.8 19.5 16.5 19.5 21\"/>", "tech": "<circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M12 11V21M8.5 21H15.5M8.6 5.6A4.8 4.8 0 0 0 8.6 12.4M15.4 5.6A4.8 4.8 0 0 1 15.4 12.4M5.6 3A8.6 8.6 0 0 0 5.6 15M18.4 3A8.6 8.6 0 0 1 18.4 15\"/>", "fusee": "<path d=\"M12 2C15.8 5 16.8 10 15.8 15H8.2C7.2 10 8.2 5 12 2Z\"/><circle cx=\"12\" cy=\"9\" r=\"1.8\"/><path d=\"M8.2 15L5 19.5L8.6 18.4M15.8 15L19 19.5L15.4 18.4M10.6 18L12 22L13.4 18\"/>", "chantier": "<path d=\"M5 21V4H19M5 4L10.5 9.5M19 4V8M17 8H21V11H17ZM3 21H9\"/>", "mur": "<path d=\"M3 5H21V19H3ZM3 9.7H21M3 14.3H21M9 5V9.7M15 5V9.7M6 9.7V14.3M12 9.7V14.3M18 9.7V14.3M9 14.3V19M15 14.3V19\"/>", "tourelle": "<circle cx=\"12\" cy=\"12\" r=\"6.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M12 2.5V6.5M12 17.5V21.5M2.5 12H6.5M17.5 12H21.5\"/>", "epines": "<path d=\"M2 20H22M3 20L6 11L9 20M9 20L12 4.5L15 20M15 20L18 11L21 20\"/>", "renforce": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/>", "temp": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4M15 13H21M15 21H21M16 13C16 16 18 16.5 18 17C18 17.5 16 18 16 21M20 13C20 16 18 16.5 18 17C18 17.5 20 18 20 21\"/>", "perm": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4\"/><path d=\"M18 11.5L19.3 14.6L22.6 14.8L20 17L20.9 20.2L18 18.4L15.1 20.2L16 17L13.4 14.8L16.7 14.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "cardinal": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 4.5L14.2 12L12 19.5L9.8 12Z\" fill=\"currentColor\" stroke=\"none\"/>", "couronne": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\"/><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\"/>", "piege": "<path d=\"M3 14H21M4 14L6 8.5L8 14L10 8.5L12 14L14 8.5L16 14L18 8.5L20 14M3 14C3 19 21 19 21 14\"/>", "aura": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "soin": "<path d=\"M9 3H15V9H21V15H15V21H9V15H3V9H9Z\"/>", "fureur": "<path d=\"M12 21C7.4 21 5.4 17.6 6.2 14.2C7 11.2 9.6 10.1 9 5.8C12 7.8 13.2 10 13 12.4C14.2 11.4 15 9.8 15 8.2C18 11 19.2 14 18.2 16.8C17.2 19.6 15 21 12 21Z\"/>", "vision": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "furtivite": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><path d=\"M4 3L20 21\"/>", "leurre": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>", "percee": "<path d=\"M9.5 3.5H14.5V20.5H9.5ZM9.5 9H14.5M9.5 15H14.5M2 12H21M17.5 8.5L21 12L17.5 15.5\"/>", "instinct": "<path d=\"M12 2L13.9 10.1L22 12L13.9 13.9L12 22L10.1 13.9L2 12L10.1 10.1Z\"/>", "spores": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"4\" r=\"1.6\"/><circle cx=\"12\" cy=\"20\" r=\"1.6\"/><circle cx=\"4\" cy=\"12\" r=\"1.6\"/><circle cx=\"20\" cy=\"12\" r=\"1.6\"/><circle cx=\"6.3\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"17.7\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"6.3\" cy=\"17.7\" r=\"1.2\"/>", "sabotage": "<circle cx=\"10\" cy=\"14.5\" r=\"6.5\"/><path d=\"M14.6 9.9L17.5 7M17.5 7L19 8.5M19.5 3V4.8M22 5.5H20.2M21.3 3.7L20.1 4.9\"/>", "mobilite": "<path d=\"M12 21V12M12 12L6 5M12 12L18 5M6 5V9M6 5H10M18 5V9M18 5H14\"/>", "deploiement": "<path d=\"M6 4L12 10L18 4M6 12L12 18L18 12M5 21H19\"/>", "reincarnation": "<path d=\"M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2\"/><path d=\"M12 15.5C9.2 13.5 8.5 12 9.6 10.6C10.4 9.7 11.5 10 12 11C12.5 10 13.6 9.7 14.4 10.6C15.5 12 14.8 13.5 12 15.5Z\" fill=\"currentColor\" stroke=\"none\"/>", "protection": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/><circle cx=\"12\" cy=\"10\" r=\"2.2\"/><path d=\"M8.5 16.5C9 14.5 10.3 13.5 12 13.5C13.7 13.5 15 14.5 15.5 16.5\"/>", "clairvoyance": "<path d=\"M4 12C6.2 8.2 8.8 7 12 7C15.2 7 17.8 8.2 20 12C17.8 15.8 15.2 17 12 17C8.8 17 6.2 15.8 4 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\"/><path d=\"M12 1.5V4M12 20V22.5M3.5 3.5L5.3 5.3M18.7 18.7L20.5 20.5M20.5 3.5L18.7 5.3M5.3 18.7L3.5 20.5\"/>", "frenesie": "<path d=\"M3 13C5 10 6.5 7.5 8.5 4.5M6 17C8 13.5 10 10.5 12.5 7M15 11L21 17M21 11L15 17\"/>", "frappe": "<path d=\"M13.5 2L5 13.5H11L9.5 22L19 9.5H13Z\"/>", "salve": "<path d=\"M8 2L3.5 9H7L6 15L11 7.5H7.5ZM17 6L12.5 13H16L15 19L20 11.5H16.5Z\"/>", "lane": "<path d=\"M8 3H16L20.5 21H3.5Z\"/><path d=\"M12 7V17M9.5 14.5L12 17L14.5 14.5\"/>", "stase": "<path d=\"M12 2V22M3.3 7L20.7 17M3.3 17L20.7 7M9.5 3.5L12 6L14.5 3.5M9.5 20.5L12 18L14.5 20.5\"/>", "famine": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><path d=\"M8.5 14.5H15.5\"/>", "brouillage": "<rect x=\"6\" y=\"3\" width=\"12\" height=\"18\"/><path d=\"M8.5 7.5L15.5 16.5M15.5 7.5L8.5 16.5\"/>", "effort": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"7.2\" stroke-width=\"3.2\" stroke-dasharray=\"2.6 2.1\"/>", "cadence": "<circle cx=\"8.5\" cy=\"9.5\" r=\"2\"/><circle cx=\"8.5\" cy=\"9.5\" r=\"5\" stroke-width=\"2.6\" stroke-dasharray=\"2 1.8\"/><circle cx=\"17\" cy=\"16.5\" r=\"1.6\"/><circle cx=\"17\" cy=\"16.5\" r=\"4\" stroke-width=\"2.4\" stroke-dasharray=\"1.8 1.6\"/>", "reparation": "<path d=\"M13 3L21 11L18 14L10 6ZM11.5 9.5L3 18L6 21L14.5 12.5\"/>", "renouvellement": "<path d=\"M20 12A8 8 0 1 1 17.7 6.3M18.5 2.5V6.8H14.2\"/>", "reconversion": "<path d=\"M4 8H19M15.5 4.5L19 8L15.5 11.5M20 16H5M8.5 12.5L5 16L8.5 19.5\"/>", "nuke": "<circle cx=\"12\" cy=\"12\" r=\"9.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(0 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(120 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(240 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "aggro": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "tank": "<path d=\"M3 15C3 9.5 7 5.5 12 5.5C17 5.5 21 9.5 21 15ZM3 15H21M8 15C8 11 9.8 8 12 8C14.2 8 16 11 16 15M12 5.5V15M2 18.5H22\"/>", "soutien": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "sort": "<path d=\"M12 2L13.6 8.4L20 10L13.6 11.6L12 18L10.4 11.6L4 10L10.4 8.4Z\"/><path d=\"M18.5 15.5L19.2 18.3L22 19L19.2 19.7L18.5 22.5L17.8 19.7L15 19L17.8 18.3Z\" fill=\"currentColor\" stroke=\"none\"/>", "palier": "<path d=\"M3 20H8V15H13V10H18V5H21\"/>", "ferocite": "<path d=\"M4 17C7 13 9 10 12 6M8 21C11 16 13 13 16 9\"/><path d=\"M18 3V9M15 6H21\"/>", "carnage": "<path d=\"M3 15C6 11 8 8 11 4M6 19C9 14 12 10 15 6M10 21C13 16 15 13 18 10\"/><path d=\"M19 2V6M17 4H21\"/><path d=\"M19 13.5C20.2 15 20.6 16 20.6 16.8A1.6 1.6 0 0 1 17.4 16.8C17.4 16 17.8 15 19 13.5Z\" fill=\"currentColor\" stroke=\"none\"/>", "essaim": "<circle cx=\"7.5\" cy=\"8.5\" r=\"2.3\"/><circle cx=\"13.5\" cy=\"7\" r=\"2.3\"/><circle cx=\"10\" cy=\"14.5\" r=\"2.3\"/><path d=\"M16.5 15H22M19.25 12.25V17.75\"/>", "carapace": "<path d=\"M3 17C3 11 7 6.5 12 6.5C17 6.5 21 11 21 17Z\"/><path d=\"M8 17C8 13 9.8 9.8 12 9.8C14.2 9.8 16 13 16 17M12 6.5V17\"/>", "blindage": "<path d=\"M4 7L12 3L20 7V13.5L12 21L4 13.5Z\"/><path d=\"M4 12.5L12 8.5L20 12.5M12 8.5V21\"/>", "masse": "<circle cx=\"8.5\" cy=\"9.5\" r=\"4\"/><circle cx=\"15.5\" cy=\"9.5\" r=\"4\"/><circle cx=\"12\" cy=\"15.5\" r=\"4\"/>", "mue": "<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3.5 20C3.5 16 5.8 13 9 13C12.2 13 14.5 16 14.5 20\"/><circle cx=\"15.5\" cy=\"8\" r=\"3\" stroke-dasharray=\"1.6 1.9\"/><path d=\"M15.5 13C18.7 13 20.5 16 20.5 20\" stroke-dasharray=\"1.6 1.9\"/>", "griffes": "<path d=\"M5 21C5 15 7.5 9 12.5 4.5M10 21C10 16 12 11.5 16.5 8M15 21C15 17.5 16.8 14.5 20.5 12.5\"/>", "regeneration": "<path d=\"M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2\"/><path d=\"M10.6 8.6H13.4V11.1H15.9V13.9H13.4V16.4H10.6V13.9H8.1V11.1H10.6Z\"/>"};
-const IMG_CLASS = {"Écorcheur": "im im-ecorcheur", "Ravageur": "im im-ravageur", "Massacreur": "im im-massacreur", "Carapace": "im im-carapace", "Béhémoth": "im im-behemoth", "Colosse": "im im-colosse", "Œil-sonde": "im im-oeil-sonde", "Glaneur": "im im-glaneur", "Hurleur": "im im-hurleur", "Phéromone": "im im-pheromone", "Perforeur": "im im-perforeur", "Catalyseur": "im im-catalyseur", "Sapeur": "im im-sapeur", "Sporeur": "im im-sporeur", "Palissade": "im im-palissade", "Barbelé": "im im-barbele", "Antenne": "im im-antenne", "Bastion": "im im-bastion", "Haie d'épines": "im im-haie-d-epines", "Laboratoire": "im im-laboratoire", "Mur hérissé": "im im-mur-herisse", "Muraille": "im im-muraille", "Observatoire": "im im-observatroire", "Rempart": "im im-rempart", "Archives": "im im-archive", "Baraquement": "im im-baraquement", "Dortoir": "im im-dortoir", "Égide": "im im-egide", "Ligne de front": "im im-ligne-de-front", "Réduit": "im im-reduit", "Piège": "im im-piege", "Siphon": "im im-siphon", "Ronceraie": "im im-ronceraie", "Avant-poste du Nord": "im im-avant-poste", "Avant-poste de l'Est": "im im-avant-poste", "Avant-poste du Sud": "im im-avant-poste", "Avant-poste de l'Ouest": "im im-avant-poste", "support 1": "im im-support-1", "support 2": "im im-support-2", "support 3": "im im-support-niveau-3", "Fusée": "im im-fusee", "Champ de bataille": "im im-champs-de-bataille", "Passage colonie": "im im-pop-up-tour-colonie", "Passage essaim": "im im-pop-up-tour-essaim", "Visage Ravageur": "im im-visage-ravageur", "Visage Massacreur": "im im-visage-massacreur", "Visage Béhémoth": "im im-visage-behemoth", "Visage Colosse": "im im-visage-colosse", "Visage Phéromone": "im im-visage-pheromone", "Visage Perforeur": "im im-visage-perforeur", "Visage Catalyseur": "im im-visage-catalyseur", "Visage Sapeur": "im im-visage-sapeur", "Visage Sporeur": "im im-visage-sporeur"};
+const IMG_CLASS = {"Écorcheur": "im im-ecorcheur", "Ravageur": "im im-ravageur", "Massacreur": "im im-massacreur", "Carapace": "im im-carapace", "Béhémoth": "im im-behemoth", "Colosse": "im im-colosse", "Œil-sonde": "im im-oeil-sonde", "Glaneur": "im im-glaneur", "Hurleur": "im im-hurleur", "Phéromone": "im im-pheromone", "Perforeur": "im im-perforeur", "Catalyseur": "im im-catalyseur", "Sapeur": "im im-sapeur", "Sporeur": "im im-sporeur", "Palissade": "im im-palissade", "Barbelé": "im im-barbele", "Antenne": "im im-antenne", "Bastion": "im im-bastion", "Haie d'épines": "im im-haie-d-epines", "Laboratoire": "im im-laboratoire", "Mur hérissé": "im im-mur-herisse", "Muraille": "im im-muraille", "Observatoire": "im im-observatroire", "Rempart": "im im-rempart", "Archives": "im im-archive", "Baraquement": "im im-baraquement", "Dortoir": "im im-dortoir", "Égide": "im im-egide", "Ligne de front": "im im-ligne-de-front", "Réduit": "im im-reduit", "Piège": "im im-piege", "Siphon": "im im-siphon", "Ronceraie": "im im-ronceraie", "Avant-poste du Nord": "im im-avant-poste", "Avant-poste de l'Est": "im im-avant-poste", "Avant-poste du Sud": "im im-avant-poste", "Avant-poste de l'Ouest": "im im-avant-poste", "support 1": "im im-support-1", "support 2": "im im-support-2", "support 3": "im im-support-niveau-3", "Fusée": "im im-fusee", "Champ de bataille": "im im-champs-de-bataille", "Passage colonie": "im im-pop-up-tour-colonie", "Passage essaim": "im im-pop-up-tour-essaim", "Visage Ravageur": "im im-visage-ravageur", "Visage Massacreur": "im im-visage-massacreur", "Visage Béhémoth": "im im-visage-behemoth", "Visage Colosse": "im im-visage-colosse", "Visage Phéromone": "im im-visage-pheromone", "Visage Perforeur": "im im-visage-perforeur", "Visage Catalyseur": "im im-visage-catalyseur", "Visage Sapeur": "im im-visage-sapeur", "Visage Sporeur": "im im-visage-sporeur", "Mine mineure": "im im-piege", "Mine majeure": "im im-piege", "Mine supérieure": "im im-piege", "Siphon mineur": "im im-siphon", "Siphon majeur": "im im-siphon", "Siphon supérieur": "im im-siphon"};
 // Swarm & Steel — moteur de règles v0.3 (livret v0.3). Aucun accès au DOM : testable sous Node.
 "use strict";
 const SF = (() => {
@@ -1171,9 +1174,15 @@ const SF = (() => {
     "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, aura: 1, n: 1 },
     "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
     "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
-    "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 }, // 3 dégâts quand il se déclenche (Oni, 01/11/2026 ; avant 2)
-    // Siphon (Oni, 02/11/2026) : piège camouflé ; révélé par une attaque, il retire 3 biomasse à l'essaim (jamais sous 3)
-    "Siphon": { d: 2, pv: 2, ep: 0, siphon: 3, camo: 1, n: 3 },
+    // Pièges (Oni, 07/11/2026 ; remplacent le Piège à 3 dégâts et le Siphon à 3 biomasse) : effet = PV = tours de construction
+    "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 1, camo: 1, n: 2 },
+    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 2, camo: 1, n: 2 },
+    "Mine supérieure": { d: 3, pv: 3, ep: 0, trap: 3, camo: 1, n: 2 },
+    "Siphon mineur": { d: 1, pv: 1, ep: 0, siphon: 1, camo: 1, n: 2 },
+    "Siphon majeur": { d: 2, pv: 2, ep: 0, siphon: 2, camo: 1, n: 2 },
+    "Siphon supérieur": { d: 3, pv: 3, ep: 0, siphon: 3, camo: 1, n: 2 },
+    // Abri blindé (Oni, 07/11/2026) : +1 travailleur tant qu'il tient, Bouclier (jeton qui annule la prochaine attaque), face visible
+    "Abri blindé": { d: 2, pv: 2, ep: 0, temp: 1, shield: 1, n: 3 },
     // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
     "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 2, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Renforcé 2 (02/11/2026 : le Bouclier est fondu dans Renforcé)
@@ -1184,9 +1193,14 @@ const SF = (() => {
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
-    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine majeure": "Camouflée. 2 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine supérieure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Siphon mineur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 1 biomasse (jamais sous 5).",
+    "Siphon majeur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 2 biomasse (jamais sous 5).",
+    "Siphon supérieur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 3 biomasse (jamais sous 5).",
+    "Abri blindé": "+1 travailleur tant que la tuile tient. Bouclier : la prochaine attaque ne lui fait rien (le jeton est alors défaussé).",
     "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
-    "Siphon": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 3 biomasse (jamais sous 3).",
     "Égide": "Camouflée. Renforcé 2 : perd 1 PV par tranche de 2 dégâts.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Renforcé 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie.",
@@ -1206,7 +1220,7 @@ const SF = (() => {
     // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
     "Feu nourri": { kind: "sup", n: 2, text: "Ce tour, chaque tourelle tire 2 fois." },
     "Réparation": { kind: "sup", n: 3, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
-    "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant." },
+    "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant, chacune dans la même pioche (renforts, actifs ou pièges)." },
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
@@ -1228,8 +1242,14 @@ const SF = (() => {
       B2: ["Frénésie", "Chaque soutien double les dégâts d'une autre créature de sa case, au choix (cumulable : deux Frénésies sur la même créature la quadruplent)."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
-  const MIN_BIOMASS = 3; // la biomasse de l'essaim ne descend jamais sous 3 (Oni, 02/11/2026)
-  const TRAP_DMG = 3; // dégâts du Piège (Oni, 01/11/2026 ; avant 2)
+  const MIN_BIOMASS = 5; // un Siphon ne fait jamais descendre l'essaim sous 5 biomasse (Oni, 07/11/2026 ; avant 3)
+  const TRAP_DMG = 3; // dégâts de l'ancien Piège (avant le 07/11/2026 : les Mines ont chacune leurs dégâts, tuile.trap)
+  // catégories de tuiles et pioches séparées (Oni, 07/11/2026) : renforts (PV, Renforcé, Épines, camouflés), actifs (face
+  // visible, effet direct), pièges (Mines et Siphons)
+  const TILE_CATS = ["renfort", "actif", "piege"], CAT_NAME = { renfort: "Renforts", actif: "Actifs", piege: "Pièges" };
+  const tileCat = name => { const t = TILES[name]; return !t ? "renfort" : t.trap || t.siphon ? "piege" : !t.camo ? "actif" : "renfort"; };
+  // anciens noms (parties en cours) : le Piège et le Siphon deviennent leur version supérieure
+  const OLD_TILE = { "Piège": "Mine supérieure", "Siphon": "Siphon supérieur" };
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
@@ -1240,7 +1260,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.1";
+  const VERSION = "0.5.2";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1299,7 +1319,7 @@ const SF = (() => {
       version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
       tiles: {}, supports: {}, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
       workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
-      tileDeck: [], tileDiscard: [], hand: [],
+      tileDecks: { renfort: [], actif: [], piege: [] }, tileDiscards: { renfort: [], actif: [], piege: [] }, hand: [],
       spellDeck: [], spellDiscard: [], spells: [],
       alloc: { N: 0, E: 0, S: 0, O: 0 }, extraPts: 0, cadence: false, firedSupports: [],
       biomass: 5, budget: 0, reserve: 0, famine: 0, startHand: true, // départ : 5 biomasse (Oni, 04/11/2026 ; avant 3)
@@ -1314,12 +1334,12 @@ const SF = (() => {
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     placeSupports(S); // supports de niveau 2 aux coins de la couronne 2 (leurs murs sont posés)
-    for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
-    shuffle(S.tileDeck);
+    for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDecks[tileCat(n)].push(n);
+    for (const c of TILE_CATS) shuffle(S.tileDecks[c]);
     for (const [n, s] of Object.entries(SPELLS)) for (let i = 0; i < s.n; i++) S.spellDeck.push(n);
     shuffle(S.spellDeck);
     addPile(S, 1, "aggro"); addPile(S, 1, "tank"); addPile(S, 1, "soutien");
-    drawTiles(S);
+    // main de la colonie : vide au départ ; elle la compose au début de son premier tour (pioche au choix, D_draw)
     log(S, "jeu", "Nouvelle partie. L'essaim commence.");
     startAttackerTurn(S);
     return S;
@@ -1426,7 +1446,7 @@ const SF = (() => {
     if (pv === "ap") pv = lane === t.dir ? 4 : 2;
     if (pv === "front") pv = 1 + r;
     if (pv === "reduit") pv = 5 - r;
-    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, siphon: t.siphon || 0, camo: t.camo || 0, revealed: !t.camo };
+    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, siphon: t.siphon || 0, camo: t.camo || 0, revealed: !t.camo, ...(t.shield ? { shield: t.shield } : {}) };
   }
   // Épines d'une tuile (Oni, 01/11/2026) : ses Épines propres, +1 par support de niveau 2 dans les 8 cases autour
   // (pour toute tuile, même sans Épines), +1 par Avant-poste dans les 8 cases autour (« Aura d'épines ») ; tout se cumule.
@@ -1447,7 +1467,7 @@ const SF = (() => {
   function destroyTile(S, k, why, by) {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
-    if (!t.start) S.tileDiscard.push(t.name);
+    if (!t.start) S.tileDiscards[tileCat(t.name)].push(t.name);
     // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
     // Aura Butin : +1 par Phéromone sur la case de la créature (Oni, 01/11/2026 ; cumulable depuis le 02/11/2026)
     const butin = by ? countMates(S, by, o => o.name === "Phéromone") : 0;
@@ -1759,7 +1779,7 @@ const SF = (() => {
         log(S, "essaim", "Un piège est révélé.");
         // le piège blesse la créature AVANT qu'elle frappe : si elle en meurt, elle n'inflige rien (Oni, 01/11/2026)
         if (!clairvoyance(S)) {
-          damageCreature(S, c, TRAP_DMG, "piège");
+          damageCreature(S, c, t.trap, "piège");
           if (c.hp + bonusHp(S, c) <= 0) { log(S, "essaim", `${c.name} meurt dans le piège avant de frapper.`); return; }
         }
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
@@ -1777,7 +1797,10 @@ const SF = (() => {
       for (const [a, b] of neighbors(x, y)) {
         const nk = key(a, b), nt = S.tiles[nk];
         // les spores n'atteignent pas une tuile encore camouflée (Oni, 02/11/2026)
-        if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
+        if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk) && nt.shield > 0) { // Bouclier : il absorbe les spores
+          nt.shield = 0; fx(S, { t: "hit", id: null, k: nk, n: 0, hp: nt.hp });
+          log(S, "colonie", `Bouclier : ${nt.name} ne subit rien des spores ; le jeton est défaussé.`);
+        } else if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
           const spLoss = nt.ren ? Math.floor(spores / nt.ren) : spores;
           nt.hp -= spLoss;
           fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
@@ -1801,7 +1824,14 @@ const SF = (() => {
         else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case suivante est vide.`);
       }
     };
-    if (S.stase.includes(tk)) {
+    const shielded = !S.stase.includes(tk) && t.shield > 0;
+    if (shielded) { // Bouclier (Oni, 07/11/2026) : comme en stase pour cette attaque, puis le jeton est défaussé
+      t.shield = 0;
+      fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
+      log(S, "colonie", `Bouclier : ${t.name} ne subit rien de cette attaque ; le jeton est défaussé.`);
+      sporesAround();
+      pierce(dmg);
+    } else if (S.stase.includes(tk)) {
       // Champ de stase (Oni, 07/11/2026) : l'attaque a lieu mais ne fait rien au bâtiment ; toute l'attaque passe en percée,
       // et les spores touchent les tuiles voisines
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
@@ -1823,6 +1853,7 @@ const SF = (() => {
     // Aura Cuirasse (Catalyseur sur la case) : pas de dégâts d'Épines (Oni, 02/11/2026)
     if (primary && epVal > 0) {
       if (S.stase.includes(tk)) log(S, "colonie", `Champ de stase : pas d'Épines pour ${c.name}.`);
+      else if (shielded) log(S, "colonie", `Bouclier : pas d'Épines pour ${c.name}.`);
       else if (caseMates(S, c).some(o => o.name === "Catalyseur")) log(S, "essaim", `Aura Cuirasse : ${c.name} ne subit pas les Épines.`);
       // Carapace épaisse (tank, côté A) : les tanks ne subissent plus les Épines (Oni, 07/11/2026 ; avant : Provocation)
       else if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "A") log(S, "essaim", `Carapace épaisse : ${c.name} ne subit pas les Épines.`);
@@ -2075,8 +2106,10 @@ const SF = (() => {
       case "Renouvellement": { // arg = indices de la main à défausser
         if (!Array.isArray(arg)) return false;
         const idx = [...arg].sort((a, b) => b - a);
-        for (const i of idx) if (S.hand[i]) S.tileDiscard.push(S.hand.splice(i, 1)[0]);
-        for (let i = 0; i < arg.length; i++) drawOneTile(S);
+        // chaque tuile défaussée est remplacée par une tuile de la même pioche (renforts, actifs ou pièges)
+        const cats = [];
+        for (const i of idx) if (S.hand[i]) { const n = S.hand.splice(i, 1)[0]; S.tileDiscards[tileCat(n)].push(n); cats.push(tileCat(n)); }
+        for (const c of cats) drawOneTile(S, c);
         return true;
       }
       case "Reconversion": { // arg = {hand: index, tile: clé}
@@ -2095,8 +2128,19 @@ const SF = (() => {
   }
 
   // ------------------------------------------------------------------ tour de la colonie
+  // pioche de la colonie (Oni, 07/11/2026) : au début de son tour, elle complète sa main carte par carte en choisissant à
+  // chaque fois la pioche (renforts, actifs ou pièges)
+  const tilesLeft = (S, c) => S.tileDecks[c].length + S.tileDiscards[c].length;
+  const needDraw = S => S.hand.length < handSize(S) && TILE_CATS.some(c => tilesLeft(S, c) > 0);
+  function drawTileFrom(S, cat) {
+    if (S.phase !== "D_draw" || !TILE_CATS.includes(cat) || !tilesLeft(S, cat) || !needDraw(S)) return false;
+    drawOneTile(S, cat);
+    fx(S, { t: "tdraw", cat });
+    if (!needDraw(S)) { S.phase = "D_main"; log(S, "colonie", `Main de ${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}.`); }
+    return true;
+  }
   function startDefenderTurn(S) {
-    S.phase = "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
+    S.phase = needDraw(S) ? "D_draw" : "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
   }
   const pubName = name => (TILES[name] && TILES[name].camo ? "tuile camouflée" : name);
   // Le chantier est affecté à une lane ; la case exacte n'est choisie qu'à la fin de la construction.
@@ -2221,8 +2265,7 @@ const SF = (() => {
   }
   function endColonyTurn(S) {
     autoFire(S); // tirs restants (automatiques)
-    // sortilèges de soutien non joués : gardés en main (Oni, 01/11/2026)
-    drawTiles(S);
+    // sortilèges de soutien non joués : gardés en main (Oni, 01/11/2026) ; les tuiles se piochent au début du tour suivant
     const n = spellsPerTurn(S);
     for (let i = 0; i < n; i++) {
       if (!S.spellDeck.length) { S.spellDeck = shuffle(S.spellDiscard); S.spellDiscard = []; }
@@ -2232,11 +2275,10 @@ const SF = (() => {
     S.round += 1;
     startAttackerTurn(S);
   }
-  function drawOneTile(S) {
-    if (!S.tileDeck.length) { S.tileDeck = shuffle(S.tileDiscard); S.tileDiscard = []; }
-    if (S.tileDeck.length) S.hand.push(S.tileDeck.pop());
+  function drawOneTile(S, cat) {
+    if (!S.tileDecks[cat].length) { S.tileDecks[cat] = shuffle(S.tileDiscards[cat]); S.tileDiscards[cat] = []; }
+    if (S.tileDecks[cat].length) S.hand.push(S.tileDecks[cat].pop());
   }
-  function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
 
   // Parties enregistrées avec d'anciennes règles : les tuiles de départ (« Mur de départ », « Haie de départ »,
   // « Haie d'épines » marquée start) deviennent des Barbelés
@@ -2249,7 +2291,8 @@ const SF = (() => {
       const wrong = S.piles[l].filter(n => CREATURES[n] && CREATURES[n].lvl !== l);
       if (wrong.length) { S.piles[l] = S.piles[l].filter(n => !wrong.includes(n)); for (const n of wrong) S.piles[CREATURES[n].lvl].push(n); }
     }
-    for (const t of Object.values(S.tiles || {})) if (t.shield) { t.ren = t.shield; delete t.shield; } // Bouclier → Renforcé (02/11/2026)
+    // ancien « Bouclier X » → Renforcé X (02/11/2026) ; le Bouclier de l'Abri blindé (jeton, 07/11/2026) n'est pas concerné
+    for (const t of Object.values(S.tiles || {})) if (t.shield && !(TILES[t.name] && TILES[t.name].shield)) { t.ren = t.shield; delete t.shield; }
     for (const c of S.creatures || []) if (CREATURES[c.name] && c.hp > maxHp(S, c.name)) c.hp = maxHp(S, c.name); // Mue : plus de +1 PV au soutien
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
@@ -2262,6 +2305,21 @@ const SF = (() => {
       if (TREES[type] && TREES[type][slot] && got >= nodeCost(slot) && nodeState(S, type, slot) === "open") { delete S.invest[key]; acquire(S, type, slot); }
     }
     for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ" || list[i] === "Haie de départ") list.splice(i, 1);
+    // pioches de tuiles par catégorie (Oni, 07/11/2026) : Piège et Siphon renommés, pioche unique répartie en trois
+    const ren = n => OLD_TILE[n] || n;
+    if (Array.isArray(S.hand)) S.hand = S.hand.map(n => (n === null ? n : ren(n)));
+    for (const t of Object.values(S.tiles || {})) if (OLD_TILE[t.name]) t.name = ren(t.name);
+    for (const l of Object.keys(S.chantiers || {})) for (const ch of S.chantiers[l]) if (ch && ch.tile) ch.tile = ren(ch.tile);
+    for (const p of S.toPlace || []) if (p && p.tile) p.tile = ren(p.tile);
+    if (!S.tileDecks && Array.isArray(S.tileDeck)) {
+      S.tileDecks = { renfort: [], actif: [], piege: [] }; S.tileDiscards = { renfort: [], actif: [], piege: [] };
+      for (const n of S.tileDeck) if (n) S.tileDecks[tileCat(ren(n))].push(ren(n));
+      for (const n of S.tileDiscard || []) if (n) S.tileDiscards[tileCat(ren(n))].push(ren(n));
+      // nouvelles tuiles (Mines mineure / majeure, Siphons mineur / majeur, Abri blindé) ajoutées à leur pioche
+      for (const n of ["Mine mineure", "Mine majeure", "Siphon mineur", "Siphon majeur", "Abri blindé"]) for (let i = 0; i < TILES[n].n; i++) S.tileDecks[tileCat(n)].push(n);
+      for (const c of TILE_CATS) shuffle(S.tileDecks[c]);
+      delete S.tileDeck; delete S.tileDiscard;
+    }
     return S;
   }
 
@@ -2269,7 +2327,7 @@ const SF = (() => {
   // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
   // vérifie le camp, la phase et les paramètres, puis appelle les fonctions de règles ci-dessus.
   // Les transitions de phase qui vivaient dans l'interface (fenêtres Famine / Réaction, passage aux tirs) sont ici.
-  const PHASE_SIDE = { A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
+  const PHASE_SIDE = { D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
   const actor = S => PHASE_SIDE[S.phase] || null;
   const isInt = v => Number.isInteger(v);
   const isLane = l => LANES.includes(l);
@@ -2339,6 +2397,7 @@ const SF = (() => {
       return true;
     } },
     endA: { phase: ["A_attack"], run(S) { endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
+    tdraw: { phase: ["D_draw"], run: (S, a) => drawTileFrom(S, a.cat) }, // pioche d'une tuile dans la pioche choisie
     startCh: { phase: ["D_main"], run(S, a) {
       if (!(isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane))) return false;
       // travailleurs assignés d'office (Oni, 04/11/2026) : juste assez pour finir les chantiers de la lane, dans la
@@ -2397,7 +2456,7 @@ const SF = (() => {
   function viewFor(S, side) {
     const V = JSON.parse(JSON.stringify(S));
     V.view = side; V.handoff = null;
-    V.tileDeck = blank(V.tileDeck); V.tileDiscard = blank(V.tileDiscard);
+    V.tileDecks = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDecks[c])])); V.tileDiscards = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDiscards[c])]));
     V.spellDeck = blank(V.spellDeck); V.spellDiscard = blank(V.spellDiscard);
     for (const l of [1, 2, 3]) V.piles[l] = blank(V.piles[l]);
     if (side === "colonie") V.handA = blank(V.handA);
@@ -2427,7 +2486,7 @@ const SF = (() => {
 
   return {
     VERSION,
-    fxFor, migrate, famineBudget, MIN_BIOMASS, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, famineBudget, MIN_BIOMASS, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
@@ -2561,7 +2620,8 @@ const AIDE = (() => {
       if (t.ren) caps.push(`Renforcé ${t.ren}`);
       if (t.tech) caps.push(`+${t.tech} technologie${t.tech > 1 ? "s" : ""}`);
       if (t.temp) caps.push("+1 travailleur");
-      if (t.trap) caps.push(`piège (${SF.TRAP_DMG} dégâts)`);
+      if (t.trap) caps.push(`mine (${t.trap} dégât${t.trap > 1 ? "s" : ""})`);
+      if (t.shield) caps.push("Bouclier");
       if (t.siphon) caps.push(`Siphon (−${t.siphon} biomasse)`);
       if (t.aura) caps.push("Aura d'épines");
       return `<tr><td><span class="rt-n">${h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${t.d}</td><td>${tilePv(t)}</td><td>${h.E(caps.join(" · ") || "—")}</td><td>${t.n}</td></tr>`;
@@ -2596,7 +2656,7 @@ const AIDE = (() => {
         <li><b>ATQ</b> : dégâts infligés par une attaque. <b>PV</b> : points de vie ; à 0, la créature ou le bâtiment est détruit.</li>
         <li><b>Épines X</b> : une créature qui attaque ce bâtiment subit X dégâts après son attaque. +1 par Avant-poste dans les 8 cases autour.</li>
         <li><b>Renforcé X</b> : le bâtiment perd 1 PV par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).</li>
-        <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Un <b>piège</b> camouflé inflige ${SF.TRAP_DMG} dégâts à la créature qui le révèle, avant qu'elle frappe ; un <b>Siphon</b> retire de la biomasse à l'essaim. Une tuile encore cachée ne subit ni la percée ni les spores.</li>
+        <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Une <b>Mine</b> camouflée inflige 1, 2 ou 3 dégâts (mineure, majeure, supérieure) à la créature qui la révèle, avant qu'elle frappe ; un <b>Siphon</b> retire 1, 2 ou 3 biomasse à l'essaim (jamais sous ${SF.MIN_BIOMASS}). Une tuile encore cachée ne subit ni la percée ni les spores.</li>
         <li><b>Percée</b> (Aura du Perforeur) : les dégâts en trop après la destruction d'un bâtiment passent à la case suivante du chemin vers la fusée.</li>
         <li><b>Auras</b> : effets des soutiens sur les <b>autres</b> créatures de leur case ; elles se cumulent toutes.</li>
       </ul>
@@ -2659,7 +2719,8 @@ const AIDE = (() => {
       <h3>Vos ressources</h3>
       <ul>
         <li><b>Travailleurs</b> : 3 au départ, +1 par étage achevé, +1 par bâtiment à travailleur temporaire encore debout, +${SF.SUP3_WORKERS} par support de niveau 3. Chaque travailleur donne <b>1 point de construction</b> par tour.</li>
-        <li><b>Main de tuiles</b> : 4 tuiles, +1 à chaque palier de la fusée (étages 3, 6 et 9). Vous la complétez à la fin de votre tour.</li>
+        <li><b>Main de tuiles</b> : 4 tuiles, +1 à chaque palier de la fusée (étages 3, 6 et 9). Vous la complétez au début de votre tour, tuile par tuile, en choisissant à chaque fois la pioche : <b>renforts</b> (murs, Épines, Renforcé, camouflés), <b>actifs</b> (face visible : technologies, travailleurs, Avant-postes) ou <b>pièges</b> (Mines et Siphons).</li>
+        <li><b>Bouclier</b> (Abri blindé) : la première attaque contre le bâtiment ne lui fait rien (comme en stase), puis le jeton est défaussé.</li>
         <li><b>Technologies</b> : à 3, 6 et 9 technologies, vous piochez 1, 2 ou 3 sortilèges à la fin de chaque tour. Elles viennent des bâtiments à technologies et du palier de l'étage 3 (+2).</li>
       </ul>
       <h3>Votre tour</h3>
@@ -2722,8 +2783,8 @@ const AIDE = (() => {
       text: () => `Pendant le déploiement, touchez une carte des arbres d'amélioration (panneau Essaim) pour y investir votre budget ou votre réserve : ${SF.COST_R1} biomasse au rang 1, ${SF.COST_R2} au rang 2, payables en plusieurs tours. Un rang 1 ajoute les cartes de niveau 2 de ce type à votre pioche, un rang 2 celles de niveau 3.` },
     { id: "e-attaque", side: "essaim", img: "Ravageur", title: "Déplacer et attaquer", when: S => S.phase === "A_attack",
       text: () => `Touchez une créature (cadre jaune), puis une case surlignée de son chemin : elle avance de 1 case jusqu'à son maximum, tout droit ou en escalier. Ensuite, si vous voulez, touchez un bâtiment encadré qui touche sa case. « Tout résoudre et finir le tour » fait agir les autres créatures et termine le tour.` },
-    { id: "e-camo", side: "essaim", img: "Piège", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
-      text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être un piège (${SF.TRAP_DMG} dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez de la biomasse). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
+    { id: "e-camo", side: "essaim", img: "Mine supérieure", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
+      text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être une Mine (1 à 3 dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez 1 à 3 biomasse, jamais sous ${SF.MIN_BIOMASS}). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
     { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),
       text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : le bâtiment ne perd qu'1 PV par tranche de X dégâts d'une même attaque.` },
     { id: "e-tourelles", side: "essaim", img: "support 2", title: "Les tourelles", when: S => S.phase === "A_attack" && S.creatures.some(c => c.k <= 3),
@@ -2752,7 +2813,7 @@ const AIDE = (() => {
     { id: "c-tirs", side: "colonie", img: "support 2", title: "Tirer", when: S => S.phase === "D_fire",
       text: () => `Touchez une tourelle surlignée, puis une créature surlignée (dans les 8 cases autour). Niveau I : 1 dégât, +1 par palier de la fusée ; niveau II : 2 dégâts. « Tirs automatiques » choisit pour vous ; « Terminer le tour » fait tirer les tourelles restantes.` },
     { id: "c-camo", side: "colonie", img: "Égide", title: "Le camouflage", when: S => inHand(S, t => t.camo),
-      text: () => `Les tuiles marquées « Camouflage » sont posées face cachée : l'essaim ne sait pas ce que c'est avant de les attaquer. Les pièges blessent la créature qui les révèle ; le Siphon lui retire de la biomasse. Un Œil-sonde ennemi révèle votre lane.` },
+      text: () => `Les tuiles marquées « Camouflage » sont posées face cachée : l'essaim ne sait pas ce que c'est avant de les attaquer. Les Mines blessent la créature qui les révèle ; les Siphons lui retirent de la biomasse. Un Œil-sonde ennemi révèle votre lane.` },
     { id: "c-epines", side: "colonie", img: "Mur hérissé", title: "Les Épines", when: S => inHand(S, t => t.ep > 0),
       text: () => `Épines : la créature qui attaque ce bâtiment subit autant de dégâts. Très efficace contre les aggros, qui n'ont qu'1 PV. Un Avant-poste ajoute +1 Épines aux bâtiments des 8 cases autour.` },
     { id: "c-tech", side: "colonie", img: "Laboratoire", title: "Les technologies", when: S => inHand(S, t => t.tech > 0) || SF.tech(S) > 0,
@@ -2837,6 +2898,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
     A_attack: ["essaim", "Attaques", "Touchez une créature : choisissez la case où elle avance sur son chemin vers la fusée (au moins 1 case, au plus sa vitesse), puis, si vous voulez, un bâtiment qui touche sa case (ou la fusée) à attaquer. « Tout résoudre et finir le tour » fait agir toutes les créatures restantes."],
+    D_draw: ["colonie", "Pioche de la colonie", "Complétez votre main carte par carte : pour chaque tuile, choisissez sa pioche (renforts, actifs ou pièges)."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
@@ -3139,6 +3201,11 @@ if (typeof module !== "undefined") module.exports = AIDE;
         body = `<p class="hint"><b>${E(sel.name)}</b>${sh ? "" : " · " + posTxt(sel)} : ${what}.</p>${tb}<div class="choices"><button data-a="rest" data-id="${sel.id}">${n && !sel.moved ? "Ne pas bouger" : "Terminer pour cette créature"}</button></div>`;
       } else body = `<p class="hint">Touchez une créature pour la déplacer puis attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>`;
       acts = `<button data-a="actAll" class="primary">Tout résoudre et finir le tour</button>`;
+    } else if (ph === "D_draw") {
+      // pioche de la colonie (Oni, 07/11/2026) : une tuile à la fois, dans la pioche choisie
+      const max = SF.handSize(S), CAT_HINT = { renfort: "murs, Épines, Renforcé (camouflés)", actif: "technologies, travailleurs, Avant-postes", piege: "Mines et Siphons" };
+      body = `<p class="hint">Main : <b>${S.hand.length}</b>/${max}. Encore ${max - S.hand.length} tuile${max - S.hand.length > 1 ? "s" : ""} à piocher, une à une.</p><div class="pick col">` +
+        SF.TILE_CATS.map(c => { const n = SF.tilesLeft(S, c); return `<div class="pick-row${n ? "" : " off"}"><span class="pick-nm"><b>${E(SF.CAT_NAME[c])}</b><small>${E(CAT_HINT[c])} · ${n} tuile${n > 1 ? "s" : ""}</small></span><span class="step"><button data-a="tdraw" data-v="${c}"${n ? "" : " disabled"}>Piocher</button></span></div>`; }).join("") + `</div>`;
     } else if (ph === "D_main") {
       body = spellBox("sup", sh) + (UI.sel !== null && sh ? `<p class="hint"><b>${E(S.hand[UI.sel])}</b> → « Construire » dans un atelier.</p>` : UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
       acts = `<button data-a="build" class="primary">Construire</button>`;
@@ -3267,7 +3334,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
         else {
           const ep = SF.epinesOf(S, k, S.view === "essaim");
           inner = `<div class="tile ${imCls(t.name)}${t.camo && !t.revealed ? " trap" : ""}" title="${t.camo && !t.revealed ? "Camouflée : l'essaim ne la voit pas" : ""}"><span class="tn">${E(short(t.name))}</span><b class="hp">${t.hp}<small>/${t.max}</small></b>
-            <span class="tb">${ep ? icon("epines") + ep : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
+            <span class="tb">${ep ? icon("epines") + ep : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}${t.shield ? `<span class="shield-tk" title="Bouclier : la prochaine attaque ne lui fait rien">${icon("protection")}</span>` : ""}</span></div>`;
         }
       }
       const stased = S.stase.includes(k);
@@ -3296,7 +3363,8 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque, ou révélée par un Œil-sonde vivant dans sa lane ou par la Clairvoyance.");
     if (t.siphon) cap("biomasse", "Siphon", `révélé par une attaque de l'essaim, il lui retire ${t.siphon} biomasse (jamais sous ${SF.MIN_BIOMASS}). Ne se déclenche pas s'il a été vu par Vision ou Clairvoyance.`);
-    if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
+    if (t.shield) cap("protection", "Bouclier", "arrive avec un jeton : la prochaine attaque ne lui fait rien (comme en stase : la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.");
+    if (t.trap) cap("piege", "Mine", `${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par Avant-poste dans les 8 cases autour).`);
     return `<span class="art ${imCls(name)}">${imCls(name) ? "" : icon("mur")}</span><b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
       <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : ""}</span><span class="caps">${caps.join("")}</span>`;
@@ -3500,7 +3568,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_place", "Pose"], ["D_fire", "Tirs"]],
   };
   function pcSteps(side) {
-    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase;
+    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase;
     const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
     const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
@@ -3792,6 +3860,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
       case "rest": UI.selCreature = null; return play("rest", { id: Number(d.id) });
       case "pickAdd": { UI.pickSel = UI.pickSel || [0, 0, 0]; UI.pickSel[Number(d.v) - 1]++; break; }
       case "pickDel": { UI.pickSel = UI.pickSel || [0, 0, 0]; if (UI.pickSel[Number(d.v) - 1]) UI.pickSel[Number(d.v) - 1]--; break; }
+      case "tdraw": return play("tdraw", { cat: d.v });
       case "pickGo": { const n = UI.pickSel || [0, 0, 0]; UI.pickSel = null; return play("pick", { n }); }
       case "ordPick": { const id = Number(d.id); UI.ord = UI.ord.includes(id) ? UI.ord.filter(x => x !== id) : [...UI.ord, id]; break; }
       case "ordCancel": UI.blk = null; UI.ord = []; break;

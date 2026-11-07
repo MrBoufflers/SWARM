@@ -9,6 +9,8 @@ const fresh = () => {
   for (const k of Object.keys(S.tiles)) if (S.tiles[k].start && SF.ring(...SF.parse(k)) === 2) delete S.tiles[k];
   for (const k of Object.keys(S.supports)) if (S.supports[k] === 2) delete S.supports[k];
   delete S.startHand; // pioche normale dès le premier tour (la main de départ a son propre test, n° 56)
+  // main de 4 tuiles de la colonie (avant le 07/11/2026, piochée à la mise en place ; désormais au début de son tour)
+  while (S.hand.length < 4) S.hand.push(S.tileDecks.renfort.pop());
   return S;
 };
 
@@ -41,11 +43,11 @@ const fresh = () => {
 // 4. piège : révélé à la première attaque, 2 dégâts à la créature
 {
   const S = fresh(); SF.attackerDraw(S);
-  S.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
+  S.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
   S.creatures.push({ id: 902, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, new: true, acted: false });
   SF.act(S, S.creatures[0]);
   const c = S.creatures[0];
-  ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 2, "piège révélé ; la Carapace meurt avant de frapper : le piège garde ses 2 PV");
+  ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 3, "Mine supérieure révélée ; la Carapace meurt avant de frapper : la mine garde ses 3 PV");
   ok(!c, "Carapace (3 PV) : 3 dégâts du piège, détruite");
 }
 // 5. un support tombe quand tous les murs qui le touchent ont disparu
@@ -140,7 +142,7 @@ const fresh = () => {
 // 14. Camouflage : toutes les forteresses sauf Antenne, Laboratoire, Observatoire, Baraquement, Dortoir
 {
   const S = fresh(); SF.attackerDraw(S);
-  for (const n of Object.keys(SF.TILES).filter(n => !["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives", "Avant-poste du Nord", "Avant-poste de l'Est", "Avant-poste du Sud", "Avant-poste de l'Ouest"].includes(n))) ok(!SF.tileStats(n, 0, 2).revealed && SF.tileStats(n, 0, 2).camo === 1, n + " posé camouflé");
+  for (const n of Object.keys(SF.TILES).filter(n => !["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives", "Avant-poste du Nord", "Avant-poste de l'Est", "Avant-poste du Sud", "Avant-poste de l'Ouest", "Abri blindé"].includes(n))) ok(!SF.tileStats(n, 0, 2).revealed && SF.tileStats(n, 0, 2).camo === 1, n + " posé camouflé");
   for (const n of ["Antenne", "Laboratoire", "Observatoire", "Baraquement", "Dortoir", "Archives", "Avant-poste du Nord", "Avant-poste de l'Est", "Avant-poste du Sud", "Avant-poste de l'Ouest"]) ok(SF.tileStats(n, 0, 2).revealed && !SF.tileStats(n, 0, 2).camo, n + " posé face visible");
   S.tiles["0,1"] = SF.tileStats("Muraille", 0, 1);
   const c = { id: 950, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, new: true, acted: false };
@@ -231,8 +233,8 @@ const fresh = () => {
 // 23. Renouvellement : indices invalides refusés (sinon pioche gratuite)
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
-  S.spells = ["Renouvellement"]; const n = S.hand.length, deck = S.tileDeck.length;
-  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: ["a", "b"] }) !== "" && S.tileDeck.length === deck && S.spells.length === 1, "indices non numériques refusés");
+  S.spells = ["Renouvellement"]; const n = S.hand.length, deck = S.tileDecks.renfort.length;
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: ["a", "b"] }) !== "" && S.tileDecks.renfort.length === deck && S.spells.length === 1, "indices non numériques refusés");
   ok(SF.apply(S, "colonie", "spell", { i: 0, arg: [0, 0] }) !== "", "indice en double refusé");
   ok(SF.apply(S, "colonie", "spell", { i: 0, arg: [0] }) === "" && S.hand.length === n, "défausser 1 tuile et en repiocher 1");
 }
@@ -252,7 +254,7 @@ const fresh = () => {
 // 25. vue filtrée : rien de caché n'est envoyé à l'autre camp
 {
   const S = fresh(); SF.attackerDraw(S);
-  S.tiles["0,2"] = SF.tileStats("Piège", 0, 2);
+  S.tiles["0,2"] = SF.tileStats("Mine supérieure", 0, 2);
   S.chantiers.E.push({ tile: "Muraille", left: 2, fresh: true }); S.chantiers.S.push({ tile: "Antenne", left: 1, fresh: true });
   S.toPlace.push({ tile: "Rempart", lane: "O" }); S.spells = ["Famine", "Effort"];
   const A = SF.viewFor(S, "essaim"), txt = JSON.stringify(A);
@@ -262,19 +264,19 @@ const fresh = () => {
   ok(A.chantiers.E[0].tile === null && A.chantiers.S[0].tile === "Antenne", "essaim : chantier camouflé sans nom, Antenne visible");
   ok(A.toPlace[0].tile === null && !txt.includes("Muraille") && !txt.includes("Rempart"), "essaim : tuile à poser camouflée sans nom");
   ok(A.handA.length && A.handA[0].name, "essaim : voit sa propre main");
-  ok([1, 2, 3].every(l => A.piles[l].every(x => x === null)) && A.tileDeck.every(x => x === null) && A.spellDeck.every(x => x === null), "personne ne voit l'ordre des pioches");
+  ok([1, 2, 3].every(l => A.piles[l].every(x => x === null)) && Object.values(A.tileDecks).every(d => d.every(x => x === null)) && A.spellDeck.every(x => x === null), "personne ne voit l'ordre des pioches");
   const C = SF.viewFor(S, "colonie");
   ok(C.handA.length === S.handA.length && C.handA.every(x => x === null), "colonie : main de l'essaim réduite à son nombre");
-  ok(C.tiles["0,2"].name === "Piège" && C.hand[0] === S.hand[0], "colonie : voit ses tuiles et sa main");
+  ok(C.tiles["0,2"].name === "Mine supérieure" && C.hand[0] === S.hand[0], "colonie : voit ses tuiles et sa main");
   S.upgrades.soutien.r2 = "C"; S.creatures.push({ id: 90, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2 });
-  ok(SF.viewFor(S, "essaim").tiles["0,2"].name === "Piège", "Clairvoyance : la tuile camouflée est visible pour l'essaim");
+  ok(SF.viewFor(S, "essaim").tiles["0,2"].name === "Mine supérieure", "Clairvoyance : la tuile camouflée est visible pour l'essaim");
 }
 // 26. événements visuels (animations) : produits seulement à la demande, et filtrés pour l'essaim
 {
   const S = fresh(); SF.attackerDraw(S);
   SF.apply(S, "essaim", "endDeploy");
   ok(!("fx" in S), "sans demande, le moteur ne garde aucun événement dans l'état");
-  const T = fresh(); T.tiles["1,2"] = SF.tileStats("Muraille", 1, 2); T.tiles["0,2"] = SF.tileStats("Piège", 0, 2);
+  const T = fresh(); T.tiles["1,2"] = SF.tileStats("Muraille", 1, 2); T.tiles["0,2"] = SF.tileStats("Mine supérieure", 0, 2);
   const c = { id: 50, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(c);
   T.phase = "A_attack"; T.fx = [];
   SF.apply(T, "essaim", "act", { key: SF.posKey(c) });
@@ -300,7 +302,7 @@ const fresh = () => {
   ok(SF.epinesOf(S, "0,2") === 2, "Haie d'épines à côté d'un support de niveau 2 : Épines 2 (sans bonus)");
   const old = { tiles: { "0,1": { name: "Mur de départ", ep: 1 }, "0,2": { name: "Muraille", ep: 1 } }, tileDiscard: ["Mur de départ", "Muraille"], tileDeck: [], hand: [] };
   SF.migrate(old);
-  ok(old.tiles["0,1"].name === "Barbelé" && old.tiles["0,1"].start && old.tiles["0,2"].ep === 0 && old.tileDiscard.join() === "Muraille", "ancienne partie : Mur de départ devenu Barbelé, Épines mises à jour");
+  ok(old.tiles["0,1"].name === "Barbelé" && old.tiles["0,1"].start && old.tiles["0,2"].ep === 0 && old.tileDiscards.renfort.join() === "Muraille", "ancienne partie : Mur de départ devenu Barbelé, Épines mises à jour");
   const old2 = { tiles: { "0,1": { name: "Haie de départ", ep: 1, hp: 2, max: 2 } }, tileDiscard: [], tileDeck: [], hand: [] };
   SF.migrate(old2);
   ok(old2.tiles["0,1"].name === "Barbelé" && old2.tiles["0,1"].hp === 1 && old2.tiles["0,1"].max === 1, "partie d'hier : Haie de départ (2 PV) ramenée à 1 PV");
@@ -356,9 +358,9 @@ const fresh = () => {
   };
   const g = [gain("Palissade"), gain("Muraille"), gain("Rempart"), gain("Muraille", "0,3")];
   ok(g.join() === "1,1,1,1", "toute tuile détruite rapporte 1 biomasse (Palissade, Muraille, Rempart, Muraille en couronne 3 : +" + g.join(" / +") + ")");
-  const S = fresh(); S.supports = {}; const b = S.biomass, n = S.tileDiscard.length;
+  const S = fresh(); S.supports = {}; const b = S.biomass, n = Object.values(S.tileDiscards).flat().length;
   const c = { id: 82, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 9, acted: false }; S.creatures.push(c); SF.act(S, c);
-  ok(!S.tiles["0,1"] && S.biomass - b === 1 && S.tileDiscard.length === n, "haie de départ détruite : +1 biomasse, retirée du jeu (pas de défausse)");
+  ok(!S.tiles["0,1"] && S.biomass - b === 1 && Object.values(S.tileDiscards).flat().length === n, "haie de départ détruite : +1 biomasse, retirée du jeu (pas de défausse)");
   const T = fresh(); const tb = T.biomass;
   const d = { id: 83, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 9, acted: false };
   const sup = Object.keys(T.supports).length; delete T.tiles["1,0"]; delete T.tiles["-1,0"];
@@ -470,7 +472,7 @@ const fresh = () => {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
   ok(E && E.pv === 2 && E.ren === 2 && !E.shield && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 2 PV, Renforcé 2 (ancien Bouclier 2), 2 tours, camouflée, 3 exemplaires, sans Épines");
-  ok(SF.newGame().tileDeck.length + 4 === 54, "pioche de forteresses : 54 tuiles (main de 4 comprise)");
+  { const G = SF.newGame(); ok(G.hand.length === 0 && Object.values(G.tileDecks).flat().length === 63, "pioches de forteresses : 63 tuiles en 3 pioches (Oni, 07/11/2026 : 6 Mines et Siphons de plus, 3 Abris blindés) ; main vide au départ"); }
   ok(["Antenne", "Laboratoire", "Observatoire", "Archives"].every(n => SF.TILES[n].tech && SF.TILES[n].n === 3), "3 exemplaires de chaque bâtiment à technologies (Oni, 02/11/2026)");
   const hit = (name, atq) => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Égide", 0, 1);
@@ -515,7 +517,7 @@ const fresh = () => {
   const R = SF.TILES["Ronceraie"];
   ok(R.d === 3 && R.pv === 2 && R.ren === 2 && R.ep === 2 && R.camo && R.n === 3, "Ronceraie : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 ex.");
   ok(SF.TRAP_DMG === 3, "Piège : 3 dégâts");
-  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
+  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
   T.handA = [{ name: "Œil-sonde", free: true, uid: 990 }]; T.phase = "A_deploy"; T.budget = 0;
   SF.deploy(T, 990, "N", 1);
   const c = { id: 97, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(c); SF.act(T, c);
@@ -539,9 +541,9 @@ const fresh = () => {
 }
 // 43. Piège avant l'attaque ; Percée limitée à la case suivante (Oni, 01/11/2026)
 {
-  const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
+  const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
   const t = { id: 99, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(t); SF.act(S, t);
-  ok(t.hp === 2 && S.tiles["0,1"].hp === 1, "Béhémoth (5 PV) survit au piège (−3) puis frappe (1 ATQ : 2 → 1 PV)");
+  ok(t.hp === 2 && S.tiles["0,1"].hp === 2, "Béhémoth (5 PV) survit à la Mine supérieure (−3) puis frappe (1 ATQ : 3 → 2 PV)");
   const P = (setup, k = 4) => {
     const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k];
     setup(T); for (const k of Object.keys(T.tiles)) T.tiles[k].revealed = true; // tuiles déjà retournées (une tuile camouflée ne subit pas la percée)
@@ -593,7 +595,7 @@ const fresh = () => {
     SF.actCase(S, SF.posKey(c), [130]); return c.hp;
   };
   ok(run(false) === 1 && run(true) === 3, "Carapace contre un Mur hérissé : −2 d'Épines sans Catalyseur, rien avec");
-  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Piège", 0, 1);
+  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
   const d = { id: 132, name: "Béhémoth", lane: "N", u: 0, k: 2, hp: 5, acted: false }; T.creatures.push(d, { id: 133, name: "Catalyseur", lane: "N", u: 0, k: 2, hp: 5, acted: false });
   SF.actCase(T, SF.posKey(d), [132]);
   ok(d.hp === 2, "le piège blesse quand même (3 dégâts : ce ne sont pas des Épines)");
@@ -634,18 +636,20 @@ const fresh = () => {
 }
 // 50. Siphon : révélé par une attaque, −3 biomasse à l'essaim (jamais sous 3) ; pas s'il a été vu avant (Oni, 02/11/2026)
 {
-  const T = SF.TILES["Siphon"];
-  ok(T && T.d === 2 && T.pv === 2 && T.siphon === 3 && T.camo && T.n === 3, "Siphon : 2 tours, 2 PV, camouflé, 3 exemplaires");
+  ok(!SF.TILES["Siphon"] && !SF.TILES["Piège"], "le Piège et le Siphon d'origine sont remplacés (Oni, 07/11/2026)");
+  ok(["mineur", "majeur", "supérieur"].every((q, i) => { const T = SF.TILES["Siphon " + q], M = SF.TILES["Mine " + q.replace("mineur", "mineure").replace("majeur", "majeure").replace("supérieur", "supérieure")];
+    return T.d === i + 1 && T.pv === i + 1 && T.siphon === i + 1 && T.camo && T.n === 2 && M.d === i + 1 && M.pv === i + 1 && M.trap === i + 1 && M.camo && M.n === 2; }),
+    "Mines et Siphons mineur / majeur / supérieur : 1 / 2 / 3 tours, PV et effet ; camouflés ; 2 exemplaires chacun");
   const hit = (bio, setup) => {
-    const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Siphon", 0, 1); S.biomass = bio;
+    const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Siphon supérieur", 0, 1); S.biomass = bio;
     const c = { id: 160, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; S.creatures.push(c);
     if (setup) setup(S);
     SF.act(S, c); return { S, c };
   };
   let r = hit(10);
-  ok(r.S.biomass === 7 && r.S.tiles["0,1"].hp === 1 && r.c.hp === 3, "révélé par l'attaque d'une Carapace : biomasse 10 → 7, puis la Carapace frappe (2 → 1 PV), sans être blessée");
-  r = hit(4);
-  ok(r.S.biomass === 3, "biomasse 4 : elle ne descend pas sous 3");
+  ok(r.S.biomass === 7 && r.S.tiles["0,1"].hp === 2 && r.c.hp === 3, "Siphon supérieur révélé par l'attaque d'une Carapace : biomasse 10 → 7, puis la Carapace frappe (3 → 2 PV), sans être blessée");
+  r = hit(6);
+  ok(r.S.biomass === 5 && SF.MIN_BIOMASS === 5, "biomasse 6 : elle ne descend pas sous 5 (Oni, 07/11/2026 ; avant 3)");
   r = hit(10, S => { S.tiles["0,1"].revealed = true; });
   ok(r.S.biomass === 10, "déjà vu (Vision d'un Œil-sonde) : ne se déclenche pas");
 }
@@ -662,9 +666,9 @@ const fresh = () => {
   ok(!r.T.tiles["0,3"] && r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed, "Percée sur une Égide camouflée : aucun dégât, elle reste cachée");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["0,2"].revealed = true; });
   ok(!r.T.tiles["0,2"], "Percée sur une Égide déjà révélée : 6 en trop − bouclier 2 = 4 → détruite (3 PV)");
-  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Piège", 0, 2); });
-  ok(r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed && r.T.creatures.some(c => c.id === 170), "Percée sur un Piège camouflé : il ne se déclenche pas et reste caché");
-  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Siphon", 0, 2); });
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Mine supérieure", 0, 2); });
+  ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && r.T.creatures.some(c => c.id === 170), "Percée sur une Mine camouflée : il ne se déclenche pas et reste caché");
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Siphon supérieur", 0, 2); });
   ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); T.tiles["1,3"].revealed = true; }, "Sporeur");
   ok(r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed && !r.T.tiles["1,3"], "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée (2 PV) tombe sous 2 dégâts");
@@ -1002,6 +1006,58 @@ const fresh = () => {
   // Réincarnation : le tank revient là où il est mort
     const R2 = fresh(); R2.supports = {}; R2.upgrades.tank.r2 = "C"; R2.creatures.push(at(98, "Carapace", 2, 0)); SF.killCheck(R2);
   ok(R2.reincQueue.length === 1 && R2.reincQueue[0].k === 2, "Réincarnation : la case de la mort est notée (C2)");
+}
+// 66. Colonie (Oni, 07/11/2026) : Abri blindé et Bouclier ; Mines et Siphons ; trois pioches ; pioche carte par carte
+{
+  ok(["Palissade", "Muraille", "Rempart", "Bastion", "Égide", "Haie d'épines", "Mur hérissé", "Ronceraie", "Ligne de front", "Réduit"].every(n => SF.tileCat(n) === "renfort")
+    && ["Antenne", "Laboratoire", "Observatoire", "Archives", "Baraquement", "Dortoir", "Avant-poste du Nord", "Abri blindé"].every(n => SF.tileCat(n) === "actif")
+    && ["Mine mineure", "Mine majeure", "Mine supérieure", "Siphon mineur", "Siphon majeur", "Siphon supérieur"].every(n => SF.tileCat(n) === "piege"),
+    "catégories : renforts (dont les tuiles à Épines), actifs (face visible), pièges");
+  const A = SF.TILES["Abri blindé"];
+  ok(A.d === 2 && A.pv === 2 && A.temp === 1 && A.shield && !A.camo && A.n === 3, "Abri blindé : 2 points, 2 PV, +1 travailleur, Bouclier, face visible, 3 exemplaires");
+  // Bouclier : la prochaine attaque ne fait rien (la percée passe, pas d'Épines), puis le jeton est défaussé
+  const S = fresh(); S.supports = {}; for (const k of Object.keys(S.tiles)) delete S.tiles[k];
+  S.tiles["0,2"] = SF.tileStats("Abri blindé", 0, 2); S.tiles["0,1"] = SF.tileStats("Antenne", 0, 1);
+  S.tiles["1,2"] = SF.tileStats("Avant-poste de l'Est", 1, 2); // Aura d'épines : l'Abri a Épines 1
+  ok(S.tiles["0,2"].shield === 1 && SF.epinesOf(S, "0,2") === 1, "l'Abri arrive avec son jeton Bouclier");
+  const e = { id: 700, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 5, acted: false, moved: 1 };
+  S.creatures.push(e, { id: 701, name: "Perforeur", lane: "N", u: 0, k: 3, hp: 4, acted: false });
+  S.phase = "A_attack";
+  ok(SF.apply(S, "essaim", "strike", { id: 700, target: "0,2" }) === "", "attaque de l'Écorcheur (3 dégâts, percée) sur l'Abri");
+  ok(S.tiles["0,2"].hp === 2 && !S.tiles["0,2"].shield && e.hp === 5, "Bouclier : aucun dégât, pas d'Épines, jeton défaussé");
+  ok(!S.tiles["0,1"], "comme en stase : toute l'attaque passe en percée (l'Antenne derrière tombe)");
+  delete S.tiles["1,2"];
+  const S2 = JSON.parse(JSON.stringify(S)); S2.phase = "A_attack"; S2.creatures[0].acted = false; S2.creatures[0].struck = 0;
+  SF.apply(S2, "essaim", "strike", { id: 700, target: "0,2" });
+  ok(!S2.tiles["0,2"], "sans jeton, la 2ᵉ attaque le détruit");
+  const Z = fresh(); Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k]; Z.phase = "A_attack";
+  Z.tiles["0,2"] = Object.assign(SF.tileStats("Antenne", 0, 2), { hp: 5, max: 5 }); Z.tiles["1,2"] = SF.tileStats("Abri blindé", 1, 2);
+  Z.creatures.push({ id: 710, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 5, acted: false, moved: 1 }, { id: 711, name: "Sporeur", lane: "N", u: 0, k: 3, hp: 6, acted: false });
+  SF.apply(Z, "essaim", "strike", { id: 710, target: "0,2" });
+  ok(Z.tiles["1,2"].hp === 2 && !Z.tiles["1,2"].shield, "spores sur un Abri blindé voisin : aucun dégât, le jeton est défaussé");
+  // pioche carte par carte au début du tour de la colonie
+  const G = SF.newGame(); SF.apply(G, "essaim", "draw"); SF.apply(G, "essaim", "endDeploy"); if (G.phase === "A_react") SF.apply(G, "colonie", "reactDone");
+  if (G.phase === "A_attack") SF.apply(G, "essaim", "actAll");
+  ok(G.phase === "D_draw" && G.hand.length === 0, "début du tour de la colonie : étape de pioche (main vide au premier tour)");
+  ok(SF.apply(G, "colonie", "build") !== "" && SF.apply(G, "colonie", "tdraw", { cat: "autre" }) !== "", "construire ou piocher dans une pioche inconnue : refusé");
+  ok(SF.apply(G, "colonie", "tdraw", { cat: "piege" }) === "" && SF.tileCat(G.hand[0]) === "piege", "1ʳᵉ tuile : un piège");
+  SF.apply(G, "colonie", "tdraw", { cat: "actif" }); SF.apply(G, "colonie", "tdraw", { cat: "renfort" });
+  ok(G.phase === "D_draw" && SF.tileCat(G.hand[1]) === "actif" && SF.tileCat(G.hand[2]) === "renfort", "chaque tuile vient de la pioche choisie");
+  SF.apply(G, "colonie", "tdraw", { cat: "renfort" });
+  ok(G.phase === "D_main" && G.hand.length === 4 && SF.apply(G, "colonie", "tdraw", { cat: "renfort" }) !== "", "main pleine (4) : on passe à la construction, plus de pioche");
+  // Renouvellement : chaque tuile est remplacée par une tuile de la même pioche
+  G.spells = ["Renouvellement"]; SF.apply(G, "colonie", "spell", { i: 0, arg: [0] });
+  ok(G.hand.length === 4 && SF.tileCat(G.hand[3]) === "piege", "Renouvellement : le piège défaussé est remplacé par un piège");
+  // anciennes parties : Piège et Siphon renommés, pioche unique répartie en trois
+  const O = { tiles: { "0,2": { name: "Piège", hp: 2, max: 2, trap: 1, camo: 1 } }, tileDeck: ["Muraille", "Siphon", "Antenne"], tileDiscard: ["Piège"], hand: ["Siphon"], chantiers: { N: [{ tile: "Piège", left: 1 }], E: [], S: [], O: [] }, toPlace: [] };
+  SF.migrate(O);
+  ok(O.tiles["0,2"].name === "Mine supérieure" && O.hand[0] === "Siphon supérieur" && O.chantiers.N[0].tile === "Mine supérieure" && !O.tileDeck
+    && O.tileDecks.renfort.includes("Muraille") && O.tileDecks.actif.includes("Antenne") && O.tileDecks.piege.includes("Siphon supérieur") && O.tileDiscards.piege.join() === "Mine supérieure"
+    && O.tileDecks.actif.filter(n => n === "Abri blindé").length === 3 && O.tileDecks.piege.includes("Mine mineure"),
+    "ancienne partie : Piège → Mine supérieure, Siphon → Siphon supérieur, trois pioches, nouvelles tuiles ajoutées");
+  const AB = { tiles: { "0,2": Object.assign(SF.tileStats("Abri blindé", 0, 2)) }, tileDecks: { renfort: [], actif: [], piege: [] }, tileDiscards: { renfort: [], actif: [], piege: [] }, hand: [] };
+  SF.migrate(AB);
+  ok(AB.tiles["0,2"].shield === 1 && !AB.tiles["0,2"].ren, "rechargement : le jeton Bouclier de l'Abri reste un Bouclier");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

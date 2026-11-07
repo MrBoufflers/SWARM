@@ -63,6 +63,7 @@
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
     A_attack: ["essaim", "Attaques", "Touchez une créature : choisissez la case où elle avance sur son chemin vers la fusée (au moins 1 case, au plus sa vitesse), puis, si vous voulez, un bâtiment qui touche sa case (ou la fusée) à attaquer. « Tout résoudre et finir le tour » fait agir toutes les créatures restantes."],
+    D_draw: ["colonie", "Pioche de la colonie", "Complétez votre main carte par carte : pour chaque tuile, choisissez sa pioche (renforts, actifs ou pièges)."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
@@ -365,6 +366,11 @@
         body = `<p class="hint"><b>${E(sel.name)}</b>${sh ? "" : " · " + posTxt(sel)} : ${what}.</p>${tb}<div class="choices"><button data-a="rest" data-id="${sel.id}">${n && !sel.moved ? "Ne pas bouger" : "Terminer pour cette créature"}</button></div>`;
       } else body = `<p class="hint">Touchez une créature pour la déplacer puis attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>`;
       acts = `<button data-a="actAll" class="primary">Tout résoudre et finir le tour</button>`;
+    } else if (ph === "D_draw") {
+      // pioche de la colonie (Oni, 07/11/2026) : une tuile à la fois, dans la pioche choisie
+      const max = SF.handSize(S), CAT_HINT = { renfort: "murs, Épines, Renforcé (camouflés)", actif: "technologies, travailleurs, Avant-postes", piege: "Mines et Siphons" };
+      body = `<p class="hint">Main : <b>${S.hand.length}</b>/${max}. Encore ${max - S.hand.length} tuile${max - S.hand.length > 1 ? "s" : ""} à piocher, une à une.</p><div class="pick col">` +
+        SF.TILE_CATS.map(c => { const n = SF.tilesLeft(S, c); return `<div class="pick-row${n ? "" : " off"}"><span class="pick-nm"><b>${E(SF.CAT_NAME[c])}</b><small>${E(CAT_HINT[c])} · ${n} tuile${n > 1 ? "s" : ""}</small></span><span class="step"><button data-a="tdraw" data-v="${c}"${n ? "" : " disabled"}>Piocher</button></span></div>`; }).join("") + `</div>`;
     } else if (ph === "D_main") {
       body = spellBox("sup", sh) + (UI.sel !== null && sh ? `<p class="hint"><b>${E(S.hand[UI.sel])}</b> → « Construire » dans un atelier.</p>` : UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
       acts = `<button data-a="build" class="primary">Construire</button>`;
@@ -493,7 +499,7 @@
         else {
           const ep = SF.epinesOf(S, k, S.view === "essaim");
           inner = `<div class="tile ${imCls(t.name)}${t.camo && !t.revealed ? " trap" : ""}" title="${t.camo && !t.revealed ? "Camouflée : l'essaim ne la voit pas" : ""}"><span class="tn">${E(short(t.name))}</span><b class="hp">${t.hp}<small>/${t.max}</small></b>
-            <span class="tb">${ep ? icon("epines") + ep : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}</span></div>`;
+            <span class="tb">${ep ? icon("epines") + ep : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}${t.shield ? `<span class="shield-tk" title="Bouclier : la prochaine attaque ne lui fait rien">${icon("protection")}</span>` : ""}</span></div>`;
         }
       }
       const stased = S.stase.includes(k);
@@ -522,7 +528,8 @@
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque, ou révélée par un Œil-sonde vivant dans sa lane ou par la Clairvoyance.");
     if (t.siphon) cap("biomasse", "Siphon", `révélé par une attaque de l'essaim, il lui retire ${t.siphon} biomasse (jamais sous ${SF.MIN_BIOMASS}). Ne se déclenche pas s'il a été vu par Vision ou Clairvoyance.`);
-    if (t.trap) cap("piege", "Piège", `${SF.TRAP_DMG} dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
+    if (t.shield) cap("protection", "Bouclier", "arrive avec un jeton : la prochaine attaque ne lui fait rien (comme en stase : la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.");
+    if (t.trap) cap("piege", "Mine", `${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui le révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par Avant-poste dans les 8 cases autour).`);
     return `<span class="art ${imCls(name)}">${imCls(name) ? "" : icon("mur")}</span><b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
       <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : ""}</span><span class="caps">${caps.join("")}</span>`;
@@ -726,7 +733,7 @@
     colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_place", "Pose"], ["D_fire", "Tirs"]],
   };
   function pcSteps(side) {
-    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase;
+    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase;
     const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
     const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
@@ -1018,6 +1025,7 @@
       case "rest": UI.selCreature = null; return play("rest", { id: Number(d.id) });
       case "pickAdd": { UI.pickSel = UI.pickSel || [0, 0, 0]; UI.pickSel[Number(d.v) - 1]++; break; }
       case "pickDel": { UI.pickSel = UI.pickSel || [0, 0, 0]; if (UI.pickSel[Number(d.v) - 1]) UI.pickSel[Number(d.v) - 1]--; break; }
+      case "tdraw": return play("tdraw", { cat: d.v });
       case "pickGo": { const n = UI.pickSel || [0, 0, 0]; UI.pickSel = null; return play("pick", { n }); }
       case "ordPick": { const id = Number(d.id); UI.ord = UI.ord.includes(id) ? UI.ord.filter(x => x !== id) : [...UI.ord, id]; break; }
       case "ordCancel": UI.blk = null; UI.ord = []; break;

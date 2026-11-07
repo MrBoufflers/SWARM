@@ -52,9 +52,15 @@ const SF = (() => {
     "Avant-poste de l'Ouest": { d: 2, pv: "ap", dir: "O", ep: 0, aura: 1, n: 1 },
     "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
     "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
-    "Piège": { d: 2, pv: 2, ep: 0, trap: 1, camo: 1, n: 3 }, // 3 dégâts quand il se déclenche (Oni, 01/11/2026 ; avant 2)
-    // Siphon (Oni, 02/11/2026) : piège camouflé ; révélé par une attaque, il retire 3 biomasse à l'essaim (jamais sous 3)
-    "Siphon": { d: 2, pv: 2, ep: 0, siphon: 3, camo: 1, n: 3 },
+    // Pièges (Oni, 07/11/2026 ; remplacent le Piège à 3 dégâts et le Siphon à 3 biomasse) : effet = PV = tours de construction
+    "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 1, camo: 1, n: 2 },
+    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 2, camo: 1, n: 2 },
+    "Mine supérieure": { d: 3, pv: 3, ep: 0, trap: 3, camo: 1, n: 2 },
+    "Siphon mineur": { d: 1, pv: 1, ep: 0, siphon: 1, camo: 1, n: 2 },
+    "Siphon majeur": { d: 2, pv: 2, ep: 0, siphon: 2, camo: 1, n: 2 },
+    "Siphon supérieur": { d: 3, pv: 3, ep: 0, siphon: 3, camo: 1, n: 2 },
+    // Abri blindé (Oni, 07/11/2026) : +1 travailleur tant qu'il tient, Bouclier (jeton qui annule la prochaine attaque), face visible
+    "Abri blindé": { d: 2, pv: 2, ep: 0, temp: 1, shield: 1, n: 3 },
     // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
     "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 2, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Renforcé 2 (02/11/2026 : le Bouclier est fondu dans Renforcé)
@@ -65,9 +71,14 @@ const SF = (() => {
     "Avant-poste du Nord": "2 PV ; 4 PV dans la lane Nord.", "Avant-poste de l'Est": "2 PV ; 4 PV dans la lane Est.",
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
-    "Piège": "Camouflé. 3 dégâts à la créature qui le révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine majeure": "Camouflée. 2 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine supérieure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Siphon mineur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 1 biomasse (jamais sous 5).",
+    "Siphon majeur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 2 biomasse (jamais sous 5).",
+    "Siphon supérieur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 3 biomasse (jamais sous 5).",
+    "Abri blindé": "+1 travailleur tant que la tuile tient. Bouclier : la prochaine attaque ne lui fait rien (le jeton est alors défaussé).",
     "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
-    "Siphon": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 3 biomasse (jamais sous 3).",
     "Égide": "Camouflée. Renforcé 2 : perd 1 PV par tranche de 2 dégâts.",
     "Antenne": "+1 technologie.", "Laboratoire": "+2 technologies.", "Observatoire": "+3 technologies.",
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Renforcé 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie.",
@@ -87,7 +98,7 @@ const SF = (() => {
     // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
     "Feu nourri": { kind: "sup", n: 2, text: "Ce tour, chaque tourelle tire 2 fois." },
     "Réparation": { kind: "sup", n: 3, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
-    "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant." },
+    "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant, chacune dans la même pioche (renforts, actifs ou pièges)." },
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
@@ -109,8 +120,14 @@ const SF = (() => {
       B2: ["Frénésie", "Chaque soutien double les dégâts d'une autre créature de sa case, au choix (cumulable : deux Frénésies sur la même créature la quadruplent)."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
-  const MIN_BIOMASS = 3; // la biomasse de l'essaim ne descend jamais sous 3 (Oni, 02/11/2026)
-  const TRAP_DMG = 3; // dégâts du Piège (Oni, 01/11/2026 ; avant 2)
+  const MIN_BIOMASS = 5; // un Siphon ne fait jamais descendre l'essaim sous 5 biomasse (Oni, 07/11/2026 ; avant 3)
+  const TRAP_DMG = 3; // dégâts de l'ancien Piège (avant le 07/11/2026 : les Mines ont chacune leurs dégâts, tuile.trap)
+  // catégories de tuiles et pioches séparées (Oni, 07/11/2026) : renforts (PV, Renforcé, Épines, camouflés), actifs (face
+  // visible, effet direct), pièges (Mines et Siphons)
+  const TILE_CATS = ["renfort", "actif", "piege"], CAT_NAME = { renfort: "Renforts", actif: "Actifs", piege: "Pièges" };
+  const tileCat = name => { const t = TILES[name]; return !t ? "renfort" : t.trap || t.siphon ? "piege" : !t.camo ? "actif" : "renfort"; };
+  // anciens noms (parties en cours) : le Piège et le Siphon deviennent leur version supérieure
+  const OLD_TILE = { "Piège": "Mine supérieure", "Siphon": "Siphon supérieur" };
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
@@ -121,7 +138,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.1";
+  const VERSION = "0.5.2";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -180,7 +197,7 @@ const SF = (() => {
       version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
       tiles: {}, supports: {}, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
       workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
-      tileDeck: [], tileDiscard: [], hand: [],
+      tileDecks: { renfort: [], actif: [], piege: [] }, tileDiscards: { renfort: [], actif: [], piege: [] }, hand: [],
       spellDeck: [], spellDiscard: [], spells: [],
       alloc: { N: 0, E: 0, S: 0, O: 0 }, extraPts: 0, cadence: false, firedSupports: [],
       biomass: 5, budget: 0, reserve: 0, famine: 0, startHand: true, // départ : 5 biomasse (Oni, 04/11/2026 ; avant 3)
@@ -195,12 +212,12 @@ const SF = (() => {
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     placeSupports(S); // supports de niveau 2 aux coins de la couronne 2 (leurs murs sont posés)
-    for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDeck.push(n);
-    shuffle(S.tileDeck);
+    for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDecks[tileCat(n)].push(n);
+    for (const c of TILE_CATS) shuffle(S.tileDecks[c]);
     for (const [n, s] of Object.entries(SPELLS)) for (let i = 0; i < s.n; i++) S.spellDeck.push(n);
     shuffle(S.spellDeck);
     addPile(S, 1, "aggro"); addPile(S, 1, "tank"); addPile(S, 1, "soutien");
-    drawTiles(S);
+    // main de la colonie : vide au départ ; elle la compose au début de son premier tour (pioche au choix, D_draw)
     log(S, "jeu", "Nouvelle partie. L'essaim commence.");
     startAttackerTurn(S);
     return S;
@@ -307,7 +324,7 @@ const SF = (() => {
     if (pv === "ap") pv = lane === t.dir ? 4 : 2;
     if (pv === "front") pv = 1 + r;
     if (pv === "reduit") pv = 5 - r;
-    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, siphon: t.siphon || 0, camo: t.camo || 0, revealed: !t.camo };
+    return { name, hp: pv, max: pv, ep: t.ep, ren: t.ren || 0, tech: t.tech || 0, temp: t.temp || 0, trap: t.trap || 0, siphon: t.siphon || 0, camo: t.camo || 0, revealed: !t.camo, ...(t.shield ? { shield: t.shield } : {}) };
   }
   // Épines d'une tuile (Oni, 01/11/2026) : ses Épines propres, +1 par support de niveau 2 dans les 8 cases autour
   // (pour toute tuile, même sans Épines), +1 par Avant-poste dans les 8 cases autour (« Aura d'épines ») ; tout se cumule.
@@ -328,7 +345,7 @@ const SF = (() => {
   function destroyTile(S, k, why, by) {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
-    if (!t.start) S.tileDiscard.push(t.name);
+    if (!t.start) S.tileDiscards[tileCat(t.name)].push(t.name);
     // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
     // Aura Butin : +1 par Phéromone sur la case de la créature (Oni, 01/11/2026 ; cumulable depuis le 02/11/2026)
     const butin = by ? countMates(S, by, o => o.name === "Phéromone") : 0;
@@ -640,7 +657,7 @@ const SF = (() => {
         log(S, "essaim", "Un piège est révélé.");
         // le piège blesse la créature AVANT qu'elle frappe : si elle en meurt, elle n'inflige rien (Oni, 01/11/2026)
         if (!clairvoyance(S)) {
-          damageCreature(S, c, TRAP_DMG, "piège");
+          damageCreature(S, c, t.trap, "piège");
           if (c.hp + bonusHp(S, c) <= 0) { log(S, "essaim", `${c.name} meurt dans le piège avant de frapper.`); return; }
         }
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
@@ -658,7 +675,10 @@ const SF = (() => {
       for (const [a, b] of neighbors(x, y)) {
         const nk = key(a, b), nt = S.tiles[nk];
         // les spores n'atteignent pas une tuile encore camouflée (Oni, 02/11/2026)
-        if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
+        if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk) && nt.shield > 0) { // Bouclier : il absorbe les spores
+          nt.shield = 0; fx(S, { t: "hit", id: null, k: nk, n: 0, hp: nt.hp });
+          log(S, "colonie", `Bouclier : ${nt.name} ne subit rien des spores ; le jeton est défaussé.`);
+        } else if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
           const spLoss = nt.ren ? Math.floor(spores / nt.ren) : spores;
           nt.hp -= spLoss;
           fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
@@ -682,7 +702,14 @@ const SF = (() => {
         else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case suivante est vide.`);
       }
     };
-    if (S.stase.includes(tk)) {
+    const shielded = !S.stase.includes(tk) && t.shield > 0;
+    if (shielded) { // Bouclier (Oni, 07/11/2026) : comme en stase pour cette attaque, puis le jeton est défaussé
+      t.shield = 0;
+      fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
+      log(S, "colonie", `Bouclier : ${t.name} ne subit rien de cette attaque ; le jeton est défaussé.`);
+      sporesAround();
+      pierce(dmg);
+    } else if (S.stase.includes(tk)) {
       // Champ de stase (Oni, 07/11/2026) : l'attaque a lieu mais ne fait rien au bâtiment ; toute l'attaque passe en percée,
       // et les spores touchent les tuiles voisines
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
@@ -704,6 +731,7 @@ const SF = (() => {
     // Aura Cuirasse (Catalyseur sur la case) : pas de dégâts d'Épines (Oni, 02/11/2026)
     if (primary && epVal > 0) {
       if (S.stase.includes(tk)) log(S, "colonie", `Champ de stase : pas d'Épines pour ${c.name}.`);
+      else if (shielded) log(S, "colonie", `Bouclier : pas d'Épines pour ${c.name}.`);
       else if (caseMates(S, c).some(o => o.name === "Catalyseur")) log(S, "essaim", `Aura Cuirasse : ${c.name} ne subit pas les Épines.`);
       // Carapace épaisse (tank, côté A) : les tanks ne subissent plus les Épines (Oni, 07/11/2026 ; avant : Provocation)
       else if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "A") log(S, "essaim", `Carapace épaisse : ${c.name} ne subit pas les Épines.`);
@@ -956,8 +984,10 @@ const SF = (() => {
       case "Renouvellement": { // arg = indices de la main à défausser
         if (!Array.isArray(arg)) return false;
         const idx = [...arg].sort((a, b) => b - a);
-        for (const i of idx) if (S.hand[i]) S.tileDiscard.push(S.hand.splice(i, 1)[0]);
-        for (let i = 0; i < arg.length; i++) drawOneTile(S);
+        // chaque tuile défaussée est remplacée par une tuile de la même pioche (renforts, actifs ou pièges)
+        const cats = [];
+        for (const i of idx) if (S.hand[i]) { const n = S.hand.splice(i, 1)[0]; S.tileDiscards[tileCat(n)].push(n); cats.push(tileCat(n)); }
+        for (const c of cats) drawOneTile(S, c);
         return true;
       }
       case "Reconversion": { // arg = {hand: index, tile: clé}
@@ -976,8 +1006,19 @@ const SF = (() => {
   }
 
   // ------------------------------------------------------------------ tour de la colonie
+  // pioche de la colonie (Oni, 07/11/2026) : au début de son tour, elle complète sa main carte par carte en choisissant à
+  // chaque fois la pioche (renforts, actifs ou pièges)
+  const tilesLeft = (S, c) => S.tileDecks[c].length + S.tileDiscards[c].length;
+  const needDraw = S => S.hand.length < handSize(S) && TILE_CATS.some(c => tilesLeft(S, c) > 0);
+  function drawTileFrom(S, cat) {
+    if (S.phase !== "D_draw" || !TILE_CATS.includes(cat) || !tilesLeft(S, cat) || !needDraw(S)) return false;
+    drawOneTile(S, cat);
+    fx(S, { t: "tdraw", cat });
+    if (!needDraw(S)) { S.phase = "D_main"; log(S, "colonie", `Main de ${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}.`); }
+    return true;
+  }
   function startDefenderTurn(S) {
-    S.phase = "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
+    S.phase = needDraw(S) ? "D_draw" : "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
   }
   const pubName = name => (TILES[name] && TILES[name].camo ? "tuile camouflée" : name);
   // Le chantier est affecté à une lane ; la case exacte n'est choisie qu'à la fin de la construction.
@@ -1102,8 +1143,7 @@ const SF = (() => {
   }
   function endColonyTurn(S) {
     autoFire(S); // tirs restants (automatiques)
-    // sortilèges de soutien non joués : gardés en main (Oni, 01/11/2026)
-    drawTiles(S);
+    // sortilèges de soutien non joués : gardés en main (Oni, 01/11/2026) ; les tuiles se piochent au début du tour suivant
     const n = spellsPerTurn(S);
     for (let i = 0; i < n; i++) {
       if (!S.spellDeck.length) { S.spellDeck = shuffle(S.spellDiscard); S.spellDiscard = []; }
@@ -1113,11 +1153,10 @@ const SF = (() => {
     S.round += 1;
     startAttackerTurn(S);
   }
-  function drawOneTile(S) {
-    if (!S.tileDeck.length) { S.tileDeck = shuffle(S.tileDiscard); S.tileDiscard = []; }
-    if (S.tileDeck.length) S.hand.push(S.tileDeck.pop());
+  function drawOneTile(S, cat) {
+    if (!S.tileDecks[cat].length) { S.tileDecks[cat] = shuffle(S.tileDiscards[cat]); S.tileDiscards[cat] = []; }
+    if (S.tileDecks[cat].length) S.hand.push(S.tileDecks[cat].pop());
   }
-  function drawTiles(S) { while (S.hand.length < handSize(S)) { const before = S.hand.length; drawOneTile(S); if (S.hand.length === before) break; } }
 
   // Parties enregistrées avec d'anciennes règles : les tuiles de départ (« Mur de départ », « Haie de départ »,
   // « Haie d'épines » marquée start) deviennent des Barbelés
@@ -1130,7 +1169,8 @@ const SF = (() => {
       const wrong = S.piles[l].filter(n => CREATURES[n] && CREATURES[n].lvl !== l);
       if (wrong.length) { S.piles[l] = S.piles[l].filter(n => !wrong.includes(n)); for (const n of wrong) S.piles[CREATURES[n].lvl].push(n); }
     }
-    for (const t of Object.values(S.tiles || {})) if (t.shield) { t.ren = t.shield; delete t.shield; } // Bouclier → Renforcé (02/11/2026)
+    // ancien « Bouclier X » → Renforcé X (02/11/2026) ; le Bouclier de l'Abri blindé (jeton, 07/11/2026) n'est pas concerné
+    for (const t of Object.values(S.tiles || {})) if (t.shield && !(TILES[t.name] && TILES[t.name].shield)) { t.ren = t.shield; delete t.shield; }
     for (const c of S.creatures || []) if (CREATURES[c.name] && c.hp > maxHp(S, c.name)) c.hp = maxHp(S, c.name); // Mue : plus de +1 PV au soutien
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
@@ -1143,6 +1183,21 @@ const SF = (() => {
       if (TREES[type] && TREES[type][slot] && got >= nodeCost(slot) && nodeState(S, type, slot) === "open") { delete S.invest[key]; acquire(S, type, slot); }
     }
     for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ" || list[i] === "Haie de départ") list.splice(i, 1);
+    // pioches de tuiles par catégorie (Oni, 07/11/2026) : Piège et Siphon renommés, pioche unique répartie en trois
+    const ren = n => OLD_TILE[n] || n;
+    if (Array.isArray(S.hand)) S.hand = S.hand.map(n => (n === null ? n : ren(n)));
+    for (const t of Object.values(S.tiles || {})) if (OLD_TILE[t.name]) t.name = ren(t.name);
+    for (const l of Object.keys(S.chantiers || {})) for (const ch of S.chantiers[l]) if (ch && ch.tile) ch.tile = ren(ch.tile);
+    for (const p of S.toPlace || []) if (p && p.tile) p.tile = ren(p.tile);
+    if (!S.tileDecks && Array.isArray(S.tileDeck)) {
+      S.tileDecks = { renfort: [], actif: [], piege: [] }; S.tileDiscards = { renfort: [], actif: [], piege: [] };
+      for (const n of S.tileDeck) if (n) S.tileDecks[tileCat(ren(n))].push(ren(n));
+      for (const n of S.tileDiscard || []) if (n) S.tileDiscards[tileCat(ren(n))].push(ren(n));
+      // nouvelles tuiles (Mines mineure / majeure, Siphons mineur / majeur, Abri blindé) ajoutées à leur pioche
+      for (const n of ["Mine mineure", "Mine majeure", "Siphon mineur", "Siphon majeur", "Abri blindé"]) for (let i = 0; i < TILES[n].n; i++) S.tileDecks[tileCat(n)].push(n);
+      for (const c of TILE_CATS) shuffle(S.tileDecks[c]);
+      delete S.tileDeck; delete S.tileDiscard;
+    }
     return S;
   }
 
@@ -1150,7 +1205,7 @@ const SF = (() => {
   // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
   // vérifie le camp, la phase et les paramètres, puis appelle les fonctions de règles ci-dessus.
   // Les transitions de phase qui vivaient dans l'interface (fenêtres Famine / Réaction, passage aux tirs) sont ici.
-  const PHASE_SIDE = { A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
+  const PHASE_SIDE = { D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
   const actor = S => PHASE_SIDE[S.phase] || null;
   const isInt = v => Number.isInteger(v);
   const isLane = l => LANES.includes(l);
@@ -1220,6 +1275,7 @@ const SF = (() => {
       return true;
     } },
     endA: { phase: ["A_attack"], run(S) { endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
+    tdraw: { phase: ["D_draw"], run: (S, a) => drawTileFrom(S, a.cat) }, // pioche d'une tuile dans la pioche choisie
     startCh: { phase: ["D_main"], run(S, a) {
       if (!(isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane))) return false;
       // travailleurs assignés d'office (Oni, 04/11/2026) : juste assez pour finir les chantiers de la lane, dans la
@@ -1278,7 +1334,7 @@ const SF = (() => {
   function viewFor(S, side) {
     const V = JSON.parse(JSON.stringify(S));
     V.view = side; V.handoff = null;
-    V.tileDeck = blank(V.tileDeck); V.tileDiscard = blank(V.tileDiscard);
+    V.tileDecks = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDecks[c])])); V.tileDiscards = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDiscards[c])]));
     V.spellDeck = blank(V.spellDeck); V.spellDiscard = blank(V.spellDiscard);
     for (const l of [1, 2, 3]) V.piles[l] = blank(V.piles[l]);
     if (side === "colonie") V.handA = blank(V.handA);
@@ -1308,7 +1364,7 @@ const SF = (() => {
 
   return {
     VERSION,
-    fxFor, migrate, famineBudget, MIN_BIOMASS, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, famineBudget, MIN_BIOMASS, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

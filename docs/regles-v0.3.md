@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.1 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.2 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -35,6 +35,12 @@ Repris du prototype jouable et validés par Oni :
 - **Améliorations** : Mobilité = +1 déplacement aux aggros ; Mue (Aura Mobilité 1) profite aussi au soutien qui la donne ; Provocation : les tanks subissent 1 dégât de moins des tourelles ; Carapace épaisse : +1 PV et les tanks ne subissent plus les Épines ; Réincarnation : le tank revient là où il est mort ; Carnage : les aggros attaquent 2 fois.
 - **Créatures** : Colosse et Massacreur coûtent 6 ; Catalyseur passe au niveau 1 (0 ATQ / 2 PV) ; Hurleur passe au niveau 2 (0 ATQ / 4 PV, Aura Fureur +2 ATQ).
 - **Champ de stase** : l'attaque fait 0 dégât au bâtiment, mais toute l'attaque passe en percée et les spores touchent les tuiles voisines.
+
+## Changements de la v0.5.2 (7 novembre 2026)
+
+- **Trois pioches de tuiles** : **renforts** (murs, Épines, Renforcé, camouflés), **actifs** (bâtiments face visible à effet direct) et **pièges** (Mines et Siphons). Au **début** de son tour, la colonie complète sa main **tuile par tuile**, en choisissant à chaque fois la pioche.
+- **Pièges** : le Piège et le Siphon sont remplacés par **Mine mineure / majeure / supérieure** (1 / 2 / 3 dégâts) et **Siphon mineur / majeur / supérieur** (1 / 2 / 3 biomasse), qui coûtent 1 / 2 / 3 points et ont 1 / 2 / 3 PV (2 exemplaires chacun). Un Siphon ne fait jamais descendre l'essaim sous **5** biomasse.
+- **Bouclier** (nouvelle capacité) : le bâtiment arrive avec un jeton ; la prochaine attaque ne lui fait rien (comme en stase), puis le jeton est défaussé. **Abri blindé** : 2 points, 2 PV, +1 travailleur, Bouclier, face visible, 3 exemplaires.
 
 ## Le jeu en bref
 
@@ -93,7 +99,7 @@ Le carré de départ couvre les couronnes 1 et 2 : chaque lane s'étendra ensuit
 2. Posez les 16 **Barbelés** sur toutes les cases des couronnes 1 et 2 (4 + 12), face visible (1 PV et Épines 1).
 3. Posez 4 **supports de niveau 1** sur les 4 coins de la couronne 1 et 4 **supports de niveau 2** sur les 4 coins de la couronne 2.
 4. Prenez **3 travailleurs**.
-5. Mélangez les 54 forteresses en une pioche. Piochez-en **4** : c'est votre main.
+5. Triez les 63 forteresses en trois pioches mélangées : **renforts** (26), **actifs** (25) et **pièges** (12). Votre main est vide : vous la composez au début de votre premier tour.
 6. Mélangez les 28 cartes sortilège en une pioche.
 
 ### Essaim
@@ -192,8 +198,9 @@ Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, d
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus cumulable : **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
-- **Piège** : la première attaque le retourne face visible et inflige **3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Un piège déjà vu par Vision ou Clairvoyance ne se déclenche plus.
-- **Siphon** : la première attaque le retourne face visible et l'essaim perd **3 biomasse** ; sa biomasse ne descend jamais sous 3. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
+- **Mine** (mineure, majeure, supérieure) : la première attaque la retourne face visible et inflige **1, 2 ou 3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Une Mine déjà vue par Vision ou Clairvoyance ne se déclenche plus.
+- **Siphon** (mineur, majeur, supérieur) : la première attaque le retourne face visible et l'essaim perd **1, 2 ou 3 biomasse** ; sa biomasse ne descend jamais sous **5**. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
+- **Bouclier** (Abri blindé) : le bâtiment arrive avec un jeton. La prochaine attaque ne lui fait aucun dégât, comme en stase : pas d'Épines, mais toute l'attaque passe en percée et les spores touchent les tuiles voisines. Le jeton est alors défaussé. Une percée ou des spores qui l'atteignent consomment aussi le jeton †.
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Un Barbelé détruit est retiré du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
 
@@ -214,6 +221,10 @@ Une créature à 0 PV retire sa figurine ; sa carte retourne dans sa pioche.
 ## Tour de la colonie
 
 À chaque tour, la colonie lance ses chantiers puis répartit ses travailleurs entre ses murs et sa fusée.
+
+### Début du tour : pioche de tuiles
+
+Complétez votre main jusqu'à **4 tuiles, +1 par palier de la fusée atteint** (étages 3, 6 et 9) : 4, 5, 6 puis 7. Piochez **une tuile à la fois**, en choisissant à chaque fois la pioche : **renforts**, **actifs** ou **pièges** (Oni, 07/11/2026). Une pioche vide est reformée avec sa défausse ; si les trois sont épuisées, la main reste incomplète.
 
 ### 1. Sorts de soutien
 
@@ -241,12 +252,11 @@ Chaque travailleur fournit **1 point de construction**. Vos travailleurs compren
 2. **Supports** : posez les supports dont les conditions sont réunies, dès que leurs murs sont construits.
 3. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
 4. **Tirs** : chaque support de niveau 1 ou 2 inflige ses dégâts à une créature située sur l'une des **8 cases qui l'entourent** (diagonales comprises), au choix de la colonie. Niveau 1 : 1 dégât, +1 à chaque palier de la fusée (étages 3, 6 et 9), soit 1 / 2 / 3 / 4 † ; niveau 2 : 2 dégâts †. Les tourelles tirent **après** la construction et la fusée : un support apparu ce tour tire déjà, et un palier atteint ce tour compte déjà pour ses dégâts.
-5. **Pioche de tuiles** : complétez votre main jusqu'à **4 tuiles, +1 par palier de la fusée atteint** (étages 3, 6 et 9) : 4, 5, 6 puis 7.
-6. **Pioche de sorts** : piochez selon vos technologies en jeu : 3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts.
+5. **Pioche de sorts** : piochez selon vos technologies en jeu : 3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts.
 
 ### Les forteresses
 
-Les 54 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
+Les 63 forteresses (durée, PV, capacité) sont décrites dans le Catalogue.
 
 ## La fusée et ses paliers
 
@@ -329,7 +339,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Forteresses
 
-54 tuiles de construction, toutes plafonnées à 4 PV. La colonne « Épines » donne les Épines de base ; s'y ajoute +1 par Avant-poste dans les 8 cases autour (cumulable). La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
+63 tuiles de construction, toutes plafonnées à 4 PV, en trois pioches : **renforts** (Palissade, Muraille, Rempart, Bastion, Égide, Haie d'épines, Mur hérissé, Ronceraie, Ligne de front, Réduit), **actifs** (Antenne, Laboratoire, Observatoire, Archives, Baraquement, Dortoir, Avant-postes, Abri blindé) et **pièges** (Mines et Siphons). La colonne « Épines » donne les Épines de base ; s'y ajoute +1 par Avant-poste dans les 8 cases autour (cumulable). La colonne « Points » vérifie l'ancien barème (2 points par tour de construction, Épines 1 de base gratuite) : à revoir depuis les changements d'Épines †. Les forteresses ajoutées le 01/11/2026 n'ont pas encore de valeur au barème.
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -350,11 +360,12 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | — | Face visible ; +2 PV si posé dans la lane de son point cardinal (4 PV) ; **Aura d'épines** : +1 Épines à chaque bâtiment des 8 cases autour | 3 | 1 de chaque |
 | Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | **1** | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
 | Réduit † | 2 | 5 − couronne (4 / 3 / 2) | **1** | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
-| Piège | 2 | 2 | — | Camouflé ; **3 dégâts** à la créature qui le révèle en l'attaquant, avant qu'elle frappe | 4 | 3 |
-| Siphon | 2 | 2 | — | Camouflé ; révélé par une attaque de l'essaim, il lui retire **3 biomasse** (jamais sous 3) | † | 3 |
+| Mine mineure / majeure / supérieure | 1 / 2 / 3 | 1 / 2 / 3 | — | Camouflée ; **1 / 2 / 3 dégâts** à la créature qui la révèle en l'attaquant, avant qu'elle frappe | † | 2 de chaque |
+| Siphon mineur / majeur / supérieur | 1 / 2 / 3 | 1 / 2 / 3 | — | Camouflé ; révélé par une attaque de l'essaim, il lui retire **1 / 2 / 3 biomasse** (jamais sous 5) | † | 2 de chaque |
+| Abri blindé | 2 | 2 | — | Face visible ; +1 travailleur **temporaire** ; **Bouclier** | † | 3 |
 
 - **Total des technologies possibles** : 21 (3 Antennes, 3 Laboratoires, 3 Observatoires, 3 Archives).
-- **Total des travailleurs bonus possibles** : 6 temporaires (3 Baraquements, 3 Dortoirs), aucun permanent.
+- **Total des travailleurs bonus possibles** : 9 temporaires (3 Baraquements, 3 Dortoirs, 3 Abris blindés), aucun permanent.
 
 ### Sortilèges
 

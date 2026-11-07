@@ -1054,3 +1054,6 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
 .h2-music { position: absolute; left: 16px; bottom: 10px; z-index: 2; }
 .h2-music .h2-ic { cursor: pointer; }
 .h2-music .music { padding: 4px 10px 4px 4px; border-radius: 6px; background: rgba(10,8,7,.55); backdrop-filter: blur(4px); }
+/* Bouclier (Abri blindé, Oni 07/11/2026) : jeton tant qu'il n'a pas servi */
+.tile .tb .shield-tk { color: #7fc8ff; filter: drop-shadow(0 0 3px rgba(127,200,255,.8)); }
+.pick.col .pick-row { --c: var(--colonie); }
