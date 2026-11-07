@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.3 — 7 novembre 2026
+
+**Interface (Oni)** : la puissance des pièges apparaît dans leurs capacités : « Mine 1 / 2 / 3 », « Siphon 1 / 2 / 3 » (cartes de tuiles, aide), et sur la tuile posée (vue de la colonie).
+
 ## v0.5.2 — 7 novembre 2026
 
 **Colonie (Oni)**
