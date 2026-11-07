@@ -26,7 +26,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       let j; try { j = await res.json(); } catch (e) { return; }
       if (!j || !j.S) return;
       const S = j.S, bad = [];
-      if ([1, 2, 3].some(l => S.piles[l].some(x => x !== null)) || S.tileDeck.some(x => x !== null) || S.spellDeck.some(x => x !== null)) bad.push('ordre des pioches');
+      if ([1, 2, 3].some(l => S.piles[l].some(x => x !== null)) || Object.values(S.tileDecks).some(d => d.some(x => x !== null)) || S.spellDeck.some(x => x !== null)) bad.push('ordre des pioches');
       if (side === 'essaim') {
         if (S.hand.some(x => x !== null)) bad.push('main de la colonie');
         if (S.spells.some(x => x !== null)) bad.push('sortilèges');
@@ -88,6 +88,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (await click(page, '[data-a="draw"]')) continue;
     if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="pickAdd"]:not([disabled])')]; if (!b.length) return false; b[b.length - 1 - Math.floor(Math.random() * Math.min(3, b.length))].dataset.robot = '1'; return true; }) && await click(page, '[data-a="pickAdd"][data-robot]')) continue; // pioche au choix : prendre le maximum de cartes
     if (await click(page, '[data-a="pickGo"]')) continue;
+    if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="tdraw"]:not([disabled])')]; if (!b.length) return false; b[Math.floor(Math.random() * b.length)].dataset.robot = '1'; return true; }) && await click(page, '[data-a="tdraw"][data-robot]')) continue; // pioche de la colonie, tuile par tuile
     if (ph === 'Déploiement et améliorations') { if (await click(page, '[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click(page, '[data-a="card"]:not([disabled])') && await click(page, '[data-a="deployAt"]')) continue; } await click(page, '[data-a="invest"][data-n="99"]'); await click(page, '[data-a="endDeploy"]'); continue; }
     if (ph === 'Améliorations') { await click(page, '[data-a="invest"][data-n="99"]'); await click(page, '[data-a="toAttacks"]'); continue; }
     if (ph === 'Réaction de la colonie') { if (await click(page, '[data-a="spell"]')) { if (!(await click(page, '[data-a="spellArg"]'))) await click(page, '[data-a="spellCancel"]'); } await click(page, '[data-a="reactDone"]'); continue; }

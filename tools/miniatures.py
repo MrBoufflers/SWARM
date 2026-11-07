@@ -19,7 +19,7 @@ NOMS = {
     "Laboratoire": "laboratoire.jpg", "Mur hérissé": "mur hérissé.jpg", "Muraille": "muraille.jpg",
     "Observatoire": "observatroire.jpg", "Rempart": "rempart.jpg", "Archives": "archive.jpg",
     "Baraquement": "baraquement.jpg", "Dortoir": "dortoir.jpg", "Égide": "egide.jpg", "Ligne de front": "ligne de front.jpg",
-    "Réduit": "réduit.jpg", "Piège": "piege.jpg", "Siphon": "siphon.jpg", "Ronceraie": "ronceraie.jpg",
+    "Réduit": "réduit.jpg", "Piège": "piege.jpg", "Siphon": "siphon.jpg", "Mine mineure": "piege.jpg", "Mine majeure": "piege.jpg", "Mine supérieure": "piege.jpg", "Siphon mineur": "siphon.jpg", "Siphon majeur": "siphon.jpg", "Siphon supérieur": "siphon.jpg", "Ronceraie": "ronceraie.jpg",
     "Avant-poste du Nord": "avant poste.jpg", "Avant-poste de l'Est": "avant poste.jpg",
     "Avant-poste du Sud": "avant poste.jpg", "Avant-poste de l'Ouest": "avant poste.jpg",
     "support 1": "support 1.jpg", "support 2": "support 2.jpg", "support 3": "support niveau 3.jpg",

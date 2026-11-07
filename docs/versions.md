@@ -4,6 +4,15 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.2 — 7 novembre 2026
+
+**Colonie (Oni)**
+- **Trois pioches de tuiles** : renforts (murs, Épines, Renforcé, camouflés), actifs (face visible, effet direct) et pièges. Au **début** de son tour, la colonie complète sa main **tuile par tuile** en choisissant chaque fois la pioche (nouvelle étape « Pioche de la colonie » ; avant : pioche unique mélangée, en fin de tour). Main vide à la mise en place.
+- **Pièges** : Mine mineure / majeure / supérieure (1 / 2 / 3 dégâts) et Siphon mineur / majeur / supérieur (1 / 2 / 3 biomasse) ; 1 / 2 / 3 points et PV ; 2 exemplaires chacun ; ils remplacent le Piège et le Siphon. Un Siphon ne fait plus descendre l'essaim sous **5** biomasse (avant 3).
+- **Bouclier** : jeton qui annule la prochaine attaque (comme en stase : percée et spores passent, pas d'Épines), puis défaussé. **Abri blindé** : 2 points, 2 PV, +1 travailleur, Bouclier, face visible, 3 exemplaires.
+- **Renouvellement** : chaque tuile défaussée est remplacée par une tuile de la même pioche.
+- Parties en cours : le Piège devient Mine supérieure, le Siphon Siphon supérieur ; la pioche est répartie en trois et les nouvelles tuiles y sont ajoutées.
+
 ## v0.5.1 — 7 novembre 2026
 
 **Pioche (Oni)** : le palier ne fixe plus que le nombre de cartes (3, 5, 7, 10) ; l'essaim pioche dans n'importe quelle pile qui contient des cartes. Les piles 2 et 3 sont grisées tant qu'elles sont vides (« amélioration de rang 1 / 2 nécessaire »). Panneau et aide : « Cartes à piocher » au lieu de la répartition par niveau.

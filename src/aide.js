@@ -24,7 +24,8 @@ const AIDE = (() => {
       if (t.ren) caps.push(`Renforcé ${t.ren}`);
       if (t.tech) caps.push(`+${t.tech} technologie${t.tech > 1 ? "s" : ""}`);
       if (t.temp) caps.push("+1 travailleur");
-      if (t.trap) caps.push(`piège (${SF.TRAP_DMG} dégâts)`);
+      if (t.trap) caps.push(`mine (${t.trap} dégât${t.trap > 1 ? "s" : ""})`);
+      if (t.shield) caps.push("Bouclier");
       if (t.siphon) caps.push(`Siphon (−${t.siphon} biomasse)`);
       if (t.aura) caps.push("Aura d'épines");
       return `<tr><td><span class="rt-n">${h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${t.d}</td><td>${tilePv(t)}</td><td>${h.E(caps.join(" · ") || "—")}</td><td>${t.n}</td></tr>`;
@@ -59,7 +60,7 @@ const AIDE = (() => {
         <li><b>ATQ</b> : dégâts infligés par une attaque. <b>PV</b> : points de vie ; à 0, la créature ou le bâtiment est détruit.</li>
         <li><b>Épines X</b> : une créature qui attaque ce bâtiment subit X dégâts après son attaque. +1 par Avant-poste dans les 8 cases autour.</li>
         <li><b>Renforcé X</b> : le bâtiment perd 1 PV par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).</li>
-        <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Un <b>piège</b> camouflé inflige ${SF.TRAP_DMG} dégâts à la créature qui le révèle, avant qu'elle frappe ; un <b>Siphon</b> retire de la biomasse à l'essaim. Une tuile encore cachée ne subit ni la percée ni les spores.</li>
+        <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Une <b>Mine</b> camouflée inflige 1, 2 ou 3 dégâts (mineure, majeure, supérieure) à la créature qui la révèle, avant qu'elle frappe ; un <b>Siphon</b> retire 1, 2 ou 3 biomasse à l'essaim (jamais sous ${SF.MIN_BIOMASS}). Une tuile encore cachée ne subit ni la percée ni les spores.</li>
         <li><b>Percée</b> (Aura du Perforeur) : les dégâts en trop après la destruction d'un bâtiment passent à la case suivante du chemin vers la fusée.</li>
         <li><b>Auras</b> : effets des soutiens sur les <b>autres</b> créatures de leur case ; elles se cumulent toutes.</li>
       </ul>
@@ -122,7 +123,8 @@ const AIDE = (() => {
       <h3>Vos ressources</h3>
       <ul>
         <li><b>Travailleurs</b> : 3 au départ, +1 par étage achevé, +1 par bâtiment à travailleur temporaire encore debout, +${SF.SUP3_WORKERS} par support de niveau 3. Chaque travailleur donne <b>1 point de construction</b> par tour.</li>
-        <li><b>Main de tuiles</b> : 4 tuiles, +1 à chaque palier de la fusée (étages 3, 6 et 9). Vous la complétez à la fin de votre tour.</li>
+        <li><b>Main de tuiles</b> : 4 tuiles, +1 à chaque palier de la fusée (étages 3, 6 et 9). Vous la complétez au début de votre tour, tuile par tuile, en choisissant à chaque fois la pioche : <b>renforts</b> (murs, Épines, Renforcé, camouflés), <b>actifs</b> (face visible : technologies, travailleurs, Avant-postes) ou <b>pièges</b> (Mines et Siphons).</li>
+        <li><b>Bouclier</b> (Abri blindé) : la première attaque contre le bâtiment ne lui fait rien (comme en stase), puis le jeton est défaussé.</li>
         <li><b>Technologies</b> : à 3, 6 et 9 technologies, vous piochez 1, 2 ou 3 sortilèges à la fin de chaque tour. Elles viennent des bâtiments à technologies et du palier de l'étage 3 (+2).</li>
       </ul>
       <h3>Votre tour</h3>
@@ -185,8 +187,8 @@ const AIDE = (() => {
       text: () => `Pendant le déploiement, touchez une carte des arbres d'amélioration (panneau Essaim) pour y investir votre budget ou votre réserve : ${SF.COST_R1} biomasse au rang 1, ${SF.COST_R2} au rang 2, payables en plusieurs tours. Un rang 1 ajoute les cartes de niveau 2 de ce type à votre pioche, un rang 2 celles de niveau 3.` },
     { id: "e-attaque", side: "essaim", img: "Ravageur", title: "Déplacer et attaquer", when: S => S.phase === "A_attack",
       text: () => `Touchez une créature (cadre jaune), puis une case surlignée de son chemin : elle avance de 1 case jusqu'à son maximum, tout droit ou en escalier. Ensuite, si vous voulez, touchez un bâtiment encadré qui touche sa case. « Tout résoudre et finir le tour » fait agir les autres créatures et termine le tour.` },
-    { id: "e-camo", side: "essaim", img: "Piège", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
-      text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être un piège (${SF.TRAP_DMG} dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez de la biomasse). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
+    { id: "e-camo", side: "essaim", img: "Mine supérieure", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
+      text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être une Mine (1 à 3 dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez 1 à 3 biomasse, jamais sous ${SF.MIN_BIOMASS}). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
     { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),
       text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : le bâtiment ne perd qu'1 PV par tranche de X dégâts d'une même attaque.` },
     { id: "e-tourelles", side: "essaim", img: "support 2", title: "Les tourelles", when: S => S.phase === "A_attack" && S.creatures.some(c => c.k <= 3),
@@ -215,7 +217,7 @@ const AIDE = (() => {
     { id: "c-tirs", side: "colonie", img: "support 2", title: "Tirer", when: S => S.phase === "D_fire",
       text: () => `Touchez une tourelle surlignée, puis une créature surlignée (dans les 8 cases autour). Niveau I : 1 dégât, +1 par palier de la fusée ; niveau II : 2 dégâts. « Tirs automatiques » choisit pour vous ; « Terminer le tour » fait tirer les tourelles restantes.` },
     { id: "c-camo", side: "colonie", img: "Égide", title: "Le camouflage", when: S => inHand(S, t => t.camo),
-      text: () => `Les tuiles marquées « Camouflage » sont posées face cachée : l'essaim ne sait pas ce que c'est avant de les attaquer. Les pièges blessent la créature qui les révèle ; le Siphon lui retire de la biomasse. Un Œil-sonde ennemi révèle votre lane.` },
+      text: () => `Les tuiles marquées « Camouflage » sont posées face cachée : l'essaim ne sait pas ce que c'est avant de les attaquer. Les Mines blessent la créature qui les révèle ; les Siphons lui retirent de la biomasse. Un Œil-sonde ennemi révèle votre lane.` },
     { id: "c-epines", side: "colonie", img: "Mur hérissé", title: "Les Épines", when: S => inHand(S, t => t.ep > 0),
       text: () => `Épines : la créature qui attaque ce bâtiment subit autant de dégâts. Très efficace contre les aggros, qui n'ont qu'1 PV. Un Avant-poste ajoute +1 Épines aux bâtiments des 8 cases autour.` },
     { id: "c-tech", side: "colonie", img: "Laboratoire", title: "Les technologies", when: S => inHand(S, t => t.tech > 0) || SF.tech(S) > 0,

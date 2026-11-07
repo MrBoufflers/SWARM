@@ -35,6 +35,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     if (await click('[data-a="draw"]')) continue;
     if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="pickAdd"]:not([disabled])')]; if (!b.length) return false; b[b.length - 1 - Math.floor(Math.random() * Math.min(3, b.length))].dataset.robot = '1'; return true; }) && await click('[data-a="pickAdd"][data-robot]')) continue; // pioche au choix : prendre le maximum de cartes
     if (await click('[data-a="pickGo"]')) continue;
+    if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="tdraw"]:not([disabled])')]; if (!b.length) return false; b[Math.floor(Math.random() * b.length)].dataset.robot = '1'; return true; }) && await click('[data-a="tdraw"][data-robot]')) continue; // pioche de la colonie, tuile par tuile
     const ph = await phase();
     if (!shots[ph]) { shots[ph] = 1;  }
     if (ph === 'Déploiement et améliorations') { if (await click('[data-a="sapTarget"]')) continue; if (!(await page.$('.ccard.sel'))) { if (await click('[data-a="card"]:not([disabled])') && await click('[data-a="deployAt"]')) continue; } await click('[data-a="invest"][data-n="99"]'); await click('[data-a="endDeploy"]'); continue; }
