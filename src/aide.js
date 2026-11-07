@@ -84,15 +84,15 @@ const AIDE = (() => {
       ${tiersTable(h)}
       <h3>Votre tour</h3>
       <ol>
-        <li><b>Pioche</b> automatique au début du tour, selon votre palier. Si une pioche de niveau 2 ou 3 est vide, vous piochez au niveau inférieur. <b>Premier tour</b> : à la place, vous recevez un Écorcheur, une Carapace et un soutien de niveau 1 tiré au hasard.</li>
-        <li><b>Déploiement et améliorations</b> (une seule étape) : répartissez votre biomasse comme vous voulez, dans l'ordre que vous voulez. <b>Déployer</b> : choisissez une carte, puis une case d'entrée (A à E) d'une lane ; payez son coût, en respectant le maximum de créatures de la lane. <b>Améliorer</b> : investissez dans un nœud d'amélioration (voir plus bas). Le budget du tour est dépensé en premier, puis la réserve ; ce qui reste du budget va à la réserve. Les cartes non jouées retournent dans la pioche.</li>
+        <li><b>Pioche au choix</b> : votre palier vous donne un nombre de cartes (la somme de ses quotas) et les niveaux auxquels vous avez accès ; vous choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) ; les créatures sont tirées au hasard dans la pile, qui mélange les types débloqués par vos améliorations. <b>Premier tour</b> : à la place, vous recevez un Écorcheur, une Carapace et un soutien de niveau 1 tiré au hasard (jamais un Œil-sonde).</li>
+        <li><b>Déploiement et améliorations</b> (une seule étape) : répartissez votre biomasse comme vous voulez, dans l'ordre que vous voulez. <b>Déployer</b> : choisissez une carte, puis une case d'entrée (A à E) d'une lane — un <b>soutien</b> peut être parachuté sur n'importe quelle case libre d'une lane ; payez son coût, en respectant le maximum de créatures de la lane. <b>Améliorer</b> : investissez dans un nœud d'amélioration (voir plus bas). Le budget du tour est dépensé en premier, puis la réserve ; ce qui reste du budget va à la réserve. Les cartes non jouées retournent dans la pioche.</li>
         <li><b>Réaction de la colonie</b> : si elle tient un sortilège offensif, elle peut le jouer maintenant.</li>
         <li><b>Attaques</b> : pour chaque créature, dans l'ordre que vous voulez :
           <ul>
-            <li><b>Déplacement</b> : elle avance seule vers la fusée sur le chemin le plus court, tout droit ou en escalier (1 case, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou la Mue), sans diagonale. Elle s'arrête devant un bâtiment ou la fusée.</li>
-            <li><b>Attaque</b> : elle frappe le bâtiment (ou la fusée) qui se trouve devant elle. Les soutiens n'attaquent jamais.</li>
+            <li><b>Déplacement</b> : elle avance sur son chemin vers la fusée, tout droit ou en escalier, sans diagonale, de <b>1 case jusqu'à son maximum</b>, au choix (1 case, 2 pour les créatures de niveau 3, +1 avec la Mobilité ou la Mue). Elle s'arrête devant un bâtiment ou la fusée. Si elle peut avancer, elle doit avancer d'au moins une case.</li>
+            <li><b>Attaque, facultative</b> : elle frappe n'importe quel bâtiment qui touche sa case par un côté, ou la fusée. Avec Carnage, une aggro peut attaquer deux fois. Les soutiens n'attaquent jamais.</li>
           </ul>
-          Touchez une créature pour la faire agir. « Tout résoudre automatiquement » fait agir toutes les créatures restantes ; « Fin du tour » termine le tour (les créatures qui n'ont pas agi ne font rien).</li>
+          Touchez une créature, puis une case surlignée de son chemin, puis une cible encadrée (ou « Terminer pour cette créature »). « Tout résoudre et finir le tour » fait agir toutes les créatures restantes (elles avancent au maximum et frappent devant elles), puis termine le tour.</li>
         <li><b>Fin du tour</b> : les auras de soin agissent.</li>
       </ol>
       <h3>Vos créatures</h3>
@@ -100,7 +100,7 @@ const AIDE = (() => {
         <li><b>Aggros</b> : grosse attaque, 1 PV. Elles meurent vite sur les Épines.</li>
         <li><b>Tanks</b> : beaucoup de PV, 1 ATQ. Ils encaissent les Épines et les tirs.</li>
         <li><b>Soutiens</b> : ils n'attaquent jamais, mais leurs <b>auras</b> renforcent les <b>autres</b> créatures de leur case ; toutes les auras se cumulent.</li>
-        <li><b>Vitesse</b> : 1 case par tour, 2 pour les créatures de niveau 3 ; avec la Mue, chaque soutien donne +1 case aux autres créatures de sa case ; la Mobilité donne +1 case aux aggros, et la Furtivité. Le nombre de déplacements est fixé au premier pas du tour. En résolution automatique (« Tout résoudre »), les soutiens agissent en premier : les créatures parties de la même case les suivent et profitent encore de leurs auras quand elles attaquent.</li>
+        <li><b>Vitesse</b> : 1 case par tour, 2 pour les créatures de niveau 3 ; avec la Mue, chaque soutien donne +1 case à toutes les créatures de sa case, lui compris ; la Mobilité donne +1 case aux aggros. Le nombre de déplacements est fixé au premier pas du tour. En résolution automatique (« Tout résoudre »), les soutiens agissent en premier : les créatures parties de la même case les suivent et profitent encore de leurs auras quand elles attaquent.</li>
       </ul>
       ${creaturesTable(h)}
       <h3>Améliorations</h3>
@@ -174,17 +174,17 @@ const AIDE = (() => {
   const TIPS = [
     // ---- essaim
     { id: "e-but", side: "essaim", img: "Massacreur", title: "Vous jouez l'essaim", when: () => true,
-      text: () => `Votre but : tuer tous les travailleurs de la colonie en frappant sa fusée, au centre du plateau. Elle gagne si elle achève ses ${SF.FLOORS} étages avant. Chaque tour : la pioche est automatique, puis vous déployez et améliorez (dans la même étape), puis vos créatures avancent et attaquent. Le bouton « Règles » détaille tout.` },
-    { id: "e-pioche", side: "essaim", img: "Écorcheur", title: "La pioche", when: S => S.phase === "A_deploy" && S.round <= 2,
-      text: () => `Vous piochez automatiquement au début de votre tour. Votre palier, fixé par votre biomasse, détermine combien de cartes de chaque niveau vous piochez. Au premier tour, vous recevez à la place une aggro, un tank et un soutien.` },
+      text: () => `Votre but : tuer tous les travailleurs de la colonie en frappant sa fusée, au centre du plateau. Elle gagne si elle achève ses ${SF.FLOORS} étages avant. Chaque tour : vous choisissez vos cartes, puis vous déployez et améliorez (dans la même étape), puis vos créatures avancent et attaquent. Le bouton « Règles » détaille tout.` },
+    { id: "e-pioche", side: "essaim", img: "Écorcheur", title: "La pioche au choix", when: S => S.phase === "A_start" && !S.startHand,
+      text: () => `Votre palier, fixé par votre biomasse, vous donne un nombre de cartes et les niveaux auxquels vous avez accès. Répartissez-les entre les piles de niveau 1, 2 et 3 avec + et −, puis « Piocher » : les créatures sont tirées au hasard dans chaque pile. Au premier tour, vous avez reçu à la place une aggro, un tank et un soutien.` },
     { id: "e-deploy", side: "essaim", img: "Carapace", title: "Déployer", when: S => S.phase === "A_deploy",
-      text: S => `Touchez une carte, puis une case d'entrée (lettres A à E au bord) d'une lane. Chaque carte coûte de la biomasse. Votre budget du tour égale votre biomasse (${S.biomass}) : elle n'est jamais dépensée et revient chaque tour. Au plus ${SF.capOf(S)} créatures par lane. Dans la même étape, vous pouvez aussi investir dans les arbres d'amélioration. Le budget non dépensé va à la réserve.` },
+      text: S => `Touchez une carte, puis une case d'entrée (lettres A à E au bord) d'une lane ; un soutien se parachute sur n'importe quelle case libre. Chaque carte coûte de la biomasse. Votre budget du tour égale votre biomasse (${S.biomass}) : elle n'est jamais dépensée et revient chaque tour. Au plus ${SF.capOf(S)} créatures par lane. Dans la même étape, vous pouvez aussi investir dans les arbres d'amélioration. Le budget non dépensé va à la réserve.` },
     { id: "e-types", side: "essaim", img: "Hurleur", title: "Aggros, tanks et soutiens", when: S => S.phase === "A_deploy" && S.handA.length > 0,
       text: () => `Aggros : grosse attaque mais 1 PV. Tanks : beaucoup de PV, 1 ATQ. Soutiens : ils n'attaquent pas, mais leurs auras renforcent les autres créatures de leur case (les auras se cumulent). Touchez une carte pour voir sa capacité.` },
     { id: "e-ameli", side: "essaim", img: "Béhémoth", title: "Améliorations", when: S => S.phase === "A_deploy" && SF.investable(S) >= 4,
       text: () => `Pendant le déploiement, touchez une carte des arbres d'amélioration (panneau Essaim) pour y investir votre budget ou votre réserve : ${SF.COST_R1} biomasse au rang 1, ${SF.COST_R2} au rang 2, payables en plusieurs tours. Un rang 1 ajoute les cartes de niveau 2 de ce type à votre pioche, un rang 2 celles de niveau 3.` },
     { id: "e-attaque", side: "essaim", img: "Ravageur", title: "Déplacer et attaquer", when: S => S.phase === "A_attack",
-      text: () => `Touchez une créature (cadre jaune) : elle avance seule vers la fusée, tout droit ou en escalier, puis attaque ce qui est devant elle. Vous choisissez l'ordre dans lequel elles agissent. « Tout résoudre automatiquement » fait agir toutes les autres.` },
+      text: () => `Touchez une créature (cadre jaune), puis une case surlignée de son chemin : elle avance de 1 case jusqu'à son maximum, tout droit ou en escalier. Ensuite, si vous voulez, touchez un bâtiment encadré qui touche sa case. « Tout résoudre et finir le tour » fait agir les autres créatures et termine le tour.` },
     { id: "e-camo", side: "essaim", img: "Piège", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
       text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être un piège (${SF.TRAP_DMG} dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez de la biomasse). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
     { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),

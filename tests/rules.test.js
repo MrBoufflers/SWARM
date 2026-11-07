@@ -92,7 +92,7 @@ const fresh = () => {
   const h = { id: 1, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 1 }, e = { id: 2, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 };
   const far = { id: 3, name: "Écorcheur", lane: "N", u: 1, k: 4, hp: 1 };
   S.creatures.push(h, e, far);
-  ok(SF.effAtq(S, e) === 4 && SF.effAtq(S, h) === 0 && SF.effAtq(S, far) === 3, "Fureur : même case seulement ; le Hurleur lui-même a 0 ATQ");
+  ok(SF.effAtq(S, e) === 5 && SF.effAtq(S, h) === 0 && SF.effAtq(S, far) === 3, "Fureur (+2 ATQ, v0.5) : même case seulement ; le Hurleur lui-même a 0 ATQ");
 }
 // 11. améliorations payées en plusieurs fois
 {
@@ -127,8 +127,8 @@ const fresh = () => {
 // 13. les soutiens n'attaquent pas (0 ATQ) et ont +1 / +3 / +5 PV
 {
   const S = fresh(); SF.attackerDraw(S);
-  ok(["Œil-sonde","Glaneur","Hurleur"].every(n => SF.CREATURES[n].pv === 2 && SF.CREATURES[n].atq === 0), "soutiens N1 : 0 ATQ / 2 PV");
-  ok(["Phéromone","Perforeur","Catalyseur"].every(n => SF.CREATURES[n].pv === 4 && SF.CREATURES[n].atq === 0), "soutiens N2 : 0 ATQ / 4 PV");
+  ok(["Œil-sonde","Glaneur","Catalyseur"].every(n => SF.CREATURES[n].pv === 2 && SF.CREATURES[n].atq === 0 && SF.CREATURES[n].lvl === 1), "soutiens N1 (Catalyseur depuis la v0.5) : 0 ATQ / 2 PV");
+  ok(["Phéromone","Perforeur","Hurleur"].every(n => SF.CREATURES[n].pv === 4 && SF.CREATURES[n].atq === 0 && SF.CREATURES[n].lvl === 2), "soutiens N2 (Hurleur depuis la v0.5) : 0 ATQ / 4 PV");
   ok(["Sapeur","Sporeur"].every(n => SF.CREATURES[n].pv === 6 && SF.CREATURES[n].atq === 0), "soutiens N3 : 0 ATQ / 6 PV");
   const g = { id: 1, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, new: true, acted: false };
   const h = { id: 2, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2, new: true, acted: false };
@@ -157,7 +157,7 @@ const fresh = () => {
   S.creatures.push(g1, g2, e);
   ok(SF.effAtq(S, e) === 5, "Écorcheur 3 + 2 (Griffes de 2 soutiens : cumulable)");
   S.creatures.push({ id: 4, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2 });
-  ok(SF.effAtq(S, e) === 7, "+ un Hurleur : 3 + 3 (Griffes de 3 soutiens) + 1 (Fureur)");
+  ok(SF.effAtq(S, e) === 8, "+ un Hurleur : 3 + 3 (Griffes de 3 soutiens) + 2 (Fureur)");
   ok(SF.effAtq(S, g1) === 0, "le soutien reste à 0 ATQ");
 }
 // 16. tourelles : 8 cases autour du support ; niveau I = 1 + paliers de fusée (3/6/9), niveau II = 2
@@ -630,7 +630,7 @@ const fresh = () => {
   const e = { id: 151, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(e); SF.act(T, e);
   ok(T.tiles["0,1"].hp === 4, "Rempart frappé pour 1 (moins que 2) : aucun PV perdu");
   ok([3, 6, 7, 15].map(SF.famineBudget).join() === "1,3,3,7", "Famine : budget = biomasse ÷ 2 arrondie à l'inférieur (3→1, 6→3, 7→3, 15→7)");
-  ok(["Œil-sonde", "Glaneur", "Hurleur"].every(n => SF.CREATURES[n].pv === 2) && ["Sapeur", "Sporeur"].every(n => SF.CREATURES[n].pv === 6), "soutiens : 2 PV (niveau 1), 4 (niveau 2), 6 (niveau 3)");
+  ok(["Œil-sonde", "Glaneur", "Catalyseur"].every(n => SF.CREATURES[n].pv === 2) && ["Hurleur", "Phéromone"].every(n => SF.CREATURES[n].pv === 4) && ["Sapeur", "Sporeur"].every(n => SF.CREATURES[n].pv === 6), "soutiens : 2 PV (niveau 1), 4 (niveau 2), 6 (niveau 3)");
 }
 // 50. Siphon : révélé par une attaque, −3 biomasse à l'essaim (jamais sous 3) ; pas s'il a été vu avant (Oni, 02/11/2026)
 {
@@ -727,7 +727,7 @@ const fresh = () => {
   const V = fresh(); V.upgrades.soutien.r1 = "A";
   const m = at(230, "Écorcheur", 4, 1), s1 = at(231, "Hurleur", 4, 2), s2 = at(232, "Œil-sonde", 4, 2);
   V.creatures.push(m, s1, s2);
-  ok(SF.bonusHp(V, m) === 2 && SF.bonusHp(V, s1) === 1 && SF.maxHp(V, "Hurleur") === 2, "Mue : +1 PV par soutien de la case aux autres créatures (Écorcheur +2, Hurleur +1), plus de +1 PV propre");
+  ok(SF.bonusHp(V, m) === 2 && SF.bonusHp(V, s1) === 1 && SF.maxHp(V, "Hurleur") === 4, "Mue : +1 PV par soutien de la case aux autres créatures (Écorcheur +2, Hurleur +1), plus de +1 PV propre");
   ok(!SF.isStealthy(V, s1) && !SF.isStealthy(V, m), "Mue : plus de Furtivité pour les soutiens (Oni, 05/11/2026)");
   ok(SF.TREES.tank.B1[0] === "Provocation", "tank, côté B : « Provocation » (ancienne Protection)");
   // Bouclier → Renforcé : une ancienne partie est convertie
@@ -742,22 +742,22 @@ const fresh = () => {
   // Frénésie : au choix, cumulable (Oni, 02/11/2026)
   const F = fresh(); F.phase = "A_attack"; F.upgrades.soutien.r2 = "B";
   const ec = at(250, "Écorcheur"), ca = at(251, "Carapace"), f1 = at(252, "Hurleur"), f2 = at(253, "Œil-sonde");
-  F.creatures.push(ec, ca, f1, f2); // Écorcheur 3 (+1 Fureur) ; Carapace 1 (+1 Fureur)
-  ok(SF.effAtq(F, ec) === 16 && SF.effAtq(F, ca) === 2, "par défaut, les 2 soutiens choisissent l'Écorcheur : (3 + 1) × 4 = 16");
-  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) === "" && SF.effAtq(F, ec) === 8 && SF.effAtq(F, ca) === 4, "l'Œil-sonde passe sur la Carapace : Écorcheur ×2 (8), Carapace ×2 (4)");
+  F.creatures.push(ec, ca, f1, f2); // Écorcheur 3 (+2 Fureur) ; Carapace 1 (+2 Fureur)
+  ok(SF.effAtq(F, ec) === 20 && SF.effAtq(F, ca) === 3, "par défaut, les 2 soutiens choisissent l'Écorcheur : (3 + 2) × 4 = 20");
+  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) === "" && SF.effAtq(F, ec) === 10 && SF.effAtq(F, ca) === 6, "l'Œil-sonde passe sur la Carapace : Écorcheur ×2 (10), Carapace ×2 (6)");
   ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 253 }) !== "" && SF.apply(F, "colonie", "frenzy", { src: 253, target: 250 }) !== "", "pas sur soi-même ; la colonie ne peut pas choisir");
   const G = fresh(); G.phase = "A_attack"; const g1 = at(260, "Hurleur"); G.creatures.push(at(261, "Écorcheur"), g1);
   ok(SF.apply(G, "essaim", "frenzy", { src: 260, target: 261 }) !== "", "sans l'amélioration Frénésie : refusé");
 }
-// 55. Provocation : les tanks ne subissent plus les Épines (Oni, 02/11/2026)
+// 55. Carapace épaisse : les tanks ne subissent plus les Épines (Oni, v0.5 ; avant : Provocation)
 {
   const run = prov => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mur hérissé", 0, 1); // Épines 2
-    if (prov) S.upgrades.tank.r1 = "B";
+    if (prov) S.upgrades.tank.r1 = "A";
     const c = { id: 300, name: "Carapace", lane: "N", u: 0, k: 2, hp: 3, acted: false }, e = { id: 301, name: "Écorcheur", lane: "N", u: 0, k: 2, hp: 5, acted: false };
     S.creatures.push(c, e); SF.actCase(S, SF.posKey(c), [300, 301]); return [c.hp, e.hp];
   };
-  ok(run(false).join() === "1,3" && run(true).join() === "3,3", "Provocation : la Carapace ne subit plus les Épines (3 PV), l'Écorcheur si (5 → 3)");
+  ok(run(false).join() === "1,3" && run(true).join() === "3,3", "Carapace épaisse : la Carapace ne subit plus les Épines (3 PV), l'Écorcheur si (5 → 3)");
 }
 // 56. Départ de l'essaim (Oni, 04/11/2026) : 5 biomasse ; premier tour : une aggro, un tank, un soutien au hasard, payés
 //     normalement, à la place de la pioche ; ensuite la pioche normale reprend
@@ -815,28 +815,34 @@ const fresh = () => {
   SF.apply(T, "colonie", "build"); while (T.phase === "D_place") SF.apply(T, "colonie", "placeAt", { k: SF.placeTargets(T)[0] });
   ok(T.phase !== "D_fire", "aucune créature à portée : pas d'étape de tirs, le tour passe à l'essaim");
 }
-// 59. Déplacements au choix (Oni, 04/11/2026) : chaque créature seule, cases voisines de sa lane, retraite possible,
-//     attaque facultative d'un bâtiment qui touche sa case, plus de mouvement après l'attaque
+// 59. Déplacements (Oni, v0.5, 07/11/2026) : chaque créature avance de 1 case à son maximum, au choix, sur son chemin en
+//     escalier vers la fusée (jamais en arrière ni sur les côtés) ; elle doit avancer avant d'attaquer si elle le peut ;
+//     attaque facultative de n'importe quel bâtiment qui touche sa case par un côté ; plus de mouvement après l'attaque
 {
   const S = fresh(); S.phase = "A_attack"; S.supports = {}; // Barbelé en C1 (0,1)
   const c = { id: 800, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 5, acted: false }, h = { id: 801, name: "Carapace", lane: "N", u: 0, k: 3, hp: 3, acted: false };
   S.creatures.push(c, h);
   const R = SF.reachable(S, c);
-  ok(Object.values(R).map(r => r.u + "," + r.k).sort().join(" ") === "-1,3 0,2 0,4 1,3", "1 déplacement : avant (C2), arrière (entrée C), côtés (B3, D3) ; jamais en diagonale");
-  ok(SF.apply(S, "essaim", "move", { id: 800, u: 0, k: 4 }) === "" && c.k === 4 && h.k === 3, "retraite de l'Écorcheur vers l'entrée ; la Carapace de sa case ne bouge pas");
-  ok(SF.apply(S, "essaim", "move", { id: 800, u: 0, k: 3 }) !== "", "plus de déplacement ce tour (vitesse 1)");
+  ok(Object.values(R).map(r => r.u + "," + r.k).join(" ") === "0,2", "vitesse 1 : seulement la case suivante du chemin (C2) ; ni retraite ni pas de côté");
+  ok(SF.apply(S, "essaim", "move", { id: 800, u: 0, k: 4 }) !== "" && SF.apply(S, "essaim", "move", { id: 800, u: 1, k: 3 }) !== "", "retraite et pas de côté refusés");
+  ok(SF.strikeTargets(S, c).length === 0, "pas d'attaque avant d'avoir avancé quand c'est possible");
   ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 1 }) !== "", "pas sur un bâtiment");
   ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 2 }) === "" && SF.strikeTargets(S, h).join() === "0,1", "la Carapace avance en C2 : le Barbelé (C1) est attaquable");
+  ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 1 }) !== "", "vitesse 1 : plus de déplacement ce tour");
   ok(S.tiles["0,1"].hp === 1, "l'attaque est facultative : rien ne se passe tant qu'on ne la demande pas");
   ok(SF.apply(S, "essaim", "strike", { id: 801, target: "0,1" }) === "" && !S.tiles["0,1"] && h.acted, "la Carapace attaque et détruit le Barbelé");
-  ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 1 }) !== "", "après une attaque, plus de déplacement");
+  ok(SF.apply(S, "essaim", "rest", { id: 800 }) === "" && c.acted && c.k === 3, "l'Écorcheur renonce (« Ne pas bouger ») : il reste en C3");
   ok(S.phase === "D_main", "plus aucune créature ne peut agir : le tour passe seul à la colonie");
-  // fusée et cibles au choix
+  // déplacement de moins que le maximum, et cibles sur les 4 côtés
   const T = fresh(); T.phase = "A_attack"; T.supports = {};
-  T.tiles["1,1"] = undefined; delete T.tiles["1,1"];
-  const m = { id: 810, name: "Massacreur", lane: "N", u: 0, k: 2, hp: 1, acted: false }; T.creatures.push(m);
-  delete T.tiles["0,1"]; T.tiles["-1,2"] = SF.tileStats("Muraille", -1, 2); T.tiles["1,2"] = SF.tileStats("Antenne", 1, 2);
-  ok(SF.strikeTargets(T, m).sort().join() === "-1,2,1,2", "cibles : les bâtiments qui touchent sa case (B2 et D2), au choix");
+  for (const k of Object.keys(T.tiles)) delete T.tiles[k];
+  const m = { id: 810, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false, spd: 3 }; T.creatures.push(m);
+  ok(Object.keys(SF.reachable(T, m)).length === 3, "vitesse 3 : 3 cases de chemin au choix");
+  T.tiles["-1,3"] = SF.tileStats("Muraille", -1, 3); T.tiles["1,3"] = SF.tileStats("Antenne", 1, 3);
+  ok(SF.apply(T, "essaim", "move", { id: 810, u: 0, k: 3 }) === "" && m.k === 3, "il s'arrête après 1 case (C3) au lieu de 3");
+  ok(SF.strikeTargets(T, m).sort().join() === "-1,3,1,3", "cibles : les bâtiments sur les côtés (B3 et D3), au choix");
+  ok(SF.apply(T, "essaim", "move", { id: 810, u: 0, k: 2 }) === "" && m.k === 2, "il peut encore avancer tant qu'il n'a pas attaqué");
+  ok(!SF.strikeTargets(T, m).length || SF.strikeTargets(T, m).every(t => t !== "-1,3"), "en C2, la Muraille (B3) ne touche plus sa case");
   SF.apply(T, "essaim", "move", { id: 810, u: 0, k: 1 });
   ok(SF.strikeTargets(T, m).includes("fusee"), "en C1 : la fusée est attaquable");
   // Glaneur : déplacements fixés au premier pas, Mobilité
@@ -844,7 +850,7 @@ const fresh = () => {
   const g = { id: 820, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, acted: false }, e = { id: 821, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false };
   U.creatures.push(g, e);
   U.upgrades.soutien.r1 = "A"; // Mue : le Glaneur (soutien) donne l'Aura Mobilité 1
-  ok(SF.stepsLeft(U, e) === 2 && SF.stepsLeft(U, g) === 1, "Mue : l'Écorcheur de la case du Glaneur fait 2 cases, le Glaneur 1");
+  ok(SF.stepsLeft(U, e) === 2 && SF.stepsLeft(U, g) === 2, "Mue : l'Écorcheur de la case du Glaneur fait 2 cases, le Glaneur aussi (v0.5)");
   SF.apply(U, "essaim", "move", { id: 821, u: 0, k: 3 });
   ok(SF.stepsLeft(U, e) === 1, "après un pas loin du Glaneur, il lui reste quand même 1 déplacement (fixé au premier pas)");
   // Tout résoudre : l'ancien comportement automatique, créature par créature
@@ -877,13 +883,13 @@ const fresh = () => {
   ok(c.hp === 3, "Glaneur : Aura Soin 2 (Colosse 1 → 3 PV)");
   const T = fresh(); T.upgrades.soutien.r1 = "A";
   const e = at(960, "Écorcheur", 1), h = at(961, "Hurleur", 2), o = at(962, "Œil-sonde", 2); T.creatures.push(e, h, o);
-  ok(SF.speedOf(T, e) === 3 && SF.speedOf(T, h) === 2, "Mue : chaque soutien donne +1 case aux autres (Écorcheur 1 + 2 = 3, Hurleur 1 + 1 = 2)");
+  ok(SF.speedOf(T, e) === 3 && SF.speedOf(T, h) === 3, "Mue : chaque soutien donne +1 case à sa case, lui compris (Écorcheur 1 + 2 = 3, Hurleur 1 + 2 = 3)");
   ok(SF.bonusHp(T, e) === 2 && !SF.isStealthy(T, h), "Mue : l'Aura +1 PV reste, la Furtivité disparaît");
   const G = fresh(); G.upgrades.soutien.r1 = "A"; const x = at(970, "Carapace", 3); G.creatures.push(x, at(971, "Glaneur", 2));
   ok(SF.speedOf(G, x) === 2, "Glaneur avec la Mue : une seule Aura Mobilité (+1), celle de la Mue");
   const U = fresh(); U.upgrades.aggro.r1 = "B"; const a = at(980, "Ravageur", 1), t = at(981, "Béhémoth", 5); U.creatures.push(a, t);
-  ok(SF.isStealthy(U, a) && !SF.isStealthy(U, t) && SF.speedOf(U, a) === 2, "Mobilité : les aggros font 2 cases et gagnent la Furtivité");
-  ok(!SF.targetable(U, a) && SF.targetable(U, t), "Furtivité : le Ravageur ne peut pas être visé tant que le Béhémoth (non furtif) est sur sa case");
+  ok(!SF.isStealthy(U, a) && SF.speedOf(U, a) === 2 && SF.speedOf(U, t) === 1, "Mobilité (v0.5) : +1 déplacement pour les aggros, plus de Furtivité");
+  ok(SF.targetable(U, a) && SF.targetable(U, t), "le Ravageur et le Béhémoth peuvent être visés");
 }
 // 62. Oni, 06/11/2026 : déplacement automatique au choix de la créature (action actOne) ; support de niveau 3 : +3 travailleurs
 {
@@ -918,6 +924,80 @@ const fresh = () => {
   const atq = SF.effAtq(S, e); // 1 + Fureur tant que le Hurleur est sur sa case
   SF.apply(S, "essaim", "actAll");
   ok(h.k === 3 && e.k === 3 && S.tiles["0,2"].hp === 20 - atq, "le Hurleur avance d'abord en C3, l'Écorcheur le rejoint et frappe avec l'Aura Fureur (" + atq + " dégâts)");
+}
+// 65. v0.5 (Oni, 07/11/2026) : pioche au choix, soutiens parachutés, Carnage, Champ de stase, Provocation, Réincarnation,
+//     coûts, main de départ sans Œil-sonde
+{
+  const at = (id, name, k, hp, more) => Object.assign({ id, name, lane: "N", u: 0, k, hp, acted: false }, more || {});
+  ok(SF.CREATURES["Colosse"].cost === 6 && SF.CREATURES["Massacreur"].cost === 6, "Colosse et Massacreur coûtent 6");
+  ok(SF.CREATURES["Catalyseur"].lvl === 1 && SF.CREATURES["Catalyseur"].pv === 2 && SF.CREATURES["Hurleur"].lvl === 2 && SF.CREATURES["Hurleur"].pv === 4,
+    "Catalyseur niveau 1 (0/2), Hurleur niveau 2 (0/4)");
+  // main de départ : jamais d'Œil-sonde
+  let eye = 0; for (let i = 0; i < 60; i++) { const T = SF.newGame(); SF.attackerDraw(T); if (T.handA.some(c => c.name === "Œil-sonde")) eye++; }
+  ok(eye === 0, "main de départ : jamais d'Œil-sonde (60 essais)");
+  // pioche au choix : palier 1 = 3 cartes de niveau 1, au choix
+  const P = fresh();
+  ok(SF.pickRule(P).total === 3 && SF.pickRule(P).levels.join() === "1", "palier 1 : 3 cartes, niveau 1");
+  ok(SF.apply(P, "essaim", "pick", { n: [4, 0, 0] }) !== "", "plus de cartes que le palier : refusé");
+  P.piles[2] = ["Ravageur", "Ravageur"];
+  ok(SF.apply(P, "essaim", "pick", { n: [0, 1, 0] }) !== "", "pile de niveau 2 au palier 1 : refusé");
+  const n1 = P.piles[1].length, top = P.piles[1].slice(-2).reverse();
+  ok(SF.apply(P, "essaim", "pick", { n: [2, 0, 0] }) === "" && P.handA.map(c => c.name).join() === top.join() && P.phase === "A_deploy" && P.piles[1].length === n1 - 2,
+    "moins de cartes possible : 2 cartes du dessus de la pile de niveau 1 (au hasard), étape de déploiement");
+  const Q = fresh(); Q.biomass = 9; Q.piles[2] = ["Ravageur"];
+  ok(SF.pickRule(Q).total === 5 && SF.pickRule(Q).levels.join() === "1,2", "palier 2 : 5 cartes, niveaux 1 et 2");
+  ok(SF.apply(Q, "essaim", "pick", { n: [0, 2, 0] }) !== "", "pas plus de cartes que la pile n'en contient");
+  ok(SF.apply(Q, "essaim", "pick", { n: [4, 1, 0] }) === "" && Q.handA.length === 5 && Q.handA.filter(c => SF.CREATURES[c.name].lvl === 2).length === 1, "répartition libre : 4 du niveau 1, 1 du niveau 2");
+  const V = SF.viewFor(Q, "essaim");
+  ok([1, 2, 3].every(l => V.piles[l].every(x => x === null)), "l'essaim ne voit que le nombre de cartes de ses piles");
+  // parachutage : un soutien sur une case libre de sa lane, pas une aggro ; limite de population
+  const D = fresh(); D.phase = "A_deploy"; D.budget = 20; D.supports = {};
+  D.handA = [{ name: "Glaneur", free: false, uid: 1 }, { name: "Écorcheur", free: false, uid: 2 }, { name: "Glaneur", free: false, uid: 3 }];
+  ok(SF.apply(D, "essaim", "deploy", { uid: 2, lane: "N", u: 0, k: 2 }) !== "", "une aggro ne se parachute pas");
+  ok(SF.apply(D, "essaim", "deploy", { uid: 1, lane: "N", u: 0, k: 1 }) !== "", "pas sur un bâtiment (Barbelé en C1)");
+  ok(SF.apply(D, "essaim", "deploy", { uid: 1, lane: "N", u: 0, k: 2 }) === "" && D.creatures.some(c => c.name === "Glaneur" && c.k === 2 && c.u === 0), "Glaneur parachuté en C2");
+  D.creatures = D.creatures.concat(Array.from({ length: SF.capOf(D) }, (_, j) => at(70 + j, "Carapace", 4, 3)));
+  ok(SF.apply(D, "essaim", "deploy", { uid: 3, lane: "N", u: 1, k: 2 }) !== "", "lane pleine : parachutage refusé");
+  // Carnage : les aggros attaquent 2 fois
+  const C = fresh(); C.phase = "A_attack"; C.supports = {}; C.upgrades.aggro.r2 = "A";
+  for (const k of Object.keys(C.tiles)) delete C.tiles[k];
+  C.tiles["0,1"] = SF.tileStats("Muraille", 0, 1); Object.assign(C.tiles["0,1"], { revealed: true, ep: 0, ren: 0, hp: 20, max: 20 });
+  const hp0 = C.tiles["0,1"].hp, e = at(80, "Écorcheur", 2, 5, { moved: 1 }); C.creatures.push(e, at(81, "Carapace", 4, 3));
+  ok(SF.apply(C, "essaim", "strike", { id: 80, target: "0,1" }) === "" && !e.acted, "Carnage : après une attaque, l'aggro peut encore frapper");
+  ok(SF.apply(C, "essaim", "strike", { id: 80, target: "0,1" }) === "" && e.acted && C.tiles["0,1"].hp === hp0 - 6, "2ᵉ attaque : 2 × 3 dégâts, puis plus rien");
+  ok(SF.effAtq(C, e) === 3, "Carnage ne donne plus +2 ATQ");
+  const K = fresh(); K.phase = "A_attack"; K.supports = {}; K.upgrades.aggro.r2 = "A";
+  for (const k of Object.keys(K.tiles)) delete K.tiles[k];
+  K.tiles["0,2"] = Object.assign(SF.tileStats("Antenne", 0, 2), { hp: 1, max: 1, ep: 0, ren: 0, camo: 0, revealed: true });
+  const kk = at(85, "Écorcheur", 3, 5); K.creatures.push(kk, at(86, "Carapace", 4, 3));
+  ok(SF.apply(K, "essaim", "strike", { id: 85, target: "0,2" }) === "" && !K.tiles["0,2"], "Carnage : la 1ʳᵉ attaque détruit le bâtiment devant (chemin libéré)");
+  ok(SF.pathCells(K, kk).length === 0 && !SF.canAct(K, kk) && SF.apply(K, "essaim", "move", { id: 85, u: 0, k: 2 }) !== "", "après une attaque, plus de déplacement : rien d'autre à faire pour elle");
+  // Champ de stase : 0 dégât au bâtiment, mais percée de toute l'attaque et spores
+  const Z = fresh(); Z.phase = "A_attack"; Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k];
+  Z.tiles["0,2"] = SF.tileStats("Antenne", 0, 2); Z.tiles["0,1"] = SF.tileStats("Antenne", 0, 1); Z.tiles["1,2"] = SF.tileStats("Antenne", 1, 2);
+  for (const k of ["0,2", "0,1", "1,2"]) { Z.tiles[k].revealed = true; Z.tiles[k].ep = 0; }
+  Z.stase = ["0,2"];
+  const z = at(90, "Écorcheur", 3, 5, { moved: 1 }); Z.creatures.push(z, at(91, "Perforeur", 3, 4), at(92, "Sporeur", 3, 6));
+  const hpA = Z.tiles["0,1"].hp, hpB = Z.tiles["1,2"].hp;
+  SF.apply(Z, "essaim", "strike", { id: 90, target: "0,2" });
+  ok(Z.tiles["0,2"].hp === SF.tileStats("Antenne", 0, 2).hp, "stase : le bâtiment ne perd rien");
+  ok(!Z.tiles["0,1"] || Z.tiles["0,1"].hp < hpA, "stase : toute l'attaque passe en percée à la case suivante (C1)");
+  ok(!Z.tiles["1,2"] || Z.tiles["1,2"].hp < hpB, "stase : les spores touchent les tuiles voisines (D2)");
+  // Provocation : −1 dégât des tourelles pour les tanks
+  const shot = prov => { const T = fresh(); T.phase = "D_fire"; T.firedSupports = []; if (prov) T.upgrades.tank.r1 = "B";
+    const sk = Object.keys(T.supports).find(k => T.supports[k] === 1); const [x, y] = SF.parse(sk);
+    const [lane] = ["N", "E", "S", "O"].filter(l => SF.cellLane(x, y) === l);
+    const t = { id: 95, name: "Colosse", lane: lane || SF.cellLane(x, y), u: 0, k: 4, hp: 7, acted: false };
+    // place le Colosse sur une case voisine du support
+    T.creatures.push(t);
+    const cands = []; for (const l of ["N", "E", "S", "O"]) for (let u = -2; u <= 2; u++) for (let k = 1; k <= 4; k++) cands.push([l, u, k]);
+    const spot = cands.find(([l, u, k]) => { t.lane = l; t.u = u; t.k = k; return SF.supportTargets(T, sk).includes(t); });
+    if (!spot) return null;
+    SF.fire(T, sk, 95); return 7 - t.hp; };
+  ok(shot(false) === 1 && shot(true) === 0, "Provocation : la tourelle de niveau 1 fait 1 dégât au Colosse, 0 avec Provocation");
+  // Réincarnation : le tank revient là où il est mort
+    const R2 = fresh(); R2.supports = {}; R2.upgrades.tank.r2 = "C"; R2.creatures.push(at(98, "Carapace", 2, 0)); SF.killCheck(R2);
+  ok(R2.reincQueue.length === 1 && R2.reincQueue[0].k === 2, "Réincarnation : la case de la mort est notée (C2)");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

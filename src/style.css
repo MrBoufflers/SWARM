@@ -1036,3 +1036,14 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
 /* colonie : 4 étapes, libellés un peu moins grands pour que « Construction » tienne */
 .pc-steps.colonie .chev li > span { font-size: clamp(1rem, .95vw, 1.15rem); letter-spacing: 0; padding: 0 4px 0 12px; }
 .pc-steps.colonie .chev li.on { flex: 1.2; }
+
+/* ---- v0.5 (Oni, 07/11/2026) ---- */
+/* directions colorées comme leur lane */
+.dir { font-weight: 700; } .dir-N { color: var(--north); } .dir-E { color: var(--east); } .dir-S { color: var(--south); } .dir-O { color: var(--west); }
+/* pioche au choix de l'essaim */
+.pick { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.pick-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; border-radius: 6px; background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid var(--c); margin-bottom: 4px; }
+.pick-row { --c: var(--essaim); } .pick-row.off { opacity: .45; }
+.pick-nm { position: relative; display: grid; column-gap: 8px; align-items: center; min-width: 0; }
+.pick-nm b { font-size: 1rem; } .pick-nm small { color: var(--ink-soft); }
+.pick-row .step button { padding: 4px 11px; }

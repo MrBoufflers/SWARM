@@ -6,27 +6,27 @@ const SF = (() => {
     "Écorcheur": { type: "aggro", lvl: 1, cost: 3, pv: 1, atq: 3 },
     // aggros : toujours 1 PV, quel que soit le niveau (Oni, 01/11/2026 ; avant Ravageur 2, Massacreur 3)
     "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 1, atq: 5 },
-    "Massacreur": { type: "aggro", lvl: 3, cost: 7, pv: 1, atq: 7 },
+    "Massacreur": { type: "aggro", lvl: 3, cost: 6, pv: 1, atq: 7 }, // coût 6 (Oni, 07/11/2026 ; avant 7)
     "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 3, atq: 1 },
     // tous les tanks à 1 ATQ (Oni, 01/11/2026 ; avant Béhémoth 2, Colosse 3)
     "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 1 },
-    "Colosse": { type: "tank", lvl: 3, cost: 7, pv: 7, atq: 1 },
+    "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 7, atq: 1 }, // coût 6 (Oni, 07/11/2026 ; avant 7)
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV." },
-    "Hurleur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ aux autres créatures de sa case." },
+    // Catalyseur passe au niveau 1 (0/2) et le Hurleur au niveau 2 (0/4, Aura Fureur +2 ATQ) — Oni, 07/11/2026
+    "Catalyseur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les autres créatures de sa case ne subissent pas les dégâts d'Épines." },
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
-    // Catalyseur (Oni, 02/11/2026) : l'Aura Instinct (Mobilité ou Furtivité à une créature) est remplacée par l'Aura Cuirasse
-    "Catalyseur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les autres créatures de sa case ne subissent pas les dégâts d'Épines." },
+    "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
     "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 2 dégâts par Sporeur de la case (sauf une tuile encore camouflée et non visible)." },
   };
   const PILES = {
-    1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Hurleur", 2]] },
-    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Phéromone", 2], ["Perforeur", 2], ["Catalyseur", 2]] },
+    1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Catalyseur", 2]] },
+    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Phéromone", 2], ["Perforeur", 2], ["Hurleur", 2]] },
     3: { aggro: [["Massacreur", 6]], tank: [["Colosse", 6]], soutien: [["Sapeur", 3], ["Sporeur", 3]] },
   };
   // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
@@ -78,7 +78,7 @@ const SF = (() => {
     "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
     // Champ de stase (Oni, 04/11/2026 ; avant : toute une lane) : un seul bâtiment, et ses Épines sont suspendues
-    "Champ de stase": { kind: "off", n: 2, text: "Choisissez un bâtiment : ce tour, il ne subit aucun dégât et les créatures qui l'attaquent ne subissent pas ses Épines." },
+    "Champ de stase": { kind: "off", n: 2, text: "Choisissez un bâtiment : ce tour, il ne subit aucun dégât et les créatures qui l'attaquent ne subissent pas ses Épines ; l'attaque passe quand même en percée et les spores touchent ses voisins." },
     "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : ce tour, son budget est sa biomasse divisée par 2 (arrondie à l'inférieur)." },
     // Brouillage (Oni, 04/11/2026 ; avant : annulait le déploiement d'une créature posée ce tour)
     "Brouillage": { kind: "off", n: 2, text: "Choisissez une créature : ce tour, elle ne bouge pas et n'attaque pas." },
@@ -97,14 +97,14 @@ const SF = (() => {
     { min: 21, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "Les créatures aggro se déplacent de 2 cases par tour au lieu d'1 et gagnent la Furtivité."],
-      A2: ["Carnage", "+2 ATQ (total +3)."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
+    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "+1 déplacement pour les créatures aggro."],
+      A2: ["Carnage", "Les créatures aggro peuvent attaquer 2 fois par tour."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
-    tank: { A1: ["Carapace épaisse", "+1 PV."], B1: ["Provocation", "Les tirs visant une créature non tank de sa case visent ce tank. Les tanks ne subissent plus les dégâts d'Épines."],
-      A2: ["Blindage", "+2 PV (total +3)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant."],
+    tank: { A1: ["Carapace épaisse", "+1 PV. Les tanks ne subissent plus les dégâts d'Épines."], B1: ["Provocation", "Les tirs visant une créature non tank de sa case visent ce tank. Les tanks subissent 1 dégât de moins des tourelles."],
+      A2: ["Blindage", "+2 PV (total +3)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant, là où il est mort."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
-    soutien: { A1: ["Mue", "Tous les soutiens gagnent l'Aura Mobilité 1 (+1 case aux autres créatures de leur case) et l'Aura +1 PV (+1 PV aux autres créatures de leur case)."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
+    soutien: { A1: ["Mue", "Tous les soutiens gagnent l'Aura Mobilité 1 (+1 case à toutes les créatures de leur case, eux compris) et l'Aura +1 PV (+1 PV aux autres créatures de leur case)."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
       A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2 (qui s'ajoute à leurs autres auras de soin)."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles. Les Œil-sonde de la pioche sortent du jeu."],
       B2: ["Frénésie", "Chaque soutien double les dégâts d'une autre créature de sa case, au choix (cumulable : deux Frénésies sur la même créature la quadruplent)."] },
   };
@@ -121,7 +121,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.4.28";
+  const VERSION = "0.5.0";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -236,9 +236,9 @@ const SF = (() => {
   function hasMobility(S, c) {
     return CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B";
   }
-  function isStealthy(S, c) {
-    // Furtivité : donnée par la Mobilité aux aggros (Oni, 05/11/2026 ; avant : par la Mue aux soutiens)
-    return CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B";
+  function isStealthy() {
+    // Furtivité : plus aucune source depuis le 07/11/2026 (Oni : la Mobilité ne donne plus que +1 déplacement)
+    return false;
   }
   function hasPercee(S, c) {
     return caseMates(S, c).some(o => o.name === "Perforeur");
@@ -259,7 +259,7 @@ const SF = (() => {
   }
   function baseAtq(S, name) {
     const b = CREATURES[name]; let a = b.atq;
-    if (b.type === "aggro") { if (S.upgrades.aggro.r1 === "A") a += 1; if (S.upgrades.aggro.r2 === "A") a += 2; }
+    if (b.type === "aggro" && S.upgrades.aggro.r1 === "A") a += 1; // Carnage ne donne plus d'ATQ (2 attaques, Oni 07/11/2026)
     return a;
   }
   // Frénésie (soutien, rang 2 côté B) : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim
@@ -286,7 +286,7 @@ const SF = (() => {
   function effAtq(S, c) {
     if (!attacks(c)) return 0;
     let a = baseAtq(S, c.name);
-    a += countMates(S, c, o => o.name === "Hurleur"); // Aura Fureur : +1 par Hurleur de la case
+    a += 2 * countMates(S, c, o => o.name === "Hurleur"); // Aura Fureur : +2 par Hurleur de la case (Oni, 07/11/2026 ; avant +1)
     if (S.upgrades.soutien.r1 === "B") a += countMates(S, c, isSoutien); // Aura Griffes : +1 par soutien de la case
     a *= 2 ** frenzyCount(S, c); // Frénésie : ×2 par soutien qui choisit cette créature
     return a;
@@ -392,7 +392,7 @@ const SF = (() => {
       log(S, "colonie", `${c.name} est détruit.`);
       if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "C" && !S.reincUsed) {
         S.reincUsed = true;
-        S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u });
+        S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u, k: c.k }); // revient là où il est mort (Oni, 07/11/2026)
         log(S, "essaim", `Réincarnation : ${c.name} reviendra au début du prochain tour de l'essaim.`);
       } else {
         toPile(S, c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
@@ -468,8 +468,9 @@ const SF = (() => {
   // vitesse de base : 2 pour le Glaneur et toutes les créatures de niveau 3 (Oni, 06/11/2026), sinon 1
   // (le Glaneur a perdu sa vitesse de 2 et son Aura Mobilité 1 le 06/11/2026, Oni)
   const baseSpeed = c => (CREATURES[c.name].lvl === 3 ? 2 : 1);
+  // Mue : l'Aura Mobilité 1 profite aussi au soutien qui la donne (Oni, 07/11/2026)
   const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0)
-    + (S.upgrades.soutien.r1 === "A" ? countMates(S, c, isSoutien) : 0);
+    + (S.upgrades.soutien.r1 === "A" ? countMates(S, c, isSoutien) + (isSoutien(c) ? 1 : 0) : 0);
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
     const block = blockAt(S, key).filter(c => !c.acted);
@@ -532,36 +533,43 @@ const SF = (() => {
     return r >= 1 && r <= 3 && !S.tiles[key(x, y)];
   }
   function stepsLeft(S, c) { return c.acted ? 0 : Math.max(0, (c.spd !== undefined ? c.spd : speedOf(S, c)) - (c.moved || 0)); }
-  function reachable(S, c) { // cases atteignables ce tour : { clé globale : { u, k, d (distance), prev (clé précédente) } }
-    const left = stepsLeft(S, c), out = {};
-    const [x0, y0] = gpos(c), start = key(x0, y0), seen = new Set([start]);
-    let front = [[x0, y0]];
-    for (let d = 1; d <= left; d++) {
-      const next = [];
-      for (const [x, y] of front) for (const [a, b] of neighbors(x, y)) {
-        const k = key(a, b); if (seen.has(k) || !walkable(S, c.lane, a, b)) continue;
-        seen.add(k); next.push([a, b]);
-        const [u, kk] = toLocal(c.lane, a, b);
-        out[k] = { u, k: kk, d, prev: key(x, y) };
-      }
-      front = next;
+  // Déplacements (Oni, 07/11/2026) : la créature avance sur son chemin en escalier vers la fusée (jamais sur les côtés ni vers
+  // l'extérieur, hormis le pas de côté de l'escalier), de 1 case jusqu'à son maximum, au choix ; elle s'arrête devant un
+  // bâtiment ou la fusée. Si elle peut avancer, elle doit le faire d'au moins une case avant d'attaquer.
+  function pathCells(S, c) {
+    const out = []; let u = c.u, k = c.k;
+    if (c.struck) return out; // après une attaque, plus de déplacement (même si la cible est tombée et libère le chemin)
+    for (let d = 1; d <= stepsLeft(S, c); d++) {
+      const [nu, nk] = nextStep(u, k);
+      if (nk === 0 || S.tiles[key(...toGlobal(c.lane, nu, nk))]) break;
+      out.push({ u: nu, k: nk, d, prev: key(...toGlobal(c.lane, u, k)) });
+      u = nu; k = nk;
     }
     return out;
   }
-  function strikeTargets(S, c) { // bâtiments qui touchent sa case (sans diagonale), ou la fusée
+  function reachable(S, c) { // cases atteignables ce tour : { clé globale : { u, k, d (distance), prev (clé précédente) } }
+    const out = {};
+    for (const p of pathCells(S, c)) out[key(...toGlobal(c.lane, p.u, p.k))] = p;
+    return out;
+  }
+  // nombre d'attaques par tour : 1, 2 pour les aggros avec Carnage (Oni, 07/11/2026)
+  const strikesPerTurn = (S, c) => (CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r2 === "A" ? 2 : 1);
+  // Attaque (Oni, 07/11/2026) : facultative, sur n'importe quel bâtiment qui touche sa case par un côté, ou la fusée ;
+  // seulement après avoir avancé d'au moins une case quand elle le pouvait
+  function strikeTargets(S, c) {
     if (c.acted || !attacks(c)) return [];
+    if (!c.moved && !c.struck && pathCells(S, c).length) return [];
     const [x, y] = gpos(c), out = [];
     for (const [a, b] of neighbors(x, y)) { if (a === 0 && b === 0) out.push("fusee"); else if (S.tiles[key(a, b)]) out.push(key(a, b)); }
     return out;
   }
-  const canAct = (S, c) => !c.acted && (strikeTargets(S, c).length > 0 || Object.keys(reachable(S, c)).length > 0);
+  const canAct = (S, c) => !c.acted && (strikeTargets(S, c).length > 0 || (!c.struck && pathCells(S, c).length > 0));
   function moveCreature(S, id, u, k) {
-    const c = S.creatures.find(o => o.id === id); if (!c || c.acted) return false;
+    const c = S.creatures.find(o => o.id === id); if (!c || c.acted || c.struck) return false;
     const R = reachable(S, c), dest = key(...toGlobal(c.lane, u, k)), r = R[dest];
     if (!r) return false;
     if (c.spd === undefined) c.spd = speedOf(S, c);
-    const start = key(...gpos(c)), path = [];
-    for (let cur = dest; cur && cur !== start; cur = R[cur] ? R[cur].prev : null) path.unshift([R[cur].u, R[cur].k]);
+    const path = pathCells(S, c).slice(0, r.d).map(p => [p.u, p.k]);
     const from = cellName(c.u, c.k);
     fx(S, { t: "move", ids: [c.id], lane: c.lane, from: [c.u, c.k], to: [u, k], path });
     c.u = u; c.k = k; c.moved = (c.moved || 0) + r.d;
@@ -570,25 +578,31 @@ const SF = (() => {
   }
   function strikeAt(S, id, target) {
     const c = S.creatures.find(o => o.id === id); if (!c || !strikeTargets(S, c).includes(target)) return false;
-    c.acted = true;
+    c.struck = (c.struck || 0) + 1;
+    if (c.struck >= strikesPerTurn(S, c)) c.acted = true;
     auraFx(S, c);
     if (target === "fusee") hitRocket(S, c); else hitTile(S, c, target, effAtq(S, c), true);
     killCheck(S);
     return true;
   }
-  // résolution automatique d'une créature (bouton « Tout résoudre ») : elle avance sur le chemin vers la fusée tant
-  // qu'elle peut, puis attaque ce qui est devant elle s'il y a quelque chose
+  // la créature renonce à agir (ou à sa 2ᵉ attaque) pour ce tour
+  function restCreature(S, id) {
+    const c = S.creatures.find(o => o.id === id); if (!c || c.acted) return false;
+    c.acted = true; return true;
+  }
+  // résolution automatique d'une créature (bouton « Tout résoudre ») : elle avance au maximum sur son chemin, puis attaque
+  // ce qui est devant elle (sinon un autre bâtiment voisin), deux fois avec Carnage
   function autoCreature(S, c) {
     if (c.acted) return;
-    for (let i = 0; i < 8 && stepsLeft(S, c) > 0; i++) {
+    const p = pathCells(S, c);
+    if (p.length && !c.struck) moveCreature(S, c.id, p[p.length - 1].u, p[p.length - 1].k);
+    while (!c.acted && S.creatures.includes(c) && !S.winner) {
       const [nu, nk] = nextStep(c.u, c.k);
-      if (nk === 0 || S.tiles[key(...toGlobal(c.lane, nu, nk))]) break;
-      if (!moveCreature(S, c.id, nu, nk)) break;
+      const front = nk === 0 ? "fusee" : key(...toGlobal(c.lane, nu, nk));
+      const t = strikeTargets(S, c);
+      if (!t.length) { c.acted = true; break; }
+      strikeAt(S, c.id, t.includes(front) ? front : t[0]);
     }
-    const [nu, nk] = nextStep(c.u, c.k);
-    const front = nk === 0 ? "fusee" : key(...toGlobal(c.lane, nu, nk));
-    if (attacks(c) && strikeTargets(S, c).includes(front)) strikeAt(S, c.id, front);
-    else c.acted = true;
   }
   // une seule créature, sans limite de déplacement (utilisé seulement par les tests de règles ciblés)
   function act(S, c) {
@@ -637,9 +651,44 @@ const SF = (() => {
         log(S, "colonie", `Siphon : l'essaim perd ${before - S.biomass} biomasse (biomasse ${S.biomass}).`);
       }
     }
-    if (S.stase.includes(tk)) { // Champ de stase : ce bâtiment ne subit rien ce tour
+    // spores (2 dégâts par Sporeur de la case, cumulable, Oni 02/11/2026) sur les tuiles qui touchent la cible
+    const sporesAround = () => {
+      const spores = primary ? 2 * countMates(S, c, o => o.name === "Sporeur") : 0;
+      if (!spores) return;
+      for (const [a, b] of neighbors(x, y)) {
+        const nk = key(a, b), nt = S.tiles[nk];
+        // les spores n'atteignent pas une tuile encore camouflée (Oni, 02/11/2026)
+        if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
+          const spLoss = nt.ren ? Math.floor(spores / nt.ren) : spores;
+          nt.hp -= spLoss;
+          fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
+          if (nt.hp <= 0) destroyTile(S, nk, "spores", c);
+        }
+      }
+    };
+    // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE du chemin, sans aller plus loin :
+    // un bâtiment les subit, la fusée perd 1 travailleur, une case vide les perd. Pas d'enchaînement.
+    const pierce = excess => {
+      if (!(primary && excess > 0 && hasPercee(S, c))) return;
+      const [nu, nk] = nextStep(...toLocal(lane, x, y));
+      if (nk === 0) {
+        S.workersBase -= 1; S.killed = (S.killed || 0) + 1;
+        fx(S, { t: "rocket", id: c.id });
+        log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
+        if (S.workersBase <= 0) S.winner = "essaim";
+      } else {
+        const next = key(...toGlobal(lane, nu, nk));
+        if (S.tiles[next]) hitTile(S, c, next, excess, false);
+        else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case suivante est vide.`);
+      }
+    };
+    if (S.stase.includes(tk)) {
+      // Champ de stase (Oni, 07/11/2026) : l'attaque a lieu mais ne fait rien au bâtiment ; toute l'attaque passe en percée,
+      // et les spores touchent les tuiles voisines
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
       log(S, "colonie", `Champ de stase : ${t.camo && !t.revealed ? "le bâtiment" : t.name} ne subit aucun dégât.`);
+      sporesAround();
+      pierce(dmg);
     } else {
       // Renforcé X : 1 PV par tranche complète de X dégâts, plusieurs PV possibles d'un coup
       // (Oni, 02/11/2026 : retour à la règle d'origine après un essai à 1 PV maximum par attaque)
@@ -649,44 +698,15 @@ const SF = (() => {
       t.hp -= loss;
       fx(S, { t: "hit", id: c.id, k: tk, n: Math.min(loss, t.hp + loss), hp: Math.max(0, t.hp) });
       log(S, "essaim", `${c.name} inflige ${dmg} à ${t.name} (−${Math.min(loss, t.hp + loss)} PV).`);
-      const spores = primary ? 2 * countMates(S, c, o => o.name === "Sporeur") : 0; // 2 dégâts par Sporeur de la case (cumulable, Oni 02/11/2026)
-      if (spores) {
-        for (const [a, b] of neighbors(x, y)) {
-          const nk = key(a, b), nt = S.tiles[nk];
-          // les spores n'atteignent pas une tuile encore camouflée (Oni, 02/11/2026)
-          if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
-            const sp = spores, spLoss = nt.ren ? Math.floor(sp / nt.ren) : sp;
-            nt.hp -= spLoss;
-            fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
-            if (nt.hp <= 0) destroyTile(S, nk, "spores", c);
-          }
-        }
-      }
-      if (t.hp <= 0) {
-        destroyTile(S, tk, "", c);
-        // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE du chemin, sans aller plus loin :
-        // un bâtiment les subit, la fusée perd 1 travailleur, une case vide les perd. Pas d'enchaînement.
-        if (primary && excess > 0 && hasPercee(S, c)) {
-          const [nu, nk] = nextStep(...toLocal(lane, x, y));
-          if (nk === 0) {
-            S.workersBase -= 1; S.killed = (S.killed || 0) + 1;
-            fx(S, { t: "rocket", id: c.id });
-            log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
-            if (S.workersBase <= 0) S.winner = "essaim";
-          } else {
-            const next = key(...toGlobal(lane, nu, nk));
-            if (S.tiles[next]) hitTile(S, c, next, excess, false);
-            else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case suivante est vide.`);
-          }
-        }
-      }
+      sporesAround();
+      if (t.hp <= 0) { destroyTile(S, tk, "", c); pierce(excess); }
     }
     // Aura Cuirasse (Catalyseur sur la case) : pas de dégâts d'Épines (Oni, 02/11/2026)
     if (primary && epVal > 0) {
       if (S.stase.includes(tk)) log(S, "colonie", `Champ de stase : pas d'Épines pour ${c.name}.`);
       else if (caseMates(S, c).some(o => o.name === "Catalyseur")) log(S, "essaim", `Aura Cuirasse : ${c.name} ne subit pas les Épines.`);
-      // Provocation (tank, côté B) : les tanks ne subissent plus les Épines (Oni, 02/11/2026)
-      else if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "B") log(S, "essaim", `Provocation : ${c.name} ne subit pas les Épines.`);
+      // Carapace épaisse (tank, côté A) : les tanks ne subissent plus les Épines (Oni, 07/11/2026 ; avant : Provocation)
+      else if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "A") log(S, "essaim", `Carapace épaisse : ${c.name} ne subit pas les Épines.`);
       else damageCreature(S, c, epVal, "épines");
     }
   }
@@ -694,13 +714,15 @@ const SF = (() => {
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
     S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = [];
-    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; }
+    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
     // Réincarnation
     for (const r of S.reincQueue) {
-      const nc = makeCreature(S, r.name, r.lane, r.u);
+      // là où il est mort (Oni, 07/11/2026) ; si un bâtiment occupe désormais cette case, à l'entrée de sa colonne
+      const k = r.k && r.k < 4 && !S.tiles[key(...toGlobal(r.lane, r.u, r.k))] ? r.k : 4;
+      const nc = makeCreature(S, r.name, r.lane, r.u, { k });
       S.creatures.push(nc);
       fx(S, { t: "reinc", id: nc.id });
-      log(S, "essaim", `${r.name} se réincarne à l'entrée de la lane ${LANE_NAME[r.lane]}.`);
+      log(S, "essaim", `${r.name} se réincarne ${k === 4 ? "à l'entrée de la lane " + LANE_NAME[r.lane] : "là où il est mort (" + LANE_NAME[r.lane] + " " + cellName(r.u, k) + ")"}.`);
     }
     S.reincQueue = [];
     S.famine = 0;
@@ -713,7 +735,8 @@ const SF = (() => {
     if (S.startHand) {
       delete S.startHand;
       for (const type of ["aggro", "tank", "soutien"]) {
-        const i = S.piles[1].findIndex(n => CREATURES[n].type === type); // pioche mélangée : le soutien est tiré au hasard
+        // pioche mélangée : le soutien est tiré au hasard, jamais l'Œil-sonde (Oni, 07/11/2026 : inutile au premier tour)
+        const i = S.piles[1].findIndex(n => CREATURES[n].type === type && n !== "Œil-sonde");
         if (i >= 0) S.handA.push({ name: S.piles[1].splice(i, 1)[0], free: false, uid: S.nextId++ });
       }
       S.budget = S.famine ? famineBudget(S.biomass) : S.biomass;
@@ -739,22 +762,52 @@ const SF = (() => {
     S.phase = "A_deploy";
     log(S, "essaim", `Palier ${tier(S) + 1} : ${S.handA.length} cartes, budget ${S.budget}.`);
   }
+  // Pioche au choix (Oni, 07/11/2026) : le palier donne un nombre total de cartes (somme de ses quotas) et les niveaux
+  // accessibles (ceux dont le quota n'est pas nul) ; l'essaim choisit combien de cartes il pioche dans chaque pile
+  // (niveau 1, 2, 3). Les cartes sont tirées au hasard dans la pile : il ne choisit pas les créatures.
+  const pickRule = S => { const t = TIERS[tier(S)]; return { total: t.n.reduce((a, b) => a + b, 0), levels: [1, 2, 3].filter(l => t.n[l - 1] > 0) }; };
+  function attackerPick(S, counts) {
+    if (S.startHand) { attackerDraw(S); return true; } // premier tour : main de départ imposée
+    const { total, levels } = pickRule(S);
+    if (counts.reduce((a, b) => a + b, 0) > total) return false;
+    for (const l of [1, 2, 3]) if (counts[l - 1] && (!levels.includes(l) || counts[l - 1] > S.piles[l].length)) return false;
+    S.handA = [];
+    for (const l of [1, 2, 3]) for (let i = 0; i < counts[l - 1]; i++) S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ });
+    if (S.upgrades.aggro.r2 === "C") { // Déploiement : 2 cartes de niveau 1 gratuites, au hasard, en plus
+      let m = 0;
+      for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); m++; }
+      log(S, "essaim", m === 2 ? "Déploiement : 2 cartes de niveau 1 gratuites." : `Déploiement : pioche de niveau 1 ${m ? "presque vide, 1 seule carte gratuite" : "vide, aucune carte gratuite"}.`);
+    }
+    S.budget = S.famine ? famineBudget(S.biomass) : S.biomass;
+    fx(S, { t: "draw", n: S.handA.length });
+    S.phase = "A_deploy";
+    log(S, "essaim", `Palier ${tier(S) + 1} : pioche ${counts.join(" · ")} (niveaux 1 · 2 · 3), budget ${S.budget}.`);
+    return true;
+  }
   function canDeploy(S, card, lane) {
     const cost = card.free ? 0 : CREATURES[card.name].cost;
     return S.phase === "A_deploy" && cost <= S.budget && laneCount(S, lane) < capOf(S);
   }
-  function deploy(S, uid, lane, u, target) {
+  // soutiens « parachutables » (Oni, 07/11/2026) : n'importe quelle case libre de la lane (sans bâtiment, coin ni fusée),
+  // pas seulement l'entrée ; la limite de population de la lane s'applique comme d'habitude
+  function canDrop(S, name, lane, u, k) {
+    if (k === undefined || k === 4) return Math.abs(u) <= 2;
+    if (CREATURES[name].type !== "soutien") return false;
+    const [x, y] = toGlobal(lane, u, k);
+    return walkable(S, lane, x, y);
+  }
+  function deploy(S, uid, lane, u, target, k) {
     const i = S.handA.findIndex(c => c.uid === uid); if (i < 0) return false;
     const card = S.handA[i];
-    if (!canDeploy(S, card, lane)) return false;
+    if (!canDeploy(S, card, lane) || !canDrop(S, card.name, lane, u, k)) return false;
     // Sapeur : s'il y a des bâtiments dans sa lane, il faut en désigner un (target)
     if (card.name === "Sapeur" && laneTiles(S, lane).length && !laneTiles(S, lane).includes(target)) return false;
     S.budget -= card.free ? 0 : CREATURES[card.name].cost;
     S.handA.splice(i, 1);
-    const c = makeCreature(S, card.name, lane, u);
+    const c = makeCreature(S, card.name, lane, u, k && k < 4 ? { k } : {});
     S.creatures.push(c);
     fx(S, { t: "deploy", id: c.id });
-    log(S, "essaim", `${card.name} déployé${card.free ? " gratuitement" : ""} en lane ${LANE_NAME[lane]}, colonne ${COLS[u + 2]}.`);
+    log(S, "essaim", `${card.name} ${k && k < 4 ? "parachuté" : "déployé"}${card.free ? " gratuitement" : ""} en lane ${LANE_NAME[lane]}, ${k && k < 4 ? "case " + cellName(u, k) : "colonne " + COLS[u + 2]}.`);
     if (card.name === "Sapeur" && target && S.tiles[target]) {
       fx(S, { t: "sapeur", k: target });
       log(S, "essaim", `Sabotage : le Sapeur détruit un bâtiment de la lane ${LANE_NAME[lane]}.`);
@@ -950,7 +1003,9 @@ const SF = (() => {
     const t = resolveTarget(S, c);
     S.firedSupports.push(sk);
     fx(S, { t: "shot", sk, id: t.id });
-    damageCreature(S, t, turretDmg(S, lvl), `tourelle de niveau ${lvl}`);
+    // Provocation (tank, côté B) : les tanks subissent 1 dégât de moins des tourelles (Oni, 07/11/2026)
+    const prov = CREATURES[t.name].type === "tank" && S.upgrades.tank.r1 === "B" ? 1 : 0;
+    damageCreature(S, t, Math.max(0, turretDmg(S, lvl) - prov), `tourelle de niveau ${lvl}${prov ? ", Provocation −1" : ""}`);
     killCheck(S);
     return true;
   }
@@ -1064,6 +1119,11 @@ const SF = (() => {
   function migrate(S) {
     if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
     if (S.killed === undefined) S.killed = 0;
+    // v0.5 : Hurleur et Catalyseur changent de niveau, donc de pioche
+    if (S.piles && S.piles[1]) for (const l of [1, 2, 3]) {
+      const wrong = S.piles[l].filter(n => CREATURES[n] && CREATURES[n].lvl !== l);
+      if (wrong.length) { S.piles[l] = S.piles[l].filter(n => !wrong.includes(n)); for (const n of wrong) S.piles[CREATURES[n].lvl].push(n); }
+    }
     for (const t of Object.values(S.tiles || {})) if (t.shield) { t.ren = t.shield; delete t.shield; } // Bouclier → Renforcé (02/11/2026)
     for (const c of S.creatures || []) if (CREATURES[c.name] && c.hp > maxHp(S, c.name)) c.hp = maxHp(S, c.name); // Mue : plus de +1 PV au soutien
     for (const t of Object.values(S.tiles || {})) {
@@ -1110,9 +1170,10 @@ const SF = (() => {
       if (a.play) { const i = S.spells.indexOf("Famine"); if (i >= 0) useSpell(S, i, null); }
       return true;
     } },
-    draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } },
+    draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } }, // pioche au hasard (premier tour, tests)
+    pick: { phase: ["A_start"], run: (S, a) => Array.isArray(a.n) && a.n.length === 3 && a.n.every(x => isInt(x) && x >= 0) && attackerPick(S, a.n) },
     frenzy: { phase: ["A_deploy", "A_upgrade", "A_attack"], run: (S, a) => isInt(a.src) && isInt(a.target) && setFrenzy(S, a.src, a.target) },
-    deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && deploy(S, a.uid, a.lane, a.u, a.target) },
+    deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && (a.k === undefined || (isInt(a.k) && a.k >= 1 && a.k <= 4)) && deploy(S, a.uid, a.lane, a.u, a.target, a.k) },
     // déploiement et améliorations dans la même étape (Oni, 06/11/2026) : terminer le déploiement passe directement aux attaques
     // (la biomasse non dépensée va à la réserve) ; l'étape A_upgrade ne sert plus qu'aux parties enregistrées avant
     endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); ACTIONS.toAttacks.run(S); return true; } },
@@ -1136,6 +1197,7 @@ const SF = (() => {
     // déplacements au choix (Oni, 04/11/2026)
     move: { phase: ["A_attack"], run: (S, a) => isInt(a.id) && isInt(a.u) && isInt(a.k) && moveCreature(S, a.id, a.u, a.k) },
     strike: { phase: ["A_attack"], run: (S, a) => isInt(a.id) && (a.target === "fusee" || (typeof a.target === "string" && /^-?\d,-?\d$/.test(a.target))) && strikeAt(S, a.id, a.target) },
+    rest: { phase: ["A_attack"], run: (S, a) => isInt(a.id) && restCreature(S, a.id) }, // la créature n'agit plus ce tour
     // déplacement automatique au choix de la créature (Oni, 06/11/2026) : l'essaim choisit quelle créature agit ;
     // elle suit seule son chemin vers la fusée (tout droit ou en escalier), puis attaque ce qui est devant elle
     actOne: { phase: ["A_attack"], run(S, a) {
@@ -1245,7 +1307,7 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, reachable, strikeTargets, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    clairvoyance, reachable, pathCells, pickRule, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
