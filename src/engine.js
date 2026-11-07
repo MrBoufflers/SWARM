@@ -762,13 +762,14 @@ const SF = (() => {
     S.phase = "A_deploy";
     log(S, "essaim", `Palier ${tier(S) + 1} : ${S.handA.length} cartes, budget ${S.budget}.`);
   }
-  // Pioche au choix (Oni, 07/11/2026) : le palier donne un nombre total de cartes (somme de ses quotas) et les niveaux
-  // accessibles (ceux dont le quota n'est pas nul) ; l'essaim choisit combien de cartes il pioche dans chaque pile
-  // (niveau 1, 2, 3). Les cartes sont tirées au hasard dans la pile : il ne choisit pas les créatures.
-  // le total est obligatoire (Oni, 07/11/2026) : il ne baisse que si les piles accessibles n'ont pas assez de cartes
+  // Pioche au choix (Oni, 07/11/2026) : le palier ne fixe que le nombre de cartes (somme de ses quotas : 3, 5, 7, 10) ;
+  // l'essaim choisit combien il en pioche dans chaque pile (niveau 1, 2, 3) qui contient des cartes — les piles 2 et 3
+  // se remplissent avec les améliorations. Les cartes sont tirées au hasard dans la pile : il ne choisit pas les créatures.
+  // Le total est obligatoire : il ne baisse que si les piles n'ont pas assez de cartes.
+  const tierCards = i => TIERS[i].n.reduce((a, b) => a + b, 0);
   const pickRule = S => {
-    const t = TIERS[tier(S)], levels = [1, 2, 3].filter(l => t.n[l - 1] > 0);
-    const total = Math.min(t.n.reduce((a, b) => a + b, 0), levels.reduce((a, l) => a + S.piles[l].length, 0));
+    const levels = [1, 2, 3].filter(l => S.piles[l].length > 0);
+    const total = Math.min(tierCards(tier(S)), levels.reduce((a, l) => a + S.piles[l].length, 0));
     return { total, levels };
   };
   function attackerPick(S, counts) {
@@ -1312,7 +1313,7 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, reachable, pathCells, pickRule, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,

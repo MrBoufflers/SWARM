@@ -58,7 +58,7 @@
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
-    A_start: ["essaim", "Tour de l'essaim", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe le total et les niveaux accessibles."],
+    A_start: ["essaim", "Tour de l'essaim", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe seulement le nombre total de cartes."],
     A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane ; un soutien peut être parachuté sur n'importe quelle case libre) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
@@ -303,7 +303,7 @@
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kcs">
         <span class="kc" tabindex="0" data-tip="Biomasse : ${S.biomass}${next ? ` (palier suivant à ${next.min})` : ""}">${icon("biomasse")}<b>${S.biomass}</b><small>bio</small></span>
-        <span class="kc" tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche ${t.n.join(" / ")} (niveaux 1 / 2 / 3), plafond ${SF.capOf(S)} créatures par lane">${icon("palier")}<b>${SF.tier(S) + 1}</b><small>max ${SF.capOf(S)}/lane</small></span>
+        <span class="kc" tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche de ${SF.tierCards(SF.tier(S))} cartes, plafond ${SF.capOf(S)} créatures par lane">${icon("palier")}<b>${SF.tier(S) + 1}</b><small>max ${SF.capOf(S)}/lane</small></span>
         ${turn ? `<span class="kc" data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b><small>budget</small></span>` : `<span class="kc" data-fx="budget" tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b><small>réserve</small></span>`}
         <span class="kc hidden-hand" tabindex="0" data-tip="${S.handA.length} cartes en main (cachées) · pioches ${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}">${icon("sort")}<b>${S.handA.length}</b><small>cartes</small></span>
       </div>
@@ -330,12 +330,12 @@
     } else if (ph === "A_start" && S.startHand) {
       acts = `<button data-a="draw" class="primary">Recevoir la main de départ</button>`;
     } else if (ph === "A_start") {
-      // pioche au choix (Oni, 07/11/2026) : le palier donne un total de cartes et les niveaux accessibles ; l'essaim choisit
-      // combien de cartes il pioche dans chaque pile, les créatures sont tirées au hasard
+      // pioche au choix (Oni, 07/11/2026) : le palier donne le nombre de cartes ; l'essaim choisit combien il en pioche
+      // dans chaque pile non vide, les créatures sont tirées au hasard
       const { total, levels } = SF.pickRule(S), sel = UI.pickSel || [0, 0, 0], n = sel.reduce((a, b) => a + b, 0);
       const rows = [1, 2, 3].map(l => {
         const q = sel[l - 1], left = S.piles[l].length, open = levels.includes(l);
-        return `<div class="pick-row lvl${l}${open ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${open ? `${left} carte${left > 1 ? "s" : ""} dans la pile` : "palier trop bas"}</small></span>
+        return `<div class="pick-row lvl${l}${open ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${open ? `${left} carte${left > 1 ? "s" : ""} dans la pile` : "pile vide" + (l > 1 ? ` (amélioration de rang ${l - 1} nécessaire)` : "")}</small></span>
           <span class="step"><button data-a="pickDel" data-v="${l}" aria-label="Retirer"${q ? "" : " disabled"}>−</button><b>${q}</b><button data-a="pickAdd" data-v="${l}" aria-label="Ajouter"${open && n < total && q < left ? "" : " disabled"}>+</button></span></div>`;
       }).join("");
       body = `<p class="hint">Palier ${SF.tier(S) + 1} : piochez <b>${total}</b> carte${total > 1 ? "s" : ""} (${n}/${total}), réparties comme vous voulez entre les piles ; les créatures sont tirées au hasard.</p><div class="pick">${rows}</div>`;
@@ -708,7 +708,7 @@
     const t = SF.TIERS[SF.tier(S)];
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
-      <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${t.n.join("/")} · plafond ${SF.capOf(S)}</b></div>
+      <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${SF.tierCards(SF.tier(S))} cartes · plafond ${SF.capOf(S)}</b></div>
       <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
@@ -770,7 +770,7 @@
         ${box2(SF.tier(S) + 1, "palier", `Palier ${SF.tier(S) + 1}${next ? ` · palier suivant à ${next.min} biomasse` : ""}`)}
         ${box2(SF.capOf(S), "max / lane", "Plafond de créatures par lane")}
       </div>
-      <div class="pc-lines"><span>Niveau de pioche <b>${t.n.join(" / ")}</b></span><span>Pioche N1 / N2 / N3 <b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></span></div>
+      <div class="pc-lines"><span>Cartes à piocher <b>${SF.tierCards(SF.tier(S))}</b></span><span>Pioche N1 / N2 / N3 <b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></span></div>
       <div class="po-scroll">
         <h4>Main <span class="small">${S.handA.length} carte${S.handA.length > 1 ? "s" : ""}</span></h4>${swarmHandHtml(true, true)}
         <h4>Arbres d'amélioration</h4>${treesHtml(true)}
@@ -842,7 +842,7 @@
       <div class="ps-rows">
         ${turn ? `<span data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b> budget</span>` : ""}
         <span tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b> réserve</span>
-        <span tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche ${SF.TIERS[SF.tier(S)].n.join(" / ")} (niveaux 1 / 2 / 3)">${icon("palier")}<b>${SF.capOf(S)}</b> max / lane</span>
+        <span tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche de ${SF.tierCards(SF.tier(S))} cartes">${icon("palier")}<b>${SF.capOf(S)}</b> max / lane</span>
         <span class="hidden-hand" tabindex="0" data-tip="${S.handA.length} cartes en main (cachées) · pioches ${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}">${icon("sort")}<b>${S.handA.length}</b> cartes</span>
       </div>
       <h4>Améliorations</h4><div class="utrees big">${trees}</div></div></aside>`;

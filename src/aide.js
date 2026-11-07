@@ -8,8 +8,8 @@ const AIDE = (() => {
 
   // ------------------------------------------------------------------ fiches de règles
   function tiersTable(h) {
-    const rows = SF.TIERS.map((t, i) => `<tr><td>${i + 1}</td><td>${i ? t.min + " et plus" : "départ"}</td><td>${t.n.join(" · ")}</td><td>${t.cap}</td></tr>`).join("");
-    return `<table class="rt"><thead><tr><th>Palier</th><th>Biomasse</th><th>Pioche (niv. 1 · 2 · 3)</th><th>Créatures max par lane</th></tr></thead><tbody>${rows}</tbody></table>`;
+    const rows = SF.TIERS.map((t, i) => `<tr><td>${i + 1}</td><td>${i ? t.min + " et plus" : "départ"}</td><td>${SF.tierCards(i)}</td><td>${t.cap}</td></tr>`).join("");
+    return `<table class="rt"><thead><tr><th>Palier</th><th>Biomasse</th><th>Cartes à piocher</th><th>Créatures max par lane</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
   function creaturesTable(h) {
     const rows = Object.entries(SF.CREATURES).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
@@ -84,7 +84,7 @@ const AIDE = (() => {
       ${tiersTable(h)}
       <h3>Votre tour</h3>
       <ol>
-        <li><b>Pioche au choix</b> : votre palier vous donne un nombre de cartes (la somme de ses quotas) et les niveaux auxquels vous avez accès ; vous choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) ; les créatures sont tirées au hasard dans la pile, qui mélange les types débloqués par vos améliorations. <b>Premier tour</b> : à la place, vous recevez un Écorcheur, une Carapace et un soutien de niveau 1 tiré au hasard (jamais un Œil-sonde).</li>
+        <li><b>Pioche au choix</b> : votre palier vous donne seulement un nombre de cartes ; vous choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) ; les créatures sont tirées au hasard dans la pile, qui mélange les types débloqués par vos améliorations (les piles 2 et 3 restent vides sans amélioration de rang 1 ou 2). <b>Premier tour</b> : à la place, vous recevez un Écorcheur, une Carapace et un soutien de niveau 1 tiré au hasard (jamais un Œil-sonde).</li>
         <li><b>Déploiement et améliorations</b> (une seule étape) : répartissez votre biomasse comme vous voulez, dans l'ordre que vous voulez. <b>Déployer</b> : choisissez une carte, puis une case d'entrée (A à E) d'une lane — un <b>soutien</b> peut être parachuté sur n'importe quelle case libre d'une lane ; payez son coût, en respectant le maximum de créatures de la lane. <b>Améliorer</b> : investissez dans un nœud d'amélioration (voir plus bas). Le budget du tour est dépensé en premier, puis la réserve ; ce qui reste du budget va à la réserve. Les cartes non jouées retournent dans la pioche.</li>
         <li><b>Réaction de la colonie</b> : si elle tient un sortilège offensif, elle peut le jouer maintenant.</li>
         <li><b>Attaques</b> : pour chaque créature, dans l'ordre que vous voulez :
@@ -176,7 +176,7 @@ const AIDE = (() => {
     { id: "e-but", side: "essaim", img: "Massacreur", title: "Vous jouez l'essaim", when: () => true,
       text: () => `Votre but : tuer tous les travailleurs de la colonie en frappant sa fusée, au centre du plateau. Elle gagne si elle achève ses ${SF.FLOORS} étages avant. Chaque tour : vous choisissez vos cartes, puis vous déployez et améliorez (dans la même étape), puis vos créatures avancent et attaquent. Le bouton « Règles » détaille tout.` },
     { id: "e-pioche", side: "essaim", img: "Écorcheur", title: "La pioche au choix", when: S => S.phase === "A_start" && !S.startHand,
-      text: () => `Votre palier, fixé par votre biomasse, vous donne un nombre de cartes et les niveaux auxquels vous avez accès. Répartissez-les toutes entre les piles de niveau 1, 2 et 3 avec + et −, puis « Piocher » : les créatures sont tirées au hasard dans chaque pile. Au premier tour, vous avez reçu à la place une aggro, un tank et un soutien.` },
+      text: () => `Votre palier, fixé par votre biomasse, vous donne un nombre de cartes. Répartissez-les toutes entre les piles de niveau 1, 2 et 3 avec + et −, puis « Piocher » : les créatures sont tirées au hasard dans chaque pile. Au premier tour, vous avez reçu à la place une aggro, un tank et un soutien.` },
     { id: "e-deploy", side: "essaim", img: "Carapace", title: "Déployer", when: S => S.phase === "A_deploy",
       text: S => `Touchez une carte, puis une case d'entrée (lettres A à E au bord) d'une lane ; un soutien se parachute sur n'importe quelle case libre. Chaque carte coûte de la biomasse. Votre budget du tour égale votre biomasse (${S.biomass}) : elle n'est jamais dépensée et revient chaque tour. Au plus ${SF.capOf(S)} créatures par lane. Dans la même étape, vous pouvez aussi investir dans les arbres d'amélioration. Le budget non dépensé va à la réserve.` },
     { id: "e-types", side: "essaim", img: "Hurleur", title: "Aggros, tanks et soutiens", when: S => S.phase === "A_deploy" && S.handA.length > 0,

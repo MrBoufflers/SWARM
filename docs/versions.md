@@ -6,6 +6,8 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 
 ## v0.5.1 — 7 novembre 2026
 
+**Pioche (Oni)** : le palier ne fixe plus que le nombre de cartes (3, 5, 7, 10) ; l'essaim pioche dans n'importe quelle pile qui contient des cartes. Les piles 2 et 3 sont grisées tant qu'elles sont vides (« amélioration de rang 1 / 2 nécessaire »). Panneau et aide : « Cartes à piocher » au lieu de la répartition par niveau.
+
 **Musique (Oni)** : bande originale « Swarm & Steel » en boucle dès l'accueil, qui continue en jeu. Bouton « Musique : oui / non » et réglette de volume en bas à gauche de l'accueil (et de la salle d'attente en ligne) et dans le menu en jeu ; réglages gardés par le navigateur. Les navigateurs bloquent le son tant que la page n'a pas été touchée : la musique démarre alors au premier clic ou à la première touche.
 
 ## v0.5.0 — 7 novembre 2026

@@ -1881,13 +1881,14 @@ const SF = (() => {
     S.phase = "A_deploy";
     log(S, "essaim", `Palier ${tier(S) + 1} : ${S.handA.length} cartes, budget ${S.budget}.`);
   }
-  // Pioche au choix (Oni, 07/11/2026) : le palier donne un nombre total de cartes (somme de ses quotas) et les niveaux
-  // accessibles (ceux dont le quota n'est pas nul) ; l'essaim choisit combien de cartes il pioche dans chaque pile
-  // (niveau 1, 2, 3). Les cartes sont tirées au hasard dans la pile : il ne choisit pas les créatures.
-  // le total est obligatoire (Oni, 07/11/2026) : il ne baisse que si les piles accessibles n'ont pas assez de cartes
+  // Pioche au choix (Oni, 07/11/2026) : le palier ne fixe que le nombre de cartes (somme de ses quotas : 3, 5, 7, 10) ;
+  // l'essaim choisit combien il en pioche dans chaque pile (niveau 1, 2, 3) qui contient des cartes — les piles 2 et 3
+  // se remplissent avec les améliorations. Les cartes sont tirées au hasard dans la pile : il ne choisit pas les créatures.
+  // Le total est obligatoire : il ne baisse que si les piles n'ont pas assez de cartes.
+  const tierCards = i => TIERS[i].n.reduce((a, b) => a + b, 0);
   const pickRule = S => {
-    const t = TIERS[tier(S)], levels = [1, 2, 3].filter(l => t.n[l - 1] > 0);
-    const total = Math.min(t.n.reduce((a, b) => a + b, 0), levels.reduce((a, l) => a + S.piles[l].length, 0));
+    const levels = [1, 2, 3].filter(l => S.piles[l].length > 0);
+    const total = Math.min(tierCards(tier(S)), levels.reduce((a, l) => a + S.piles[l].length, 0));
     return { total, levels };
   };
   function attackerPick(S, counts) {
@@ -2431,7 +2432,7 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, reachable, pathCells, pickRule, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
@@ -2544,8 +2545,8 @@ const AIDE = (() => {
 
   // ------------------------------------------------------------------ fiches de règles
   function tiersTable(h) {
-    const rows = SF.TIERS.map((t, i) => `<tr><td>${i + 1}</td><td>${i ? t.min + " et plus" : "départ"}</td><td>${t.n.join(" · ")}</td><td>${t.cap}</td></tr>`).join("");
-    return `<table class="rt"><thead><tr><th>Palier</th><th>Biomasse</th><th>Pioche (niv. 1 · 2 · 3)</th><th>Créatures max par lane</th></tr></thead><tbody>${rows}</tbody></table>`;
+    const rows = SF.TIERS.map((t, i) => `<tr><td>${i + 1}</td><td>${i ? t.min + " et plus" : "départ"}</td><td>${SF.tierCards(i)}</td><td>${t.cap}</td></tr>`).join("");
+    return `<table class="rt"><thead><tr><th>Palier</th><th>Biomasse</th><th>Cartes à piocher</th><th>Créatures max par lane</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
   function creaturesTable(h) {
     const rows = Object.entries(SF.CREATURES).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
@@ -2620,7 +2621,7 @@ const AIDE = (() => {
       ${tiersTable(h)}
       <h3>Votre tour</h3>
       <ol>
-        <li><b>Pioche au choix</b> : votre palier vous donne un nombre de cartes (la somme de ses quotas) et les niveaux auxquels vous avez accès ; vous choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) ; les créatures sont tirées au hasard dans la pile, qui mélange les types débloqués par vos améliorations. <b>Premier tour</b> : à la place, vous recevez un Écorcheur, une Carapace et un soutien de niveau 1 tiré au hasard (jamais un Œil-sonde).</li>
+        <li><b>Pioche au choix</b> : votre palier vous donne seulement un nombre de cartes ; vous choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) ; les créatures sont tirées au hasard dans la pile, qui mélange les types débloqués par vos améliorations (les piles 2 et 3 restent vides sans amélioration de rang 1 ou 2). <b>Premier tour</b> : à la place, vous recevez un Écorcheur, une Carapace et un soutien de niveau 1 tiré au hasard (jamais un Œil-sonde).</li>
         <li><b>Déploiement et améliorations</b> (une seule étape) : répartissez votre biomasse comme vous voulez, dans l'ordre que vous voulez. <b>Déployer</b> : choisissez une carte, puis une case d'entrée (A à E) d'une lane — un <b>soutien</b> peut être parachuté sur n'importe quelle case libre d'une lane ; payez son coût, en respectant le maximum de créatures de la lane. <b>Améliorer</b> : investissez dans un nœud d'amélioration (voir plus bas). Le budget du tour est dépensé en premier, puis la réserve ; ce qui reste du budget va à la réserve. Les cartes non jouées retournent dans la pioche.</li>
         <li><b>Réaction de la colonie</b> : si elle tient un sortilège offensif, elle peut le jouer maintenant.</li>
         <li><b>Attaques</b> : pour chaque créature, dans l'ordre que vous voulez :
@@ -2712,7 +2713,7 @@ const AIDE = (() => {
     { id: "e-but", side: "essaim", img: "Massacreur", title: "Vous jouez l'essaim", when: () => true,
       text: () => `Votre but : tuer tous les travailleurs de la colonie en frappant sa fusée, au centre du plateau. Elle gagne si elle achève ses ${SF.FLOORS} étages avant. Chaque tour : vous choisissez vos cartes, puis vous déployez et améliorez (dans la même étape), puis vos créatures avancent et attaquent. Le bouton « Règles » détaille tout.` },
     { id: "e-pioche", side: "essaim", img: "Écorcheur", title: "La pioche au choix", when: S => S.phase === "A_start" && !S.startHand,
-      text: () => `Votre palier, fixé par votre biomasse, vous donne un nombre de cartes et les niveaux auxquels vous avez accès. Répartissez-les toutes entre les piles de niveau 1, 2 et 3 avec + et −, puis « Piocher » : les créatures sont tirées au hasard dans chaque pile. Au premier tour, vous avez reçu à la place une aggro, un tank et un soutien.` },
+      text: () => `Votre palier, fixé par votre biomasse, vous donne un nombre de cartes. Répartissez-les toutes entre les piles de niveau 1, 2 et 3 avec + et −, puis « Piocher » : les créatures sont tirées au hasard dans chaque pile. Au premier tour, vous avez reçu à la place une aggro, un tank et un soutien.` },
     { id: "e-deploy", side: "essaim", img: "Carapace", title: "Déployer", when: S => S.phase === "A_deploy",
       text: S => `Touchez une carte, puis une case d'entrée (lettres A à E au bord) d'une lane ; un soutien se parachute sur n'importe quelle case libre. Chaque carte coûte de la biomasse. Votre budget du tour égale votre biomasse (${S.biomass}) : elle n'est jamais dépensée et revient chaque tour. Au plus ${SF.capOf(S)} créatures par lane. Dans la même étape, vous pouvez aussi investir dans les arbres d'amélioration. Le budget non dépensé va à la réserve.` },
     { id: "e-types", side: "essaim", img: "Hurleur", title: "Aggros, tanks et soutiens", when: S => S.phase === "A_deploy" && S.handA.length > 0,
@@ -2831,7 +2832,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
-    A_start: ["essaim", "Tour de l'essaim", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe le total et les niveaux accessibles."],
+    A_start: ["essaim", "Tour de l'essaim", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe seulement le nombre total de cartes."],
     A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane ; un soutien peut être parachuté sur n'importe quelle case libre) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
@@ -3076,7 +3077,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kcs">
         <span class="kc" tabindex="0" data-tip="Biomasse : ${S.biomass}${next ? ` (palier suivant à ${next.min})` : ""}">${icon("biomasse")}<b>${S.biomass}</b><small>bio</small></span>
-        <span class="kc" tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche ${t.n.join(" / ")} (niveaux 1 / 2 / 3), plafond ${SF.capOf(S)} créatures par lane">${icon("palier")}<b>${SF.tier(S) + 1}</b><small>max ${SF.capOf(S)}/lane</small></span>
+        <span class="kc" tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche de ${SF.tierCards(SF.tier(S))} cartes, plafond ${SF.capOf(S)} créatures par lane">${icon("palier")}<b>${SF.tier(S) + 1}</b><small>max ${SF.capOf(S)}/lane</small></span>
         ${turn ? `<span class="kc" data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b><small>budget</small></span>` : `<span class="kc" data-fx="budget" tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b><small>réserve</small></span>`}
         <span class="kc hidden-hand" tabindex="0" data-tip="${S.handA.length} cartes en main (cachées) · pioches ${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}">${icon("sort")}<b>${S.handA.length}</b><small>cartes</small></span>
       </div>
@@ -3103,12 +3104,12 @@ if (typeof module !== "undefined") module.exports = AIDE;
     } else if (ph === "A_start" && S.startHand) {
       acts = `<button data-a="draw" class="primary">Recevoir la main de départ</button>`;
     } else if (ph === "A_start") {
-      // pioche au choix (Oni, 07/11/2026) : le palier donne un total de cartes et les niveaux accessibles ; l'essaim choisit
-      // combien de cartes il pioche dans chaque pile, les créatures sont tirées au hasard
+      // pioche au choix (Oni, 07/11/2026) : le palier donne le nombre de cartes ; l'essaim choisit combien il en pioche
+      // dans chaque pile non vide, les créatures sont tirées au hasard
       const { total, levels } = SF.pickRule(S), sel = UI.pickSel || [0, 0, 0], n = sel.reduce((a, b) => a + b, 0);
       const rows = [1, 2, 3].map(l => {
         const q = sel[l - 1], left = S.piles[l].length, open = levels.includes(l);
-        return `<div class="pick-row lvl${l}${open ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${open ? `${left} carte${left > 1 ? "s" : ""} dans la pile` : "palier trop bas"}</small></span>
+        return `<div class="pick-row lvl${l}${open ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${open ? `${left} carte${left > 1 ? "s" : ""} dans la pile` : "pile vide" + (l > 1 ? ` (amélioration de rang ${l - 1} nécessaire)` : "")}</small></span>
           <span class="step"><button data-a="pickDel" data-v="${l}" aria-label="Retirer"${q ? "" : " disabled"}>−</button><b>${q}</b><button data-a="pickAdd" data-v="${l}" aria-label="Ajouter"${open && n < total && q < left ? "" : " disabled"}>+</button></span></div>`;
       }).join("");
       body = `<p class="hint">Palier ${SF.tier(S) + 1} : piochez <b>${total}</b> carte${total > 1 ? "s" : ""} (${n}/${total}), réparties comme vous voulez entre les piles ; les créatures sont tirées au hasard.</p><div class="pick">${rows}</div>`;
@@ -3481,7 +3482,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     const t = SF.TIERS[SF.tier(S)];
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
-      <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${t.n.join("/")} · plafond ${SF.capOf(S)}</b></div>
+      <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${SF.tierCards(SF.tier(S))} cartes · plafond ${SF.capOf(S)}</b></div>
       <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
@@ -3543,7 +3544,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
         ${box2(SF.tier(S) + 1, "palier", `Palier ${SF.tier(S) + 1}${next ? ` · palier suivant à ${next.min} biomasse` : ""}`)}
         ${box2(SF.capOf(S), "max / lane", "Plafond de créatures par lane")}
       </div>
-      <div class="pc-lines"><span>Niveau de pioche <b>${t.n.join(" / ")}</b></span><span>Pioche N1 / N2 / N3 <b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></span></div>
+      <div class="pc-lines"><span>Cartes à piocher <b>${SF.tierCards(SF.tier(S))}</b></span><span>Pioche N1 / N2 / N3 <b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></span></div>
       <div class="po-scroll">
         <h4>Main <span class="small">${S.handA.length} carte${S.handA.length > 1 ? "s" : ""}</span></h4>${swarmHandHtml(true, true)}
         <h4>Arbres d'amélioration</h4>${treesHtml(true)}
@@ -3615,7 +3616,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
       <div class="ps-rows">
         ${turn ? `<span data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b> budget</span>` : ""}
         <span tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b> réserve</span>
-        <span tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche ${SF.TIERS[SF.tier(S)].n.join(" / ")} (niveaux 1 / 2 / 3)">${icon("palier")}<b>${SF.capOf(S)}</b> max / lane</span>
+        <span tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche de ${SF.tierCards(SF.tier(S))} cartes">${icon("palier")}<b>${SF.capOf(S)}</b> max / lane</span>
         <span class="hidden-hand" tabindex="0" data-tip="${S.handA.length} cartes en main (cachées) · pioches ${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}">${icon("sort")}<b>${S.handA.length}</b> cartes</span>
       </div>
       <h4>Améliorations</h4><div class="utrees big">${trees}</div></div></aside>`;

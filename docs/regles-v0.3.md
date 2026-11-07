@@ -28,7 +28,7 @@ Repris du prototype jouable et validés par Oni :
 
 ## Changements de la v0.5 (7 novembre 2026)
 
-- **Pioche au choix** : le palier donne un nombre de cartes (3, 5, 7 puis 10) et les niveaux accessibles ; l'essaim choisit combien il en pioche dans chaque pile (niveau 1, 2, 3), les créatures étant tirées au hasard dans la pile (le premier tour garde sa main de départ, sans Œil-sonde).
+- **Pioche au choix** : le palier donne seulement le nombre de cartes (3, 5, 7 puis 10) ; l'essaim choisit combien il en pioche dans chaque pile (niveau 1, 2, 3), les créatures étant tirées au hasard dans la pile (le premier tour garde sa main de départ, sans Œil-sonde).
 - **Soutiens parachutés** : un soutien peut être déployé sur n'importe quelle case libre de sa lane (plafond de population inchangé), puis se déplace comme les autres.
 - **Déplacements** : la vitesse est un maximum ; la créature avance de 1 case à sa vitesse, au choix, sur son chemin en escalier (jamais en arrière ni sur les côtés). Elle doit avancer d'au moins 1 case si elle le peut.
 - **Attaque facultative** de n'importe quel bâtiment qui touche sa case par un côté (ou la fusée). Bouton unique « Tout résoudre et finir le tour ».
@@ -124,7 +124,7 @@ Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais d
 
 ### 2. Pioche (au choix)
 
-Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe le **nombre de cartes** que vous prenez (la somme de ses quotas : 3, 5, 7 puis 10), les **niveaux accessibles** (ceux dont le quota n'est pas nul) et combien de créatures peuvent attaquer une même lane. Vous répartissez ce nombre comme vous voulez entre les piles de ces niveaux (Oni, 07/11/2026) : vous choisissez **de quelle pile** vous piochez, pas les créatures — chaque pile mélange les types débloqués par vos améliorations, et les cartes sont tirées au hasard. Vous devez piocher **exactement** ce nombre de cartes (Oni, 07/11/2026), sans jamais prendre plus de cartes qu'une pile n'en contient ; si les piles accessibles n'en ont pas assez, vous piochez tout ce qu'elles contiennent.
+Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe seulement le **nombre de cartes** que vous prenez (3, 5, 7 puis 10) et combien de créatures peuvent attaquer une même lane. Vous répartissez ce nombre comme vous voulez entre les piles de niveau 1, 2 et 3 (Oni, 07/11/2026) ; les piles de niveau 2 et 3 restent vides tant que vous n'avez pas d'amélioration de rang 1 ou 2 : vous choisissez **de quelle pile** vous piochez, pas les créatures — chaque pile mélange les types débloqués par vos améliorations, et les cartes sont tirées au hasard. Vous devez piocher **exactement** ce nombre de cartes (Oni, 07/11/2026), sans jamais prendre plus de cartes qu'une pile n'en contient ; si les piles n'en ont pas assez, vous piochez tout ce qu'elles contiennent.
 
 **Premier tour** : au lieu de choisir, l'essaim reçoit une créature de niveau 1 de chaque type : un Écorcheur (aggro), une Carapace (tank) et un soutien de niveau 1 tiré au hasard, jamais l'Œil-sonde (Glaneur ou Catalyseur). Elles se paient normalement avec le budget.
 
@@ -425,12 +425,12 @@ Les chiffres de référence des deux camps, à garder sous la main.
 
 ### Paliers de l'essaim
 
-| Palier | Biomasse | Cartes piochées (N1 / N2 / N3) | Plafond par lane |
+| Palier | Biomasse | Cartes piochées | Plafond par lane |
 | --- | --- | --- | --- |
-| 1 | départ (5) | premier tour : 1 aggro, 1 tank, 1 soutien ; ensuite 3 / 0 / 0 | 2 |
-| 2 | 9 et plus | 3 / 2 / 0 | 3 |
-| 3 | 15 et plus | 4 / 2 / 1 | 4 |
-| 4 | 21 et plus | 4 / 3 / 3 | 5 |
+| 1 | départ (5) | premier tour : 1 aggro, 1 tank, 1 soutien ; ensuite 3 | 2 |
+| 2 | 9 et plus | 5 | 3 |
+| 3 | 15 et plus | 7 | 4 |
+| 4 | 21 et plus | 10 | 5 |
 
 Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalogue.
 

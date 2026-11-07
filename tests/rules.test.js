@@ -937,10 +937,11 @@ const fresh = () => {
   ok(eye === 0, "main de départ : jamais d'Œil-sonde (60 essais)");
   // pioche au choix : palier 1 = 3 cartes de niveau 1, au choix
   const P = fresh();
-  ok(SF.pickRule(P).total === 3 && SF.pickRule(P).levels.join() === "1", "palier 1 : 3 cartes, niveau 1");
+  ok(SF.pickRule(P).total === 3 && SF.pickRule(P).levels.join() === "1", "palier 1 : 3 cartes ; seule la pile de niveau 1 a des cartes");
   ok(SF.apply(P, "essaim", "pick", { n: [4, 0, 0] }) !== "", "plus de cartes que le palier : refusé");
   P.piles[2] = ["Ravageur", "Ravageur"];
-  ok(SF.apply(P, "essaim", "pick", { n: [0, 1, 0] }) !== "", "pile de niveau 2 au palier 1 : refusé");
+  ok(SF.apply(P, "essaim", "pick", { n: [2, 1, 0] }) === "" && P.handA.filter(c => SF.CREATURES[c.name].lvl === 2).length === 1, "palier 1 : la pile de niveau 2 est permise dès qu'elle a des cartes (Oni, 07/11/2026)");
+  P.phase = "A_start"; P.handA = [];
   ok(SF.apply(P, "essaim", "pick", { n: [2, 0, 0] }) !== "", "moins de cartes que le palier : refusé (Oni, 07/11/2026)");
   const n1 = P.piles[1].length, top = P.piles[1].slice(-3).reverse();
   ok(SF.apply(P, "essaim", "pick", { n: [3, 0, 0] }) === "" && P.handA.map(c => c.name).join() === top.join() && P.phase === "A_deploy" && P.piles[1].length === n1 - 3,
@@ -948,7 +949,7 @@ const fresh = () => {
   const R = fresh(); R.piles[1] = R.piles[1].slice(0, 2);
   ok(SF.pickRule(R).total === 2 && SF.apply(R, "essaim", "pick", { n: [2, 0, 0] }) === "", "pile presque vide : le total baisse au nombre de cartes disponibles (2)");
   const Q = fresh(); Q.biomass = 9; Q.piles[2] = ["Ravageur"];
-  ok(SF.pickRule(Q).total === 5 && SF.pickRule(Q).levels.join() === "1,2", "palier 2 : 5 cartes, niveaux 1 et 2");
+  ok(SF.pickRule(Q).total === 5 && SF.pickRule(Q).levels.join() === "1,2", "palier 2 : 5 cartes, piles 1 et 2 non vides");
   ok(SF.apply(Q, "essaim", "pick", { n: [0, 2, 0] }) !== "", "pas plus de cartes que la pile n'en contient");
   ok(SF.apply(Q, "essaim", "pick", { n: [4, 1, 0] }) === "" && Q.handA.length === 5 && Q.handA.filter(c => SF.CREATURES[c.name].lvl === 2).length === 1, "répartition libre : 4 du niveau 1, 1 du niveau 2");
   const V = SF.viewFor(Q, "essaim");
