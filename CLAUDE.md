@@ -12,7 +12,7 @@ Tout le contenu du jeu, les messages et la documentation sont **en français**. 
 - **Remonter les décisions** plutôt que les trancher seul ; poser des questions quand une demande est imprécise.
 - **Signaler les incohérences** (entre le moteur, l'interface et le livret) au lieu de les corriger en silence.
 - **Pas de simulation** (parties automatiques en masse, études d'équilibrage) ni de nouveau moteur de jeu **sans demande explicite** d'Oni.
-- **Vérification obligatoire avant livraison** : `npm test` (règles) et `npm run e2e` (partie complète en vrais clics dans Chromium), sur ordinateur et à 400 px de large.
+- **Vérification obligatoire avant livraison** : `npm test` (règles) et **une seule** partie complète par robot (`npm run e2e`, en vrais clics dans Chromium) — demandé par Oni le 07/11/2026 : ne pas lancer plusieurs parties complètes (ordinateur, 400 px, en ligne) à chaque fois ; choisir celle qui couvre le changement (400 px pour l'interface mobile, `e2e:en-ligne` pour le réseau ou les vues filtrées) et vérifier le reste par des captures ciblées.
 - **Versions (depuis le 02/11/2026, demandé par Oni pour les tests d'équilibrage)** : chaque mise à jour livrée (déployée) augmente `SF.VERSION` de 1 au dernier chiffre (0.4.0 → 0.4.1…) et ajoute son entrée dans `docs/versions.md` (un test le vérifie). Les statistiques sont regroupées par version.
 - Honnêteté plutôt que diplomatie ; information sourcée.
 
