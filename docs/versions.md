@@ -4,6 +4,15 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.4 — 8 novembre 2026
+
+**IA pour jouer en solo (Oni)**
+- Accueil : « Solo contre l'IA » → jouer l'essaim ou la colonie ; l'IA joue l'autre camp et fait de son mieux pour gagner.
+- IA honnête : elle ne voit que ce que voit un joueur (ni main adverse, ni sortilèges, ni tuiles camouflées, ni ordre des pioches) ; une tuile camouflée inconnue est estimée.
+- Évaluation coup par coup : à chaque décision, elle essaie les actions possibles sur une copie, termine le tour avec un jeu par défaut (et, pour la colonie, la riposte probable des créatures en jeu), puis garde la meilleure note.
+- Elle joue pas à pas avec les animations ; pas d'écran de passage en solo.
+- Statistiques : parties marquées « contre l'IA », masquées par défaut (bouton « Parties contre l'IA »), colonne `ia` dans l'export CSV.
+
 ## v0.5.3 — 7 novembre 2026
 
 **Interface (Oni)** : la puissance des pièges apparaît dans leurs capacités : « Mine 1 / 2 / 3 », « Siphon 1 / 2 / 3 » (cartes de tuiles, aide), et sur la tuile posée (vue de la colonie).

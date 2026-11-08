@@ -41,7 +41,7 @@ function cleanRecord(r) {
   if (!r || typeof r !== "object") return null;
   const str = (v, n) => (typeof v === "string" && v.length <= n ? v : null);
   if (!str(r.id, 60) || !/^[\w.-]+$/.test(r.id) || !["essaim", "colonie"].includes(r.winner) || !str(r.version, 20)) return null;
-  const o = { id: "local-" + r.id, mode: "local", test: !!r.test, decouverte: !!r.decouverte, version: r.version, versionFin: str(r.versionFin, 20) || r.version,
+  const o = { id: "local-" + r.id, mode: "local", test: !!r.test, decouverte: !!r.decouverte, ia: r.ia === "essaim" || r.ia === "colonie" ? r.ia : null, version: r.version, versionFin: str(r.versionFin, 20) || r.version,
     date: new Date().toISOString(), winner: r.winner, upgrades: str(r.upgrades, 120) || "" };
   for (const k of NUM) { const v = Number(r[k]); if (!Number.isFinite(v) || Math.abs(v) > 1e5) return null; o[k] = v; }
   return o;

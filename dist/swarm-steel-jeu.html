@@ -1260,7 +1260,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.3";
+  const VERSION = "0.5.4";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -2511,7 +2511,7 @@ const BILAN = (() => {
   function summary(S, extra) {
     const tiles = Object.values(S.tiles || {});
     return {
-      id: String(extra.id || ""), mode: extra.mode, test: !!extra.test, decouverte: !!(extra.decouverte || S.decouverte),
+      id: String(extra.id || ""), mode: extra.mode, test: !!extra.test, decouverte: !!(extra.decouverte || S.decouverte), ia: S.ia === "essaim" || S.ia === "colonie" ? S.ia : null,
       version: S.version || E.VERSION, versionFin: E.VERSION, date: new Date().toISOString(),
       winner: S.winner, rounds: S.round, biomass: S.biomass, reserve: S.reserve || 0,
       killed: S.killed || 0, workers: S.workersBase, floors: S.floors,
@@ -2833,6 +2833,310 @@ const AIDE = (() => {
 })();
 if (typeof module !== "undefined") module.exports = AIDE;
 
+// IA pour jouer en solo (Oni, 08/11/2026) : joue l'essaim ou la colonie et fait de son mieux pour gagner.
+// - Honnête : elle ne décide qu'à partir de la vue de son camp (SF.viewFor) ; ce qui est caché (main adverse,
+//   sortilèges, tuiles camouflées, pioches) est remplacé par des estimations.
+// - Évaluation coup par coup : pour chaque décision, elle essaie les actions possibles sur une copie de la partie,
+//   termine le tour avec un jeu par défaut (et, pour la colonie, la riposte probable de l'essaim), puis note le résultat.
+// Aucun accès au DOM : utilisable dans la page (après engine.js) et sous Node (tests).
+const IA = (() => {
+  const E = typeof SF !== "undefined" ? SF : require("./engine.js");
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const other = side => (side === "essaim" ? "colonie" : "essaim");
+  const ok = (V, side, type, args) => E.apply(V, side, type, args || {}) === "";
+
+  // ------------------------------------------------------------ état « croyance » (ce que le camp voit + estimations)
+  function belief(S, side) {
+    const V = E.viewFor(S, side);
+    V.log = []; delete V.fx;
+    V.spellDeck = []; V.spellDiscard = [];
+    // pioches de créatures : seulement leur nombre de cartes (cases vides), ce qui suffit pour la pioche au choix
+    if (side === "essaim") {
+      V.hand = []; V.spells = []; // l'essaim ignore la main et les sortilèges de la colonie
+      for (const k of Object.keys(V.tiles)) {
+        const t = V.tiles[k];
+        if (t.hidden) { // tuile camouflée inconnue : estimée comme une Palissade (2 PV), sans piège
+          const [x, y] = E.parse(k);
+          V.tiles[k] = Object.assign(E.tileStats("Palissade", x, y), { revealed: false });
+        }
+      }
+      for (const l of E.LANES) for (const ch of V.chantiers[l]) if (!ch.tile) ch.tile = "Palissade";
+      for (const p of V.toPlace) if (!p.tile) p.tile = "Palissade";
+    } else {
+      V.handA = [];
+    }
+    return V;
+  }
+
+  // ------------------------------------------------------------ évaluation (positive = bon pour l'essaim)
+  const dist = c => { let u = c.u, k = c.k, n = 0; while (k !== 0 && n < 12) { [u, k] = E.nextStep(u, k); n++; } return n; };
+  function score(S) {
+    if (S.winner === "essaim") return 1e6;
+    if (S.winner === "colonie") return -1e6;
+    let s = 0;
+    const rocket = S.floors + S.rocketPts / E.floorCost(S);
+    s -= rocket * 45;                       // la fusée est la menace principale pour l'essaim
+    s -= S.workersBase * 22;                // chaque travailleur tué rapproche l'essaim de la victoire
+    s -= E.tech(S) * 2.5;
+    s += S.biomass * 3.5 + (S.reserve || 0) * 0.8;
+    for (const v of Object.values(S.invest || {})) s += v * 1.1;
+    for (const t of ["aggro", "tank", "soutien"]) for (const r of ["r1", "r2"]) if (S.upgrades[t][r]) s += r === "r1" ? 12 : 22;
+    for (const c of S.creatures) {
+      const b = E.CREATURES[c.name], hp = c.hp + E.bonusHp(S, c), d = dist(c);
+      const base = b.cost * 2 + E.effAtq(S, c) * 1.6 + hp * 0.9;
+      s += base * (1 + Math.max(0, 7 - d) * 0.12) + (d <= 1 ? 6 : 0);
+    }
+    for (const [k, t] of Object.entries(S.tiles)) {
+      if (t.start) { s -= t.hp * 2; continue; }
+      const r = E.ring(...E.parse(k));
+      s -= (t.hp * 2.5 + (t.ren || 0) * 1.5 + (t.ep || 0) * 1.5 + (t.tech || 0) * 4 + (t.temp || 0) * 6 + (t.shield ? 3 : 0) + (t.trap || t.siphon ? 2 : 0)) * (1 + (3 - Math.min(3, r)) * 0.15);
+    }
+    for (const l of Object.values(S.supports)) s -= 5 + l * 3;
+    s -= (S.hand || []).length * 2 + (S.spells || []).length * 3;
+    return s;
+  }
+  const val = (S, side) => (side === "essaim" ? score(S) : -score(S));
+
+  // ------------------------------------------------------------ fins de tour par défaut (simulations)
+  // essaim : termine son tour (déploiement fini, réaction passée, toutes les créatures agissent)
+  function finishSwarm(V) {
+    for (let i = 0; i < 6 && !V.winner; i++) {
+      if (V.phase === "A_deploy") ok(V, "essaim", "endDeploy");
+      else if (V.phase === "A_upgrade") ok(V, "essaim", "toAttacks");
+      else if (V.phase === "A_react") ok(V, "colonie", "reactDone");
+      else if (V.phase === "A_attack") { if (!ok(V, "essaim", "actAll")) ok(V, "essaim", "endA"); }
+      else break;
+    }
+    return V;
+  }
+  // colonie : termine son tour (construction, pose, tirs), puis riposte de l'essaim avec les créatures déjà en jeu
+  function finishColony(V) {
+    for (let i = 0; i < 20 && !V.winner; i++) {
+      if (V.phase === "D_draw") { const c = E.TILE_CATS.find(c => E.tilesLeft(V, c) > 0); if (!c || !ok(V, "colonie", "tdraw", { cat: c })) break; }
+      else if (V.phase === "D_main") ok(V, "colonie", "build");
+      else if (V.phase === "D_place") { const t = E.placeTargets(V); if (!t.length || !ok(V, "colonie", "placeAt", { k: bestPlaceGuess(V, t) })) break; }
+      else if (V.phase === "D_fire") ok(V, "colonie", "endD");
+      else break;
+    }
+    return swarmThreat(V);
+  }
+  // riposte probable : toutes les créatures en jeu avancent et attaquent (sans déploiement : la main de l'essaim est cachée)
+  function swarmThreat(V) {
+    if (V.winner) return V;
+    for (const c of V.creatures) { c.acted = false; c.new = false; delete c.moved; delete c.spd; delete c.struck; delete c.jammed; }
+    V.stase = []; V.phase = "A_attack";
+    try { E.ACTIONS.actAll.run(V); } catch (e) { /* estimation : on garde l'état atteint */ }
+    return V;
+  }
+  // case de pose estimée (simulations) : la plus menacée = celle où le plus de créatures de la lane passent
+  function bestPlaceGuess(V, targets) {
+    let best = targets[0], bs = -1;
+    for (const k of targets) {
+      const [x, y] = E.parse(k), r = E.ring(x, y);
+      const near = V.creatures.filter(c => { const [a, b] = E.toGlobal(c.lane, c.u, c.k); return Math.abs(a - x) + Math.abs(b - y) <= 2; }).length;
+      const s = near * 3 + (4 - r);
+      if (s > bs) { bs = s; best = k; }
+    }
+    return best;
+  }
+
+  // choisit parmi des candidats { type, args } celui qui donne la meilleure note après la fin de tour simulée
+  function best(V, side, cands, finish) {
+    let top = null, ts = -Infinity;
+    for (const c of cands) {
+      const W = clone(V);
+      if (!ok(W, side, c.type, c.args)) continue;
+      const s = val(finish(W), side) - (c.cost || 0);
+      if (s > ts) { ts = s; top = c; }
+    }
+    return { move: top, s: ts };
+  }
+
+  // ------------------------------------------------------------ décisions de l'essaim
+  const AVG_COST = { 1: 2.6, 2: 3.5, 3: 5.5 };
+  function swarmPick(V) {
+    const { total, levels } = E.pickRule(V);
+    const budget = V.famine ? Math.floor(V.biomass / 2) : V.biomass;
+    // les piles sont cachées : on ne connaît que leur nombre de cartes (__pileN)
+    const n = [0, 0, 0], avail = { 1: V.__pileN[1], 2: V.__pileN[2], 3: V.__pileN[3] };
+    // tout en niveau 1, puis on monte de niveau tant que le coût moyen reste à portée du budget (un peu plus, pour choisir)
+    while (n[0] < Math.min(total, avail[1])) n[0]++;
+    for (let i = 0; i < total; i++) {
+      const cost = n.reduce((a, q, j) => a + q * AVG_COST[j + 1], 0);
+      let moved = false;
+      for (const l of [3, 2]) {
+        if (!levels.includes(l) || n[l - 1] >= avail[l]) continue;
+        const from = n[0] > 0 ? 1 : n[1] > 0 && l === 3 ? 2 : 0;
+        if (!from) continue;
+        const extra = AVG_COST[l] - AVG_COST[from];
+        if (cost + extra <= budget * 1.25) { n[from - 1]--; n[l - 1]++; moved = true; break; }
+      }
+      if (!moved) break;
+    }
+    // pile 1 trop courte : compléter avec les autres
+    let miss = total - n.reduce((a, b) => a + b, 0);
+    for (const l of [2, 3, 1]) while (miss > 0 && n[l - 1] < avail[l] && levels.includes(l)) { n[l - 1]++; miss--; }
+    return { type: "pick", args: { n } };
+  }
+  // ordre de préférence des améliorations
+  const NODES = [["aggro", "A1"], ["soutien", "B1"], ["aggro", "A2"], ["tank", "A1"], ["soutien", "B2"], ["tank", "A2"], ["aggro", "C2"], ["aggro", "B1"], ["aggro", "B2"], ["tank", "B1"], ["tank", "C2"], ["tank", "B2"], ["soutien", "A1"], ["soutien", "A2"], ["soutien", "C2"]];
+  function swarmInvest(V) {
+    const can = (V.budget || 0) + (V.reserve || 0);
+    if (can <= 0) return null;
+    // un nœud déjà entamé d'abord, sinon le premier ouvert de la liste
+    const st = (t, s) => E.nodeState(V, t, s);
+    const started = NODES.find(([t, s]) => (V.invest || {})[t + ":" + s] > 0 && st(t, s) === "open");
+    const node = started || NODES.find(([t, s]) => st(t, s) === "open");
+    return node ? { type: "invest", args: { t: node[0], s: node[1], n: 99 } } : null;
+  }
+  function deployCands(V) {
+    const out = [], seen = new Set();
+    for (const card of V.handA) {
+      const key = card.name + (card.free ? "*" : "");
+      if (seen.has(key)) continue; seen.add(key);
+      const sap = card.name === "Sapeur";
+      for (const lane of E.LANES) {
+        const targets = sap ? E.laneTiles(V, lane) : [undefined];
+        for (const target of targets.length ? targets : [undefined]) {
+          for (let u = -2; u <= 2; u++) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target }, cost: card.free ? 0 : E.CREATURES[card.name].cost * 0.8 });
+          if (E.CREATURES[card.name].type === "soutien") for (let u = -2; u <= 2; u++) for (let k = 1; k <= 3; k++) if (E.canDrop(V, card.name, lane, u, k)) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target, k }, cost: E.CREATURES[card.name].cost * 0.8 });
+        }
+      }
+    }
+    return out;
+  }
+  function swarmDeploy(V) {
+    const base = val(finishSwarm(clone(V)), "essaim");
+    const { move, s } = best(V, "essaim", deployCands(V), finishSwarm);
+    if (move && s > base + 0.5) return move;
+    return swarmInvest(V) || { type: "endDeploy" };
+  }
+  function swarmAttack(V) {
+    const cands = [{ type: "actAll" }];
+    for (const c of V.creatures) {
+      if (!E.canAct(V, c)) continue;
+      if (!c.struck) for (const p of E.pathCells(V, c)) cands.push({ type: "move", args: { id: c.id, u: p.u, k: p.k } });
+      for (const t of E.strikeTargets(V, c)) cands.push({ type: "strike", args: { id: c.id, target: t } });
+    }
+    if (cands.length === 1) return cands[0];
+    const { move } = best(V, "essaim", cands, finishSwarm);
+    return move || { type: "actAll" };
+  }
+
+  // ------------------------------------------------------------ décisions de la colonie
+  function colonyReact(V) {
+    const cands = [{ type: "reactDone" }];
+    V.spells.forEach((name, i) => {
+      const sp = E.SPELLS[name]; if (!sp || sp.kind !== "off" || name === "Famine") return;
+      const args = name === "Barrage" ? E.LANES : name === "Onde de choc" ? [1, 2, 3] : name === "Champ de stase" ? Object.keys(V.tiles)
+        : ["Frappe orbitale", "Salve", "Brouillage"].includes(name) ? V.creatures.map(c => c.id) : [];
+      for (const arg of args) cands.push({ type: "spell", args: { i, arg }, cost: 9 }); // un sortilège gardé a de la valeur
+    });
+    if (cands.length === 1) return cands[0];
+    const fin = W => { if (W.phase === "A_react") ok(W, "colonie", "reactDone"); return finishSwarm(W); };
+    return best(V, "colonie", cands, fin).move || { type: "reactDone" };
+  }
+  function colonyDraw(V) {
+    const max = E.handSize(V), have = { renfort: 0, actif: 0, piege: 0 };
+    for (const n of V.hand) have[E.tileCat(n)]++;
+    const near = V.creatures.filter(c => dist(c) <= 3).length;
+    const want = { renfort: 0.45 + near * 0.04, actif: 0.4 - near * 0.03, piege: 0.15 };
+    let top = null, td = -Infinity;
+    for (const c of E.TILE_CATS) {
+      if (!E.tilesLeft(V, c)) continue;
+      const d = want[c] * max - have[c];
+      if (d > td) { td = d; top = c; }
+    }
+    return { type: "tdraw", args: { cat: top || "renfort" } };
+  }
+  function colonyMain(V) {
+    // sortilèges de soutien utiles tout de suite
+    for (let i = 0; i < V.spells.length; i++) {
+      const name = V.spells[i];
+      if (name === "Effort" || name === "Cadence") return { type: "spell", args: { i } };
+      if (name === "Feu nourri" && Object.keys(V.supports).some(sk => V.supports[sk] !== 3 && E.supportTargets(V, sk).length)) return { type: "spell", args: { i } };
+      if (name === "Réparation") {
+        const hurt = Object.entries(V.tiles).filter(([, t]) => t.hp < t.max && !t.start).sort((a, b) => (b[1].max - b[1].hp) - (a[1].max - a[1].hp)).slice(0, 3).map(([k]) => k);
+        if (hurt.length) return { type: "spell", args: { i, arg: hurt } };
+      }
+    }
+    // chantiers : la meilleure tuile et la meilleure lane, tant que ça améliore la position
+    const cands = [{ type: "build" }];
+    V.hand.forEach((n, i) => { for (const lane of E.LANES) if (V.chantiers[lane].length < V.chPerLane) cands.push({ type: "startCh", args: { i, lane } }); });
+    if (cands.length === 1) return cands[0];
+    return best(V, "colonie", cands, finishColony).move || { type: "build" };
+  }
+  function colonyPlace(V) {
+    const cands = E.placeTargets(V).map(k => ({ type: "placeAt", args: { k } }));
+    return best(V, "colonie", cands, finishColony).move || cands[0];
+  }
+  function colonyFire(V) {
+    const cands = [{ type: "endD" }];
+    for (const sk of Object.keys(V.supports)) {
+      if (V.supports[sk] === 3 || E.shotsLeft(V, sk) <= 0) continue;
+      for (const c of E.supportTargets(V, sk)) cands.push({ type: "fire", args: { sk, id: c.id } });
+    }
+    if (cands.length === 1) return cands[0];
+    // tirs : note immédiate (créatures tuées ou blessées), la fin de tour faisant de toute façon les tirs restants
+    let top = cands[0], ts = -Infinity;
+    for (const c of cands) {
+      const W = clone(V);
+      if (!ok(W, "colonie", c.type, c.args)) continue;
+      const s = val(W, "colonie") + (c.type === "endD" ? -0.5 : 0);
+      if (s > ts) { ts = s; top = c; }
+    }
+    return top;
+  }
+
+  // ------------------------------------------------------------ point d'entrée
+  // décision du camp `side` pour l'état S (complet) : renvoie { type, args } ou null si ce n'est pas son tour
+  function decide(S, side) {
+    if (S.winner || E.actor(S) !== side) return null;
+    const V = belief(S, side);
+    V.__pileN = { 1: S.piles[1].length, 2: S.piles[2].length, 3: S.piles[3].length }; // nombres seulement (publics pour l'essaim)
+    try {
+      switch (V.phase) {
+        case "A_famine": return { type: "famine", args: { play: V.spells.includes("Famine") } };
+        case "A_start": return V.startHand ? { type: "draw" } : swarmPick(V);
+        case "A_deploy": return swarmDeploy(V);
+        case "A_upgrade": return swarmInvest(V) || { type: "toAttacks" };
+        case "A_react": return colonyReact(V);
+        case "A_attack": return swarmAttack(V);
+        case "D_draw": return colonyDraw(V);
+        case "D_main": return colonyMain(V);
+        case "D_place": return colonyPlace(V);
+        case "D_fire": return colonyFire(V);
+      }
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("IA :", e);
+    }
+    return fallback(S, side);
+  }
+  // action de secours (jamais de blocage) : termine l'étape en cours
+  function fallback(S, side) {
+    switch (S.phase) {
+      case "A_famine": return { type: "famine", args: { play: false } };
+      case "A_start": {
+        if (S.startHand) return { type: "draw" };
+        let left = E.pickRule(S).total; const n = [0, 0, 0];
+        for (const l of [1, 2, 3]) { const q = Math.min(left, S.piles[l].length); n[l - 1] = q; left -= q; }
+        return { type: "pick", args: { n } };
+      }
+      case "A_deploy": return { type: "endDeploy" };
+      case "A_upgrade": return { type: "toAttacks" };
+      case "A_react": return { type: "reactDone" };
+      case "A_attack": return { type: "actAll" };
+      case "D_draw": return { type: "tdraw", args: { cat: E.TILE_CATS.find(c => E.tilesLeft(S, c) > 0) } };
+      case "D_main": return { type: "build" };
+      case "D_place": return { type: "placeAt", args: { k: E.placeTargets(S)[0] } };
+      case "D_fire": return { type: "endD" };
+    }
+    return null;
+  }
+  return { decide, fallback, score, belief, other };
+})();
+if (typeof module !== "undefined") module.exports = IA;
+
 // Swarm & Steel — interface : 2 joueurs sur le même écran (local) ou sur deux appareils (en ligne)
 "use strict";
 (() => {
@@ -2914,13 +3218,31 @@ if (typeof module !== "undefined") module.exports = AIDE;
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true; S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  function newGame(solo) { // solo : camp du joueur face à l'IA (Oni, 08/11/2026)
+    MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true;
+    if (solo) { S.ia = IA.other(solo); S.view = solo; S.handoff = null; } else { S.handoff = "essaim"; S.view = null; }
+    UI = resetUI(); save(); render();
+  }
+  // tour de l'IA (partie solo) : une action à la fois, après les animations, avec une courte pause pour suivre
+  const iaTurn = () => !!(S && S.ia && MODE === "local" && !S.winner && SF.actor(S) === S.ia);
+  function iaTick() {
+    if (!iaTurn() || iaTick.busy || FX.playing) return;
+    iaTick.busy = true;
+    setTimeout(() => {
+      iaTick.busy = false;
+      if (!iaTurn() || FX.playing || MODE !== "local") return;
+      let d = IA.decide(S, S.ia);
+      if (!d || SF.apply(JSON.parse(JSON.stringify(S)), S.ia, d.type, d.args || {})) d = IA.fallback(S, S.ia); // coup refusé : action de secours
+      if (d) { play.byIa = true; try { play(d.type, d.args); } finally { play.byIa = false; } }
+    }, animOn ? 650 : 250);
+  }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   // fenêtres de réaction (Oni, 06/11/2026) : pas d'écran de passage pour entrer dans la réaction de la colonie (A_react)
   // ni pour en sortir ; un bandeau « RÉACTIONS ! » traverse l'écran à la place
   const REACT = ["A_famine", "A_react"];
   function setPhaseHandoff(prev) { // passe la main si le joueur actif change
     const w = who();
+    if (S.ia) { S.view = IA.other(S.ia); S.handoff = null; if (w !== S.view) UI = { ...resetUI(), help: UI.help }; return; } // solo : pas d'écran de passage
     if (S.view === w) return;
     if (S.phase === "A_react" || prev === "A_react") { S.view = w; S.handoff = null; UI = { ...resetUI(), help: UI.help }; return; }
     S.handoff = w; UI = { ...resetUI(), help: UI.help };
@@ -2951,7 +3273,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
       n.replaceWith(f);
     }
   }
-  function render() { renderInner(); colorDirs($("#app")); }
+  function render() { renderInner(); colorDirs($("#app")); iaTick(); }
   function renderInner() {
     document.documentElement.dataset.motion = animOn ? "on" : "off"; // animations CSS suivant le bouton « Animations »
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
@@ -3016,6 +3338,9 @@ if (typeof module !== "undefined") module.exports = AIDE;
       <nav class="h2-menu" aria-label="Menu principal">
         ${resume ? `<button data-a="resume" class="h2-btn main">Reprendre la partie</button>` : ""}
         <button data-a="local" class="h2-btn${resume ? "" : " main"}">Nouvelle partie <small>sur cet appareil</small></button>
+        <div class="h2-online"><span class="h2-k">Solo contre l'IA</span>
+          <div class="h2-row"><button data-a="solo" data-side="essaim" class="h2-btn side essaim">${sideLogo("essaim")}Jouer l'essaim</button><button data-a="solo" data-side="colonie" class="h2-btn side colonie">${sideLogo("colonie")}Jouer la colonie</button></div>
+        </div>
         <div class="h2-online"><span class="h2-k">En ligne</span>
           <div class="h2-row"><button data-a="create" data-side="essaim" class="h2-btn side essaim">${sideLogo("essaim")}Jouer l'essaim</button><button data-a="create" data-side="colonie" class="h2-btn side colonie">${sideLogo("colonie")}Jouer la colonie</button></div>
           <div class="h2-row join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CODE" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="h2-btn">Rejoindre</button></div>
@@ -3151,14 +3476,14 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (S.winner) return "";
     const { p, body, acts, waiting } = phaseParts();
     if (waiting) return `<section class="phase ${p[0]} waiting"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
-      <p class="ph-txt">Au tour de ${E(SIDE[p[0]])} : en attente de votre adversaire…</p></section>`;
+      <p class="ph-txt">Au tour de ${E(SIDE[p[0]])} : ${iaTurn() ? "l'IA joue…" : "en attente de votre adversaire…"}</p></section>`;
     return `<section class="phase ${p[0]}"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
       <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
   }
   // contenu de la boîte d'action (consignes, choix, boutons) : partagé par la mise en page mobile et la mise en page PC
   function phaseParts(sh) { // sh : textes courts (mise en page PC, le détail est au survol)
     const p = PHASE_TXT[S.phase];
-    if (online() && !myTurn()) return { p, body: "", acts: "", waiting: true };
+    if ((online() && !myTurn()) || iaTurn()) return { p, body: "", acts: "", waiting: true };
     let body = "", acts = "";
     const ph = S.phase;
     if (ph === "A_famine") {
@@ -3593,7 +3918,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (S.winner) return { top: "", acts: "" };
     const { p, body, acts, waiting } = phaseParts(true);
     const head = `<div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="info" tabindex="0" data-tip="${E(p[2])}">i</span></div>`;
-    if (waiting) return { top: `<section class="phase ${p[0]} waiting">${head}<p class="hint">En attente de votre adversaire…</p></section>`, acts: "" };
+    if (waiting) return { top: `<section class="phase ${p[0]} waiting">${head}<p class="hint">${iaTurn() ? "L'IA joue…" : "En attente de votre adversaire…"}</p></section>`, acts: "" };
     return { top: `<section class="phase ${p[0]}">${head}${body}</section>`, acts: p[0] === side || !online() ? acts : "" };
   }
   function pcSwarmOwn() {
@@ -3787,6 +4112,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
   // Les actions de jeu passent toutes par SF.apply (moteur) : en local directement, en ligne via le serveur.
   function play(type, args, onOk) {
     if (online()) { send(type, args, onOk); return; }
+    if (iaTurn() && !play.byIa) return; // partie solo : pendant le tour de l'IA, le joueur ne peut pas jouer à sa place
     S.fx = [];
     const prev = S.phase;
     const refused = SF.apply(S, who(), type, args || {});
@@ -3820,7 +4146,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
     if (a === "quit") { if (confirmQuit()) { setNet(null); MODE = "home"; S = null; UI = resetUI(); render(); } return; }
     if (a === "new") {
       if (online()) { if (S.winner) send("rematch", {}); return; }
-      if (!S || S.winner || confirmNew()) { clearSave(); newGame(); } return;
+      if (!S || S.winner || confirmNew()) { const solo = S && S.ia ? IA.other(S.ia) : undefined; clearSave(); newGame(solo); } return;
     }
     if (a === "reveal") {
       if (online() || UI.leaving) return;
@@ -3911,6 +4237,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
   function homeAction(a, d) {
     if (a === "resume") { const t = load(); if (t && t.phase) { S = upgradeSave(t); MODE = "local"; UI = resetUI(); render(); } return; }
     if (a === "local") { MODE = "local"; clearSave(); newGame(); return; }
+    if (a === "solo" && (d.side === "essaim" || d.side === "colonie")) { MODE = "local"; clearSave(); newGame(d.side); return; }
     if (a === "create") { createOnline(d.side); return; }
     if (a === "stats") { openStats(); return; }
     if (a === "join") { const c = ($("#joincode").value || "").trim().toUpperCase(); if (c.length !== 5) { flash("Le code fait 5 caractères."); return; } joinOnline(c); }
@@ -4234,7 +4561,7 @@ if (typeof module !== "undefined") module.exports = AIDE;
   }
   const pct = (a, n) => (n ? Math.round(100 * a / n) + " %" : "–");
   const avg = v => (Math.round(v * 10) / 10).toLocaleString("fr-FR");
-  const shown = () => (STATS.list || []).filter(r => STATS.test || !r.test);
+  const shown = () => (STATS.list || []).filter(r => (STATS.test || !r.test) && (STATS.ia || !r.ia)); // parties contre l'IA à part (Oni, 08/11/2026)
   function statsPage() {
     const head = `<div class="st-head"><h2>Statistiques des parties</h2><button data-a="statsBack" class="ghost">Retour</button></div>`;
     if (STATS.error) return `<section class="statpage">${head}<p>${E(STATS.error)}</p></section>`;
@@ -4245,22 +4572,23 @@ if (typeof module !== "undefined") module.exports = AIDE;
       rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td></tr>`).join("")
     }</tbody></table></div><p class="small">Moyennes par partie. Touchez une version pour ne voir que ses parties.</p>` : `<p>Aucune partie terminée enregistrée pour l'instant.</p>`;
     const games = list.filter(r => !STATS.ver || r.version === STATS.ver).slice(0, 100);
-    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.decouverte ? " · découverte" : ""}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
+    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.decouverte ? " · découverte" : ""}${r.test ? " · test" : ""}${r.ia ? ` · contre l'IA (IA : ${E(r.ia)})` : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
       <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
       ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
     return `<section class="statpage">${head}
       <p class="small">Version actuelle : v${E(SF.VERSION)} · ${list.length} partie${list.length > 1 ? "s" : ""} terminée${list.length > 1 ? "s" : ""}${STATS.test ? "" : ` (hors ${nTest} partie${nTest > 1 ? "s" : ""} de test)`}.</p>
-      <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
+      <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsIa" aria-pressed="${!!STATS.ia}">Parties contre l'IA : ${STATS.ia ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
       ${table}
       <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
       <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
   }
-  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "ia", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
   function statsAction(a, d) {
     if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
     if (a === "help") { return; }
     if (!STATS) return;
     if (a === "statsTest") STATS.test = !STATS.test;
+    if (a === "statsIa") STATS.ia = !STATS.ia;
     if (a === "statsVer") STATS.ver = d.v || null;
     if (a === "statsPlan") {
       fetch("/api/resultat?id=" + encodeURIComponent(d.id), { cache: "no-store" }).then(r => r.json()).then(j => { if (j.svg) { STATS.plans[d.id] = j.svg; render(); } }).catch(() => flash("Plateau indisponible."));

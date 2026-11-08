@@ -1,5 +1,6 @@
 // Partie complète jouée par de vrais clics souris dans Chromium (Playwright).
-// Usage : node tests/e2e-partie.js [largeur]   (ex. 400 pour un téléphone)
+// Usage : node tests/e2e-partie.js [largeur] [solo]   (ex. 400 pour un téléphone ; solo = essaim ou colonie : le robot
+//         joue ce camp contre l'IA, qui joue l'autre)
 // Vérifie : aucune erreur JavaScript, aucun bouton cliqué recouvert par un autre élément, la partie va jusqu'à une victoire.
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
 (async () => {
@@ -26,9 +27,14 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     await new Promise(r => setTimeout(r, 30)); await calm(); return true;
   };
   const phase = () => page.evaluate(() => (document.querySelector('.ph-head b') || document.querySelector('.ho-card h2') || {}).textContent);
-  const shots = {};
+  const shots = {}, solo = process.argv[3];
+  let waits = 0;
   for (let step = 0; step < 7000; step++) {
     if (await page.$('.banner.win, .pc-win')) break;
+    if (solo) {
+      if (await click(`[data-a="solo"][data-side="${solo}"]`)) continue;
+      if (await page.$('.phase.waiting')) { if (++waits > 20000) { console.log('l\'IA ne joue plus'); break; } step--; await new Promise(r => setTimeout(r, 50)); continue; }
+    }
     if (await click('[data-a="local"]')) continue;
     if (await click('[data-a="reveal"]')) continue;
     if (await click('[data-a="famine"][data-v="1"]')) continue;
