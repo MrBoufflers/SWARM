@@ -837,7 +837,7 @@ const fresh = () => {
   ok(SF.apply(S, "essaim", "move", { id: 801, u: 0, k: 1 }) !== "", "vitesse 1 : plus de déplacement ce tour");
   ok(S.tiles["0,1"].hp === 1, "l'attaque est facultative : rien ne se passe tant qu'on ne la demande pas");
   ok(SF.apply(S, "essaim", "strike", { id: 801, target: "0,1" }) === "" && !S.tiles["0,1"] && h.acted, "la Carapace attaque et détruit le Barbelé");
-  ok(SF.apply(S, "essaim", "rest", { id: 800 }) === "" && c.acted && c.k === 3, "l'Écorcheur renonce (« Ne pas bouger ») : il reste en C3");
+  ok(c.k === 2, "l'Écorcheur a avancé avec son bloc en C2 (v0.5.9) ; le Barbelé détruit, il n'a plus rien à faire");
   ok(S.phase === "D_main", "plus aucune créature ne peut agir : le tour passe seul à la colonie");
   // déplacement de moins que le maximum, et cibles sur les 4 côtés
   const T = fresh(); T.phase = "A_attack"; T.supports = {};
@@ -1143,6 +1143,23 @@ const fresh = () => {
   ok(SF.pointsLeft(R) === 2, "le +1 travailleur du Baraquement posé ce tour ne compte qu'au tour suivant");
   SF.apply(R, "colonie", "build");
   ok(R.floors === 1, "les 2 points restants vont à la fusée (1 étage)");
+}
+// 72. Blocs (Oni, 08/11/2026) : les créatures d'une case avancent ensemble, de la vitesse du plus lent ; les plus
+//     rapides finissent seules ; les auras de mobilité sont comptées avant le départ
+{
+  const at = (id, name, k, hp) => ({ id, name, lane: "N", u: 0, k, hp, acted: false });
+  const S = fresh(); S.supports = {}; for (const k of Object.keys(S.tiles)) delete S.tiles[k]; S.phase = "A_attack";
+  S.upgrades.soutien.r1 = "A"; // Mue : Aura Mobilité 1 par soutien, le soutien compris
+  const g1 = at(1, "Glaneur", 4, 2), g2 = at(2, "Œil-sonde", 4, 2), e = at(3, "Écorcheur", 4, 1), c = at(4, "Carapace", 4, 3);
+  S.creatures.push(g1, g2, e, c);
+  ok(Object.keys(SF.reachable(S, e)).length === 3, "bloc de 4 : vitesse 3 pour tous (1 + 2 soutiens), 3 cases possibles");
+  ok(SF.apply(S, "essaim", "move", { id: 3, u: 0, k: 1 }) === "" && [g1, g2, e, c].every(o => o.k === 1), "le bloc entier avance ensemble jusqu'en C1");
+  const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k]; T.phase = "A_attack";
+  const m = at(10, "Massacreur", 4, 1), t = at(11, "Carapace", 4, 3); T.creatures.push(m, t); // vitesses 2 et 1
+  ok(Object.keys(SF.reachable(T, m)).length === 1, "Massacreur (2) avec une Carapace (1) : le bloc n'avance que d'une case");
+  SF.apply(T, "essaim", "move", { id: 10, u: 0, k: 3 });
+  ok(m.k === 3 && t.k === 3 && Object.keys(SF.reachable(T, m)).length === 1 && Object.keys(SF.reachable(T, t)).length === 0, "ensemble en C3 ; il reste 1 case au Massacreur, plus rien à la Carapace");
+  ok(SF.apply(T, "essaim", "move", { id: 10, u: 0, k: 2 }) === "" && m.k === 2 && t.k === 3, "le Massacreur finit seul son déplacement");
 }
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {

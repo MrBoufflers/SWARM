@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.8 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.9 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -187,7 +187,8 @@ Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coi
 
 Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, dans l'ordre qu'il veut (Oni, 06/11/2026).
 
-1. **Déplacement** (Oni, 07/11/2026) : la vitesse est un **maximum** : la créature avance de **1 case jusqu'à sa vitesse**, au choix, sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut ; jamais en arrière ni sur les côtés). Vitesse : **1** (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros) ou la Mue (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée, et ne passe jamais sur un bâtiment, un coin de support ou la fusée. Si elle peut avancer, elle doit avancer d'au moins une case avant d'attaquer. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
+1. **Déplacement en bloc** (Oni, 08/11/2026) : les créatures d'une même case qui peuvent encore avancer bougent **ensemble**, d'autant de cases que la plus lente ; leurs vitesses sont fixées ensemble avant le départ (toutes les auras de mobilité de la case comptent). Celles à qui il reste des déplacements peuvent ensuite finir le leur.
+   1. **Déplacement** (Oni, 07/11/2026) : la vitesse est un **maximum** : la créature avance de **1 case jusqu'à sa vitesse**, au choix, sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut ; jamais en arrière ni sur les côtés). Vitesse : **1** (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros) ou la Mue (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée, et ne passe jamais sur un bâtiment, un coin de support ou la fusée. Si elle peut avancer, elle doit avancer d'au moins une case avant d'attaquer. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
 2. **Attaque (facultative)** : elle peut attaquer **n'importe quel bâtiment qui touche sa case par un côté** (4 côtés), ou la fusée si elle la touche. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais. Après une attaque, elle ne bouge plus (avec **Carnage**, une aggro peut attaquer une 2ᵉ fois).
 3. **Tout résoudre et finir le tour** : fait agir toutes les créatures restantes (chacune avance au maximum puis attaque devant elle), **les soutiens d'abord** (les créatures parties de la même case les suivent et profitent encore de leurs auras en attaquant), puis les plus avancées ; puis le tour de l'essaim se termine. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
 

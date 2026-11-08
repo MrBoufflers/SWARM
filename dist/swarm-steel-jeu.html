@@ -1260,7 +1260,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.8";
+  const VERSION = "0.5.9";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1721,10 +1721,18 @@ const SF = (() => {
   // Déplacements (Oni, 07/11/2026) : la créature avance sur son chemin en escalier vers la fusée (jamais sur les côtés ni vers
   // l'extérieur, hormis le pas de côté de l'escalier), de 1 case jusqu'à son maximum, au choix ; elle s'arrête devant un
   // bâtiment ou la fusée. Si elle peut avancer, elle doit le faire d'au moins une case avant d'attaquer.
+  // Blocs (Oni, 08/11/2026) : les créatures d'une même case qui peuvent encore avancer bougent ensemble, d'autant de cases
+  // que la plus lente d'entre elles (leurs vitesses sont fixées ensemble, auras de la case comprises) ; celles à qui il reste
+  // des déplacements peuvent ensuite continuer (nouveau bloc, plus petit).
+  const moveBlock = (S, c) => S.creatures.filter(o => o.lane === c.lane && o.u === c.u && o.k === c.k && !o.acted && !o.struck && stepsLeft(S, o) > 0);
+  function blockSteps(S, c) {
+    if (c.acted || c.struck || stepsLeft(S, c) <= 0) return 0;
+    return Math.min(...moveBlock(S, c).map(o => stepsLeft(S, o)));
+  }
   function pathCells(S, c) {
     const out = []; let u = c.u, k = c.k;
     if (c.struck) return out; // après une attaque, plus de déplacement (même si la cible est tombée et libère le chemin)
-    for (let d = 1; d <= stepsLeft(S, c); d++) {
+    for (let d = 1; d <= blockSteps(S, c); d++) {
       const [nu, nk] = nextStep(u, k);
       if (nk === 0 || S.tiles[key(...toGlobal(c.lane, nu, nk))]) break;
       out.push({ u: nu, k: nk, d, prev: key(...toGlobal(c.lane, u, k)) });
@@ -1751,14 +1759,16 @@ const SF = (() => {
   const canAct = (S, c) => !c.acted && (strikeTargets(S, c).length > 0 || (!c.struck && pathCells(S, c).length > 0));
   function moveCreature(S, id, u, k) {
     const c = S.creatures.find(o => o.id === id); if (!c || c.acted || c.struck) return false;
+    // vitesses de toute la case fixées ensemble, avant que quiconque parte (les auras de mobilité comptent toutes)
+    for (const o of S.creatures) if (o.lane === c.lane && o.u === c.u && o.k === c.k && o.spd === undefined) o.spd = speedOf(S, o);
     const R = reachable(S, c), dest = key(...toGlobal(c.lane, u, k)), r = R[dest];
     if (!r) return false;
-    if (c.spd === undefined) c.spd = speedOf(S, c);
+    const block = moveBlock(S, c);
     const path = pathCells(S, c).slice(0, r.d).map(p => [p.u, p.k]);
     const from = cellName(c.u, c.k);
-    fx(S, { t: "move", ids: [c.id], lane: c.lane, from: [c.u, c.k], to: [u, k], path });
-    c.u = u; c.k = k; c.moved = (c.moved || 0) + r.d;
-    log(S, "essaim", `${c.name} (lane ${LANE_NAME[c.lane]}) : ${from} → ${cellName(u, k)}.`);
+    fx(S, { t: "move", ids: block.map(o => o.id), lane: c.lane, from: [c.u, c.k], to: [u, k], path });
+    for (const o of block) { o.u = u; o.k = k; o.moved = (o.moved || 0) + r.d; }
+    log(S, "essaim", `${block.map(o => o.name).join(", ")} (lane ${LANE_NAME[c.lane]}) : ${from} → ${cellName(u, k)}.`);
     return true;
   }
   function strikeAt(S, id, target) {
@@ -1779,8 +1789,11 @@ const SF = (() => {
   // ce qui est devant elle (sinon un autre bâtiment voisin), deux fois avec Carnage
   function autoCreature(S, c) {
     if (c.acted) return;
-    const p = pathCells(S, c);
-    if (p.length && !c.struck) moveCreature(S, c.id, p[p.length - 1].u, p[p.length - 1].k);
+    // avance avec son bloc, puis seule (ou avec les plus rapides) tant qu'il lui reste des déplacements
+    for (let i = 0; i < 6 && !c.struck && !c.acted; i++) {
+      const p = pathCells(S, c);
+      if (!p.length || !moveCreature(S, c.id, p[p.length - 1].u, p[p.length - 1].k)) break;
+    }
     while (!c.acted && S.creatures.includes(c) && !S.winner) {
       const [nu, nk] = nextStep(c.u, c.k);
       const front = nk === 0 ? "fusee" : key(...toGlobal(c.lane, nu, nk));
