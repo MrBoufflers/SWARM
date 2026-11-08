@@ -19,10 +19,10 @@ const SF = (() => {
     // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
     "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
-    "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case." },
+    "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+1 ATQ et +1 PV aux autres créatures de sa case." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
-    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque un bâtiment ou la fusée, les 8 cases autour de la cible (diagonales comprises, toutes lanes) subissent 2 dégâts par Sporeur de la case ; la fusée touchée perd 1 travailleur (sauf une tuile encore camouflée et non visible)." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 2 dégâts par Sporeur ; la fusée touchée perd 1 travailleur." },
   };
   const PILES = {
     1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Catalyseur", 2]] },
@@ -74,9 +74,9 @@ const SF = (() => {
     "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Mine majeure": "Camouflée. 2 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Mine supérieure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
-    "Siphon mineur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 1 biomasse (jamais sous 5).",
-    "Siphon majeur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 2 biomasse (jamais sous 5).",
-    "Siphon supérieur": "Camouflé. Révélé par une attaque de l'essaim : l'essaim perd 3 biomasse (jamais sous 5).",
+    "Siphon mineur": "Camouflé. Révélé par une attaque : l'essaim perd 1 biomasse, +1 par tranche de 10 qu'il possède (jamais sous 5).",
+    "Siphon majeur": "Camouflé. Révélé par une attaque : l'essaim perd 2 biomasse, +2 par tranche de 10 qu'il possède (jamais sous 5).",
+    "Siphon supérieur": "Camouflé. Révélé par une attaque : l'essaim perd 3 biomasse, +3 par tranche de 10 qu'il possède (jamais sous 5).",
     "Abri blindé": "+1 travailleur tant que la tuile tient. Bouclier : la prochaine attaque ne lui fait rien (le jeton est alors défaussé).",
     "Ronceraie": "Camouflée. Renforcé 2, Épines 2.",
     "Égide": "Camouflée. Renforcé 2 : perd 1 PV par tranche de 2 dégâts.",
@@ -108,16 +108,16 @@ const SF = (() => {
     { min: 21, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ. Les créatures aggro gagnent la Furtivité."], B1: ["Mobilité", "+1 déplacement pour les créatures aggro."],
-      A2: ["Carnage", "Les créatures aggro peuvent attaquer 2 fois par tour."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
+    aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 déplacement."],
+      A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 2 cartes de niveau 1 gratuites en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
-    tank: { A1: ["Carapace épaisse", "+1 PV. Les tanks ne subissent plus les dégâts d'Épines."], B1: ["Provocation", "Les tirs visant une créature non tank de sa case visent ce tank. Les tanks subissent 1 dégât de moins des tourelles."],
-      A2: ["Blindage", "+2 PV (total +3)."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au début de votre tour suivant, là où il est mort."],
+    tank: { A1: ["Carapace épaisse", "+1 PV. Insensibles aux Épines."], B1: ["Provocation", "Les tirs visant une autre créature de sa case visent ce tank. −1 dégât des tourelles."],
+      A2: ["Blindage", "+2 PV."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au tour suivant, là où il est mort."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
-    soutien: { A1: ["Mue", "Tous les soutiens gagnent l'Aura Mobilité 1 (+1 case à toutes les créatures de leur case, eux compris) et l'Aura +1 PV (+1 PV aux autres créatures de leur case)."], B1: ["Griffes", "Tous les soutiens gagnent l'Aura Griffes : +1 ATQ aux autres créatures de leur case."],
-      A2: ["Régénération", "Tous les soutiens gagnent l'Aura Soin 2 (qui s'ajoute à leurs autres auras de soin)."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, toutes les tuiles camouflées sont visibles. Les Œil-sonde de la pioche sortent du jeu."],
-      B2: ["Frénésie", "Chaque soutien double les dégâts d'une autre créature de sa case, au choix (cumulable : deux Frénésies sur la même créature la quadruplent)."] },
+    soutien: { A1: ["Mue", "Aura Mobilité 1 et Aura +1 PV."], B1: ["Griffes", "Aura +1 ATQ et Aura Mobilité 1."],
+      A2: ["Régénération", "Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      B2: ["Frénésie", "Double les dégâts d'une autre créature de sa case, au choix."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
   const MIN_BIOMASS = 5; // un Siphon ne fait jamais descendre l'essaim sous 5 biomasse (Oni, 07/11/2026 ; avant 3)
@@ -138,7 +138,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.6";
+  const VERSION = "0.5.7";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -267,6 +267,7 @@ const SF = (() => {
   function bonusHp(S, c) {
     let b = CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "B" ? caseMates(S, c).length : 0; // Masse vivante
     if (S.upgrades.soutien.r1 === "A") b += countMates(S, c, isSoutien); // Mue : Aura +1 PV de chaque soutien de la case
+    b += countMates(S, c, o => o.name === "Hurleur"); // Aura Fureur : +1 PV (Oni, 08/11/2026)
     return b;
   }
   function maxHp(S, name) {
@@ -303,7 +304,7 @@ const SF = (() => {
   function effAtq(S, c) {
     if (!attacks(c)) return 0;
     let a = baseAtq(S, c.name);
-    a += 2 * countMates(S, c, o => o.name === "Hurleur"); // Aura Fureur : +2 par Hurleur de la case (Oni, 07/11/2026 ; avant +1)
+    a += countMates(S, c, o => o.name === "Hurleur"); // Aura Fureur : +1 ATQ (et +1 PV, bonusHp) par Hurleur de la case (Oni, 08/11/2026 ; avant +2 ATQ)
     if (S.upgrades.soutien.r1 === "B") a += countMates(S, c, isSoutien); // Aura Griffes : +1 par soutien de la case
     a *= 2 ** frenzyCount(S, c); // Frénésie : ×2 par soutien qui choisit cette créature
     return a;
@@ -532,7 +533,7 @@ const SF = (() => {
   const baseSpeed = c => (CREATURES[c.name].lvl === 3 ? 2 : 1);
   // Mue : l'Aura Mobilité 1 profite aussi au soutien qui la donne (Oni, 07/11/2026)
   const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0)
-    + (S.upgrades.soutien.r1 === "A" ? countMates(S, c, isSoutien) + (isSoutien(c) ? 1 : 0) : 0);
+    + (S.upgrades.soutien.r1 ? countMates(S, c, isSoutien) + (isSoutien(c) ? 1 : 0) : 0); // Aura Mobilité 1 : Mue, et Griffes depuis le 08/11/2026
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
     const block = blockAt(S, key).filter(c => !c.acted);
@@ -708,7 +709,8 @@ const SF = (() => {
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
       // Siphon : retire de la biomasse à l'essaim, sans jamais la faire passer sous 3 (Oni, 02/11/2026)
       if (t.siphon && !clairvoyance(S)) {
-        const before = S.biomass; S.biomass = Math.max(MIN_BIOMASS, S.biomass - t.siphon);
+        // effet selon la biomasse de l'essaim (Oni, 08/11/2026) : niveau × (1 + 1 par tranche complète de 10)
+        const before = S.biomass; S.biomass = Math.max(MIN_BIOMASS, S.biomass - siphonLoss(t.siphon, S.biomass));
         fx(S, { t: "siphon", k: tk, n: before - S.biomass });
         log(S, "colonie", `Siphon : l'essaim perd ${before - S.biomass} biomasse (biomasse ${S.biomass}).`);
       }
@@ -770,7 +772,7 @@ const SF = (() => {
 
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
-    S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = [];
+    S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
     // Réincarnation
     for (const r of S.reincQueue) {
@@ -829,13 +831,20 @@ const SF = (() => {
     const total = Math.min(tierCards(tier(S)), levels.reduce((a, l) => a + S.piles[l].length, 0));
     return { total, levels };
   };
-  function attackerPick(S, counts) {
-    if (S.startHand) { attackerDraw(S); return true; } // premier tour : main de départ imposée
-    const { total, levels } = pickRule(S);
-    if (counts.reduce((a, b) => a + b, 0) !== total) return false; // ni plus ni moins que le palier
-    for (const l of [1, 2, 3]) if (counts[l - 1] && (!levels.includes(l) || counts[l - 1] > S.piles[l].length)) return false;
-    S.handA = [];
-    for (const l of [1, 2, 3]) for (let i = 0; i < counts[l - 1]; i++) S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ });
+  const siphonLoss = (lvl, bio) => lvl * (1 + Math.floor(bio / 10));
+  // pioche de l'essaim carte par carte (Oni, 08/11/2026) : comme la colonie, une carte à la fois dans la pile choisie ;
+  // le total (S.pickTotal) est fixé à la première carte
+  function pickOne(S, l) {
+    if (S.startHand || ![1, 2, 3].includes(l) || !S.piles[l].length) return false;
+    if (S.pickTotal == null) { S.pickTotal = pickRule(S).total; S.handA = []; }
+    S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ });
+    if (S.handA.length >= S.pickTotal || ![1, 2, 3].some(x => S.piles[x].length)) {
+      const n = [1, 2, 3].map(x => S.handA.filter(c => CREATURES[c.name].lvl === x).length);
+      delete S.pickTotal; finishPick(S, n);
+    }
+    return true;
+  }
+  function finishPick(S, counts) {
     if (S.upgrades.aggro.r2 === "C") { // Déploiement : 2 cartes de niveau 1 gratuites, au hasard, en plus
       let m = 0;
       for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); m++; }
@@ -845,6 +854,27 @@ const SF = (() => {
     fx(S, { t: "draw", n: S.handA.length });
     S.phase = "A_deploy";
     log(S, "essaim", `Palier ${tier(S) + 1} : pioche ${counts.join(" · ")} (niveaux 1 · 2 · 3), budget ${S.budget}.`);
+  }
+  // Déploiement (aggro C2, Oni 08/11/2026) : une fois par tour, pendant le déploiement, une aggro en jeu est redéployée
+  // à l'entrée (colonne u) de n'importe quelle lane, dans la limite de population
+  function teleport(S, id, lane, u) {
+    const c = S.creatures.find(o => o.id === id);
+    if (S.upgrades.aggro.r2 !== "C" || S.tpUsed || !c || CREATURES[c.name].type !== "aggro" || Math.abs(u) > 2) return false;
+    if (c.lane !== lane && laneCount(S, lane) >= capOf(S)) return false;
+    const from = `${LANE_NAME[c.lane]} ${cellName(c.u, c.k)}`;
+    c.lane = lane; c.u = u; c.k = 4; S.tpUsed = true;
+    fx(S, { t: "deploy", id: c.id });
+    log(S, "essaim", `Déploiement : ${c.name} redéployé de ${from} à l'entrée de la lane ${LANE_NAME[lane]}, colonne ${COLS[u + 2]}.`);
+    return true;
+  }
+  function attackerPick(S, counts) {
+    if (S.startHand) { attackerDraw(S); return true; } // premier tour : main de départ imposée
+    const { total, levels } = pickRule(S);
+    if (counts.reduce((a, b) => a + b, 0) !== total) return false; // ni plus ni moins que le palier
+    for (const l of [1, 2, 3]) if (counts[l - 1] && (!levels.includes(l) || counts[l - 1] > S.piles[l].length)) return false;
+    S.handA = []; delete S.pickTotal;
+    for (const l of [1, 2, 3]) for (let i = 0; i < counts[l - 1]; i++) S.handA.push({ name: S.piles[l].pop(), free: false, uid: S.nextId++ });
+    finishPick(S, counts);
     return true;
   }
   function canDeploy(S, card, lane) {
@@ -1261,6 +1291,8 @@ const SF = (() => {
       return true;
     } },
     draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } }, // pioche au hasard (premier tour, tests)
+    pickOne: { phase: ["A_start"], run: (S, a) => isInt(a.l) && pickOne(S, a.l) }, // une carte dans la pile choisie
+    teleport: { phase: ["A_deploy"], run: (S, a) => isInt(a.id) && isLane(a.lane) && isInt(a.u) && teleport(S, a.id, a.lane, a.u) },
     pick: { phase: ["A_start"], run: (S, a) => Array.isArray(a.n) && a.n.length === 3 && a.n.every(x => isInt(x) && x >= 0) && attackerPick(S, a.n) },
     frenzy: { phase: ["A_deploy", "A_upgrade", "A_attack"], run: (S, a) => isInt(a.src) && isInt(a.target) && setFrenzy(S, a.src, a.target) },
     deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && (a.k === undefined || (isInt(a.k) && a.k >= 1 && a.k <= 4)) && deploy(S, a.uid, a.lane, a.u, a.target, a.k) },
@@ -1394,7 +1426,7 @@ const SF = (() => {
 
   return {
     VERSION,
-    fxFor, migrate, famineBudget, MIN_BIOMASS, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, famineBudget, MIN_BIOMASS, siphonLoss, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

@@ -94,7 +94,7 @@ const fresh = () => {
   const h = { id: 1, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 1 }, e = { id: 2, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 };
   const far = { id: 3, name: "Écorcheur", lane: "N", u: 1, k: 4, hp: 1 };
   S.creatures.push(h, e, far);
-  ok(SF.effAtq(S, e) === 5 && SF.effAtq(S, h) === 0 && SF.effAtq(S, far) === 3, "Fureur (+2 ATQ, v0.5) : même case seulement ; le Hurleur lui-même a 0 ATQ");
+  ok(SF.effAtq(S, e) === 4 && SF.effAtq(S, h) === 0 && SF.effAtq(S, far) === 3, "Fureur (+1 ATQ, 08/11/2026) : même case seulement ; le Hurleur lui-même a 0 ATQ");
 }
 // 11. améliorations payées en plusieurs fois
 {
@@ -159,7 +159,7 @@ const fresh = () => {
   S.creatures.push(g1, g2, e);
   ok(SF.effAtq(S, e) === 5, "Écorcheur 3 + 2 (Griffes de 2 soutiens : cumulable)");
   S.creatures.push({ id: 4, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2 });
-  ok(SF.effAtq(S, e) === 8, "+ un Hurleur : 3 + 3 (Griffes de 3 soutiens) + 2 (Fureur)");
+  ok(SF.effAtq(S, e) === 7, "+ un Hurleur : 3 + 3 (Griffes de 3 soutiens) + 1 (Fureur)");
   ok(SF.effAtq(S, g1) === 0, "le soutien reste à 0 ATQ");
 }
 // 16. tourelles : 8 cases autour du support ; niveau I = 1 + paliers de fusée (3/6/9), niveau II = 2
@@ -647,7 +647,9 @@ const fresh = () => {
     SF.act(S, c); return { S, c };
   };
   let r = hit(10);
-  ok(r.S.biomass === 7 && r.S.tiles["0,1"].hp === 2 && r.c.hp === 3, "Siphon supérieur révélé par l'attaque d'une Carapace : biomasse 10 → 7, puis la Carapace frappe (3 → 2 PV), sans être blessée");
+  ok(r.S.biomass === 5 && r.S.tiles["0,1"].hp === 2 && r.c.hp === 3, "Siphon supérieur révélé par l'attaque d'une Carapace : biomasse 10 → 5 (3 + 3 par tranche de 10 = 6, plancher 5), puis la Carapace frappe (3 → 2 PV)");
+  r = hit(25);
+  ok(r.S.biomass === 16 && SF.siphonLoss(1, 25) === 3 && SF.siphonLoss(2, 9) === 2, "biomasse 25 : Siphon supérieur 3 + 3 × 2 = 9 (25 → 16) ; mineur à 25 : 3 ; majeur à 9 : 2");
   r = hit(6);
   ok(r.S.biomass === 5 && SF.MIN_BIOMASS === 5, "biomasse 6 : elle ne descend pas sous 5 (Oni, 07/11/2026 ; avant 3)");
   r = hit(10, S => { S.tiles["0,1"].revealed = true; });
@@ -731,7 +733,7 @@ const fresh = () => {
   const V = fresh(); V.upgrades.soutien.r1 = "A";
   const m = at(230, "Écorcheur", 4, 1), s1 = at(231, "Hurleur", 4, 2), s2 = at(232, "Œil-sonde", 4, 2);
   V.creatures.push(m, s1, s2);
-  ok(SF.bonusHp(V, m) === 2 && SF.bonusHp(V, s1) === 1 && SF.maxHp(V, "Hurleur") === 4, "Mue : +1 PV par soutien de la case aux autres créatures (Écorcheur +2, Hurleur +1), plus de +1 PV propre");
+  ok(SF.bonusHp(V, m) === 3 && SF.bonusHp(V, s1) === 1 && SF.maxHp(V, "Hurleur") === 4, "Mue : +1 PV par soutien de la case aux autres créatures (Écorcheur +2, +1 de la Fureur du Hurleur), plus de +1 PV propre");
   ok(!SF.isStealthy(V, s1) && !SF.isStealthy(V, m), "Mue : plus de Furtivité pour les soutiens (Oni, 05/11/2026)");
   ok(SF.TREES.tank.B1[0] === "Provocation", "tank, côté B : « Provocation » (ancienne Protection)");
   // Bouclier → Renforcé : une ancienne partie est convertie
@@ -747,8 +749,8 @@ const fresh = () => {
   const F = fresh(); F.phase = "A_attack"; F.upgrades.soutien.r2 = "B";
   const ec = at(250, "Écorcheur"), ca = at(251, "Carapace"), f1 = at(252, "Hurleur"), f2 = at(253, "Œil-sonde");
   F.creatures.push(ec, ca, f1, f2); // Écorcheur 3 (+2 Fureur) ; Carapace 1 (+2 Fureur)
-  ok(SF.effAtq(F, ec) === 20 && SF.effAtq(F, ca) === 3, "par défaut, les 2 soutiens choisissent l'Écorcheur : (3 + 2) × 4 = 20");
-  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) === "" && SF.effAtq(F, ec) === 10 && SF.effAtq(F, ca) === 6, "l'Œil-sonde passe sur la Carapace : Écorcheur ×2 (10), Carapace ×2 (6)");
+  ok(SF.effAtq(F, ec) === 16 && SF.effAtq(F, ca) === 2, "par défaut, les 2 soutiens choisissent l'Écorcheur : (3 + 1) × 4 = 16");
+  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) === "" && SF.effAtq(F, ec) === 8 && SF.effAtq(F, ca) === 4, "l'Œil-sonde passe sur la Carapace : Écorcheur ×2 (8), Carapace ×2 (4)");
   ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 253 }) !== "" && SF.apply(F, "colonie", "frenzy", { src: 253, target: 250 }) !== "", "pas sur soi-même ; la colonie ne peut pas choisir");
   const G = fresh(); G.phase = "A_attack"; const g1 = at(260, "Hurleur"); G.creatures.push(at(261, "Écorcheur"), g1);
   ok(SF.apply(G, "essaim", "frenzy", { src: 260, target: 261 }) !== "", "sans l'amélioration Frénésie : refusé");
@@ -888,7 +890,7 @@ const fresh = () => {
   const T = fresh(); T.upgrades.soutien.r1 = "A";
   const e = at(960, "Écorcheur", 1), h = at(961, "Hurleur", 2), o = at(962, "Œil-sonde", 2); T.creatures.push(e, h, o);
   ok(SF.speedOf(T, e) === 3 && SF.speedOf(T, h) === 3, "Mue : chaque soutien donne +1 case à sa case, lui compris (Écorcheur 1 + 2 = 3, Hurleur 1 + 2 = 3)");
-  ok(SF.bonusHp(T, e) === 2 && !SF.isStealthy(T, h), "Mue : l'Aura +1 PV reste, la Furtivité disparaît");
+  ok(SF.bonusHp(T, e) === 3 && !SF.isStealthy(T, h), "Mue : Aura +1 PV de 2 soutiens, + 1 PV de la Fureur du Hurleur (3)");
   const G = fresh(); G.upgrades.soutien.r1 = "A"; const x = at(970, "Carapace", 3); G.creatures.push(x, at(971, "Glaneur", 2));
   ok(SF.speedOf(G, x) === 2, "Glaneur avec la Mue : une seule Aura Mobilité (+1), celle de la Mue");
   const U = fresh(); U.upgrades.aggro.r1 = "B"; const a = at(980, "Ravageur", 1), t = at(981, "Béhémoth", 5); U.creatures.push(a, t);
@@ -1096,6 +1098,26 @@ const fresh = () => {
   ok(!SF.targetable(S, a) && SF.targetable(S, t), "l'Écorcheur ne peut pas être visé tant que la Carapace est sur sa case");
   S.creatures.pop();
   ok(SF.targetable(S, a), "seul sur sa case, il redevient une cible");
+}
+// 70. Oni, 08/11/2026 : Hurleur +1 ATQ +1 PV ; Griffes donne l'Aura Mobilité 1 ; Déploiement téléporte une aggro ;
+//     pioche de l'essaim carte par carte
+{
+  const at = (id, name, k, hp, u = 0) => ({ id, name, lane: "N", u, k, hp, acted: false });
+  const S = fresh(); const e = at(1, "Écorcheur", 4, 1), h = at(2, "Hurleur", 4, 4); S.creatures.push(e, h);
+  ok(SF.effAtq(S, e) === 4 && SF.bonusHp(S, e) === 1 && SF.bonusHp(S, h) === 0, "Hurleur : +1 ATQ et +1 PV aux autres créatures de sa case");
+  const G = fresh(); G.upgrades.soutien.r1 = "B"; const c = at(3, "Carapace", 4, 3), g = at(4, "Glaneur", 4, 2); G.creatures.push(c, g);
+  ok(SF.speedOf(G, c) === 2 && SF.speedOf(G, g) === 2 && SF.effAtq(G, c) === 2, "Griffes : Aura Mobilité 1 (soutien compris) et +1 ATQ");
+  const T = fresh(); T.phase = "A_deploy"; T.upgrades.aggro.r2 = "C"; const a = at(5, "Ravageur", 2, 1), t = at(6, "Carapace", 2, 3); T.creatures.push(a, t);
+  ok(SF.apply(T, "essaim", "teleport", { id: 6, lane: "E", u: 0 }) !== "", "téléportation : une aggro seulement");
+  ok(SF.apply(T, "essaim", "teleport", { id: 5, lane: "E", u: 1 }) === "" && a.lane === "E" && a.u === 1 && a.k === 4, "le Ravageur est redéployé à l'entrée de la lane Est, colonne D");
+  ok(SF.apply(T, "essaim", "teleport", { id: 5, lane: "S", u: 0 }) !== "", "une seule fois par tour");
+  const N = fresh(); N.upgrades.aggro.r2 = null; N.phase = "A_deploy"; N.creatures.push(at(7, "Écorcheur", 3, 1));
+  ok(SF.apply(N, "essaim", "teleport", { id: 7, lane: "E", u: 0 }) !== "", "sans l'amélioration Déploiement : refusé");
+  const P = fresh(); P.biomass = 9; P.piles[2] = ["Ravageur", "Béhémoth"];
+  ok(SF.apply(P, "essaim", "pickOne", { l: 2 }) === "" && P.phase === "A_start" && P.handA.length === 1 && P.pickTotal === 5, "1ʳᵉ carte piochée dans la pile 2 ; total du palier fixé (5)");
+  ok(SF.apply(P, "essaim", "pickOne", { l: 3 }) !== "", "pile vide : refusé");
+  for (let i = 0; i < 4; i++) SF.apply(P, "essaim", "pickOne", { l: 1 });
+  ok(P.phase === "A_deploy" && P.handA.length === 5 && !("pickTotal" in P), "5 cartes : étape de déploiement");
 }
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {

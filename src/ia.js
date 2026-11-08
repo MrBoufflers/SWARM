@@ -262,7 +262,12 @@ const IA = (() => {
     try {
       switch (V.phase) {
         case "A_famine": return { type: "famine", args: { play: V.spells.includes("Famine") } };
-        case "A_start": return V.startHand ? { type: "draw" } : swarmPick(V);
+        case "A_start": { // pioche carte par carte : la pile la plus haute encore prévue par le plan
+          if (V.startHand) return { type: "draw" };
+          const plan = swarmPick(V).args.n, got = [1, 2, 3].map(l => V.handA.filter(c => V.pickTotal != null && c.name && E.CREATURES[c.name].lvl === l).length);
+          const l = [3, 2, 1].find(l => plan[l - 1] > got[l - 1] && V.__pileN[l] > 0) || [1, 2, 3].find(l => V.__pileN[l] > 0);
+          return { type: "pickOne", args: { l } };
+        }
         case "A_deploy": return swarmDeploy(V);
         case "A_upgrade": return swarmInvest(V) || { type: "toAttacks" };
         case "A_react": return colonyReact(V);
@@ -283,9 +288,7 @@ const IA = (() => {
       case "A_famine": return { type: "famine", args: { play: false } };
       case "A_start": {
         if (S.startHand) return { type: "draw" };
-        let left = E.pickRule(S).total; const n = [0, 0, 0];
-        for (const l of [1, 2, 3]) { const q = Math.min(left, S.piles[l].length); n[l - 1] = q; left -= q; }
-        return { type: "pick", args: { n } };
+        return { type: "pickOne", args: { l: [1, 2, 3].find(l => S.piles[l].length > 0) } };
       }
       case "A_deploy": return { type: "endDeploy" };
       case "A_upgrade": return { type: "toAttacks" };

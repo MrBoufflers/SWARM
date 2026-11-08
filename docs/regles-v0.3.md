@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.6 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.7 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -132,6 +132,8 @@ Votre budget du tour est égal à votre **biomasse**. La biomasse n'est jamais d
 
 Votre **palier** dépend de votre biomasse (voir l'aide de jeu). Il fixe seulement le **nombre de cartes** que vous prenez (3, 5, 7 puis 10) et combien de créatures peuvent attaquer une même lane. Vous répartissez ce nombre comme vous voulez entre les piles de niveau 1, 2 et 3 (Oni, 07/11/2026) ; les piles de niveau 2 et 3 restent vides tant que vous n'avez pas d'amélioration de rang 1 ou 2 : vous choisissez **de quelle pile** vous piochez, pas les créatures — chaque pile mélange les types débloqués par vos améliorations, et les cartes sont tirées au hasard. Vous devez piocher **exactement** ce nombre de cartes (Oni, 07/11/2026), sans jamais prendre plus de cartes qu'une pile n'en contient ; si les piles n'en ont pas assez, vous piochez tout ce qu'elles contiennent.
 
+**Carte par carte** (Oni, 08/11/2026) : vous piochez une carte à la fois, en choisissant à chaque fois la pile (niveau 1, 2 ou 3), et vous la voyez avant de choisir la suivante.
+
 **Premier tour** : au lieu de choisir, l'essaim reçoit une créature de niveau 1 de chaque type : un Écorcheur (aggro), une Carapace (tank) et un soutien de niveau 1 tiré au hasard, jamais l'Œil-sonde (Glaneur ou Catalyseur). Elles se paient normalement avec le budget.
 
 ### 3. Déploiement et améliorations (une seule étape)
@@ -199,7 +201,7 @@ Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, d
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus cumulable : **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
 - **Mine** (mineure, majeure, supérieure) : la première attaque la retourne face visible et inflige **1, 2 ou 3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Une Mine déjà vue par Vision ou Clairvoyance ne se déclenche plus.
-- **Siphon** (mineur, majeur, supérieur) : la première attaque le retourne face visible et l'essaim perd **1, 2 ou 3 biomasse** ; sa biomasse ne descend jamais sous **5**. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
+- **Siphon** (mineur, majeur, supérieur) : la première attaque le retourne face visible et l'essaim perd **1, 2 ou 3 biomasse, plus autant par tranche complète de 10 qu'il possède** (ex. Siphon supérieur à 25 biomasse : 3 + 3 × 2 = 9) ; sa biomasse ne descend jamais sous **5**. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
 - **Bouclier** (Abri blindé) : le bâtiment arrive avec un jeton. La prochaine attaque ne lui fait aucun dégât, comme en stase : pas d'Épines, mais toute l'attaque passe en percée et les spores touchent les tuiles voisines. Le jeton est alors défaussé. Une percée ou des spores qui l'atteignent consomment aussi le jeton †.
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Un Barbelé détruit est retiré du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
@@ -335,7 +337,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Catalyseur | Soutien | 1 | 2 | 2 | 0 | **Aura Cuirasse** : les autres créatures de sa case ne subissent pas les dégâts d'Épines (les pièges blessent toujours) | 2 |
 | Phéromone | Soutien | 2 | 3 | 4 | 0 | **Aura Butin** : chaque autre créature de sa case qui détruit un bâtiment (attaque, percée ou spores) rapporte **+1 biomasse** en plus (cumulable : +1 par Phéromone) | 2 |
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
-| Hurleur | Soutien | 2 | 3 | 4 | 0 | **Aura Fureur** : +2 ATQ aux autres créatures de sa case | 2 |
+| Hurleur | Soutien | 2 | 3 | 4 | 0 | **Aura Fureur** : +1 ATQ et +1 PV aux autres créatures de sa case | 2 |
 | Sapeur | Soutien | 3 | 5 | 6 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
 | Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque un bâtiment ou la fusée, les **8 cases autour de la cible** (diagonales comprises, toutes lanes) subissent **2 dégâts par Sporeur** de la case, en une seule attaque ; si la fusée est parmi elles, elle perd **1 travailleur** (sauf une tuile encore camouflée et non visible) | 3 |
 
@@ -407,7 +409,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | 1 | Côté A | Férocité | +1 ATQ ; les créatures aggro gagnent la **Furtivité** (elles ne peuvent pas être visées par une tourelle ni un sortilège tant qu'une créature non furtive est sur leur case) |
 | 1 | Côté B | Mobilité | **+1 déplacement** pour les créatures aggro |
 | 2 | Côté A (après Férocité) | Carnage | les créatures aggro peuvent **attaquer 2 fois** par tour |
-| 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † |
+| 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † ; en plus, une fois par tour pendant le déploiement, une aggro en jeu peut être **redéployée à l'entrée de n'importe quelle lane** (plafond de population respecté) |
 | 2 | Côté B (après Mobilité) | Essaim agrandi | **+3 au plafond de population** de chaque lane |
 
 #### Tank
@@ -425,7 +427,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
 | 1 | Côté A | Mue | tous les soutiens gagnent l'**Aura Mobilité 1** (+1 case à toutes les créatures de leur case, eux compris) et l'**Aura +1 PV** (+1 PV aux autres créatures de leur case) ; cumulables |
-| 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) |
+| 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) ; et l'**Aura Mobilité 1** (comme la Mue) |
 | 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 4) |
 | 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles ; les Œil-sonde de la pioche sortent du jeu (ceux en main ou en jeu restent, mais ne reviennent plus dans la pioche) |
 | 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim ; cumulable (deux soutiens sur la même créature : ×4 ; ou sur deux créatures différentes) |

@@ -97,7 +97,7 @@
       if (d) { play.byIa = true; try { play(d.type, d.args); } finally { play.byIa = false; } }
     }, animOn ? 650 : 250);
   }
-  const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
+  const resetUI = () => ({ tp: null, sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   // fenêtres de réaction (Oni, 06/11/2026) : pas d'écran de passage pour entrer dans la réaction de la colonie (A_react)
   // ni pour en sortir ; un bandeau « RÉACTIONS ! » traverse l'écran à la place
   const REACT = ["A_famine", "A_react"];
@@ -352,22 +352,21 @@
     } else if (ph === "A_start" && S.startHand) {
       acts = `<button data-a="draw" class="primary">Recevoir la main de départ</button>`;
     } else if (ph === "A_start") {
-      // pioche au choix (Oni, 07/11/2026) : le palier donne le nombre de cartes ; l'essaim choisit combien il en pioche
-      // dans chaque pile non vide, les créatures sont tirées au hasard
-      const { total, levels } = SF.pickRule(S), sel = UI.pickSel || [0, 0, 0], n = sel.reduce((a, b) => a + b, 0);
+      // pioche carte par carte (Oni, 08/11/2026) : le palier donne le nombre de cartes ; une carte à la fois, dans la pile choisie
+      const total = S.pickTotal != null ? S.pickTotal : SF.pickRule(S).total, n = S.pickTotal != null ? S.handA.length : 0;
       const rows = [1, 2, 3].map(l => {
-        const q = sel[l - 1], left = S.piles[l].length, open = levels.includes(l);
-        return `<div class="pick-row lvl${l}${open ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${open ? `${left} carte${left > 1 ? "s" : ""} dans la pile` : "pile vide" + (l > 1 ? ` (amélioration de rang ${l - 1} nécessaire)` : "")}</small></span>
-          <span class="step"><button data-a="pickDel" data-v="${l}" aria-label="Retirer"${q ? "" : " disabled"}>−</button><b>${q}</b><button data-a="pickAdd" data-v="${l}" aria-label="Ajouter"${open && n < total && q < left ? "" : " disabled"}>+</button></span></div>`;
+        const left = S.piles[l].length;
+        return `<div class="pick-row lvl${l}${left ? "" : " off"}"><span class="pick-nm"><b>Pile de niveau ${l}</b><small>${left ? `${left} carte${left > 1 ? "s" : ""}` : "vide" + (l > 1 ? ` (amélioration de rang ${l - 1})` : "")}</small></span><span class="step"><button data-a="pickOne" data-v="${l}"${left ? "" : " disabled"}>Piocher</button></span></div>`;
       }).join("");
-      body = `<p class="hint">Palier ${SF.tier(S) + 1} : piochez <b>${total}</b> carte${total > 1 ? "s" : ""} (${n}/${total}), réparties comme vous voulez entre les piles ; les créatures sont tirées au hasard.</p><div class="pick">${rows}</div>`;
-      acts = `<button data-a="pickGo" class="primary"${n === total ? "" : " disabled"}>${n === total ? `Piocher ${n} carte${n > 1 ? "s" : ""}` : `Encore ${total - n} carte${total - n > 1 ? "s" : ""} à répartir`}</button>`;
+      body = `<p class="hint">Palier ${SF.tier(S) + 1} : <b>${n}</b>/${total} cartes. Piochez-les une à une, dans la pile de votre choix.</p><div class="pick">${rows}</div>`;
     } else if (ph === "A_deploy" && UI.sap) {
       body = `<p class="hint">Sapeur : ${sh ? "bâtiment à détruire" : "choisissez le bâtiment à détruire"} dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
         SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;
     } else if (ph === "A_deploy") {
       const para = UI.sel && SF.CREATURES[cardOf(UI.sel).name] && SF.CREATURES[cardOf(UI.sel).name].type === "soutien";
       body = UI.sel ? (sh ? `<p class="hint"><b>${E(cardOf(UI.sel).name)}</b> → cliquez ${para ? "une case surlignée (parachutage : n'importe quelle case libre)" : "une entrée surlignée"}.</p>` : `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez ${para ? "une case surlignée : un soutien se parachute sur n'importe quelle case libre" : "une case d'entrée surlignée"}.</p>`) : (sh ? `<p class="hint">Choisissez une carte de votre main.</p>` : "");
+      // Déploiement (aggro C2) : redéployer une aggro à l'entrée de n'importe quelle lane, une fois par tour (Oni, 08/11/2026)
+      if (canTp()) body += UI.tp ? `<p class="hint">Redéploiement : touchez une entrée surlignée.</p>` : `<p class="hint">Déploiement : touchez une aggro en jeu pour la redéployer à l'entrée d'une lane (une fois par tour).</p>`;
       acts = `<button data-a="endDeploy" class="primary">Passer aux attaques</button>`;
     } else if (ph === "A_upgrade") {
       body = sh ? `<p class="hint">Réserve <b>${S.reserve}</b> : investissez-la dans un arbre, ou gardez-la.</p>` : `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
@@ -407,7 +406,7 @@
         const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length);
         body = ready.length ? `<p class="hint">${sh ? "Cliquez une tourelle surlignée." : "Tourelles prêtes : cliquez une tourelle surlignée sur le plateau."}</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
       }
-      acts = `<button data-a="autoFire">Tirs automatiques</button><button data-a="endD" class="primary">Terminer le tour</button>`;
+      acts = `<button data-a="endD" class="primary">Tirer et finir le tour</button>`; // tirs restants automatiques (Oni, 08/11/2026)
     }
     return { p, body, acts, waiting: false };
   }
@@ -418,10 +417,20 @@
     if (sh) return `<div class="spells sh">` + list.map(([s, i]) => `<button data-a="spell" data-i="${i}" class="spell ${kind}" data-tip="${E(SF.SPELLS[s].text)}">${icon(spellIcon(s))}<span><b>${E(s)}</b></span></button>`).join("") + `</div>`;
     return `<div class="spells">` + list.map(([s, i]) => `<button data-a="spell" data-i="${i}" class="spell ${kind}">${icon(spellIcon(s))}<span><b>${E(s)}</b><small>${E(SF.SPELLS[s].text)}</small></span></button>`).join("") + `</div>`;
   }
+  // créatures que le sortilège en cours de ciblage peut viser (jetons cliquables sur le plateau)
+  function spellCreatures() {
+    if (UI.spell === null || UI.spell === undefined || !S.spells[UI.spell]) return [];
+    const name = S.spells[UI.spell];
+    if (name === "Frappe orbitale" || name === "Salve") return S.creatures.filter(c => SF.targetable(S, c));
+    if (name === "Brouillage") return S.creatures.filter(c => SF.targetable(S, c) && !c.acted);
+    return [];
+  }
+  const canTp = () => S.phase === "A_deploy" && S.upgrades.aggro.r2 === "C" && !S.tpUsed && S.creatures.some(c => SF.CREATURES[c.name].type === "aggro");
   function spellTargeting(sh) {
     const name = S.spells[UI.spell];
     const cancel = `<button data-a="spellCancel">Annuler</button>`;
-    const crs = list => `<div class="choices">${list.map(c => `<button data-a="spellArg" data-v="${c.id}">${E(c.name)} · ${c.hp} PV · ${posTxt(c)}</button>`).join("")}${cancel}</div>`;
+    // cible : toucher le jeton de la créature sur le plateau (Oni, 08/11/2026), voir spellCreatures
+    const crs = list => `<p class="hint">${list.length ? "Touchez une créature surlignée sur le plateau." : "Aucune créature ne peut être visée."}</p><div class="choices">${cancel}</div>`;
     const lanes = `<div class="choices">${SF.LANES.map(l => `<button data-a="spellArg" data-v="${l}">Lane ${SF.LANE_NAME[l]}</button>`).join("")}${cancel}</div>`;
     let inner = "";
     switch (name) {
@@ -493,8 +502,8 @@
         const [u] = SF.toLocal(lane, x, y);
         if (Math.abs(u) > 2) { html += `<div class="cell void"></div>`; continue; }
         const crs = S.creatures.filter(c => c.lane === lane && c.k === 4 && c.u === u);
-        const hot = canDeployHere(lane, u);
-        html += `<div class="cell entry lane-${lane}${hot ? " hot" : ""}${R[k] ? " mv" : ""}" data-xy="${k}" ${hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : mvAttr(k)}><span class="col">${SF.COLS[u + 2]}</span>${rng(k)}${tokens(crs)}</div>`;
+        const hot = canDeployHere(lane, u), tp = !!UI.tp && canTp();
+        html += `<div class="cell entry lane-${lane}${hot || tp ? " hot" : ""}${R[k] ? " mv" : ""}" data-xy="${k}" ${tp ? `data-a="tpAt" data-l="${lane}" data-u="${u}"` : hot ? `data-a="deployAt" data-l="${lane}" data-u="${u}"` : mvAttr(k)}><span class="col">${SF.COLS[u + 2]}</span>${rng(k)}${tokens(crs)}</div>`;
         continue;
       }
       if (x === 0 && y === 0) {
@@ -548,7 +557,7 @@
     if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque, ou révélée par un Œil-sonde vivant dans sa lane ou par la Clairvoyance.");
-    if (t.siphon) cap("biomasse", `Siphon ${t.siphon}`, `révélé par une attaque de l'essaim, il lui retire ${t.siphon} biomasse (jamais sous ${SF.MIN_BIOMASS}). Ne se déclenche pas s'il a été vu par Vision ou Clairvoyance.`);
+    if (t.siphon) cap("biomasse", `Siphon ${t.siphon}`, `révélé par une attaque, l'essaim perd ${t.siphon} biomasse, +${t.siphon} par tranche de 10 qu'il possède (jamais sous ${SF.MIN_BIOMASS}). Pas s'il a été vu par Vision ou Clairvoyance.`);
     if (t.shield) cap("protection", "Bouclier", "arrive avec un jeton : la prochaine attaque ne lui fait rien (comme en stase : la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.");
     if (t.trap) cap("piege", `Mine ${t.trap}`, `${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui la révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par Avant-poste dans les 8 cases autour).`);
@@ -563,17 +572,18 @@
     return `<div class="toks" style="--n:${Math.ceil(Math.sqrt(crs.length))}">` + crs.map(c => {
       const t = SF.CREATURES[c.name].type;
       // tourelle choisie : toucher une créature à portée la vise directement (Oni, 04/11/2026)
-      const tgt = S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c);
+      const spT = spellCreatures().includes(c), tpT = S.phase === "A_deploy" && canTp() && !UI.tp && SF.CREATURES[c.name].type === "aggro";
+      const tgt = (S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c)) || spT || tpT;
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" ? (SF.canAct(S, c) ? (S.view === "essaim" ? " go" : "") : " done") : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       const au = auraOf(c);
-      return `<button class="${cls}" data-a="${tgt ? "fireAt" : "creature"}" data-id="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
   const FX_LABEL = {
-    soin: () => ["+2 HEAL"], fureur: () => ["+2 ATQ"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
+    soin: () => ["+2 HEAL"], fureur: () => ["+1 ATQ", "+1 DEF"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
-    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"],
+    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ", "+1 MOV"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
   function sumLabels(list) {
@@ -1087,6 +1097,9 @@
         return play("spell", { i, arg });
       }
       case "build": UI.sel = null; UI.spell = null; return play("build");
+      case "tpPick": UI.tp = Number(d.id); break;
+      case "tpAt": { const id = UI.tp; UI.tp = null; if (id) return play("teleport", { id, lane: d.l, u: Number(d.u) }); break; }
+      case "pickOne": return play("pickOne", { l: Number(d.v) });
       case "fireAt": if (UI.support) { const sk = UI.support; UI.support = null; return play("fire", { sk, id: Number(d.id) }); } break;
       case "autoFire": UI.support = null; return play("autoFire");
       case "endD": return play("endD");
