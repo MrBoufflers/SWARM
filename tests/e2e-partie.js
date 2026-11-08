@@ -52,8 +52,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
       if (!(await page.$('.board .tok.go[data-done-robot]')) && await page.evaluate(() => { const t = document.querySelector('.board .tok.go'); if (!t || window.__robotOne) return false; window.__robotOne = 1; return true; }) && await click('.board .tok.go')) continue;
       await page.evaluate(() => { window.__robotOne = 0; }); await click('[data-a="actAll"]'); continue; }
     if (ph === 'Tour de la colonie') {
-      if (!(await page.$('.tcard.sel'))) { if (await click('[data-a="tile"]:not([disabled])') && await click('[data-a="startCh"]')) continue; }
-      for (let i = 0; i < 4; i++) { await calm(); const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; await bs[i].click(); await new Promise(r => setTimeout(r, 20)); }
+      if (!(await page.$('.tcard.sel'))) { if (await click('[data-a="tile"]:not([disabled])') && await click('[data-a="buildAt"]')) continue; } // construction immédiate : tuile puis case
       await click('[data-a="build"]'); continue;
     }
     if (ph === 'Pose des bâtiments') { if (await click('[data-a="placeAt"]')) continue; console.log('pose impossible'); break; }

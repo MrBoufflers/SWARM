@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.7 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.8 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -234,25 +234,20 @@ Complétez votre main jusqu'à **4 tuiles, +1 par palier de la fusée atteint** 
 
 Jouez autant de sorts de soutien que vous le souhaitez (voir Les sorts).
 
-### 2. Lancer des chantiers
+### 2. Construire (construction immédiate)
 
-Chaque lane a **1 chantier** dans son atelier (2 après l'étage 6 de la fusée). Pour chaque chantier vide, vous pouvez y placer une tuile de votre main : le chantier appartient à cette lane, mais la **case exacte n'est choisie qu'à la fin de la construction** (voir Fin de tour). À ce moment, la case choisie doit respecter :
+Chaque travailleur fournit **1 point de construction** ; vos travailleurs comprennent vos travailleurs de base et les bonus en jeu (Baraquement, Dortoir, Abri blindé, support de niveau 3). Les points du tour sont comptés **au début du tour** : un bâtiment ou un support posé ce tour ne donne ses travailleurs qu'au tour suivant.
 
-- la case appartient à cette lane et ne porte pas de tuile (des créatures peuvent s'y trouver) ;
-- elle touche (par un côté) une tuile déjà posée, un support ou la fusée † ;
+Construisez vos bâtiments **un par un** (Oni, 08/11/2026 ; plus d'ateliers) : choisissez une tuile de votre main, payez **d'un coup** ses points de construction et posez-la **aussitôt** sur une case :
 
-Rien n'oblige à remplir une couronne avant d'ouvrir la suivante. Une tuile en chantier reste dans l'atelier : elle n'est pas sur le plateau, donc ni attaquable ni bloquante.
+- de la lane choisie, sans tuile (des créatures peuvent s'y trouver : elles reculent d'une case vers le fond, dans la même colonne, jusqu'à la première case libre, au pire la case d'entrée †) ;
+- qui touche (par un côté) une tuile déjà posée, un support ou la fusée †.
 
-### 3. Affecter les travailleurs
+**Un bâtiment par lane et par tour** (2 après l'étage 6 de la fusée). Rien n'oblige à remplir une couronne avant d'ouvrir la suivante.
 
-Chaque travailleur fournit **1 point de construction**. Vos travailleurs comprennent vos travailleurs de base et les bonus en jeu (Baraquement, Dortoir, support de niveau 3). Placez chaque point :
+### 3. Fin de tour, dans cet ordre
 
-- sur une **lane** : il avancera le chantier de cette lane ;
-- ou sur la **fusée**.
-
-### 4. Fin de tour, dans cet ordre
-
-1. **Chantiers** : retirez de la durée de chaque chantier les points de sa lane. Les points en trop d'une lane vont à la fusée. Une tuile à 0 est achevée : choisissez alors sa case dans la lane de son chantier (conditions de l'étape 2) et posez-la ; si aucune case n'est valable, la tuile revient en main †. Si des créatures (une ou plusieurs) se trouvent sur la case choisie, elles reculent d'une case vers le fond, dans la même colonne, pour laisser la place au bâtiment ; si cette case porte déjà une tuile, elles continuent de reculer jusqu'à la première case libre (au pire, la case d'entrée) †.
+1. **Points restants** : les points de construction non dépensés vont à la fusée.
 2. **Supports** : posez les supports dont les conditions sont réunies, dès que leurs murs sont construits.
 3. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
 4. **Tirs** : chaque support de niveau 1 ou 2 inflige ses dégâts à une créature située sur l'une des **8 cases qui l'entourent** (diagonales comprises), au choix de la colonie. Niveau 1 : 1 dégât, +1 à chaque palier de la fusée (étages 3, 6 et 9), soit 1 / 2 / 3 / 4 † ; niveau 2 : 2 dégâts †. Les tourelles tirent **après** la construction et la fusée : un support apparu ce tour tire déjà, et un palier atteint ce tour compte déjà pour ses dégâts.
@@ -462,9 +457,9 @@ Créatures, forteresses, sortilèges et arbres d'amélioration : voir le Catalog
 | Essaim | Colonie |
 | --- | --- |
 | 1. Budget = biomasse | 1. Sorts de soutien |
-| 2. Pioche au choix selon le palier | 2. Lancer des chantiers |
-| 3. Déployer et améliorer (même étape) | 3. Affecter les travailleurs |
-| 4. Budget restant → réserve | 4. Chantiers, débordement, supports |
+| 2. Pioche carte par carte selon le palier | 2. Construire (immédiat, un bâtiment par lane) |
+| 3. Déployer et améliorer (même étape) | 3. Points restants vers la fusée |
+| 4. Budget restant → réserve | 4. Supports |
 | 5. Défausse | 5. Fusée |
 | 6. Sorts offensifs de la colonie, puis attaques créature par créature | 6. Tirs, puis pioche de tuiles et de sorts |
 

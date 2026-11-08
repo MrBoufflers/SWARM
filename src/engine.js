@@ -138,7 +138,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.7";
+  const VERSION = "0.5.8";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1078,6 +1078,36 @@ const SF = (() => {
   }
   function startDefenderTurn(S) {
     S.phase = needDraw(S) ? "D_draw" : "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
+    // construction immédiate (Oni, 08/11/2026) : points du tour fixés au début du tour (un bâtiment posé ce tour, ou un
+    // support de niveau 3 apparu, ne donne ses travailleurs qu'au tour suivant), dépensés bâtiment par bâtiment
+    S.turnPts = S.workersBase + bonusWorkers(S); S.spent = 0; S.built = { N: 0, E: 0, S: 0, O: 0 };
+  }
+  // points de construction encore disponibles ce tour (le reste ira à la fusée)
+  const pointsLeft = S => (S.turnPts != null ? S.turnPts + S.extraPts : totalPoints(S)) - (S.spent || 0) - allocated(S);
+  // Construction immédiate (Oni, 08/11/2026 ; remplace les ateliers) : on paie d'un coup les points de construction d'une
+  // tuile de la main et on la pose aussitôt sur une case valable ; un bâtiment par lane et par tour (2 au palier 6)
+  function canBuildAt(S, name, k) {
+    const t = TILES[name]; if (!t || S.phase !== "D_main") return false;
+    const lane = cellLane(...parse(k)); if (!lane) return false;
+    if (((S.built && S.built[lane]) || 0) + S.chantiers[lane].length >= S.chPerLane) return false;
+    return t.d <= pointsLeft(S) && canTarget(S, lane, k);
+  }
+  function buildTargets(S, i) {
+    const name = S.hand[i], out = [];
+    if (!name) return out;
+    for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) { const k = key(x, y); if (canBuildAt(S, name, k)) out.push(k); }
+    return out;
+  }
+  function buildAt(S, i, k) {
+    const name = S.hand[i];
+    if (!name || !canBuildAt(S, name, k)) return false;
+    const lane = cellLane(...parse(k));
+    S.hand.splice(i, 1);
+    S.spent = (S.spent || 0) + TILES[name].d;
+    S.built = S.built || { N: 0, E: 0, S: 0, O: 0 }; S.built[lane] += 1;
+    fx(S, { t: "work", lane, n: TILES[name].d });
+    putTile(S, name, k, lane);
+    return true;
   }
   const pubName = name => (TILES[name] && TILES[name].camo ? "tuile camouflée" : name);
   // Le chantier est affecté à une lane ; la case exacte n'est choisie qu'à la fin de la construction.
@@ -1129,7 +1159,7 @@ const SF = (() => {
   // pendant le tour comptent donc pour les tirs.
   function endDefenderTurn(S) {
     // chantiers et débordement
-    let rocket = totalPoints(S) - allocated(S);
+    let rocket = pointsLeft(S); // points non dépensés (construction immédiate) et non affectés aux anciens chantiers
     for (const lane of LANES) {
       let pts = S.alloc[lane];
       const done = [];
@@ -1166,17 +1196,22 @@ const SF = (() => {
   }
   function placeTile(S, k) {
     if (S.phase !== "D_place" || !placeTargets(S).includes(k)) return false;
-    const p = S.toPlace.shift(), [x, y] = parse(k);
-    pushBack(S, k);
-    S.tiles[k] = tileStats(p.tile, x, y);
-    fx(S, { t: "place", k });
-    if (TILES[p.tile].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
-    placeSupports(S); // un support apparaît dès que ses murs sont construits
-    log(S, "colonie", TILES[p.tile].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[p.lane]}.` : `${p.tile} construit en lane ${LANE_NAME[p.lane]}.`);
-    visionSweep(S); // un Œil-sonde en vie dans la lane révèle aussitôt la nouvelle tuile camouflée
+    const p = S.toPlace.shift();
+    putTile(S, p.tile, k, p.lane);
     skipUnplaceable(S);
     if (!S.toPlace.length) finishDefenderTurn(S);
     return true;
+  }
+  // pose d'une tuile (chantier achevé ou construction immédiate)
+  function putTile(S, name, k, lane) {
+    const [x, y] = parse(k);
+    pushBack(S, k);
+    S.tiles[k] = tileStats(name, x, y);
+    fx(S, { t: "place", k });
+    if (TILES[name].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
+    placeSupports(S); // un support apparaît dès que ses murs sont construits
+    log(S, "colonie", TILES[name].camo ? `Une tuile camouflée est construite en lane ${LANE_NAME[lane]}.` : `${name} construit en lane ${LANE_NAME[lane]}.`);
+    visionSweep(S); // un Œil-sonde en vie dans la lane révèle aussitôt la nouvelle tuile camouflée
   }
   function finishDefenderTurn(S) {
     const rocket = S.pendingRocket || 0; S.pendingRocket = 0;
@@ -1337,6 +1372,7 @@ const SF = (() => {
     } },
     endA: { phase: ["A_attack"], run(S) { endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
     tdraw: { phase: ["D_draw"], run: (S, a) => drawTileFrom(S, a.cat) }, // pioche d'une tuile dans la pioche choisie
+    buildAt: { phase: ["D_main"], run: (S, a) => isInt(a.i) && typeof a.k === "string" && /^-?\d,-?\d$/.test(a.k) && buildAt(S, a.i, a.k) },
     startCh: { phase: ["D_main"], run(S, a) {
       if (!(isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane))) return false;
       // travailleurs assignés d'office (Oni, 04/11/2026) : juste assez pour finir les chantiers de la lane, dans la
@@ -1426,7 +1462,7 @@ const SF = (() => {
 
   return {
     VERSION,
-    fxFor, migrate, famineBudget, MIN_BIOMASS, siphonLoss, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, famineBudget, MIN_BIOMASS, siphonLoss, buildTargets, canBuildAt, pointsLeft, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

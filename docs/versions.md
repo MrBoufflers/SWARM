@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.8 — 8 novembre 2026
+
+**Règles (Oni)** : **construction immédiate**, plus d'ateliers. Pendant son tour, la colonie construit ses bâtiments un par un : elle paie d'un coup les points de construction de la tuile avec ses travailleurs et la pose aussitôt sur une case valable. Toujours un bâtiment par lane et par tour (2 au palier 6). Les points non dépensés vont à la fusée. Les points du tour sont fixés au début du tour : un bâtiment ou un support posé ce tour ne donne ses travailleurs qu'au tour suivant.
+
 ## v0.5.7 — 8 novembre 2026
 
 **Règles (Oni)**
