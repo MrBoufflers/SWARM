@@ -1033,6 +1033,11 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
   63% { transform: translateX(-1vw) skewX(0); filter: blur(0); opacity: 1; }
   100% { transform: translateX(-115vw) skewX(14deg); filter: blur(8px); opacity: 0; } }
 .react-banner.still .rb-band { transform: translateY(-50%); animation: none; } .react-banner.still .rb-txt { animation: none; }
+/* bandeau de changement de tour : couleur du camp */
+.react-banner.turn.essaim .rb-band { box-shadow: 0 -2px 0 color-mix(in srgb, var(--essaim) 70%, transparent), 0 2px 0 color-mix(in srgb, var(--essaim) 70%, transparent), 0 0 60px color-mix(in srgb, var(--essaim) 30%, transparent); }
+.react-banner.turn.colonie .rb-band { box-shadow: 0 -2px 0 color-mix(in srgb, var(--colonie) 70%, transparent), 0 2px 0 color-mix(in srgb, var(--colonie) 70%, transparent), 0 0 60px color-mix(in srgb, var(--colonie) 30%, transparent); }
+.react-banner.turn.essaim .rb-txt b { text-shadow: 0 0 24px color-mix(in srgb, var(--essaim) 85%, transparent), 0 6px 0 rgba(0,0,0,.6); }
+.react-banner.turn.colonie .rb-txt b { text-shadow: 0 0 24px color-mix(in srgb, var(--colonie) 85%, transparent), 0 6px 0 rgba(0,0,0,.6); }
 /* colonie : 4 étapes, libellés un peu moins grands pour que « Construction » tienne */
 .pc-steps.colonie .chev li > span { font-size: clamp(1rem, .95vw, 1.15rem); letter-spacing: 0; padding: 0 4px 0 12px; }
 .pc-steps.colonie .chev li.on { flex: 1.2; }

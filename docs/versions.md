@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.10 — 8 novembre 2026
+
+**Interface (Oni)** : à chaque changement de camp actif, un bandeau « Tour de l'essaim » (avec sa biomasse) ou « Tour de la colonie » (avec ses travailleurs), aux couleurs du camp ; sur un même appareil, il apparaît après l'écran de passage ; en ligne, chez les deux joueurs. L'étape « Pose » est retirée des étapes de la colonie (construction immédiate).
+
 ## v0.5.9 — 8 novembre 2026
 
 **Règles (Oni)** : **blocs** — les créatures d'une même case avancent ensemble, d'autant de cases que la plus lente ; leurs vitesses sont fixées ensemble avant le départ, toutes les auras de mobilité de la case comptent. Celles à qui il reste des déplacements peuvent ensuite finir seules (ou avec les autres plus rapides).

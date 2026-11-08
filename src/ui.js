@@ -756,7 +756,7 @@
   // étapes du tour de chaque camp (chevrons) ; la réaction de la colonie a lieu pendant le tour de l'essaim
   const PC_STEPS = {
     essaim: [["A_deploy", "Déployer & améliorer"], ["A_attack", "Attaques"]],
-    colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_place", "Pose"], ["D_fire", "Tirs"]],
+    colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_fire", "Tirs"]], // « Pose » retirée (construction immédiate, v0.5.8)
   };
   function pcSteps(side) {
     const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase;
@@ -979,7 +979,9 @@
     save();
     if (S.winner) recordLocal();
     const reacts = !REACT.includes(prev) && REACT.includes(S.phase);
-    animate(events).then(() => { render(); afterRender(events); if (reacts) reactBanner(); });
+    const turned = !S.winner && turnOf(prev) !== turnOf(S.phase);
+    if (turned && S.handoff) UI.turnBanner = true; // partie sur un même appareil : après l'écran de passage
+    animate(events).then(() => { render(); afterRender(events); if (reacts) reactBanner(); else if (turned && !S.handoff) turnBanner(); });
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
@@ -1007,7 +1009,7 @@
     }
     if (a === "reveal") {
       if (online() || UI.leaving) return;
-      const go = () => { UI.leaving = false; S.view = S.handoff; S.handoff = null; save(); render(); };
+      const go = () => { UI.leaving = false; S.view = S.handoff; S.handoff = null; save(); render(); if (UI.turnBanner && !REACT.includes(S.phase)) { UI.turnBanner = false; turnBanner(); } };
       const card = document.querySelector(".pc-ho .ho-card");
       if (card && animOn) { UI.leaving = true; card.classList.add("leave"); document.body.dataset.anim = "1"; setTimeout(() => { document.body.dataset.anim = "0"; go(); }, 320); } else go();
       return;
@@ -1366,6 +1368,19 @@
     }
   }
   // bandeau « RÉACTIONS ! » (Oni, 06/11/2026) : arrive de la droite, reste 1 s au centre, repart vers la gauche
+  // bandeau de changement de tour (Oni, 08/11/2026) : « Tour de l'essaim » / « Tour de la colonie », avec la ressource du camp
+  const turnOf = ph => (ph && ph[0] === "D" ? "colonie" : "essaim");
+  function turnBanner() {
+    if (!S || S.winner) return;
+    const side = turnOf(S.phase), w = S.workersBase + SF.bonusWorkers(S);
+    const old = document.querySelector(".react-banner"); if (old) old.remove();
+    const b = document.createElement("div");
+    b.className = "react-banner turn " + side + (animOn ? "" : " still");
+    b.setAttribute("role", "status");
+    b.innerHTML = `<div class="rb-band"></div><div class="rb-txt"><b>${side === "essaim" ? "TOUR DE L'ESSAIM" : "TOUR DE LA COLONIE"}</b><span>${side === "essaim" ? `${S.biomass} biomasse` : `${w} travailleur${w > 1 ? "s" : ""}`}</span></div>`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), animOn ? 2300 : 1600);
+  }
   function reactBanner() {
     const old = document.querySelector(".react-banner"); if (old) old.remove();
     const b = document.createElement("div");
@@ -1480,7 +1495,9 @@
     receive(j);
     if (j.ok && onOk) onOk(); // ex. désélectionner la carte jouée, avant de redessiner
     render(); afterRender(j.fx || []);
+    const turned = S && NET.lastTurn && NET.lastTurn !== turnOf(S.phase); if (S) NET.lastTurn = turnOf(S.phase);
     if (NET.react) { NET.react = false; NET.banner = false; reactBanner(); }
+    else if (turned) { NET.banner = false; turnBanner(); }
     if (NET.banner) { NET.banner = false; banner(`À vous de jouer · ${PHASE_TXT[S.phase][1]}`); }
   }
   async function withBusy(f) {
