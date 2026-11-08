@@ -1059,6 +1059,34 @@ const fresh = () => {
   SF.migrate(AB);
   ok(AB.tiles["0,2"].shield === 1 && !AB.tiles["0,2"].ren, "rechargement : le jeton Bouclier de l'Abri reste un Bouclier");
 }
+// 68. Oni, 08/11/2026 : PV bonus perdus = seul le maximum baisse ; spores sur les 8 cases autour, fusée comprise
+{
+  const at = (id, name, k, hp, u = 0) => ({ id, name, lane: "N", u, k, hp, acted: false });
+  const S = fresh(); S.supports = {}; S.upgrades.soutien.r1 = "A"; // Mue : Aura +1 PV de chaque soutien
+  const blesse = at(1, "Carapace", 4, 1), plein = at(2, "Carapace", 4, 3), g = at(3, "Glaneur", 4, 2);
+  S.creatures.push(blesse, plein, g); SF.killCheck(S);
+  ok(blesse.hp + SF.bonusHp(S, blesse) === 2 && plein.hp + SF.bonusHp(S, plein) === 4, "avec la Mue : Carapace blessée 2 PV, Carapace intacte 4 PV (3 + 1)");
+  g.hp = 0; SF.killCheck(S);
+  ok(blesse.hp + SF.bonusHp(S, blesse) === 2 && plein.hp + SF.bonusHp(S, plein) === 3, "le soutien meurt : la blessée garde 2 PV, l'intacte passe à son maximum 3");
+  const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k]; T.phase = "A_attack"; T.upgrades.soutien.r1 = "A";
+  const e = at(10, "Écorcheur", 3, 0), h = at(11, "Glaneur", 3, 2); T.creatures.push(e, h, at(12, "Carapace", 4, 3)); SF.killCheck(T);
+  ok(e.hp + SF.bonusHp(T, e) === 1 && SF.apply(T, "essaim", "move", { id: 10, u: 0, k: 2 }) === "" && T.creatures.includes(e) && e.hp + SF.bonusHp(T, e) === 1,
+    "l'Écorcheur (1 PV grâce à la Mue) quitte la case du Glaneur : il garde 1 PV (avant : il mourait)");
+  // spores : 8 cases, toutes lanes, fusée comprise
+  const Z = fresh(); Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k]; Z.phase = "A_attack";
+  for (const k of ["0,1", "1,2", "-1,0"]) { const [x, y] = SF.parse(k); Z.tiles[k] = Object.assign(SF.tileStats("Muraille", x, y), { revealed: true }); }
+  Z.creatures.push(Object.assign(at(20, "Écorcheur", 2, 5), { moved: 1 }), at(21, "Sporeur", 2, 6)); // en C2, contre le bâtiment C1
+  const w = Z.workersBase;
+  ok(SF.apply(Z, "essaim", "strike", { id: 20, target: "0,1" }) === "", "attaque du bâtiment C1 avec un Sporeur dans la case");
+  ok(Z.workersBase === w - 1, "spores : la fusée derrière le bâtiment de la couronne 1 est touchée, −1 travailleur");
+  ok(Z.tiles["1,2"].hp === 2 && Z.tiles["-1,0"].hp === 2, "spores : les cases en diagonale (D2) et sur une autre lane (Ouest) sont touchées aussi");
+  const R = fresh(); R.supports = {}; for (const k of Object.keys(R.tiles)) delete R.tiles[k]; R.phase = "A_attack";
+  R.tiles["1,0"] = Object.assign(SF.tileStats("Muraille", 1, 0), { revealed: true });
+  R.creatures.push(Object.assign(at(30, "Écorcheur", 1, 5), { moved: 1 }), at(31, "Sporeur", 1, 6));
+  const w2 = R.workersBase;
+  ok(SF.apply(R, "essaim", "strike", { id: 30, target: "fusee" }) === "" && R.workersBase === w2 - 1 && R.tiles["1,0"].hp === 2,
+    "attaque de la fusée avec un Sporeur : −1 travailleur, et les spores touchent le bâtiment voisin de la fusée (lane Est)");
+}
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {
   const IA = require("../src/ia.js");

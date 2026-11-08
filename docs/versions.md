@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.5 — 8 novembre 2026
+
+**Règles (Oni)**
+- **PV bonus perdus** : quand une créature perd un bonus de PV (soutien de la Mue mort ou parti, créature qui quitte la case, Masse vivante qui diminue), seul son maximum baisse ; une créature blessée garde ses PV (avant : elle perdait 1 PV, et pouvait en mourir).
+- **Aura Spores** : les 8 cases autour de la cible, diagonales comprises et toutes lanes (avant : les 4 côtés). Un bâtiment de la couronne 1 attaqué diffuse les spores jusqu'à la fusée (−1 travailleur) ; une attaque sur la fusée les diffuse aux bâtiments qui l'entourent.
+
 ## v0.5.4 — 8 novembre 2026
 
 **IA pour jouer en solo (Oni)**

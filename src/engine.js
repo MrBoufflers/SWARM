@@ -22,7 +22,7 @@ const SF = (() => {
     "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
-    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit 2 dégâts par Sporeur de la case (sauf une tuile encore camouflée et non visible)." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque un bâtiment ou la fusée, les 8 cases autour de la cible (diagonales comprises, toutes lanes) subissent 2 dégâts par Sporeur de la case ; la fusée touchée perd 1 travailleur (sauf une tuile encore camouflée et non visible)." },
   };
   const PILES = {
     1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Catalyseur", 2]] },
@@ -138,7 +138,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.4";
+  const VERSION = "0.5.5";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -401,7 +401,21 @@ const SF = (() => {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
     return c;
   }
+  // PV bonus perdus (Oni, 08/11/2026) : quand un bonus de PV disparaît (soutien de la Mue mort ou parti, créature qui
+  // quitte la case, Masse vivante qui diminue), seul le maximum baisse : une créature blessée garde ses PV, sans dépasser
+  // son nouveau maximum. c.lastB = bonus au dernier passage.
+  function syncBonus(S) {
+    for (const c of S.creatures) {
+      const b = bonusHp(S, c), last = c.lastB === undefined ? b : c.lastB;
+      if (b < last) {
+        const eff = c.hp + last, cap = maxHp(S, c.name) + b;
+        if (eff > 0) c.hp = Math.min(eff, cap) - b;
+      }
+      c.lastB = b;
+    }
+  }
   function killCheck(S) {
+    syncBonus(S);
     const dead = S.creatures.filter(c => c.hp + bonusHp(S, c) <= 0);
     for (const c of dead) {
       S.creatures.splice(S.creatures.indexOf(c), 1);
@@ -415,6 +429,7 @@ const SF = (() => {
         toPile(S, c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
       }
     }
+    if (dead.length) syncBonus(S); // les survivants qui perdent un bonus (soutien mort) gardent leurs PV
   }
   function damageCreature(S, c, n, why) {
     c.hp -= n;
@@ -475,7 +490,37 @@ const SF = (() => {
     S.workersBase -= 1; S.killed = (S.killed || 0) + 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
     fx(S, { t: "rocket", id: c.id });
     log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
-    if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); }
+    if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); return; }
+    sporeBurst(S, c, 0, 0); // les spores touchent aussi les 8 cases autour de la fusée (Oni, 08/11/2026)
+  }
+  // Aura Spores (2 dégâts par Sporeur de la case, cumulable, Oni 02/11/2026) : quand une autre créature de la case attaque,
+  // les 8 cases autour de la cible (diagonales comprises, toutes lanes ; Oni 08/11/2026, avant : les 4 côtés) sont touchées.
+  // La fusée parmi elles : −1 travailleur. Pas sur une tuile encore camouflée, ni en stase ; un Bouclier les absorbe.
+  function sporeBurst(S, c, x, y) {
+    const spores = 2 * countMates(S, c, o => o.name === "Sporeur");
+    if (!spores) return;
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      if (!dx && !dy) continue;
+      const a = x + dx, b = y + dy;
+      if (a === 0 && b === 0) {
+        S.workersBase -= 1; S.killed = (S.killed || 0) + 1;
+        fx(S, { t: "rocket", id: c.id });
+        log(S, "essaim", "Spores : la fusée est touchée, −1 travailleur.");
+        if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); return; }
+        continue;
+      }
+      const nk = key(a, b), nt = S.tiles[nk];
+      if (!nt || (nt.camo && !nt.revealed && !clairvoyance(S)) || S.stase.includes(nk)) continue;
+      if (nt.shield > 0) { // Bouclier : il absorbe les spores
+        nt.shield = 0; fx(S, { t: "hit", id: null, k: nk, n: 0, hp: nt.hp });
+        log(S, "colonie", `Bouclier : ${nt.name} ne subit rien des spores ; le jeton est défaussé.`);
+        continue;
+      }
+      const spLoss = nt.ren ? Math.floor(spores / nt.ren) : spores;
+      nt.hp -= spLoss;
+      fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
+      if (nt.hp <= 0) destroyTile(S, nk, "spores", c);
+    }
   }
   // Déplacement (Oni, 02/11/2026) : une case par tour, deux avec la Mobilité (aggros). Une créature qui arrive au contact
   // d'une tuile ou de la fusée attaque aussitôt. Les aggros mobiles quittent leur case et agissent d'abord, en bloc à part.
@@ -669,23 +714,7 @@ const SF = (() => {
       }
     }
     // spores (2 dégâts par Sporeur de la case, cumulable, Oni 02/11/2026) sur les tuiles qui touchent la cible
-    const sporesAround = () => {
-      const spores = primary ? 2 * countMates(S, c, o => o.name === "Sporeur") : 0;
-      if (!spores) return;
-      for (const [a, b] of neighbors(x, y)) {
-        const nk = key(a, b), nt = S.tiles[nk];
-        // les spores n'atteignent pas une tuile encore camouflée (Oni, 02/11/2026)
-        if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk) && nt.shield > 0) { // Bouclier : il absorbe les spores
-          nt.shield = 0; fx(S, { t: "hit", id: null, k: nk, n: 0, hp: nt.hp });
-          log(S, "colonie", `Bouclier : ${nt.name} ne subit rien des spores ; le jeton est défaussé.`);
-        } else if (nt && !(nt.camo && !nt.revealed && !clairvoyance(S)) && !S.stase.includes(nk)) {
-          const spLoss = nt.ren ? Math.floor(spores / nt.ren) : spores;
-          nt.hp -= spLoss;
-          fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
-          if (nt.hp <= 0) destroyTile(S, nk, "spores", c);
-        }
-      }
-    };
+    const sporesAround = () => { if (primary) sporeBurst(S, c, x, y); };
     // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE du chemin, sans aller plus loin :
     // un bâtiment les subit, la fusée perd 1 travailleur, une case vide les perd. Pas d'enchaînement.
     const pierce = excess => {
@@ -1307,6 +1336,7 @@ const SF = (() => {
     if (side !== actor(S)) return "ce n'est pas votre tour";
     if (!A.phase.includes(S.phase)) return "action impossible dans cette phase";
     if (!A.run(S, args && typeof args === "object" ? args : {})) return "action refusée";
+    syncBonus(S); // déplacements, déploiements : bonus de PV à jour
     autoAdvance(S);
     return "";
   }
