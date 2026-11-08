@@ -1230,7 +1230,7 @@ const SF = (() => {
     { min: 21, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ."], B1: ["Mobilité", "+1 déplacement pour les créatures aggro."],
+    aggro: { A1: ["Férocité", "+1 ATQ. Les créatures aggro gagnent la Furtivité."], B1: ["Mobilité", "+1 déplacement pour les créatures aggro."],
       A2: ["Carnage", "Les créatures aggro peuvent attaquer 2 fois par tour."], C2: ["Déploiement", "Chaque tour, 2 cartes de niveau 1 en plus, déployées gratuitement."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
@@ -1260,7 +1260,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.5";
+  const VERSION = "0.5.6";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1375,9 +1375,9 @@ const SF = (() => {
   function hasMobility(S, c) {
     return CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B";
   }
-  function isStealthy() {
-    // Furtivité : plus aucune source depuis le 07/11/2026 (Oni : la Mobilité ne donne plus que +1 déplacement)
-    return false;
+  // Furtivité : donnée aux aggros par Férocité (Oni, 08/11/2026 ; du 05 au 07/11 par Mobilité, avant par Mue)
+  function isStealthy(S, c) {
+    return !!(S && c && CREATURES[c.name] && CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "A");
   }
   function hasPercee(S, c) {
     return caseMates(S, c).some(o => o.name === "Perforeur");

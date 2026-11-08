@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.5 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.6 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -381,7 +381,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
 | Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines ; une attaque sur lui a quand même lieu : toute l'attaque passe en percée à la case suivante et les spores touchent les tuiles voisines (v0.5) | 2 |
 | Famine | Offensif | à jouer au début du tour de l'essaim : ce tour, son budget est sa biomasse **divisée par 2**, arrondie à l'inférieur (sa biomasse ne change pas) | 2 |
-| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation s'applique) : ce tour, elle ne bouge pas et n'attaque pas | 2 |
+| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation et Furtivité s'appliquent) : ce tour, elle ne bouge pas et n'attaque pas | 2 |
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |
 | Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 2 |
@@ -404,7 +404,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 
 | Rang | Position | Amélioration | Effet |
 | --- | --- | --- | --- |
-| 1 | Côté A | Férocité | +1 ATQ |
+| 1 | Côté A | Férocité | +1 ATQ ; les créatures aggro gagnent la **Furtivité** (elles ne peuvent pas être visées par une tourelle ni un sortilège tant qu'une créature non furtive est sur leur case) |
 | 1 | Côté B | Mobilité | **+1 déplacement** pour les créatures aggro |
 | 2 | Côté A (après Férocité) | Carnage | les créatures aggro peuvent **attaquer 2 fois** par tour |
 | 2 | Centre | Déploiement | à chaque tour, piochez d'abord 2 cartes de niveau 1 supplémentaires (avant la pioche normale) et déployez-les gratuitement, plafond de population respecté † |
@@ -482,7 +482,7 @@ Ces règles et valeurs n'ont pas encore été validées ; elles portent la marqu
 - [ ] **Barème des créatures** : aggros à 1 PV et tanks à 1 ATQ à tous les niveaux ; le barème PV + ATQ = 4 / 7 / 10 ne tient plus.
 - [ ] **Barème des forteresses** : la colonne « Points » comptait une Épines 1 gratuite pour toutes les tuiles ; à recalculer depuis sa suppression.
 - [ ] **54 figurines** : lourd à produire ; des pions génériques par type et niveau suffiraient-ils ?
-- [x] **Furtivité** : plus aucune créature ne l'a depuis la v0.5 (Mobilité ne la donne plus).
+- [x] **Furtivité** : donnée aux aggros par Férocité depuis la v0.5.6 (Oni, 08/11/2026).
 - [x] **Régénération** : l'Aura Soin 2 s'ajoute à l'Aura Soin 1 du Glaneur (décidé le 02/11/2026).
 - [x] **Aura Frénésie** : cumulable, cible au choix ; deux Frénésies sur la même créature la quadruplent (décidé le 02/11/2026).
 - [ ] Un **piège rendu visible** par Vision ou Clairvoyance ne se déclenche plus.

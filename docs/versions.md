@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.6 — 8 novembre 2026
+
+**Règles (Oni)** : **Férocité** (aggro, rang 1, côté A) donne aussi la **Furtivité** aux aggros : pas de tir de tourelle ni de sortilège sur elles tant qu'une créature non furtive est sur leur case.
+
 ## v0.5.5 — 8 novembre 2026
 
 **Règles (Oni)**

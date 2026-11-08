@@ -1087,6 +1087,16 @@ const fresh = () => {
   ok(SF.apply(R, "essaim", "strike", { id: 30, target: "fusee" }) === "" && R.workersBase === w2 - 1 && R.tiles["1,0"].hp === 2,
     "attaque de la fusée avec un Sporeur : −1 travailleur, et les spores touchent le bâtiment voisin de la fusée (lane Est)");
 }
+// 69. Férocité donne la Furtivité aux aggros (Oni, 08/11/2026)
+{
+  const S = fresh(); S.upgrades.aggro.r1 = "A";
+  const a = { id: 1, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 2 }, t = { id: 2, name: "Carapace", lane: "N", u: 0, k: 3, hp: 3 };
+  S.creatures.push(a, t);
+  ok(SF.isStealthy(S, a) && !SF.isStealthy(S, t) && SF.effAtq(S, a) === 4, "Férocité : +1 ATQ et Furtivité pour l'aggro, pas pour le tank");
+  ok(!SF.targetable(S, a) && SF.targetable(S, t), "l'Écorcheur ne peut pas être visé tant que la Carapace est sur sa case");
+  S.creatures.pop();
+  ok(SF.targetable(S, a), "seul sur sa case, il redevient une cible");
+}
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {
   const IA = require("../src/ia.js");
