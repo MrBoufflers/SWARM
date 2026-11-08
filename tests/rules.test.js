@@ -1059,6 +1059,26 @@ const fresh = () => {
   SF.migrate(AB);
   ok(AB.tiles["0,2"].shield === 1 && !AB.tiles["0,2"].ren, "rechargement : le jeton Bouclier de l'Abri reste un Bouclier");
 }
+// 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
+{
+  const IA = require("../src/ia.js");
+  const S = SF.newGame(); S.hand = ["Mine supérieure"]; S.spells = ["Frappe orbitale"];
+  const B = IA.belief(S, "essaim");
+  ok(B.hand.length === 0 && B.spells.length === 0 && Object.values(B.tileDecks).every(d => d.every(x => x === null)), "IA de l'essaim : ni la main ni les sortilèges de la colonie, ni l'ordre des pioches");
+  S.tiles["0,3"] = SF.tileStats("Mine supérieure", 0, 3);
+  ok(IA.belief(S, "essaim").tiles["0,3"].name === "Palissade" && !IA.belief(S, "essaim").tiles["0,3"].trap, "une tuile camouflée inconnue est estimée (Palissade), pas lue");
+  ok(IA.belief(S, "colonie").handA.length === 0, "IA de la colonie : la main de l'essaim est cachée");
+  ok(IA.decide(S, "colonie") === null && IA.decide(S, "essaim").type === "draw", "elle ne joue que pendant son tour");
+  SF.setRng(((a) => () => { a = (a * 16807) % 2147483647; return a / 2147483647; })(42)); // partie reproductible
+  const G = SF.newGame(); let n = 0, refus = 0;
+  while (!G.winner && n < 1500) {
+    const side = SF.actor(G), d = IA.decide(G, side);
+    if (SF.apply(G, side, d.type, d.args || {})) { refus++; const f = IA.fallback(G, side); if (SF.apply(G, side, f.type, f.args || {})) break; }
+    n++;
+  }
+  SF.setRng(Math.random);
+  ok(G.winner && refus === 0, `IA contre IA : partie terminée (victoire ${G.winner}, manche ${G.round}, ${n} actions, ${refus} coup refusé)`);
+}
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
   const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");

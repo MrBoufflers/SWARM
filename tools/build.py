@@ -9,6 +9,7 @@ icons_js = "const ICONS = " + json.dumps({k: v[1] for k, v in ICONS.items()}, en
 engine = (ROOT / "src/engine.js").read_text(encoding="utf-8")
 bilan = (ROOT / "src/bilan.js").read_text(encoding="utf-8")
 aide = (ROOT / "src/aide.js").read_text(encoding="utf-8")
+ia = (ROOT / "src/ia.js").read_text(encoding="utf-8")
 ui = (ROOT / "src/ui.js").read_text(encoding="utf-8")
 css = (ROOT / "src/style.css").read_text(encoding="utf-8")
 # illustrations (miniatures de tools/miniatures.py) : une classe CSS par nom du jeu (.im-ecorcheur…), table IMG_CLASS côté JS
@@ -37,6 +38,7 @@ page = f"""<!doctype html>
 {engine}
 {bilan}
 {aide}
+{ia}
 {ui}</script>
 </body></html>
 """

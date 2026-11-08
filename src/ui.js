@@ -79,13 +79,31 @@
   function clearSave() { try { localStorage.removeItem(SAVE); } catch (e) { /* rien */ } }
 
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  function newGame() { MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true; S.handoff = "essaim"; S.view = null; UI = resetUI(); save(); render(); }
+  function newGame(solo) { // solo : camp du joueur face à l'IA (Oni, 08/11/2026)
+    MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true;
+    if (solo) { S.ia = IA.other(solo); S.view = solo; S.handoff = null; } else { S.handoff = "essaim"; S.view = null; }
+    UI = resetUI(); save(); render();
+  }
+  // tour de l'IA (partie solo) : une action à la fois, après les animations, avec une courte pause pour suivre
+  const iaTurn = () => !!(S && S.ia && MODE === "local" && !S.winner && SF.actor(S) === S.ia);
+  function iaTick() {
+    if (!iaTurn() || iaTick.busy || FX.playing) return;
+    iaTick.busy = true;
+    setTimeout(() => {
+      iaTick.busy = false;
+      if (!iaTurn() || FX.playing || MODE !== "local") return;
+      let d = IA.decide(S, S.ia);
+      if (!d || SF.apply(JSON.parse(JSON.stringify(S)), S.ia, d.type, d.args || {})) d = IA.fallback(S, S.ia); // coup refusé : action de secours
+      if (d) { play.byIa = true; try { play(d.type, d.args); } finally { play.byIa = false; } }
+    }, animOn ? 650 : 250);
+  }
   const resetUI = () => ({ sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
   // fenêtres de réaction (Oni, 06/11/2026) : pas d'écran de passage pour entrer dans la réaction de la colonie (A_react)
   // ni pour en sortir ; un bandeau « RÉACTIONS ! » traverse l'écran à la place
   const REACT = ["A_famine", "A_react"];
   function setPhaseHandoff(prev) { // passe la main si le joueur actif change
     const w = who();
+    if (S.ia) { S.view = IA.other(S.ia); S.handoff = null; if (w !== S.view) UI = { ...resetUI(), help: UI.help }; return; } // solo : pas d'écran de passage
     if (S.view === w) return;
     if (S.phase === "A_react" || prev === "A_react") { S.view = w; S.handoff = null; UI = { ...resetUI(), help: UI.help }; return; }
     S.handoff = w; UI = { ...resetUI(), help: UI.help };
@@ -116,7 +134,7 @@
       n.replaceWith(f);
     }
   }
-  function render() { renderInner(); colorDirs($("#app")); }
+  function render() { renderInner(); colorDirs($("#app")); iaTick(); }
   function renderInner() {
     document.documentElement.dataset.motion = animOn ? "on" : "off"; // animations CSS suivant le bouton « Animations »
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
@@ -181,6 +199,9 @@
       <nav class="h2-menu" aria-label="Menu principal">
         ${resume ? `<button data-a="resume" class="h2-btn main">Reprendre la partie</button>` : ""}
         <button data-a="local" class="h2-btn${resume ? "" : " main"}">Nouvelle partie <small>sur cet appareil</small></button>
+        <div class="h2-online"><span class="h2-k">Solo contre l'IA</span>
+          <div class="h2-row"><button data-a="solo" data-side="essaim" class="h2-btn side essaim">${sideLogo("essaim")}Jouer l'essaim</button><button data-a="solo" data-side="colonie" class="h2-btn side colonie">${sideLogo("colonie")}Jouer la colonie</button></div>
+        </div>
         <div class="h2-online"><span class="h2-k">En ligne</span>
           <div class="h2-row"><button data-a="create" data-side="essaim" class="h2-btn side essaim">${sideLogo("essaim")}Jouer l'essaim</button><button data-a="create" data-side="colonie" class="h2-btn side colonie">${sideLogo("colonie")}Jouer la colonie</button></div>
           <div class="h2-row join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CODE" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="h2-btn">Rejoindre</button></div>
@@ -316,14 +337,14 @@
     if (S.winner) return "";
     const { p, body, acts, waiting } = phaseParts();
     if (waiting) return `<section class="phase ${p[0]} waiting"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
-      <p class="ph-txt">Au tour de ${E(SIDE[p[0]])} : en attente de votre adversaire…</p></section>`;
+      <p class="ph-txt">Au tour de ${E(SIDE[p[0]])} : ${iaTurn() ? "l'IA joue…" : "en attente de votre adversaire…"}</p></section>`;
     return `<section class="phase ${p[0]}"><div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="side">${E(SIDE[p[0]])}</span></div>
       <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
   }
   // contenu de la boîte d'action (consignes, choix, boutons) : partagé par la mise en page mobile et la mise en page PC
   function phaseParts(sh) { // sh : textes courts (mise en page PC, le détail est au survol)
     const p = PHASE_TXT[S.phase];
-    if (online() && !myTurn()) return { p, body: "", acts: "", waiting: true };
+    if ((online() && !myTurn()) || iaTurn()) return { p, body: "", acts: "", waiting: true };
     let body = "", acts = "";
     const ph = S.phase;
     if (ph === "A_famine") {
@@ -758,7 +779,7 @@
     if (S.winner) return { top: "", acts: "" };
     const { p, body, acts, waiting } = phaseParts(true);
     const head = `<div class="ph-head"><span class="dot ${p[0]}"></span><b>${E(p[1])}</b><span class="info" tabindex="0" data-tip="${E(p[2])}">i</span></div>`;
-    if (waiting) return { top: `<section class="phase ${p[0]} waiting">${head}<p class="hint">En attente de votre adversaire…</p></section>`, acts: "" };
+    if (waiting) return { top: `<section class="phase ${p[0]} waiting">${head}<p class="hint">${iaTurn() ? "L'IA joue…" : "En attente de votre adversaire…"}</p></section>`, acts: "" };
     return { top: `<section class="phase ${p[0]}">${head}${body}</section>`, acts: p[0] === side || !online() ? acts : "" };
   }
   function pcSwarmOwn() {
@@ -952,6 +973,7 @@
   // Les actions de jeu passent toutes par SF.apply (moteur) : en local directement, en ligne via le serveur.
   function play(type, args, onOk) {
     if (online()) { send(type, args, onOk); return; }
+    if (iaTurn() && !play.byIa) return; // partie solo : pendant le tour de l'IA, le joueur ne peut pas jouer à sa place
     S.fx = [];
     const prev = S.phase;
     const refused = SF.apply(S, who(), type, args || {});
@@ -985,7 +1007,7 @@
     if (a === "quit") { if (confirmQuit()) { setNet(null); MODE = "home"; S = null; UI = resetUI(); render(); } return; }
     if (a === "new") {
       if (online()) { if (S.winner) send("rematch", {}); return; }
-      if (!S || S.winner || confirmNew()) { clearSave(); newGame(); } return;
+      if (!S || S.winner || confirmNew()) { const solo = S && S.ia ? IA.other(S.ia) : undefined; clearSave(); newGame(solo); } return;
     }
     if (a === "reveal") {
       if (online() || UI.leaving) return;
@@ -1076,6 +1098,7 @@
   function homeAction(a, d) {
     if (a === "resume") { const t = load(); if (t && t.phase) { S = upgradeSave(t); MODE = "local"; UI = resetUI(); render(); } return; }
     if (a === "local") { MODE = "local"; clearSave(); newGame(); return; }
+    if (a === "solo" && (d.side === "essaim" || d.side === "colonie")) { MODE = "local"; clearSave(); newGame(d.side); return; }
     if (a === "create") { createOnline(d.side); return; }
     if (a === "stats") { openStats(); return; }
     if (a === "join") { const c = ($("#joincode").value || "").trim().toUpperCase(); if (c.length !== 5) { flash("Le code fait 5 caractères."); return; } joinOnline(c); }
@@ -1399,7 +1422,7 @@
   }
   const pct = (a, n) => (n ? Math.round(100 * a / n) + " %" : "–");
   const avg = v => (Math.round(v * 10) / 10).toLocaleString("fr-FR");
-  const shown = () => (STATS.list || []).filter(r => STATS.test || !r.test);
+  const shown = () => (STATS.list || []).filter(r => (STATS.test || !r.test) && (STATS.ia || !r.ia)); // parties contre l'IA à part (Oni, 08/11/2026)
   function statsPage() {
     const head = `<div class="st-head"><h2>Statistiques des parties</h2><button data-a="statsBack" class="ghost">Retour</button></div>`;
     if (STATS.error) return `<section class="statpage">${head}<p>${E(STATS.error)}</p></section>`;
@@ -1410,22 +1433,23 @@
       rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td></tr>`).join("")
     }</tbody></table></div><p class="small">Moyennes par partie. Touchez une version pour ne voir que ses parties.</p>` : `<p>Aucune partie terminée enregistrée pour l'instant.</p>`;
     const games = list.filter(r => !STATS.ver || r.version === STATS.ver).slice(0, 100);
-    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.decouverte ? " · découverte" : ""}${r.test ? " · test" : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
+    const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.decouverte ? " · découverte" : ""}${r.test ? " · test" : ""}${r.ia ? ` · contre l'IA (IA : ${E(r.ia)})` : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
       <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
       ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
     return `<section class="statpage">${head}
       <p class="small">Version actuelle : v${E(SF.VERSION)} · ${list.length} partie${list.length > 1 ? "s" : ""} terminée${list.length > 1 ? "s" : ""}${STATS.test ? "" : ` (hors ${nTest} partie${nTest > 1 ? "s" : ""} de test)`}.</p>
-      <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
+      <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsIa" aria-pressed="${!!STATS.ia}">Parties contre l'IA : ${STATS.ia ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
       ${table}
       <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
       <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
   }
-  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "ia", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
   function statsAction(a, d) {
     if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
     if (a === "help") { return; }
     if (!STATS) return;
     if (a === "statsTest") STATS.test = !STATS.test;
+    if (a === "statsIa") STATS.ia = !STATS.ia;
     if (a === "statsVer") STATS.ver = d.v || null;
     if (a === "statsPlan") {
       fetch("/api/resultat?id=" + encodeURIComponent(d.id), { cache: "no-store" }).then(r => r.json()).then(j => { if (j.svg) { STATS.plans[d.id] = j.svg; render(); } }).catch(() => flash("Plateau indisponible."));
