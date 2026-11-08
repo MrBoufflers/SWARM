@@ -97,8 +97,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       if (!(await page.$('.board .tok.go[data-done-robot]')) && await page.evaluate(() => { const t = document.querySelector('.board .tok.go'); if (!t || window.__robotOne) return false; window.__robotOne = 1; return true; }) && await click(page, '.board .tok.go')) continue;
       await page.evaluate(() => { window.__robotOne = 0; }); await click(page, '[data-a="actAll"]'); continue; }
     if (ph === 'Tour de la colonie') {
-      if (!(await page.$('.tcard.sel'))) { if (await click(page, '[data-a="tile"]:not([disabled])') && await click(page, '[data-a="startCh"]')) continue; }
-      for (let i = 0; i < 4; i++) { const bs = await page.$$('[data-a="alloc"][data-d="1"]'); if (!bs[i]) break; try { await bs[i].click(); } catch (e) { if (!detached(e)) throw e; } await sleep(20); await idle(page); }
+      if (!(await page.$('.tcard.sel'))) { if (await click(page, '[data-a="tile"]:not([disabled])') && await click(page, '[data-a="buildAt"]')) continue; } // construction immédiate : tuile puis case
       await click(page, '[data-a="build"]'); continue;
     }
     if (ph === 'Pose des bâtiments') { if (await click(page, '[data-a="placeAt"]')) continue; console.log('pose impossible'); break; }

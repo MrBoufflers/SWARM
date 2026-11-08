@@ -64,7 +64,7 @@
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
     A_attack: ["essaim", "Attaques", "Touchez une créature : choisissez la case où elle avance sur son chemin vers la fusée (au moins 1 case, au plus sa vitesse), puis, si vous voulez, un bâtiment qui touche sa case (ou la fusée) à attaquer. « Tout résoudre et finir le tour » fait agir toutes les créatures restantes."],
     D_draw: ["colonie", "Pioche de la colonie", "Complétez votre main carte par carte : pour chaque tuile, choisissez sa pioche (renforts, actifs ou pièges)."],
-    D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, chantiers, puis répartition des travailleurs. Ensuite : construction et fusée, puis tirs des tourelles."],
+    D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, puis construction : choisissez une tuile et sa case, elle est payée et posée tout de suite (un bâtiment par lane et par tour). Les points restants vont à la fusée, puis les tourelles tirent."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
     D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
   };
@@ -286,7 +286,7 @@
     const ateliers = SF.LANES.map(l => {
       const chs = S.chantiers[l];
       const txt = chs.length ? chs.map(ch => `${E(!ch.tile || SF.TILES[ch.tile].camo ? "?" : short(ch.tile))} ${ch.left}`).join(" · ") : "—";
-      return `<span class="sa lane-${l}" tabindex="0" data-tip="${E(`Atelier ${SF.LANE_NAME[l]} : ${chs.length ? chs.map(ch => `${!ch.tile || SF.TILES[ch.tile].camo ? "tuile cachée" : ch.tile}, ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}`).join(" ; ") : "libre"}`)}"><b>${l}</b>${txt}</span>`;
+      return `<span class="sa lane-${l}" tabindex="0" data-tip="${E(`Lane ${SF.LANE_NAME[l]} : ${chs.length ? chs.map(ch => `${!ch.tile || SF.TILES[ch.tile].camo ? "tuile cachée" : ch.tile}, ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}`).join(" ; ") : "libre"}`)}"><b>${l}</b>${txt}</span>`;
     }).join("");
     return `<h3>${icon("fusee")} Colonie</h3>
       <div class="sum">
@@ -392,8 +392,10 @@
       body = `<p class="hint">Main : <b>${S.hand.length}</b>/${max}. Encore ${max - S.hand.length} tuile${max - S.hand.length > 1 ? "s" : ""} à piocher, une à une.</p><div class="pick col">` +
         SF.TILE_CATS.map(c => { const n = SF.tilesLeft(S, c); return `<div class="pick-row${n ? "" : " off"}"><span class="pick-nm"><b>${E(SF.CAT_NAME[c])}</b><small>${E(CAT_HINT[c])} · ${n} tuile${n > 1 ? "s" : ""}</small></span><span class="step"><button data-a="tdraw" data-v="${c}"${n ? "" : " disabled"}>Piocher</button></span></div>`; }).join("") + `</div>`;
     } else if (ph === "D_main") {
-      body = spellBox("sup", sh) + (UI.sel !== null && sh ? `<p class="hint"><b>${E(S.hand[UI.sel])}</b> → « Construire » dans un atelier.</p>` : UI.sel !== null ? `<p class="hint">Tuile choisie : <b>${E(S.hand[UI.sel])}</b>. Choisissez la lane de son chantier : bouton « Construire ici » dans les ateliers (panneau Colonie). La case exacte sera choisie à la fin de la construction.</p>` : "");
-      acts = `<button data-a="build" class="primary">Construire</button>`;
+      const left = SF.pointsLeft(S), pts = `<p class="hint">Points : <b>${left}</b> restant${left > 1 ? "s" : ""} (le reste ira à la fusée).</p>`;
+      const sel = UI.sel !== null ? S.hand[UI.sel] : null, cost = sel ? SF.TILES[sel].d : 0, n = sel ? SF.buildTargets(S, UI.sel).length : 0;
+      body = spellBox("sup", sh) + pts + (sel ? `<p class="hint"><b>${E(sel)}</b> (${cost} point${cost > 1 ? "s" : ""}) : ${n ? "touchez une case surlignée pour le construire tout de suite." : cost > left ? "pas assez de points." : "aucune case libre (un bâtiment par lane et par tour)."}</p>` : `<p class="hint">Choisissez une tuile de votre main, puis sa case.</p>`);
+      acts = `<button data-a="build" class="primary">Fin de la construction</button>`;
     } else if (ph === "D_place") {
       const p = S.toPlace[0];
       body = p && sh ? `<p class="hint"><b>${E(p.tile)}</b> achevé : cliquez une case surlignée${S.toPlace.length > 1 ? ` (encore ${S.toPlace.length - 1})` : ""}.</p>` : p ? `<p class="hint"><b>${E(p.tile)}</b> est achevé en lane ${SF.LANE_NAME[p.lane]} : cliquez une case surlignée.${S.toPlace.length > 1 ? ` Encore ${S.toPlace.length - 1} bâtiment${S.toPlace.length > 2 ? "s" : ""} à poser ensuite.` : ""}</p>` : "";
@@ -481,7 +483,8 @@
   function hiddenTrap(t) { return t.camo && !t.revealed && S.view === "essaim" && !SF.clairvoyance(S); }
   function board() {
     const canDeployHere = (lane, u) => S.phase === "A_deploy" && S.view === "essaim" && UI.sel && SF.canDeploy(S, cardOf(UI.sel), lane);
-    const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : [];
+    const buildHot = S.phase === "D_main" && S.view === "colonie" && UI.sel !== null && UI.spell === null ? SF.buildTargets(S, UI.sel) : [];
+    const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : buildHot;
     // créature choisie en phase d'attaque : cases où elle peut aller, cibles qu'elle peut attaquer
     const mover = S.phase === "A_attack" && S.view === "essaim" ? S.creatures.find(c => c.id === UI.selCreature && !c.acted) : null;
     const R = mover ? SF.reachable(S, mover) : {}, T = mover ? SF.strikeTargets(S, mover) : [];
@@ -537,7 +540,7 @@
       const [pu, pk] = SF.toLocal(lane, x, y);
       const drop = !t && S.phase === "A_deploy" && S.view === "essaim" && UI.sel && !UI.sap && SF.canDeploy(S, cardOf(UI.sel), lane) && SF.canDrop(S, cardOf(UI.sel).name, lane, pu, pk);
       const atk = !target && T.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target || drop ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="placeAt" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target || drop ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="${S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -644,22 +647,14 @@
   // ateliers de la colonie : une ligne par lane (emplacements de chantier + travailleurs affectés) ;
   // pc : toujours 2 emplacements, le second verrouillé tant que le palier 6 n'est pas atteint
   function ateliersHtml(mine, pc) {
+    // construction immédiate (Oni, 08/11/2026) : plus d'ateliers ; par lane, les bâtiments construits ce tour (1, 2 au palier 6)
     let out = "";
     for (const l of SF.LANES) {
-      const chs = S.chantiers[l];
-      const n = pc ? Math.max(2, S.chPerLane) : S.chPerLane;
-      const slots = Array.from({ length: n }, (_, i) => {
-        const ch = chs[i];
-        if (i >= S.chPerLane) return `<div class="slot empty lock" title="Second chantier au palier 6 de la fusée">${pc ? icon("fusee") + "6" : ""}</div>`;
-        if (!ch) return mine && S.phase === "D_main" && UI.sel !== null && UI.spell === null && chs.length < S.chPerLane
-          ? `<button data-a="startCh" data-l="${l}" class="slot empty go">${pc ? `Construire<small>${E(short(S.hand[UI.sel]))}</small>` : `Construire ici : ${E(S.hand[UI.sel])}`}</button>` : `<div class="slot empty">libre</div>`;
-        const hide = !ch.tile || (SF.TILES[ch.tile].camo && !mine);
-        const x = mine && ch.fresh && S.phase === "D_main" ? ` <button data-a="cancelCh" data-l="${l}" data-i="${i}" class="x" aria-label="Annuler">×</button>` : "";
-        return pc ? `<div class="slot" title="${E(hide ? "Tuile cachée" : ch.tile)} : ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}"><span class="sn">${E(hide ? "?" : short(ch.tile))}</span><b>${ch.left}</b>${x}</div>`
-          : `<div class="slot">${E(hide ? "?" : ch.tile)} · ${ch.left} pt${ch.left > 1 ? "s" : ""}${x}</div>`;
-      }).join("");
-      const step = mine && S.phase === "D_main" ? `<span class="step"><button data-a="alloc" data-l="${l}" data-d="-1" aria-label="Retirer un point">−</button><b>${S.alloc[l]}</b><button data-a="alloc" data-l="${l}" data-d="1" aria-label="Ajouter un point">+</button></span>` : `<b class="pts">${S.alloc[l]}</b>`;
-      out += `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${slots}</div>${mine || !pc ? step : ""}</div>`;
+      const done = (S.built && S.built[l]) || 0;
+      const slots = Array.from({ length: pc ? Math.max(2, S.chPerLane) : S.chPerLane }, (_, i) =>
+        i >= S.chPerLane ? `<div class="slot empty lock" title="Second bâtiment par tour au palier 6 de la fusée">${pc ? icon("fusee") + "6" : ""}</div>`
+          : i < done ? `<div class="slot" title="Bâtiment construit ce tour"><span class="sn">construit</span></div>` : `<div class="slot empty">libre</div>`).join("");
+      out += `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${slots}</div></div>`;
     }
     return out;
   }
@@ -675,7 +670,7 @@
       <div class="kv"><span>Travailleurs</span><b>${S.workersBase}${SF.bonusWorkers(S) ? ` + ${SF.bonusWorkers(S)}` : ""}</b></div>
       <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
       <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 2 points (étages 1 à 3), puis 4, 6 et 8 après les paliers 3 · 6 · 9.</p>
-      <h4 data-fx="ateliers">Ateliers ${mine && S.phase === "D_main" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>${ateliersHtml(mine, false)}
+      <h4 data-fx="ateliers">Construction ${mine && S.phase === "D_main" ? `<span class="small">${SF.pointsLeft(S)} point(s) restant(s)</span>` : ""}</h4>${ateliersHtml(mine, false)}
       <h4 data-fx="tilehand">Main de tuiles</h4>${tileHandHtml(mine)}<h4>Sortilèges</h4>${spellsHtml(mine)}`;
   }
   const acquiredUps = ty => { // améliorations acquises pour ce type
@@ -827,7 +822,7 @@
         ${box2(SF.spellsPerTurn(S), "sorts / tour", "Sortilèges piochés par tour")}
         ${box2(S.spells.length, "sorts en main", "Sortilèges en main")}
       </div>
-      <h4 data-fx="ateliers">Ateliers ${S.phase === "D_main" && S.view === "colonie" ? `<span class="small">points ${used}/${pts} · fusée ${pts - used}</span>` : ""}</h4>
+      <h4 data-fx="ateliers">Construction ${S.phase === "D_main" && S.view === "colonie" ? `<span class="small">${SF.pointsLeft(S)} point(s) restant(s)</span>` : ""}</h4>
       <div class="pc-ateliers">${ateliersHtml(S.view === "colonie", true)}</div>
       <div class="po-scroll">
         <h4 data-fx="tilehand">Main de tuiles <span class="small">${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}</span></h4>${tileHandHtml(true)}
@@ -838,16 +833,7 @@
   // résumé de la colonie vu par l'essaim (colonne de gauche)
   function pcColonySum() {
     const bonus = SF.bonusWorkers(S);
-    const at = SF.LANES.map(l => {
-      const chs = S.chantiers[l];
-      const blocks = Array.from({ length: Math.max(2, S.chPerLane) }, (_, i) => {
-        if (i >= S.chPerLane) return `<span class="slot empty lock" title="Second chantier au palier 6"></span>`;
-        const ch = chs[i]; if (!ch) return `<span class="slot empty"></span>`;
-        const hide = !ch.tile || SF.TILES[ch.tile].camo;
-        return `<span class="slot" tabindex="0" data-tip="${E(`${hide ? "Tuile cachée" : ch.tile} : ${ch.left} point${ch.left > 1 ? "s" : ""} restant${ch.left > 1 ? "s" : ""}`)}"><span class="sn">${E(hide ? "?" : short(ch.tile))}</span><b>${ch.left}</b></span>`;
-      }).join("");
-      return `<div class="atelier lane-${l}"><span class="al">${l}</span><div class="slots">${blocks}</div></div>`;
-    }).join("");
+    const at = ateliersHtml(false, true);
     return `<aside class="panel colonie mini pc-sum"><div class="ps-main">
       <h3>${sideLogo("colonie")}${sideName("colonie")}</h3>
       ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "pop.", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}
@@ -857,7 +843,7 @@
         <span tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b> tuiles</span>
       </div>
       ${pcRocket(true)}
-      <h4 data-fx="ateliers">Ateliers</h4><div class="pc-ateliers sum">${at}</div></div></aside>`;
+      <h4 data-fx="ateliers">Construits ce tour</h4><div class="pc-ateliers sum">${at}</div></div></aside>`;
   }
   // résumé de l'essaim vu par la colonie (colonne de droite) : améliorations en grosses icônes
   function pcSwarmSum() {
@@ -1083,6 +1069,7 @@
       case "endA": return play("endA");
       case "startCh": if (UI.sel !== null) return play("startCh", { i: UI.sel, lane: d.l }, () => { UI.sel = null; }); break;
       case "placeAt": return play("placeAt", { k: d.k });
+      case "buildAt": { const i = UI.sel; UI.sel = null; if (i !== null) return play("buildAt", { i, k: d.k }); break; }
       case "cancelCh": return play("cancelCh", { lane: d.l, i: Number(d.i) });
       case "alloc": return play("alloc", { lane: d.l, d: Number(d.d) });
       case "spellArg": {

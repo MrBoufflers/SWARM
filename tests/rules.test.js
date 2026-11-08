@@ -63,7 +63,7 @@ const fresh = () => {
 // 6. fusée : 2 points par étage (étages 1-3), +1 travailleur, palier 3 = +2 technologies
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
-  S.workersBase = 6; S.extraPts = 0;
+  S.workersBase = 6; S.turnPts = 6; S.extraPts = 0; // points du tour fixés au début du tour (v0.5.8)
   SF.endDefenderTurn(S);
   ok(S.floors === 3 && S.workersBase === 9 && SF.tech(S) >= 2, "6 points → 3 étages, +3 travailleurs, +2 technologies");
 }
@@ -1118,6 +1118,31 @@ const fresh = () => {
   ok(SF.apply(P, "essaim", "pickOne", { l: 3 }) !== "", "pile vide : refusé");
   for (let i = 0; i < 4; i++) SF.apply(P, "essaim", "pickOne", { l: 1 });
   ok(P.phase === "A_deploy" && P.handA.length === 5 && !("pickTotal" in P), "5 cartes : étape de déploiement");
+}
+// 71. Construction immédiate (Oni, 08/11/2026 ; remplace les ateliers) : on paie d'un coup et on pose aussitôt ;
+//     un bâtiment par lane et par tour (2 au palier 6) ; les points restants vont à la fusée
+{
+  const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
+  ok(S.phase === "D_main" && S.turnPts === 3 && SF.pointsLeft(S) === 3, "début du tour : 3 points de construction");
+  S.hand = ["Muraille", "Palissade", "Bastion", "Antenne"];
+  const t = SF.buildTargets(S, 0);
+  ok(t.length > 0 && t.every(k => SF.ring(...SF.parse(k)) >= 1), "Muraille (2 points) : des cases valables sont proposées");
+  const kN = t.find(k => SF.cellLane(...SF.parse(k)) === "N");
+  ok(SF.apply(S, "colonie", "buildAt", { i: 0, k: kN }) === "" && S.tiles[kN].name === "Muraille" && SF.pointsLeft(S) === 1 && S.hand.length === 3, "Muraille posée aussitôt en lane Nord, 2 points payés (reste 1)");
+  const k2 = SF.buildTargets(S, 0).find(k => SF.cellLane(...SF.parse(k)) === "N");
+  ok(!k2, "un seul bâtiment par lane et par tour");
+  ok(SF.buildTargets(S, 1).length === 0, "Bastion (3 points) : trop cher avec 1 point restant");
+  const kE = SF.buildTargets(S, 0).find(k => SF.cellLane(...SF.parse(k)) === "E");
+  ok(SF.apply(S, "colonie", "buildAt", { i: 0, k: kE }) === "" && SF.pointsLeft(S) === 0, "Palissade (1 point) en lane Est");
+  S.hand.push("Baraquement"); const w = S.workersBase;
+  SF.apply(S, "colonie", "build");
+  ok(S.rocketPts + S.floors * 2 === 0 && S.workersBase === w, "fin de la construction : aucun point restant, rien pour la fusée");
+  const R = fresh(); SF.attackerDraw(R); SF.endDeploy(R); SF.startAttacks(R); SF.endAttackerTurn(R);
+  R.hand = ["Baraquement"]; const kb = SF.buildTargets(R, 0)[0];
+  SF.apply(R, "colonie", "buildAt", { i: 0, k: kb });
+  ok(SF.pointsLeft(R) === 2, "le +1 travailleur du Baraquement posé ce tour ne compte qu'au tour suivant");
+  SF.apply(R, "colonie", "build");
+  ok(R.floors === 1, "les 2 points restants vont à la fusée (1 étage)");
 }
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {

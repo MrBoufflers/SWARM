@@ -227,7 +227,8 @@ const IA = (() => {
     }
     // chantiers : la meilleure tuile et la meilleure lane, tant que ça améliore la position
     const cands = [{ type: "build" }];
-    V.hand.forEach((n, i) => { for (const lane of E.LANES) if (V.chantiers[lane].length < V.chPerLane) cands.push({ type: "startCh", args: { i, lane } }); });
+    // construction immédiate (v0.5.8) : chaque tuile de la main sur chaque case possible
+    V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k } }); });
     if (cands.length === 1) return cands[0];
     return best(V, "colonie", cands, finishColony).move || { type: "build" };
   }

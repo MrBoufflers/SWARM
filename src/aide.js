@@ -130,9 +130,8 @@ const AIDE = (() => {
       <h3>Votre tour</h3>
       <ol>
         <li><b>Sortilèges de soutien</b> : jouez ceux que vous voulez.</li>
-        <li><b>Chantiers</b> : touchez une tuile de votre main, puis un atelier (une lane). Le chantier demande autant de points que la durée de la tuile. Un chantier par lane (deux après l'étage 6). Juste assez de travailleurs y sont assignés d'office.</li>
-        <li><b>Répartition</b> : ajustez les points de chaque atelier avec + / −. Les points non utilisés vont à la <b>fusée</b>, de même que les points en trop d'un atelier.</li>
-        <li><b>Construire</b> : les chantiers avancent. Un bâtiment achevé se <b>pose</b> sur une case libre de sa lane qui touche un bâtiment, un support ou la fusée (sans diagonale). Les créatures présentes reculent d'une case. S'il n'y a aucune case possible, la tuile revient en main.</li>
+        <li><b>Construction immédiate</b> : touchez une tuile de votre main, puis une case surlignée : vous payez tout de suite ses points de construction et le bâtiment est posé aussitôt. Un bâtiment par lane et par tour (deux après l'étage 6). Case valable : libre, dans la lane, touchant un bâtiment, un support ou la fusée (sans diagonale) ; les créatures présentes reculent d'une case.</li>
+        <li><b>Fusée</b> : les points non dépensés vont à la fusée quand vous terminez la construction. Les points du tour sont fixés au début du tour : un bâtiment posé ce tour ne donne ses travailleurs qu'au tour suivant.</li>
         <li><b>Supports et fusée</b> : les nouveaux supports apparaissent, puis la fusée gagne ses étages.</li>
         <li><b>Tirs</b> : touchez une tourelle surlignée, puis une créature surlignée (ou « Tirs automatiques »). « Terminer le tour » fait tirer les tourelles restantes. Le tour passe seul quand plus aucune tourelle ne peut tirer.</li>
         <li><b>Pioche</b> de tuiles et de sortilèges.</li>
@@ -140,7 +139,7 @@ const AIDE = (() => {
       <h3>La fusée</h3>
       <ul>
         <li>Un étage coûte <b>${F[0]} points</b> (étages 1 à 3), puis ${F[1]} (4 à 6), ${F[2]} (7 à 9) et ${F[3]} (10 à 12). Les points en trop passent à l'étage suivant. Chaque étage donne <b>+1 travailleur</b>.</li>
-        <li><b>Étage 3</b> : +2 technologies. <b>Étage 6</b> : +1 chantier par lane. <b>Étage 9</b> : la <b>Nuke</b> détruit toutes les créatures. Chaque palier (3, 6, 9) donne aussi +1 tuile en main et +1 dégât aux tourelles de niveau 1.</li>
+        <li><b>Étage 3</b> : +2 technologies. <b>Étage 6</b> : +1 bâtiment par lane et par tour. <b>Étage 9</b> : la <b>Nuke</b> détruit toutes les créatures. Chaque palier (3, 6, 9) donne aussi +1 tuile en main et +1 dégât aux tourelles de niveau 1.</li>
         <li><b>Étage 12</b> : décollage, vous gagnez.</li>
       </ul>
       <h3>Les supports</h3>
@@ -204,10 +203,10 @@ const AIDE = (() => {
     // ---- colonie
     { id: "c-but", side: "colonie", img: "Fusée", title: "Vous jouez la colonie", when: () => true,
       text: () => `Votre but : achever les ${SF.FLOORS} étages de la fusée, au centre. Vous perdez si l'essaim tue tous vos travailleurs. Chaque tour : lancer des chantiers, répartir vos travailleurs entre ateliers et fusée, construire, poser les bâtiments, puis tirer avec vos tourelles. Le bouton « Règles » détaille tout.` },
-    { id: "c-chantier", side: "colonie", img: "Muraille", title: "Lancer un chantier", when: S => S.phase === "D_main" && S.hand.length > 0,
-      text: S => `Touchez une tuile de votre main, puis un atelier (une lane : N, E, S, O). Le chantier demande autant de points que sa durée. ${S.chPerLane > 1 ? "Deux chantiers" : "Un chantier"} par lane. Juste assez de travailleurs y sont assignés d'office.` },
-    { id: "c-points", side: "colonie", img: "Baraquement", title: "Répartir les travailleurs", when: S => S.phase === "D_main",
-      text: S => `Vos travailleurs donnent ${SF.totalPoints(S)} points ce tour. Les points d'un atelier font avancer son chantier ; tous les autres vont à la fusée. Ajustez avec + / −, puis touchez « Construire ».` },
+    { id: "c-chantier", side: "colonie", img: "Muraille", title: "Construire", when: S => S.phase === "D_main" && S.hand.length > 0,
+      text: S => `Touchez une tuile de votre main, puis une case surlignée : elle est payée et construite tout de suite. ${S.chPerLane > 1 ? "Deux bâtiments" : "Un bâtiment"} par lane et par tour.` },
+    { id: "c-points", side: "colonie", img: "Baraquement", title: "Points de construction", when: S => S.phase === "D_main",
+      text: S => `Vos travailleurs donnent ${SF.totalPoints(S)} points ce tour. Chaque bâtiment coûte ses points de construction ; ceux qui restent vont à la fusée quand vous touchez « Fin de la construction ».` },
     { id: "c-fusee", side: "colonie", img: "Fusée", title: "La fusée", when: S => S.phase === "D_main",
       text: () => `Un étage coûte ${F[0]} points (étages 1 à 3), puis ${F[1]}, ${F[2]} et ${F[3]}. Chaque étage donne +1 travailleur. Étage 3 : +2 technologies. Étage 6 : +1 chantier par lane. Étage 9 : la Nuke détruit toutes les créatures. Survolez les étages pour le détail.` },
     { id: "c-pose", side: "colonie", img: "Rempart", title: "Poser un bâtiment", when: S => S.phase === "D_place",
