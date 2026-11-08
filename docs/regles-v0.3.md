@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.4 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.5 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -218,6 +218,8 @@ Une créature qui atteint la fusée l'attaque : **chaque attaque retire un seul 
 
 Une créature à 0 PV retire sa figurine ; sa carte retourne dans sa pioche.
 
+**PV bonus perdus** (Oni, 08/11/2026) : quand une créature perd un bonus de PV (soutien de la Mue mort ou parti, créature qui quitte la case, Masse vivante qui diminue), seul son **maximum** baisse : une créature blessée garde ses PV, sans dépasser son nouveau maximum. Une créature n'en meurt jamais.
+
 ## Tour de la colonie
 
 À chaque tour, la colonie lance ses chantiers puis répartit ses travailleurs entre ses murs et sa fusée.
@@ -335,7 +337,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Perforeur | Soutien | 2 | 3 | 4 | 0 | **Aura Percée** : les autres créatures de sa case gagnent la percée | 2 |
 | Hurleur | Soutien | 2 | 3 | 4 | 0 | **Aura Fureur** : +2 ATQ aux autres créatures de sa case | 2 |
 | Sapeur | Soutien | 3 | 5 | 6 | 0 | **Sabotage** : quand il est déployé, détruisez un bâtiment au choix de sa lane (+1 biomasse comme toute tuile détruite) | 3 |
-| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque une tuile, chaque tuile qui touche cette tuile subit **2 dégâts par Sporeur** de la case, en une seule attaque (sauf une tuile encore camouflée et non visible) | 3 |
+| Sporeur | Soutien | 3 | 5 | 6 | 0 | **Aura Spores** : quand une autre créature de sa case attaque un bâtiment ou la fusée, les **8 cases autour de la cible** (diagonales comprises, toutes lanes) subissent **2 dégâts par Sporeur** de la case, en une seule attaque ; si la fusée est parmi elles, elle perd **1 travailleur** (sauf une tuile encore camouflée et non visible) | 3 |
 
 ### Forteresses
 
