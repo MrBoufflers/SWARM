@@ -4,6 +4,20 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.7 — 8 novembre 2026
+
+**Règles (Oni)**
+- **Siphon** : selon la biomasse de l'essaim — mineur 1 + 1 par tranche de 10, majeur 2 + 2 par tranche de 10, supérieur 3 + 3 par tranche de 10 (jamais sous 5).
+- **Hurleur** : Aura Fureur = +1 ATQ et +1 PV aux autres créatures de sa case (avant +2 ATQ).
+- **Griffes** : ajoute l'Aura Mobilité 1 (comme la Mue).
+- **Déploiement** (aggro) : en plus, une fois par tour pendant le déploiement, une aggro en jeu peut être redéployée à l'entrée de n'importe quelle lane.
+- **Pioche de l'essaim** : carte par carte, en choisissant la pile à chaque fois (comme la colonie).
+
+**Interface (Oni)**
+- Colonie : un seul bouton « Tirer et finir le tour » (tirs restants automatiques).
+- Sortilèges : la créature visée se choisit en touchant le jeton sur le plateau.
+- Textes raccourcis (améliorations, capacités).
+
 ## v0.5.6 — 8 novembre 2026
 
 **Règles (Oni)** : **Férocité** (aggro, rang 1, côté A) donne aussi la **Furtivité** aux aggros : pas de tir de tourelle ni de sortilège sur elles tant qu'une créature non furtive est sur leur case.
