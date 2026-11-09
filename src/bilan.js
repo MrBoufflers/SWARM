@@ -17,6 +17,8 @@ const BILAN = (() => {
       creatures: (S.creatures || []).length, buildings: tiles.filter(t => !t.start).length, barbed: tiles.filter(t => t.start).length,
       supports: Object.keys(S.supports || {}).length,
       upgrades: ["aggro", "tank", "soutien"].map(ty => [ty, S.upgrades[ty].r1 || "-", S.upgrades[ty].r2 || "-"].join(":")).join(" "),
+      // bâtiments construits par la colonie pendant la partie, avec leur nombre (Oni, 09/11/2026) : « Muraille:2 Antenne:1 »
+      bats: Object.entries(S.builtCount || {}).map(([n, q]) => n + ":" + q).join(" ").slice(0, 600),
     };
   }
 

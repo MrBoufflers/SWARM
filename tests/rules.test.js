@@ -541,9 +541,9 @@ const fresh = () => {
 }
 // 43. Piège avant l'attaque ; Percée limitée à la case suivante (Oni, 01/11/2026)
 {
-  const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
+  const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mine majeure", 0, 1);
   const t = { id: 99, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(t); SF.act(S, t);
-  ok(t.hp === 2 && S.tiles["0,1"].hp === 2, "Béhémoth (5 PV) survit à la Mine supérieure (−3) puis frappe (1 ATQ : 3 → 2 PV)");
+  ok(t.hp === 2 && S.tiles["0,1"].hp === 1, "Béhémoth (5 PV) survit à la Mine majeure (−3) puis frappe (1 ATQ : 2 → 1 PV)");
   const P = (setup, k = 4) => {
     const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k];
     setup(T); for (const k of Object.keys(T.tiles)) T.tiles[k].revealed = true; // tuiles déjà retournées (une tuile camouflée ne subit pas la percée)
@@ -596,9 +596,9 @@ const fresh = () => {
   };
   ok(run(false) === 1 && run(true) === 3, "Carapace contre un Mur hérissé : −2 d'Épines sans Catalyseur, rien avec");
   const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
-  const d = { id: 132, name: "Béhémoth", lane: "N", u: 0, k: 2, hp: 5, acted: false }; T.creatures.push(d, { id: 133, name: "Catalyseur", lane: "N", u: 0, k: 2, hp: 5, acted: false });
+  const d = { id: 132, name: "Béhémoth", lane: "N", u: 0, k: 2, hp: 7, acted: false }; T.creatures.push(d, { id: 133, name: "Catalyseur", lane: "N", u: 0, k: 2, hp: 5, acted: false });
   SF.actCase(T, SF.posKey(d), [132]);
-  ok(d.hp === 2, "le piège blesse quand même (3 dégâts : ce ne sont pas des Épines)");
+  ok(d.hp === 2, "le piège blesse quand même (Mine supérieure : 5 dégâts, ce ne sont pas des Épines)");
   ok(SF.CREATURES["Catalyseur"].capName === "Aura Cuirasse" && !SF.ACTIONS.instinct && !SF.hasMobility(T, { name: "Carapace", lane: "N", u: 0, k: 4 }), "plus d'Aura Instinct : un tank n'a plus de Mobilité");
 }
 // 48. Muraille et Palissade à 4 ex., Feu nourri, support de niveau 3 à +3 travailleurs (Oni, 02/11/2026)
@@ -638,8 +638,8 @@ const fresh = () => {
 {
   ok(!SF.TILES["Siphon"] && !SF.TILES["Piège"], "le Piège et le Siphon d'origine sont remplacés (Oni, 07/11/2026)");
   ok(["mineur", "majeur", "supérieur"].every((q, i) => { const T = SF.TILES["Siphon " + q], M = SF.TILES["Mine " + q.replace("mineur", "mineure").replace("majeur", "majeure").replace("supérieur", "supérieure")];
-    return T.d === i + 1 && T.pv === i + 1 && T.siphon === i + 1 && T.camo && T.n === 2 && M.d === i + 1 && M.pv === i + 1 && M.trap === i + 1 && M.camo && M.n === 2; }),
-    "Mines et Siphons mineur / majeur / supérieur : 1 / 2 / 3 tours, PV et effet ; camouflés ; 2 exemplaires chacun");
+    return T.d === i + 1 && T.pv === i + 1 && T.siphon === i + 1 && T.camo && T.n === 2 && M.d === i + 1 && M.pv === i + 1 && M.trap === [1, 3, 5][i] && M.camo && M.n === 2; }),
+    "Mines (1 / 3 / 5 dégâts) et Siphons mineur / majeur / supérieur : 1 / 2 / 3 tours et PV ; camouflés ; 2 exemplaires chacun");
   const hit = (bio, setup) => {
     const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Siphon supérieur", 0, 1); S.biomass = bio;
     const c = { id: 160, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; S.creatures.push(c);
@@ -1160,6 +1160,29 @@ const fresh = () => {
   SF.apply(T, "essaim", "move", { id: 10, u: 0, k: 3 });
   ok(m.k === 3 && t.k === 3 && Object.keys(SF.reachable(T, m)).length === 1 && Object.keys(SF.reachable(T, t)).length === 0, "ensemble en C3 ; il reste 1 case au Massacreur, plus rien à la Carapace");
   ok(SF.apply(T, "essaim", "move", { id: 10, u: 0, k: 2 }) === "" && m.k === 2 && t.k === 3, "le Massacreur finit seul son déplacement");
+}
+// 73. Oni, 09/11/2026 : Frappe orbitale 5, Salve 3, Double bouclier, Blindage −1 tourelle, départ au contact sans avancer
+{
+  const at = (id, name, k, hp) => ({ id, name, lane: "N", u: 0, k, hp, acted: false });
+  const S = fresh(); S.phase = "A_react"; S.spells = ["Frappe orbitale", "Salve"]; const c = at(1, "Colosse", 3, 7), d = at(2, "Béhémoth", 3, 5); S.creatures.push(c, d);
+  SF.apply(S, "colonie", "spell", { i: 0, arg: 1 });
+  ok(c.hp === 2, "Frappe orbitale : 5 dégâts (Colosse 7 → 2)");
+  SF.apply(S, "colonie", "spell", { i: 0, arg: 2 });
+  ok(d.hp === 2 && !S.creatures.includes(c), "Salve : 3 dégâts à 2 créatures de la case (Béhémoth 5 → 2, Colosse détruit)");
+  const B = fresh(); B.phase = "D_main"; B.spells = ["Double bouclier"]; B.tiles["0,3"] = SF.tileStats("Muraille", 0, 3);
+  ok(SF.apply(B, "colonie", "spell", { i: 0, arg: ["0,1", "0,3"] }) === "" && B.tiles["0,1"].shield === 1 && B.tiles["0,3"].shield === 1, "Double bouclier : deux bâtiments gagnent un jeton Bouclier");
+  const F = fresh(); F.phase = "D_fire"; F.firedSupports = []; F.upgrades.tank.r1 = "A"; F.upgrades.tank.r2 = "A";
+  const sk = Object.keys(F.supports).find(k => F.supports[k] === 1);
+  const t = at(3, "Colosse", 4, 10); F.creatures.push(t);
+  const spot = [];
+  for (const l of ["N", "E", "S", "O"]) for (let u = -2; u <= 2; u++) for (let k = 1; k <= 4; k++) { t.lane = l; t.u = u; t.k = k; if (SF.supportTargets(F, sk).includes(t)) spot.push([l, u, k]); }
+  [t.lane, t.u, t.k] = spot[0];
+  SF.fire(F, sk, 3);
+  ok(t.hp === 10, "Blindage : la tourelle de niveau 1 (1 dégât) ne fait plus rien au tank");
+  const G = fresh(); G.supports = {}; for (const k of Object.keys(G.tiles)) delete G.tiles[k];
+  G.tiles["1,3"] = SF.tileStats("Antenne", 1, 3); G.tiles["1,3"].revealed = true;
+  const e = at(4, "Écorcheur", 3, 1); G.creatures.push(e); G.phase = "A_deploy"; SF.apply(G, "essaim", "endDeploy");
+  ok(G.phase === "A_attack" && SF.strikeTargets(G, e).includes("1,3") && SF.pathCells(G, e).length > 0, "au contact d'un bâtiment au début des attaques : il peut frapper sans avancer, alors que son chemin est libre");
 }
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {

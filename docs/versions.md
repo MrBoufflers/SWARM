@@ -4,9 +4,20 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
-## v0.5.10 — 8 novembre 2026
+## v0.5.10 — 9 novembre 2026
 
-**Interface (Oni)** : à chaque changement de camp actif, un bandeau « Tour de l'essaim » (avec sa biomasse) ou « Tour de la colonie » (avec ses travailleurs), aux couleurs du camp ; sur un même appareil, il apparaît après l'écran de passage ; en ligne, chez les deux joueurs. L'étape « Pose » est retirée des étapes de la colonie (construction immédiate).
+**Règles (Oni)**
+- **Frappe orbitale** : 5 dégâts (avant 4). **Salve** : 3 dégâts à 2 créatures de la même case (avant 2).
+- **Mines** : 1 / 3 / 5 dégâts (avant 1 / 2 / 3).
+- Nouveau sortilège de soutien **Double bouclier** (2 exemplaires) : deux bâtiments au choix gagnent un jeton Bouclier.
+- **Blindage** (tank) : aussi −1 dégât des tourelles.
+- Une créature (ou un bloc) au contact d'un bâtiment au début des attaques n'est pas obligée d'avancer avant d'attaquer.
+
+**Interface (Oni)**
+- En ligne aussi, l'écran de passage « C'est à … de jouer » (avec biomasse ou travailleurs) s'affiche quand votre tour commence.
+- Une tuile camouflée retournée par une attaque montre son nom et ses PV ; si elle tombe aussitôt, elle reste affichée à 0 PV un instant avant de disparaître.
+- Statistiques : taux de victoire de l'essaim par amélioration acquise, et de la colonie par bâtiment construit (bâtiments comptés à partir de cette version ; colonne `bats` dans l'export CSV).
+- L'étape « Pose » est retirée des étapes de la colonie (construction immédiate).
 
 ## v0.5.9 — 8 novembre 2026
 

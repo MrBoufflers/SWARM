@@ -70,7 +70,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   // 2. partie complète : on joue sur la page dont c'est le tour
   const pages = { essaim: pE, colonie: pC }, seen = {};
-  let reloaded = false, resumed = null, steps = 0, stuck = 0;
+  let handoffs = 0, reloaded = false, resumed = null, steps = 0, stuck = 0;
   for (; steps < 9000; steps++) {
     if (await pE.$('.banner.win, .pc-win') && await pC.$('.banner.win, .pc-win')) break;
     let page = null;
@@ -84,6 +84,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       resumed = await pC.evaluate(() => !!document.querySelector('.board') && document.body.dataset.myturn === '1');
       continue;
     }
+    if (await click(page, '[data-a="reveal"]')) { handoffs++; continue; } // écran de passage (en ligne aussi depuis la v0.5.10)
     if (await click(page, '[data-a="famine"][data-v="1"]')) continue;
     if (await click(page, '[data-a="draw"]')) continue;
     if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="pickOne"]:not([disabled])')]; if (!b.length) return false; b[b.length - 1 - Math.floor(Math.random() * Math.min(3, b.length))].dataset.robot = '1'; return true; }) && await click(page, '[data-a="pickOne"][data-robot]')) continue; // pioche au choix : prendre le maximum de cartes
@@ -109,7 +110,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const fin = await pE.evaluate(() => (document.querySelector('.banner.win b, .pc-win .hf-sub') || {}).textContent || 'en cours');
   const finC = await pC.evaluate(() => (document.querySelector('.banner.win b, .pc-win .hf-sub') || {}).textContent || 'en cours');
   const fxE = await pE.evaluate(() => window.__fx), fxC = await pC.evaluate(() => window.__fx);
-  console.log('animations jouées — essaim :', JSON.stringify(fxE), '| colonie :', JSON.stringify(fxC));
+  console.log('écrans de passage :', handoffs, '|'); console.log('animations jouées — essaim :', JSON.stringify(fxE), '| colonie :', JSON.stringify(fxC));
   // statistiques : la partie terminée est enregistrée (marquée test), la page s'affiche et montre le plateau final
   let stats = 'non vérifiées';
   if (fin !== 'en cours') {
@@ -121,7 +122,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     stats = rec && rec.test && rec.mode === 'en ligne' && rec.winner && !overflow ? 'ok' : `problème (enregistrée : ${!!rec}, test : ${rec && rec.test}, débordement : ${overflow})`;
   }
   console.log('statistiques :', stats);
-  const ok = stats === 'ok' && fxE['déplacement'] > 0 && fxC['déplacement'] > 0 && fxC['bandeau'] > 0 && fxE['bandeau'] > 0 && !errs.length && !leaks.length && !covered && started && pre === code && resumed === true && fin !== 'en cours' && fin === finC;
+  const ok = stats === 'ok' && fxE['déplacement'] > 0 && fxC['déplacement'] > 0 && handoffs > 1 && !errs.length && !leaks.length && !covered && started && pre === code && resumed === true && fin !== 'en cours' && fin === finC;
   console.log('erreurs :', errs.length ? errs : 'aucune', '| fuites :', leaks.length ? [...new Set(leaks)] : 'aucune', '| boutons masqués :', covered,
     '| reprise après rechargement :', resumed, '| fin (essaim / colonie) :', fin, '/', finC, '| phases vues :', Object.keys(seen).join(', '));
   await browser.close(); if (server) server.close();

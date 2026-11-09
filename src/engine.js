@@ -54,8 +54,8 @@ const SF = (() => {
     "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
     // Pièges (Oni, 07/11/2026 ; remplacent le Piège à 3 dégâts et le Siphon à 3 biomasse) : effet = PV = tours de construction
     "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 1, camo: 1, n: 2 },
-    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 2, camo: 1, n: 2 },
-    "Mine supérieure": { d: 3, pv: 3, ep: 0, trap: 3, camo: 1, n: 2 },
+    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 3, camo: 1, n: 2 }, // dégâts 1 / 3 / 5 (Oni, 09/11/2026 ; avant 1 / 2 / 3)
+    "Mine supérieure": { d: 3, pv: 3, ep: 0, trap: 5, camo: 1, n: 2 },
     "Siphon mineur": { d: 1, pv: 1, ep: 0, siphon: 1, camo: 1, n: 2 },
     "Siphon majeur": { d: 2, pv: 2, ep: 0, siphon: 2, camo: 1, n: 2 },
     "Siphon supérieur": { d: 3, pv: 3, ep: 0, siphon: 3, camo: 1, n: 2 },
@@ -72,8 +72,8 @@ const SF = (() => {
     "Avant-poste du Sud": "2 PV ; 4 PV dans la lane Sud.", "Avant-poste de l'Ouest": "2 PV ; 4 PV dans la lane Ouest.",
     "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
     "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
-    "Mine majeure": "Camouflée. 2 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
-    "Mine supérieure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine majeure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine supérieure": "Camouflée. 5 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Siphon mineur": "Camouflé. Révélé par une attaque : l'essaim perd 1 biomasse, +1 par tranche de 10 qu'il possède (jamais sous 5).",
     "Siphon majeur": "Camouflé. Révélé par une attaque : l'essaim perd 2 biomasse, +2 par tranche de 10 qu'il possède (jamais sous 5).",
     "Siphon supérieur": "Camouflé. Révélé par une attaque : l'essaim perd 3 biomasse, +3 par tranche de 10 qu'il possède (jamais sous 5).",
@@ -84,8 +84,8 @@ const SF = (() => {
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Renforcé 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie.",
   };
   const SPELLS = {
-    "Frappe orbitale": { kind: "off", n: 3, text: "4 dégâts à 1 créature." },
-    "Salve": { kind: "off", n: 3, text: "2 dégâts à 2 créatures de la même case." },
+    "Frappe orbitale": { kind: "off", n: 3, text: "5 dégâts à 1 créature." },
+    "Salve": { kind: "off", n: 3, text: "3 dégâts à 2 créatures de la même case." },
     "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
     // Champ de stase (Oni, 04/11/2026 ; avant : toute une lane) : un seul bâtiment, et ses Épines sont suspendues
@@ -98,6 +98,7 @@ const SF = (() => {
     // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
     "Feu nourri": { kind: "sup", n: 2, text: "Ce tour, chaque tourelle tire 2 fois." },
     "Réparation": { kind: "sup", n: 3, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
+    "Double bouclier": { kind: "sup", n: 2, text: "Deux bâtiments au choix gagnent un jeton Bouclier." }, // Oni, 09/11/2026
     "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant, chacune dans la même pioche (renforts, actifs ou pièges)." },
     "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
   };
@@ -113,7 +114,7 @@ const SF = (() => {
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "+1 PV. Insensibles aux Épines."], B1: ["Provocation", "Les tirs visant une autre créature de sa case visent ce tank. −1 dégât des tourelles."],
-      A2: ["Blindage", "+2 PV."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au tour suivant, là où il est mort."],
+      A2: ["Blindage", "+2 PV. −1 dégât des tourelles."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au tour suivant, là où il est mort."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 et Aura +1 PV."], B1: ["Griffes", "Aura +1 ATQ et Aura Mobilité 1."],
       A2: ["Régénération", "Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
@@ -629,7 +630,7 @@ const SF = (() => {
   // seulement après avoir avancé d'au moins une case quand elle le pouvait
   function strikeTargets(S, c) {
     if (c.acted || !attacks(c)) return [];
-    if (!c.moved && !c.struck && pathCells(S, c).length) return [];
+    if (!c.moved && !c.struck && !c.startNear && pathCells(S, c).length) return [];
     const [x, y] = gpos(c), out = [];
     for (const [a, b] of neighbors(x, y)) { if (a === 0 && b === 0) out.push("fusee"); else if (S.tiles[key(a, b)]) out.push(key(a, b)); }
     return out;
@@ -711,7 +712,7 @@ const SF = (() => {
     }
     if (t.camo && !t.revealed) { // Camouflage : la première attaque retourne la tuile
       t.revealed = true;
-      fx(S, { t: "reveal", k: tk, trap: !!t.trap });
+      fx(S, { t: "reveal", k: tk, trap: !!t.trap, name: t.name, hp: t.hp, max: t.max }); // contenu montré à l'essaim (Oni, 09/11/2026)
       if (t.trap) {
         log(S, "essaim", "Un piège est révélé.");
         // le piège blesse la créature AVANT qu'elle frappe : si elle en meurt, elle n'inflige rien (Oni, 01/11/2026)
@@ -991,7 +992,11 @@ const SF = (() => {
   }
   function canBuy(S, type, slot) { return nodeState(S, type, slot) === "open" && investable(S) + invested(S, type, slot) >= nodeCost(slot); }
   function buy(S, type, slot) { return canBuy(S, type, slot) && invest(S, type, slot, nodeCost(slot)); }
-  function startAttacks(S) { S.phase = "A_attack"; }
+  // une créature qui commence ses attaques au contact d'un bâtiment n'est pas obligée d'avancer (Oni, 09/11/2026)
+  function startAttacks(S) {
+    S.phase = "A_attack";
+    for (const c of S.creatures) { const [x, y] = gpos(c); c.startNear = neighbors(x, y).some(([a, b]) => S.tiles[key(a, b)]); }
+  }
   function attackOrder(S) { return [...S.creatures].filter(c => !c.acted).sort((a, b) => a.k - b.k || a.id - b.id); }
   function endAttackerTurn(S) {
     if (S.winner) return;
@@ -1012,7 +1017,7 @@ const SF = (() => {
     // événement visuel du sort, placé avant ses effets (dégâts, soins…) ; seules des informations publiques
     const at = S.fx ? S.fx.length : 0;
     const pubArg = ["Frappe orbitale", "Salve", "Brouillage"].includes(name) ? { id: arg } : name === "Barrage" ? { lane: arg } : name === "Champ de stase" ? { k: arg }
-      : name === "Onde de choc" ? { ring: Number(arg) } : name === "Réparation" ? { keys: arg } : name === "Reconversion" ? { k: arg && arg.tile }
+      : name === "Double bouclier" ? { keys: arg } : name === "Onde de choc" ? { ring: Number(arg) } : name === "Réparation" ? { keys: arg } : name === "Reconversion" ? { k: arg && arg.tile }
       : name === "Renouvellement" ? { n: Array.isArray(arg) ? arg.length : 0 } : {};
     fx(S, { t: "spell", name, kind: sp.kind, ...pubArg });
     const ok = applySpell(S, name, arg);
@@ -1025,14 +1030,14 @@ const SF = (() => {
   function applySpell(S, name, arg) {
     const cr = id => S.creatures.find(c => c.id === id);
     switch (name) {
-      case "Frappe orbitale": { const c = cr(arg); if (!c) return false; const t = resolveTarget(S, c); if (!t) return false; damageCreature(S, t, 4, name); return true; }
+      case "Frappe orbitale": { const c = cr(arg); if (!c) return false; const t = resolveTarget(S, c); if (!t) return false; damageCreature(S, t, 5, name); return true; } // 5 dégâts (Oni, 09/11/2026 ; avant 4)
       case "Salve": {
         const c = cr(arg); if (!c) return false;
         const group = [c, ...caseMates(S, c)].filter(o => targetable(S, o));
         if (!group.length) return false;
         const first = resolveTarget(S, c) || group[0];
         const rest = group.filter(o => o !== first).sort((a, b) => effAtq(S, b) - effAtq(S, a));
-        damageCreature(S, first, 2, name); if (rest[0]) damageCreature(S, rest[0], 2, name);
+        damageCreature(S, first, 3, name); if (rest[0]) damageCreature(S, rest[0], 3, name); // 3 dégâts (Oni, 09/11/2026 ; avant 2)
         return true;
       }
       case "Barrage": { if (!LANES.includes(arg)) return false; for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
@@ -1048,6 +1053,11 @@ const SF = (() => {
       case "Effort": S.extraPts += 2; return true;
       case "Cadence": S.extraPts += 2; return true;
       case "Feu nourri": S.doubleFire = true; return true;
+      case "Double bouclier": { // arg = 1 ou 2 clés de tuiles : chacune gagne un jeton Bouclier (non cumulable)
+        if (!Array.isArray(arg) || !arg.length || arg.length > 2) return false;
+        for (const k of arg) { const t = S.tiles[k]; if (t) { t.shield = 1; fx(S, { t: "heal", k, n: 0, hp: t.hp }); } }
+        return true;
+      }
       case "Réparation": { // arg = liste de clés de tuiles, 3 PV au total
         if (!Array.isArray(arg) || !arg.length || arg.length > 3) return false;
         for (const k of arg) { const t = S.tiles[k]; if (t && t.hp < t.max) { t.hp += 1; fx(S, { t: "heal", k, n: 1, hp: t.hp }); } }
@@ -1153,8 +1163,9 @@ const SF = (() => {
     S.firedSupports.push(sk);
     fx(S, { t: "shot", sk, id: t.id });
     // Provocation (tank, côté B) : les tanks subissent 1 dégât de moins des tourelles (Oni, 07/11/2026)
-    const prov = CREATURES[t.name].type === "tank" && S.upgrades.tank.r1 === "B" ? 1 : 0;
-    damageCreature(S, t, Math.max(0, turretDmg(S, lvl) - prov), `tourelle de niveau ${lvl}${prov ? ", Provocation −1" : ""}`);
+    // Blindage (tank, rang 2 côté A) : aussi −1 dégât des tourelles (Oni, 09/11/2026)
+    const prov = CREATURES[t.name].type === "tank" && (S.upgrades.tank.r1 === "B" || S.upgrades.tank.r2 === "A") ? 1 : 0;
+    damageCreature(S, t, Math.max(0, turretDmg(S, lvl) - prov), `tourelle de niveau ${lvl}${prov ? (S.upgrades.tank.r2 === "A" ? ", Blindage −1" : ", Provocation −1") : ""}`);
     killCheck(S);
     return true;
   }
@@ -1220,6 +1231,7 @@ const SF = (() => {
     const [x, y] = parse(k);
     pushBack(S, k);
     S.tiles[k] = tileStats(name, x, y);
+    S.builtCount = S.builtCount || {}; S.builtCount[name] = (S.builtCount[name] || 0) + 1; // statistiques (Oni, 09/11/2026)
     fx(S, { t: "place", k });
     if (TILES[name].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
     placeSupports(S); // un support apparaît dès que ses murs sont construits
@@ -1327,6 +1339,7 @@ const SF = (() => {
       case "Champ de stase": return typeof arg === "string" && /^-?\d,-?\d$/.test(arg);
       case "Onde de choc": return [1, 2, 3, "1", "2", "3"].includes(arg);
       case "Réparation": return Array.isArray(arg) && arg.length >= 1 && arg.length <= 3 && arg.every(k => own(S.tiles, k));
+      case "Double bouclier": return Array.isArray(arg) && arg.length >= 1 && arg.length <= 2 && new Set(arg).size === arg.length && arg.every(k => own(S.tiles, k));
       case "Renouvellement": return Array.isArray(arg) && arg.every(i => isInt(i) && i >= 0 && i < S.hand.length) && new Set(arg).size === arg.length;
       case "Reconversion": return !!arg && isInt(arg.hand) && arg.hand >= 0 && arg.hand < S.hand.length && own(S.tiles, arg.tile);
       default: return arg === null || arg === undefined;
