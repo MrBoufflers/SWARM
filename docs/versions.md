@@ -11,7 +11,9 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 - **Mines** : 1 / 3 / 5 dégâts (avant 1 / 2 / 3).
 - Nouveau sortilège de soutien **Double bouclier** (2 exemplaires) : deux bâtiments au choix gagnent un jeton Bouclier.
 - **Blindage** (tank) : aussi −1 dégât des tourelles.
-- Une créature (ou un bloc) au contact d'un bâtiment au début des attaques n'est pas obligée d'avancer avant d'attaquer.
+- **Soutiens** : un soutien (ou un groupe de soutiens) qui accompagne une autre créature restée sur place reste avec elle au lieu d'avancer seul dans la brèche (résolution automatique) ; manuellement, « Ne pas bouger » le permet aussi.
+- **Bouclier** sur 4 bâtiments : **Palissade** (1 PV), **Égide** (à la place de Renforcé 2), **Archives** (2 PV), **Observatoire** (2 PV). Un bâtiment à Épines protégé par un Bouclier inflige quand même ses Épines.
+- **Corrosion** remplace Frénésie (soutien, rang 2, côté B) : contre l'attaque d'une créature accompagnée d'un soutien, le Bouclier est détruit sans effet et le Renforcé ne compte pas.
 
 **Interface (Oni)**
 - En ligne aussi, l'écran de passage « C'est à … de jouer » (avec biomasse ou travailleurs) s'affiche quand votre tour commence.

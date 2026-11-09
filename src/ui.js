@@ -305,7 +305,7 @@
   const NODE_ICON = {
     aggro: { A1: "ferocite", B1: "mobilite", A2: "carnage", C2: "deploiement", B2: "essaim" },
     tank: { A1: "carapace", B1: "protection", A2: "blindage", C2: "reincarnation", B2: "masse" },
-    soutien: { A1: "mue", B1: "griffes", A2: "regeneration", C2: "clairvoyance", B2: "frenesie" },
+    soutien: { A1: "mue", B1: "griffes", A2: "regeneration", C2: "clairvoyance", B2: "corrosion" },
   };
   // résumé de l'essaim vu par la colonie : chiffres clés et améliorations en icônes (détail au survol)
   function swarmSummary() {
@@ -593,7 +593,7 @@
   const FX_LABEL = {
     soin: () => ["+2 HEAL"], fureur: () => ["+1 ATQ", "+1 DEF"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
-    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ", "+1 MOV"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"],
+    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ", "+1 MOV"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"], corrosion: () => ["CORROSION"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
   function sumLabels(list) {
@@ -611,7 +611,7 @@
   }
   // aura d'une créature (jetons) : un soutien qui en donne une (icône blanche), ou une créature qui en profite (icône violette)
   const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
-  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "frenesie" } };
+  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "corrosion" } };
   function auraGiven(c) { // icône et nom de l'aura donnée par ce soutien, ou null
     const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return null;
     if (AURA_CAPS.includes(b.cap)) return { icon: capIcon(b.cap), name: b.capName };
@@ -639,7 +639,7 @@
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
     let actions = "";
     // Frénésie : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim (cumulable)
-    if (b.type === "soutien" && S.upgrades.soutien.r2 === "B") {
+    if (false && b.type === "soutien" && S.upgrades.soutien.r2 === "B") { // Frénésie retirée (Corrosion, 09/11/2026)
       const cur = SF.frenzyOf(S, c), others = S.creatures.filter(o => o !== c && SF.posKey(o) === SF.posKey(c));
       const canSet = S.view === "essaim" && ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase) && !c.acted;
       actions += `<p>Frénésie : ${cur ? `double les dégâts ${/^[AEIOUYÉÈÊŒ]/i.test(cur.name) ? "d'" : "de "}${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;

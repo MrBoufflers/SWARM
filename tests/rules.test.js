@@ -4,6 +4,10 @@ let fails = 0;
 const ok = (cond, msg) => { if (!cond) { fails++; console.log("ÉCHEC :", msg); } else console.log("ok   :", msg); };
 // Les scénarios ciblés partent de l'ancienne mise en place (haies de la couronne 1 seulement, supports de niveau 1) ;
 // la mise en place actuelle (couronne 2 garnie, Oni 01/11/2026) a son propre test (37) via SF.newGame().
+// anciens scénarios : Palissade, Égide et Archives gardent leurs valeurs d'avant le 09/11/2026 (sans Bouclier) pour tester
+// la percée, les spores, la biomasse… ; leurs nouvelles valeurs ont leurs propres tests (n° 74)
+const TILESTATS = SF.tileStats, LEGACY = { "Palissade": { hp: 2, max: 2 }, "Égide": { ren: 2 }, "Archives": { hp: 3, max: 3 } };
+SF.tileStats = (n, x, y) => { const t = TILESTATS(n, x, y); if (LEGACY[n]) { Object.assign(t, LEGACY[n]); delete t.shield; } return t; };
 const fresh = () => {
   const S = SF.newGame(); S.log = [];
   for (const k of Object.keys(S.tiles)) if (S.tiles[k].start && SF.ring(...SF.parse(k)) === 2) delete S.tiles[k];
@@ -471,7 +475,7 @@ const fresh = () => {
 {
   ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
   const E = SF.TILES["Égide"];
-  ok(E && E.pv === 2 && E.ren === 2 && !E.shield && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 2 PV, Renforcé 2 (ancien Bouclier 2), 2 tours, camouflée, 3 exemplaires, sans Épines");
+  ok(E && E.pv === 2 && !E.ren && E.shield === 1 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 2 PV, Bouclier (au lieu de Renforcé 2, 09/11/2026), 2 tours, camouflée, 3 exemplaires, sans Épines");
   { const G = SF.newGame(); ok(G.hand.length === 0 && Object.values(G.tileDecks).flat().length === 63, "pioches de forteresses : 63 tuiles en 3 pioches (Oni, 07/11/2026 : 6 Mines et Siphons de plus, 3 Abris blindés) ; main vide au départ"); }
   ok(["Antenne", "Laboratoire", "Observatoire", "Archives"].every(n => SF.TILES[n].tech && SF.TILES[n].n === 3), "3 exemplaires de chaque bâtiment à technologies (Oni, 02/11/2026)");
   const hit = (name, atq) => {
@@ -487,7 +491,7 @@ const fresh = () => {
 {
   const D = SF.TILES["Dortoir"], A = SF.TILES["Archives"];
   ok(D.d === 3 && D.pv === 3 && D.ren === 2 && D.temp === 1 && !D.perm && D.n === 3 && !D.camo, "Dortoir : 3 tours, 3 PV, Renforcé 2, +1 travailleur temporaire, 3 ex., face visible");
-  ok(A.d === 2 && A.pv === 3 && A.tech === 1 && A.n === 3 && !A.camo && A.ep === 0, "Archives : 2 tours, 3 PV, +1 technologie, 3 ex., face visible");
+  ok(A.d === 2 && A.pv === 2 && A.shield === 1 && A.tech === 1 && A.n === 3 && !A.camo && A.ep === 0, "Archives : 2 tours, 2 PV + Bouclier (09/11/2026), +1 technologie, 3 ex., face visible");
   const S = fresh(); const w = SF.bonusWorkers(S), t = SF.tech(S);
   S.tiles["0,2"] = SF.tileStats("Dortoir", 0, 2); S.tiles["0,-2"] = SF.tileStats("Archives", 0, -2);
   ok(SF.bonusWorkers(S) === w + 1 && SF.tech(S) === t + 1, "Dortoir en jeu : +1 travailleur ; Archives : +1 technologie");
@@ -737,7 +741,7 @@ const fresh = () => {
   ok(!SF.isStealthy(V, s1) && !SF.isStealthy(V, m), "Mue : plus de Furtivité pour les soutiens (Oni, 05/11/2026)");
   ok(SF.TREES.tank.B1[0] === "Provocation", "tank, côté B : « Provocation » (ancienne Protection)");
   // Bouclier → Renforcé : une ancienne partie est convertie
-  const W = fresh(); W.tiles["3,0"] = { name: "Égide", hp: 3, max: 3, ep: 0, ren: 0, shield: 2, camo: 1, revealed: false }; SF.migrate(W);
+  const W = fresh(); W.tiles["3,0"] = { name: "Dortoir", hp: 3, max: 3, ep: 0, ren: 0, shield: 2, camo: 1, revealed: false }; SF.migrate(W);
   ok(W.tiles["3,0"].ren === 2 && !("shield" in W.tiles["3,0"]), "partie en cours : Bouclier 2 devient Renforcé 2");
   // Spores cumulables : 2 Sporeurs → 2 dégâts aux tuiles voisines
   const Z = fresh(); Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k];
@@ -749,8 +753,8 @@ const fresh = () => {
   const F = fresh(); F.phase = "A_attack"; F.upgrades.soutien.r2 = "B";
   const ec = at(250, "Écorcheur"), ca = at(251, "Carapace"), f1 = at(252, "Hurleur"), f2 = at(253, "Œil-sonde");
   F.creatures.push(ec, ca, f1, f2); // Écorcheur 3 (+2 Fureur) ; Carapace 1 (+2 Fureur)
-  ok(SF.effAtq(F, ec) === 16 && SF.effAtq(F, ca) === 2, "par défaut, les 2 soutiens choisissent l'Écorcheur : (3 + 1) × 4 = 16");
-  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) === "" && SF.effAtq(F, ec) === 8 && SF.effAtq(F, ca) === 4, "l'Œil-sonde passe sur la Carapace : Écorcheur ×2 (8), Carapace ×2 (4)");
+  ok(SF.effAtq(F, ec) === 4 && SF.effAtq(F, ca) === 2, "Frénésie remplacée par Corrosion (09/11/2026) : plus de multiplicateur (Écorcheur 3 + 1)");
+  ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) !== "", "l'action Frénésie est refusée");
   ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 253 }) !== "" && SF.apply(F, "colonie", "frenzy", { src: 253, target: 250 }) !== "", "pas sur soi-même ; la colonie ne peut pas choisir");
   const G = fresh(); G.phase = "A_attack"; const g1 = at(260, "Hurleur"); G.creatures.push(at(261, "Écorcheur"), g1);
   ok(SF.apply(G, "essaim", "frenzy", { src: 260, target: 261 }) !== "", "sans l'amélioration Frénésie : refusé");
@@ -1026,7 +1030,7 @@ const fresh = () => {
   S.creatures.push(e, { id: 701, name: "Perforeur", lane: "N", u: 0, k: 3, hp: 4, acted: false });
   S.phase = "A_attack";
   ok(SF.apply(S, "essaim", "strike", { id: 700, target: "0,2" }) === "", "attaque de l'Écorcheur (3 dégâts, percée) sur l'Abri");
-  ok(S.tiles["0,2"].hp === 2 && !S.tiles["0,2"].shield && e.hp === 5, "Bouclier : aucun dégât, pas d'Épines, jeton défaussé");
+  ok(S.tiles["0,2"].hp === 2 && !S.tiles["0,2"].shield && e.hp === 4, "Bouclier : aucun dégât, jeton défaussé ; les Épines s'appliquent quand même (5 → 4, 09/11/2026)");
   ok(!S.tiles["0,1"], "comme en stase : toute l'attaque passe en percée (l'Antenne derrière tombe)");
   delete S.tiles["1,2"];
   const S2 = JSON.parse(JSON.stringify(S)); S2.phase = "A_attack"; S2.creatures[0].acted = false; S2.creatures[0].struck = 0;
@@ -1182,7 +1186,24 @@ const fresh = () => {
   const G = fresh(); G.supports = {}; for (const k of Object.keys(G.tiles)) delete G.tiles[k];
   G.tiles["1,3"] = SF.tileStats("Antenne", 1, 3); G.tiles["1,3"].revealed = true;
   const e = at(4, "Écorcheur", 3, 1); G.creatures.push(e); G.phase = "A_deploy"; SF.apply(G, "essaim", "endDeploy");
-  ok(G.phase === "A_attack" && SF.strikeTargets(G, e).includes("1,3") && SF.pathCells(G, e).length > 0, "au contact d'un bâtiment au début des attaques : il peut frapper sans avancer, alors que son chemin est libre");
+  // règle remplacée (09/11/2026) : un soutien qui accompagne une créature restée sur place reste avec elle
+  const H = fresh(); H.supports = {}; for (const k of Object.keys(H.tiles)) delete H.tiles[k]; H.phase = "A_attack";
+  H.tiles["0,2"] = Object.assign(SF.tileStats("Muraille", 0, 2), { revealed: true, hp: 1, max: 1 });
+  const x = Object.assign(at(5, "Écorcheur", 3, 1), { moved: 1 }), g = at(6, "Hurleur", 3, 4); H.creatures.push(x, g);
+  SF.apply(H, "essaim", "strike", { id: 5, target: "0,2" });
+  ok(!H.tiles["0,2"] && x.k === 3, "l'Écorcheur détruit la Muraille devant lui et reste en C3 (il a attaqué)");
+  if (H.phase === "A_attack") SF.apply(H, "essaim", "actAll");
+  ok(g.k === 3, "« Tout résoudre » : le Hurleur reste avec l'Écorcheur au lieu d'avancer seul dans la brèche");
+}
+// 74. Oni, 09/11/2026 : Bouclier sur Palissade, Égide, Archives, Observatoire ; Corrosion
+{
+  const T = n => SF.TILES[n];
+  ok(T("Palissade").pv === 1 && T("Palissade").shield && T("Observatoire").pv === 2 && T("Observatoire").shield && T("Égide").shield && !T("Égide").ren, "Palissade 1 PV, Observatoire 2 PV, Égide sans Renforcé : tous avec Bouclier");
+  const S = fresh(); S.supports = {}; for (const k of Object.keys(S.tiles)) delete S.tiles[k]; S.phase = "A_attack"; S.upgrades.soutien.r2 = "B";
+  S.tiles["0,2"] = Object.assign(TILESTATS("Rempart", 0, 2), { revealed: true, shield: 1 }); // Renforcé 2, 4 PV, avec un Bouclier
+  S.creatures.push({ id: 1, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 1, acted: false, moved: 1 }, { id: 2, name: "Glaneur", lane: "N", u: 0, k: 3, hp: 2, acted: false });
+  SF.apply(S, "essaim", "strike", { id: 1, target: "0,2" });
+  ok(S.tiles["0,2"].hp === 1 && !S.tiles["0,2"].shield, "Corrosion : Bouclier détruit et Renforcé sans effet (Rempart 4 → 1 sous 3 dégâts)");
 }
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {
