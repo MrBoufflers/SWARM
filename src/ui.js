@@ -81,7 +81,7 @@
 
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   function newGame(solo) { // solo : camp du joueur face à l'IA (Oni, 08/11/2026)
-    MODE = "local"; S = SF.newGame(); S.gid = newGid(); if (DISC) S.decouverte = true;
+    MODE = "local"; S = SF.newGame(); S.gid = newGid(); S.t0 = Date.now(); if (DISC) S.decouverte = true;
     if (solo) { S.ia = IA.other(solo); S.view = solo; S.handoff = null; } else { S.handoff = "essaim"; S.view = null; }
     UI = resetUI(); save(); render();
   }
@@ -363,8 +363,7 @@
       }).join("");
       body = `<p class="hint">Palier ${SF.tier(S) + 1} : <b>${n}</b>/${total} cartes. Piochez-les une à une, dans la pile de votre choix.</p><div class="pick">${rows}</div>`;
     } else if (ph === "A_deploy" && UI.sap) {
-      body = `<p class="hint">Sapeur : ${sh ? "bâtiment à détruire" : "choisissez le bâtiment à détruire"} dans la lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices">` +
-        SF.laneTiles(S, UI.sap.lane).map(k => `<button data-a="sapTarget" data-k="${k}">${E(tileLabel(k))}</button>`).join("") + `<button data-a="sapCancel">Annuler</button></div>`;
+      body = `<p class="hint">Sapeur : touchez le bâtiment à détruire, lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices"><button data-a="sapCancel">Annuler</button></div>`;
     } else if (ph === "A_deploy") {
       const para = UI.sel && SF.CREATURES[cardOf(UI.sel).name] && SF.CREATURES[cardOf(UI.sel).name].type === "soutien";
       body = UI.sel ? (sh ? `<p class="hint"><b>${E(cardOf(UI.sel).name)}</b> → cliquez ${para ? "une case surlignée (parachutage : n'importe quelle case libre)" : "une entrée surlignée"}.</p>` : `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez ${para ? "une case surlignée : un soutien se parachute sur n'importe quelle case libre" : "une case d'entrée surlignée"}.</p>`) : (sh ? `<p class="hint">Choisissez une carte de votre main.</p>` : "");
@@ -436,7 +435,18 @@
     if (name === "Brouillage") return S.creatures.filter(c => SF.targetable(S, c) && !c.acted);
     return [];
   }
-  const canTp = () => S.phase === "A_deploy" && S.upgrades.aggro.r2 === "C" && !S.tpUsed && S.creatures.some(c => SF.CREATURES[c.name].type === "aggro");
+  // bâtiments que l'on peut toucher sur le plateau : sortilège en cours de ciblage, ou Sapeur (Oni, 09/11/2026)
+  function tileTargets() {
+    if (UI.sap) return { keys: SF.laneTiles(S, UI.sap.lane), a: "sapTarget" };
+    if (UI.spell === null || UI.spell === undefined || !S.spells[UI.spell]) return null;
+    const name = S.spells[UI.spell], all = Object.keys(S.tiles);
+    if (name === "Champ de stase") return { keys: all, a: "spellArg" };
+    if (name === "Reconversion" && UI.recoHand !== null) return { keys: all.filter(k => !S.tiles[k].start), a: "spellArg" };
+    if (name === "Double bouclier" && UI.picks.length < 2) return { keys: all.filter(k => !S.tiles[k].shield && !UI.picks.includes(k)), a: "pick" };
+    if (name === "Réparation" && UI.picks.length < 3) return { keys: all.filter(k => S.tiles[k].hp + UI.picks.filter(p => p === k).length < S.tiles[k].max), a: "pick" };
+    return null;
+  }
+  const canTp = () => S.phase === "A_deploy" && S.view === "essaim" && (!online() || myTurn()) && !iaTurn() && S.upgrades.aggro.r2 === "C" && !S.tpUsed && S.creatures.some(c => SF.CREATURES[c.name].type === "aggro");
   function spellTargeting(sh) {
     const name = S.spells[UI.spell];
     const cancel = `<button data-a="spellCancel">Annuler</button>`;
@@ -448,19 +458,15 @@
       case "Frappe orbitale": case "Salve": inner = crs(S.creatures.filter(c => SF.targetable(S, c))); break;
       case "Brouillage": inner = crs(S.creatures.filter(c => SF.targetable(S, c) && !c.acted)); break;
       case "Barrage": inner = lanes; break;
-      case "Champ de stase": inner = `<p class="hint">Bâtiment à protéger ce tour (aucun dégât, pas d'Épines) :</p><div class="choices">${Object.keys(S.tiles).map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`; break;
+      case "Champ de stase": inner = `<p class="hint">Touchez le bâtiment à protéger ce tour (aucun dégât, pas d'Épines).</p><div class="choices">${cancel}</div>`; break;
       case "Onde de choc": inner = `<div class="choices">${[1, 2, 3].map(r => `<button data-a="spellArg" data-v="${r}">Couronne ${r}</button>`).join("")}${cancel}</div>`; break;
-      case "Double bouclier": { // deux bâtiments différents (Oni, 09/11/2026)
-        const list = Object.keys(S.tiles).filter(k => !S.tiles[k].shield && !UI.picks.includes(k));
-        inner = `<p class="hint">Bâtiments choisis : ${UI.picks.length} / 2${UI.picks.length ? " (" + UI.picks.map(k => E(tileLabel(k))).join(", ") + ")" : ""}.</p><div class="choices">` +
-          (UI.picks.length < 2 ? list.map(k => `<button data-a="pick" data-k="${k}">${E(tileLabel(k))}</button>`).join("") : "") +
+      case "Double bouclier": { // deux bâtiments différents (Oni, 09/11/2026), touchés sur le plateau
+        inner = `<p class="hint">Touchez jusqu'à 2 bâtiments : ${UI.picks.length} / 2${UI.picks.length ? " (" + UI.picks.map(k => E(tileLabel(k))).join(", ") + ")" : ""}.</p><div class="choices">` +
           `<button data-a="spellArg" data-v="picks" class="primary"${UI.picks.length ? "" : " disabled"}>Valider</button>${cancel}</div>`;
         break;
       }
-      case "Réparation": {
-        const dmg = Object.keys(S.tiles).filter(k => S.tiles[k].hp < S.tiles[k].max);
-        inner = `<p class="hint">Points posés : ${UI.picks.length} / 3.</p><div class="choices">` +
-          dmg.map(k => `<button data-a="pick" data-k="${k}">+1 · ${E(tileLabel(k))} (${S.tiles[k].hp + UI.picks.filter(p => p === k).length}/${S.tiles[k].max})</button>`).join("") +
+      case "Réparation": { // touchez les tuiles abîmées sur le plateau (+1 PV par toucher, 3 au total)
+        inner = `<p class="hint">Touchez les tuiles abîmées à réparer : ${UI.picks.length} / 3 PV${UI.picks.length ? " (" + UI.picks.map(k => E(tileLabel(k))).join(", ") + ")" : ""}.</p><div class="choices">` +
           `<button data-a="spellArg" data-v="picks" class="primary"${UI.picks.length ? "" : " disabled"}>Valider</button>${cancel}</div>`;
         break;
       }
@@ -472,7 +478,7 @@
       case "Reconversion":
         inner = UI.recoHand === null
           ? `<p class="hint">Choisissez la tuile de votre main.</p><div class="choices">${S.hand.map((t, i) => `<button data-a="recoHand" data-i="${i}">${E(t)}</button>`).join("")}${cancel}</div>`
-          : `<p class="hint">Elle remplace quelle tuile construite ?</p><div class="choices">${Object.keys(S.tiles).filter(k => !S.tiles[k].start).map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`;
+          : `<p class="hint">Touchez la tuile construite qu'elle remplace.</p><div class="choices">${cancel}</div>`;
         break;
       default: inner = `<div class="choices"><button data-a="spellArg" data-v="go" class="primary">Jouer ${E(name)}</button>${cancel}</div>`;
     }
@@ -502,6 +508,7 @@
     const buildHot = S.phase === "D_main" && S.view === "colonie" && UI.sel !== null && UI.spell === null ? SF.buildTargets(S, UI.sel) : [];
     const relHot = S.phase === "D_main" && S.view === "colonie" && S.relocate ? SF.relocateTargets(S) : null;
     const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : relHot || buildHot;
+    const TT = tileTargets();
     // créature choisie en phase d'attaque : cases où elle peut aller, cibles qu'elle peut attaquer
     const mover = S.phase === "A_attack" && S.view === "essaim" ? S.creatures.find(c => c.id === UI.selCreature && !c.acted) : null;
     const R = mover ? SF.reachable(S, mover) : {}, T = mover ? SF.strikeTargets(S, mover) : [];
@@ -543,6 +550,7 @@
       const t = S.tiles[k];
       const crs = S.creatures.filter(c => c.k < 4 && SF.posKey(c) === k);
       const target = placeHot.includes(k);
+      const tt = TT && TT.keys.includes(k) ? `data-a="${TT.a}" data-k="${k}" data-v="${k}"` : "";
       let inner = "";
       if (t) {
         if (hiddenTrap(t)) inner = `<div class="tile hidden"><b>?</b><small>camouflée</small></div>`;
@@ -557,7 +565,7 @@
       const [pu, pk] = SF.toLocal(lane, x, y);
       const drop = !t && S.phase === "A_deploy" && S.view === "essaim" && UI.sel && !UI.sap && SF.canDeploy(S, cardOf(UI.sel), lane) && SF.canDrop(S, cardOf(UI.sel).name, lane, pu, pk);
       const atk = !target && T.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target || drop ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target || drop || tt ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${tt ? tt : target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -574,15 +582,14 @@
     if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
     if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que par tranche complète de ${t.ren} dégâts d'une même attaque.`);
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
-    if (t.temp) cap("temp", "Travailleur temporaire", "+1 travailleur tant que la tuile tient.");
+    if (t.temp) cap("temp", "+1 travailleur", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");
     if (t.camo) cap("piege", "Camouflage", "posée face cachée : l'essaim ne la voit pas. Retournée à la première attaque, ou révélée par un Œil-sonde vivant dans sa lane ou par la Clairvoyance.");
     if (t.siphon) cap("biomasse", `Siphon ${t.siphon}`, `révélé par une attaque, l'essaim perd ${t.siphon} biomasse, +${t.siphon} par tranche de 10 qu'il possède (jamais sous ${SF.MIN_BIOMASS}). Pas s'il a été vu par Vision ou Clairvoyance.`);
     if (t.shield) cap("protection", "Bouclier", "arrive avec un jeton : la prochaine attaque ne lui fait rien (comme en stase : la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.");
     if (t.trap) cap("piege", `Mine ${t.trap}`, `${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui la révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par Avant-poste dans les 8 cases autour).`);
-    return `<span class="art ${imCls(name)}">${imCls(name) ? "" : icon("mur")}</span><b>${E(name)}</b><small>${icon("duree")} ${t.d} point${t.d > 1 ? "s" : ""} de construction</small>
-      <span class="stats">${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} Épines ${t.ep}` : ""}</span><span class="caps">${caps.join("")}</span>`;
+    return `<span class="art ${imCls(name)}">${imCls(name) ? "" : icon("mur")}</span><b>${E(name)}</b><small>${icon("duree")} ${t.d} pt${t.d > 1 ? "s" : ""} · ${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} ${t.ep}` : ""}</small><span class="caps">${caps.join("")}</span>`;
   }
   // illustration d'une tuile, d'un support ou d'une créature : classe CSS « im im-… » ajoutée au build (vide si pas d'image)
   const imCls = n => (typeof IMG_CLASS !== "undefined" && IMG_CLASS[n]) || "";
@@ -840,7 +847,7 @@
         ${box2(S.spells.length, "sorts en main", "Sortilèges en main")}
       </div>
       <h4 data-fx="ateliers">Construction ${S.phase === "D_main" && S.view === "colonie" ? `<span class="small">${SF.pointsLeft(S)} point(s) restant(s)</span>` : ""}</h4>
-      <div class="pc-ateliers">${ateliersHtml(S.view === "colonie", true)}</div>
+      <div class="built-row">${SF.LANES.map(l => { const d = (S.built && S.built[l]) || 0; return `<span class="bchip lane-${l}${d >= S.chPerLane ? " full" : ""}" title="Bâtiments construits ce tour en lane ${SF.LANE_NAME[l]}"><b>${l}</b>${d}/${S.chPerLane}</span>`; }).join("")}</div>
       <div class="po-scroll">
         <h4 data-fx="tilehand">Main de tuiles <span class="small">${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}</span></h4>${tileHandHtml(true)}
         <h4>Sortilèges</h4>${spellsHtml(true)}
@@ -1478,12 +1485,12 @@
     if (!STATS.list) return `<section class="statpage">${head}<p>Chargement…</p></section>`;
     const list = shown(), rows = BILAN.byVersion(list);
     const nTest = STATS.list.filter(r => r.test).length;
-    const table = rows.length ? `<div class="tbl"><table><thead><tr><th>Version</th><th>Parties</th><th>Essaim gagne</th><th>Colonie gagne</th><th>Manches</th><th>Biomasse finale</th><th>Travailleurs tués</th><th>Étages</th></tr></thead><tbody>${
-      rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td></tr>`).join("")
+    const table = rows.length ? `<div class="tbl"><table><thead><tr><th>Version</th><th>Parties</th><th>Essaim gagne</th><th>Colonie gagne</th><th>Manches</th><th>Biomasse finale</th><th>Travailleurs tués</th><th>Étages</th><th>Durée</th></tr></thead><tbody>${
+      rows.map(r => `<tr class="${STATS.ver === r.version ? "sel" : ""}" data-a="statsVer" data-v="${E(r.version)}"><td><b>v${E(r.version)}</b></td><td>${r.n}</td><td>${pct(r.essaim, r.n)}</td><td>${pct(r.colonie, r.n)}</td><td>${avg(r.rounds)}</td><td>${avg(r.biomass)}</td><td>${avg(r.killed)}</td><td>${avg(r.floors)}</td><td>${r.minutes ? Math.round(r.minutes) + " min" : "–"}</td></tr>`).join("")
     }</tbody></table></div><p class="small">Moyennes par partie. Touchez une version pour ne voir que ses parties.</p>` : `<p>Aucune partie terminée enregistrée pour l'instant.</p>`;
     const games = list.filter(r => !STATS.ver || r.version === STATS.ver).slice(0, 100);
     const card = r => `<div class="st-game"><div class="st-line"><b class="${r.winner}">${r.winner === "essaim" ? "Essaim" : "Colonie"}</b> · v${E(r.version)}${r.versionFin && r.versionFin !== r.version ? ` → v${E(r.versionFin)}` : ""} · ${E(r.mode)}${r.decouverte ? " · découverte" : ""}${r.test ? " · test" : ""}${r.ia ? ` · contre l'IA (IA : ${E(r.ia)})` : ""} · ${E(new Date(r.date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}</div>
-      <div class="st-line small">${r.rounds} manches · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
+      <div class="st-line small">${r.rounds} manches${r.minutes ? ` · ${r.minutes} min` : ""} · biomasse ${r.biomass} · ${r.killed} travailleur${r.killed > 1 ? "s" : ""} tué${r.killed > 1 ? "s" : ""} · fusée ${r.floors}/12</div>
       ${STATS.plans[r.id] ? `<img class="st-plan" alt="Plateau en fin de partie" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(STATS.plans[r.id])}">` : `<button data-a="statsPlan" data-id="${E(r.id)}" class="ghost">Voir le plateau final</button>`}</div>`;
     return `<section class="statpage">${head}
       <p class="small">Version actuelle : v${E(SF.VERSION)} · ${list.length} partie${list.length > 1 ? "s" : ""} terminée${list.length > 1 ? "s" : ""}${STATS.test ? "" : ` (hors ${nTest} partie${nTest > 1 ? "s" : ""} de test)`}.</p>
@@ -1492,7 +1499,7 @@
       <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
       <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
   }
-  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "ia", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades", "bats"];
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "ia", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades", "bats", "minutes"];
   function statsAction(a, d) {
     if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
     if (a === "help") { return; }

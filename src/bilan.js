@@ -18,6 +18,8 @@ const BILAN = (() => {
       supports: Object.keys(S.supports || {}).length,
       upgrades: ["aggro", "tank", "soutien"].map(ty => [ty, S.upgrades[ty].r1 || "-", S.upgrades[ty].r2 || "-"].join(":")).join(" "),
       // bâtiments construits par la colonie pendant la partie, avec leur nombre (Oni, 09/11/2026) : « Muraille:2 Antenne:1 »
+      // durée de la partie en minutes (Oni, 09/11/2026) : extra.minutes (serveur) ou S.t0 (horloge du navigateur)
+      minutes: extra.minutes != null ? extra.minutes : S.t0 ? Math.max(1, Math.round((Date.now() - S.t0) / 60000)) : null,
       bats: Object.entries(S.builtCount || {}).map(([n, q]) => n + ":" + q).join(" ").slice(0, 600),
     };
   }
@@ -82,12 +84,13 @@ const BILAN = (() => {
     const g = {};
     for (const r of list) {
       const v = r.version || "?";
-      const a = g[v] = g[v] || { version: v, n: 0, essaim: 0, colonie: 0, rounds: 0, biomass: 0, killed: 0, floors: 0 };
+      const a = g[v] = g[v] || { version: v, n: 0, essaim: 0, colonie: 0, rounds: 0, biomass: 0, killed: 0, floors: 0, min: 0, nMin: 0 };
       a.n++; if (r.winner === "essaim") a.essaim++; else if (r.winner === "colonie") a.colonie++;
       a.rounds += r.rounds || 0; a.biomass += r.biomass || 0; a.killed += r.killed || 0; a.floors += r.floors || 0;
+      if (r.minutes > 0) { a.min += r.minutes; a.nMin++; }
     }
     return Object.values(g).sort((x, y) => cmpVersion(y.version, x.version)).map(a => ({
-      ...a, rounds: a.rounds / a.n, biomass: a.biomass / a.n, killed: a.killed / a.n, floors: a.floors / a.n,
+      ...a, rounds: a.rounds / a.n, biomass: a.biomass / a.n, killed: a.killed / a.n, floors: a.floors / a.n, minutes: a.nMin ? a.min / a.nMin : null,
     }));
   }
 

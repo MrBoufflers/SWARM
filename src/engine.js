@@ -85,7 +85,7 @@ const SF = (() => {
   };
   const SPELLS = {
     // un seul exemplaire de chaque sortilège ; Cadence retirée (doublon d'Effort) — Oni, 09/11/2026
-    "Frappe orbitale": { kind: "off", n: 1, text: "5 dégâts à 1 créature." },
+    "Frappe orbitale": { kind: "off", n: 1, text: "Détruit une créature." },
     "Salve": { kind: "off", n: 1, text: "3 dégâts à 2 créatures de la même case." },
     "Barrage": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
@@ -93,7 +93,7 @@ const SF = (() => {
     "Champ de stase": { kind: "off", n: 1, text: "Choisissez un bâtiment : ce tour, il ne subit aucun dégât et les créatures qui l'attaquent ne subissent pas ses Épines ; l'attaque passe quand même en percée et les spores touchent ses voisins." },
     "Famine": { kind: "off", n: 1, text: "Au début du tour de l'essaim : ce tour, son budget est sa biomasse divisée par 2 (arrondie à l'inférieur)." },
     // Brouillage (Oni, 04/11/2026 ; avant : annulait le déploiement d'une créature posée ce tour)
-    "Brouillage": { kind: "off", n: 1, text: "Choisissez une créature : ce tour, elle ne bouge pas et n'attaque pas." },
+    "Brouillage": { kind: "off", n: 1, text: "Choisissez une case : ce tour, ses créatures ne bougent pas et n'attaquent pas." },
     "Effort": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
     // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
     "Feu nourri": { kind: "sup", n: 1, text: "Ce tour, chaque tourelle tire 2 fois." },
@@ -139,7 +139,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.11";
+  const VERSION = "0.5.12";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -974,8 +974,9 @@ const SF = (() => {
     n = Math.min(n, need, investable(S));
     if (n <= 0) return false;
     let left = n;
-    if (S.phase === "A_deploy") { const b = Math.min(left, S.budget); S.budget -= b; left -= b; }
-    S.reserve -= left;
+    // la réserve d'abord, pour garder le budget du tour pour les créatures (Oni, 09/11/2026)
+    const r = Math.min(left, S.reserve); S.reserve -= r; left -= r;
+    if (left > 0 && S.phase === "A_deploy") { const b = Math.min(left, S.budget); S.budget -= b; left -= b; }
     S.invest = S.invest || {};
     S.invest[type + ":" + slot] = invested(S, type, slot) + n;
     fx(S, { t: "invest", type, slot, got: invested(S, type, slot), cost: nodeCost(slot) });
@@ -1034,7 +1035,7 @@ const SF = (() => {
   function applySpell(S, name, arg) {
     const cr = id => S.creatures.find(c => c.id === id);
     switch (name) {
-      case "Frappe orbitale": { const c = cr(arg); if (!c) return false; const t = resolveTarget(S, c); if (!t) return false; damageCreature(S, t, 5, name); return true; } // 5 dégâts (Oni, 09/11/2026 ; avant 4)
+      case "Frappe orbitale": { const c = cr(arg); if (!c) return false; const t = resolveTarget(S, c); if (!t) return false; damageCreature(S, t, t.hp + bonusHp(S, t), name); return true; } // détruit la créature visée (Oni, 09/11/2026 ; avant 4 puis 5 dégâts)
       case "Salve": {
         const c = cr(arg); if (!c) return false;
         const group = [c, ...caseMates(S, c)].filter(o => targetable(S, o));
@@ -1048,10 +1049,11 @@ const SF = (() => {
       case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Champ de stase": { if (typeof arg !== "string" || !S.tiles[arg]) return false; S.stase.push(arg); return true; }
       case "Famine": { if (S.phase !== "A_start") return false; S.famine = 1; return true; }
-      case "Brouillage": { // la créature visée (Provocation et Furtivité s'appliquent) ne bouge pas et n'attaque pas ce tour
-        const c0 = cr(arg); if (!c0) return false; const c = resolveTarget(S, c0); if (!c || c.acted) return false;
-        c.acted = true; c.jammed = true;
-        log(S, "colonie", `Brouillage : ${c.name} ne bouge pas et n'attaque pas ce tour.`);
+      case "Brouillage": { // stase de toute une case (Oni, 09/11/2026) : ses créatures ne bougent pas et n'attaquent pas ce tour
+        const c0 = cr(arg); if (!c0) return false;
+        const group = [c0, ...caseMates(S, c0)].filter(o => !o.acted); if (!group.length) return false;
+        for (const c of group) { c.acted = true; c.jammed = true; }
+        log(S, "colonie", `Brouillage : ${group.map(c => c.name).join(", ")} ne bougent pas et n'attaquent pas ce tour.`);
         return true;
       }
       case "Effort": S.extraPts += 2; return true;

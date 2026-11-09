@@ -104,10 +104,10 @@ const fresh = () => {
 {
   const S = fresh(); SF.attackerDraw(S);
   S.budget = 3; S.reserve = 2;
-  ok(SF.invest(S, "aggro", "A1", 2) && S.budget === 1 && S.reserve === 2, "déploiement : l'investissement prend d'abord le budget");
+  ok(SF.invest(S, "aggro", "A1", 2) && S.budget === 3 && S.reserve === 0, "déploiement : l'investissement prend d'abord la réserve (Oni, 09/11/2026)");
   ok(SF.nodeState(S, "aggro", "B1") === "closed", "commencer à investir dans A1 ferme B1");
   ok(!SF.invest(S, "aggro", "B1", 1), "investir dans B1 refusé");
-  ok(SF.invest(S, "aggro", "A1", 99) && SF.invested(S, "aggro", "A1") === 5 && S.budget === 0 && S.reserve === 0, "Tout investir : budget puis réserve (5 / 6)");
+  ok(SF.invest(S, "aggro", "A1", 99) && SF.invested(S, "aggro", "A1") === 5 && S.budget === 0 && S.reserve === 0, "Tout investir : réserve puis budget (5 / 6)");
   ok(SF.nodeState(S, "aggro", "A2") === "needR1" && !SF.invest(S, "aggro", "A2", 1), "rang 2 bloqué tant que le rang 1 n'est pas acquis");
   SF.endDeploy(S); S.reserve = 4;
   const n2 = S.piles[2].length;
@@ -811,7 +811,7 @@ const fresh = () => {
   T.creatures.push(d, e);
   ok(SF.apply(T, "colonie", "spell", { i: 0, arg: 510 }) === "", "Brouillage sur une créature qui n'a pas été déployée ce tour");
   SF.apply(T, "colonie", "reactDone"); SF.apply(T, "essaim", "act", { key: SF.posKey(e) });
-  ok(d.k === 4 && e.k === 3, "l'Écorcheur brouillé ne bouge pas, la Carapace de sa case avance");
+  ok(d.k === 4 && e.k === 4 && e.jammed, "Brouillage : toute la case est immobilisée (l'Écorcheur et la Carapace ; Oni, 09/11/2026)");
 }
 // 58. Passage automatique et travailleurs assignés d'office (Oni, 04/11/2026)
 {
@@ -1172,10 +1172,10 @@ const fresh = () => {
 {
   const at = (id, name, k, hp) => ({ id, name, lane: "N", u: 0, k, hp, acted: false });
   const S = fresh(); S.phase = "A_react"; S.spells = ["Frappe orbitale", "Salve"]; const c = at(1, "Colosse", 3, 7), d = at(2, "Béhémoth", 3, 5); S.creatures.push(c, d);
+  SF.apply(S, "colonie", "spell", { i: 1, arg: 2 });
+  ok(d.hp === 2 && c.hp === 4, "Salve : 3 dégâts à 2 créatures de la case (Béhémoth 5 → 2, Colosse 7 → 4)");
   SF.apply(S, "colonie", "spell", { i: 0, arg: 1 });
-  ok(c.hp === 2, "Frappe orbitale : 5 dégâts (Colosse 7 → 2)");
-  SF.apply(S, "colonie", "spell", { i: 0, arg: 2 });
-  ok(d.hp === 2 && !S.creatures.includes(c), "Salve : 3 dégâts à 2 créatures de la case (Béhémoth 5 → 2, Colosse détruit)");
+  ok(!S.creatures.includes(c), "Frappe orbitale : détruit la créature visée (Oni, 09/11/2026)");
   const B = fresh(); B.phase = "D_main"; B.spells = ["Double bouclier"]; B.tiles["0,3"] = SF.tileStats("Muraille", 0, 3);
   ok(SF.apply(B, "colonie", "spell", { i: 0, arg: ["0,1", "0,3"] }) === "" && B.tiles["0,1"].shield === 1 && B.tiles["0,3"].shield === 1, "Double bouclier : deux bâtiments gagnent un jeton Bouclier");
   const F = fresh(); F.phase = "D_fire"; F.firedSupports = []; F.upgrades.tank.r1 = "A"; F.upgrades.tank.r2 = "A";
