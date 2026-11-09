@@ -4,6 +4,19 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.12 — 9 novembre 2026
+
+**Règles (Oni)**
+- **Frappe orbitale** : détruit la créature visée (Provocation s'applique).
+- **Brouillage** : toute une case — ses créatures ne bougent pas et n'attaquent pas ce tour.
+- **Améliorations** : l'investissement prend d'abord la réserve, puis le budget du tour.
+
+**Interface (Oni)**
+- Panneau de la colonie plus compact : construction sur une ligne (« N 0/1 »…), cartes de tuiles basses (image réduite, coût et PV sur une ligne, capacités à droite), étape du bas resserrée.
+- Bâtiments ciblés directement sur le plateau : Champ de stase, Double bouclier, Réparation, Reconversion et Sapeur.
+- Téléportation (Déploiement) : seul l'essaim, pendant son tour, peut la déclencher à l'écran.
+- Statistiques : durée des parties (moyenne par version, durée de chaque partie, colonne `minutes` du CSV).
+
 ## v0.5.11 — 9 novembre 2026
 
 **Sortilèges (Oni)**

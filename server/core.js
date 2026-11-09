@@ -32,7 +32,7 @@ const stale = cv => out(409, { error: `Nouvelle version du jeu (v${SF.VERSION}) 
 // partie en ligne terminée : résumé + mini-plan enregistrés pour les statistiques (une seule fois par partie)
 async function saveResult(rawStore, room) {
   if (!rawStore.results || !room.S.winner || room.recorded) return;
-  const rec = BILAN.summary(room.S, { id: room.code + "-" + (room.started || room.created), mode: "en ligne", test: room.test, decouverte: room.decouverte });
+  const rec = BILAN.summary(room.S, { id: room.code + "-" + (room.started || room.created), mode: "en ligne", test: room.test, decouverte: room.decouverte, minutes: room.started ? Math.max(1, Math.round((Date.now() - room.started) / 60000)) : null });
   try { await rawStore.results.add(rec, BILAN.miniMap(room.S)); } catch (e) { console.error("statistiques :", e); }
 }
 // résumé envoyé par une page (partie locale) : seuls les champs connus, avec leur type, sont gardés
@@ -42,7 +42,8 @@ function cleanRecord(r) {
   const str = (v, n) => (typeof v === "string" && v.length <= n ? v : null);
   if (!str(r.id, 60) || !/^[\w.-]+$/.test(r.id) || !["essaim", "colonie"].includes(r.winner) || !str(r.version, 20)) return null;
   const o = { id: "local-" + r.id, mode: "local", test: !!r.test, decouverte: !!r.decouverte, ia: r.ia === "essaim" || r.ia === "colonie" ? r.ia : null, version: r.version, versionFin: str(r.versionFin, 20) || r.version,
-    date: new Date().toISOString(), winner: r.winner, upgrades: str(r.upgrades, 120) || "", bats: str(r.bats, 600) || "" };
+    date: new Date().toISOString(), winner: r.winner, upgrades: str(r.upgrades, 120) || "", bats: str(r.bats, 600) || "",
+    minutes: Number.isFinite(Number(r.minutes)) && Number(r.minutes) > 0 && Number(r.minutes) < 1e4 ? Math.round(Number(r.minutes)) : null };
   for (const k of NUM) { const v = Number(r[k]); if (!Number.isFinite(v) || Math.abs(v) > 1e5) return null; o[k] = v; }
   return o;
 }

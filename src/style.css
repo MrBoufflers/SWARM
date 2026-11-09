@@ -1062,3 +1062,18 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
 /* Bouclier (Abri blindé, Oni 07/11/2026) : jeton tant qu'il n'a pas servi */
 .tile .tb .shield-tk { color: #7fc8ff; filter: drop-shadow(0 0 3px rgba(127,200,255,.8)); }
 .pick.col .pick-row { --c: var(--colonie); }
+
+/* v0.5.12 (Oni, 09/11/2026) : panneau de la colonie plus compact — construction sur une ligne, cartes de tuiles basses */
+.built-row { display: flex; gap: 6px; margin: 2px 0 6px; }
+.built-row .bchip { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 3px 6px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--rule); font: 600 1rem/1.2 var(--display); }
+.built-row .bchip b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 4px; color: #fff; background: var(--c, var(--rule)); }
+.built-row .bchip.lane-N { --c: var(--north); } .built-row .bchip.lane-E { --c: var(--east); } .built-row .bchip.lane-S { --c: var(--south); } .built-row .bchip.lane-O { --c: var(--west); }
+.built-row .bchip.full { opacity: .55; }
+body.pc .tcard { display: grid; grid-template-columns: 56px 1fr auto; grid-auto-rows: auto; column-gap: 8px; row-gap: 0; padding: 4px 8px 4px 4px; min-height: 0; align-items: center; }
+body.pc .tcard .art { position: static; grid-column: 1; grid-row: 1 / span 3; width: 56px; height: 56px; border-radius: 5px; }
+body.pc .tcard > b, body.pc .tcard > small, body.pc .tcard .stats { grid-column: 2; padding: 0; line-height: 1.2; }
+body.pc .tcard .caps { grid-column: 3; grid-row: 1 / span 3; flex-direction: column; align-items: flex-end; justify-content: center; margin: 0; gap: 3px; }
+body.pc .tcard .cap { padding: 1px 6px; }
+body.pc .po-bottom .phase { padding: 6px 10px; }
+body.pc .po-bottom .phase .hint { margin: 2px 0; }
+body.pc .po-bottom .pick-row { padding: 3px 8px; margin-bottom: 2px; }

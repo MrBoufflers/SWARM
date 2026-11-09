@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.11 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.12 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -150,7 +150,7 @@ Pour chaque carte que vous jouez :
 
 **Améliorations** : chaque nœud d'amélioration coûte **6 biomasse au rang 1 †, 12 au rang 2 †**, et se paie **en plusieurs fois** : vous investissez des points dans un nœud précis, et l'amélioration est acquise dès que le total investi atteint son coût.
 
-- **Pendant le déploiement**, vous pouvez investir votre budget du tour et votre réserve (le budget est utilisé en premier).
+- **Pendant le déploiement**, vous pouvez investir votre budget du tour et votre réserve (la **réserve** est utilisée en premier, pour garder le budget pour les créatures — Oni, 09/11/2026).
 - À la fin de l'étape, le **budget non dépensé va à votre réserve**, gardée pour un tour suivant.
 - Les points investis dans un nœud y restent d'un tour à l'autre, jusqu'à ce que le nœud soit acquis.
 - **Commencer à investir dans un nœud ferme les autres choix du même rang** de cet arbre.
@@ -374,13 +374,13 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 | Sortilège | Type | Effet | Ex. |
 | --- | --- | --- | --- |
-| Frappe orbitale | Offensif | 5 dégâts à 1 créature | 1 |
+| Frappe orbitale | Offensif | **détruit** une créature (Provocation s'applique) | 1 |
 | Salve | Offensif | 3 dégâts à 2 créatures de la même case | 1 |
 | Barrage | Offensif | 1 dégât à chaque créature d'une lane | 1 |
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
 | Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines ; une attaque sur lui a quand même lieu : toute l'attaque passe en percée à la case suivante et les spores touchent les tuiles voisines (v0.5) | 1 |
 | Famine | Offensif | à jouer au début du tour de l'essaim : ce tour, son budget est sa biomasse **divisée par 2**, arrondie à l'inférieur (sa biomasse ne change pas) | 1 |
-| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation et Furtivité s'appliquent) : ce tour, elle ne bouge pas et n'attaque pas | 1 |
+| Brouillage | Offensif | à jouer avant les attaques : choisissez une **case** ; ce tour, toutes ses créatures ne bougent pas et n'attaquent pas | 1 |
 | Effort | Soutien | +2 points de construction ce tour | 1 |
 | Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 1 |
 | Double bouclier | Soutien | deux bâtiments au choix gagnent un jeton **Bouclier** (la prochaine attaque ne leur fait rien) | 1 |
