@@ -4,6 +4,23 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.10 — 9 novembre 2026
+
+**Règles (Oni)**
+- **Frappe orbitale** : 5 dégâts (avant 4). **Salve** : 3 dégâts à 2 créatures de la même case (avant 2).
+- **Mines** : 1 / 3 / 5 dégâts (avant 1 / 2 / 3).
+- Nouveau sortilège de soutien **Double bouclier** (2 exemplaires) : deux bâtiments au choix gagnent un jeton Bouclier.
+- **Blindage** (tank) : aussi −1 dégât des tourelles.
+- **Soutiens** : un soutien (ou un groupe de soutiens) qui accompagne une autre créature restée sur place reste avec elle au lieu d'avancer seul dans la brèche (résolution automatique) ; manuellement, « Ne pas bouger » le permet aussi.
+- **Bouclier** sur 4 bâtiments : **Palissade** (1 PV), **Égide** (à la place de Renforcé 2), **Archives** (2 PV), **Observatoire** (2 PV). Un bâtiment à Épines protégé par un Bouclier inflige quand même ses Épines.
+- **Corrosion** remplace Frénésie (soutien, rang 2, côté B) : contre l'attaque d'une créature accompagnée d'un soutien, le Bouclier est détruit sans effet et le Renforcé ne compte pas.
+
+**Interface (Oni)**
+- En ligne aussi, l'écran de passage « C'est à … de jouer » (avec biomasse ou travailleurs) s'affiche quand votre tour commence.
+- Une tuile camouflée retournée par une attaque montre son nom et ses PV ; si elle tombe aussitôt, elle reste affichée à 0 PV un instant avant de disparaître.
+- Statistiques : taux de victoire de l'essaim par amélioration acquise, et de la colonie par bâtiment construit (bâtiments comptés à partir de cette version ; colonne `bats` dans l'export CSV).
+- L'étape « Pose » est retirée des étapes de la colonie (construction immédiate).
+
 ## v0.5.9 — 8 novembre 2026
 
 **Règles (Oni)** : **blocs** — les créatures d'une même case avancent ensemble, d'autant de cases que la plus lente ; leurs vitesses sont fixées ensemble avant le départ, toutes les auras de mobilité de la case comptent. Celles à qui il reste des déplacements peuvent ensuite finir seules (ou avec les autres plus rapides).

@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.9 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.10 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -187,9 +187,10 @@ Les numéros indiquent la couronne (3 en haut, 1 en bas) : la case A2 est un coi
 
 Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, dans l'ordre qu'il veut (Oni, 06/11/2026).
 
-1. **Déplacement en bloc** (Oni, 08/11/2026) : les créatures d'une même case qui peuvent encore avancer bougent **ensemble**, d'autant de cases que la plus lente ; leurs vitesses sont fixées ensemble avant le départ (toutes les auras de mobilité de la case comptent). Celles à qui il reste des déplacements peuvent ensuite finir le leur.
+1. **Soutiens** (Oni, 09/11/2026) : un soutien, ou un groupe de soutiens, qui accompagne une autre créature peut rester avec elle, même s'il ne se déplace pas ce tour.
+   **Déplacement en bloc** (Oni, 08/11/2026) : les créatures d'une même case qui peuvent encore avancer bougent **ensemble**, d'autant de cases que la plus lente ; leurs vitesses sont fixées ensemble avant le départ (toutes les auras de mobilité de la case comptent). Celles à qui il reste des déplacements peuvent ensuite finir le leur.
    1. **Déplacement** (Oni, 07/11/2026) : la vitesse est un **maximum** : la créature avance de **1 case jusqu'à sa vitesse**, au choix, sur son chemin vers la fusée (tout droit ou en escalier, voir plus haut ; jamais en arrière ni sur les côtés). Vitesse : **1** (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros) ou la Mue (voir plus bas). Elle s'arrête devant un bâtiment ou la fusée, et ne passe jamais sur un bâtiment, un coin de support ou la fusée. Si elle peut avancer, elle doit avancer d'au moins une case avant d'attaquer. Plusieurs créatures peuvent partager une case ; chacune agit séparément.
-2. **Attaque (facultative)** : elle peut attaquer **n'importe quel bâtiment qui touche sa case par un côté** (4 côtés), ou la fusée si elle la touche. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais. Après une attaque, elle ne bouge plus (avec **Carnage**, une aggro peut attaquer une 2ᵉ fois).
+2. **Attaque (facultative)** :  elle peut attaquer **n'importe quel bâtiment qui touche sa case par un côté** (4 côtés), ou la fusée si elle la touche. Elle inflige son ATQ, plus les bonus des auras des créatures de sa case à ce moment-là. Les soutiens n'attaquent jamais. Après une attaque, elle ne bouge plus (avec **Carnage**, une aggro peut attaquer une 2ᵉ fois).
 3. **Tout résoudre et finir le tour** : fait agir toutes les créatures restantes (chacune avance au maximum puis attaque devant elle), **les soutiens d'abord** (les créatures parties de la même case les suivent et profitent encore de leurs auras en attaquant), puis les plus avancées ; puis le tour de l'essaim se termine. Le tour se termine aussi tout seul quand plus aucune créature ne peut agir.
 
 **Vitesse** : le nombre de déplacements d'une créature est fixé à son premier pas du tour : 1 (2 pour les créatures de niveau 3), +1 avec la Mobilité (aggros) et +1 par soutien de sa case avec la Mue, le soutien lui-même compris.
@@ -201,9 +202,9 @@ Pendant ses attaques, l'essaim choisit **quelle créature agit**, une par une, d
 - La tuile pivote d'**un quart de tour par PV perdu**.
 - **Renforcé X** : la tuile ne perd 1 PV que par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).
 - **Épines X** : la créature qui attaque la tuile subit X dégâts après son attaque. Épines de base : **1** pour les Barbelés, le Baraquement, la Ligne de front et le Réduit ; **2** pour la Haie d'épines, le Mur hérissé et la Ronceraie ; 0 pour les autres. Bonus cumulable : **+1** par Avant-poste dans les 8 cases autour (Aura d'épines).
-- **Mine** (mineure, majeure, supérieure) : la première attaque la retourne face visible et inflige **1, 2 ou 3 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Une Mine déjà vue par Vision ou Clairvoyance ne se déclenche plus.
+- **Mine** (mineure, majeure, supérieure) : la première attaque la retourne face visible et inflige **1, 3 ou 5 dégâts** à la créature **avant qu'elle frappe** : si elle en meurt, elle n'inflige rien (ni dégâts ni Épines subies). Une Mine déjà vue par Vision ou Clairvoyance ne se déclenche plus.
 - **Siphon** (mineur, majeur, supérieur) : la première attaque le retourne face visible et l'essaim perd **1, 2 ou 3 biomasse, plus autant par tranche complète de 10 qu'il possède** (ex. Siphon supérieur à 25 biomasse : 3 + 3 × 2 = 9) ; sa biomasse ne descend jamais sous **5**. Un Siphon déjà vu par Vision ou Clairvoyance ne se déclenche plus.
-- **Bouclier** (Abri blindé) : le bâtiment arrive avec un jeton. La prochaine attaque ne lui fait aucun dégât, comme en stase : pas d'Épines, mais toute l'attaque passe en percée et les spores touchent les tuiles voisines. Le jeton est alors défaussé. Une percée ou des spores qui l'atteignent consomment aussi le jeton †.
+- **Bouclier** (Abri blindé, Palissade, Égide, Archives, Observatoire) : le bâtiment arrive avec un jeton. La prochaine attaque ne lui fait aucun dégât, comme en stase : toute l'attaque passe en percée et les spores touchent les tuiles voisines ; ses **Épines s'appliquent quand même** (Oni, 09/11/2026). Le jeton est alors défaussé. Une percée ou des spores qui l'atteignent consomment aussi le jeton †.
 - À 0 PV, la tuile est retirée (défaussée) et l'essaim gagne **1 biomasse**. Un Barbelé détruit est retiré du jeu (elle ne va pas dans la défausse).
 - Les dégâts en trop sont **perdus**, sauf pour une créature dotée de la **percée**.
 
@@ -343,24 +344,24 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 | Forteresse | Durée | PV | Épines | Capacité | Points | Ex. |
 | --- | --- | --- | --- | --- | --- | --- |
-| Palissade | 1 | 2 | — | Camouflé | 2 | 3 |
+| Palissade | 1 | 1 | — | Camouflé ; **Bouclier** | † | 3 |
 | Muraille | 2 | 4 | — | Camouflé | 4 | 3 |
 | Rempart | 3 | 4 | — | Camouflé ; Renforcé 2 | 6 | 3 |
 | Bastion | 3 | 3 | — | Camouflé ; Renforcé 3 | 6 | 2 |
 | Haie d'épines | 1 | 1 | **2** | Camouflée | 2 | 3 |
 | Mur hérissé | 2 | 2 | **2** | Camouflé | 4 | 2 |
 | Ronceraie | 3 | 2 | **2** | Camouflée ; Renforcé 2 | † | 3 |
-| Égide | 2 | 2 | — | Camouflée ; **Renforcé 2** | † | 3 |
+| Égide | 2 | 2 | — | Camouflée ; **Bouclier** | † | 3 |
 | Antenne | 1 | 1 | — | +1 technologie | 2 | 3 |
 | Laboratoire | 2 | 2 | — | +2 technologies | 4 | 3 |
-| Observatoire | 3 | 3 | — | +3 technologies | 6 | 3 |
-| Archives | 2 | 3 | — | +1 technologie | † | 3 |
+| Observatoire | 3 | 2 | — | +3 technologies ; **Bouclier** | † | 3 |
+| Archives | 2 | 2 | — | +1 technologie ; **Bouclier** | † | 3 |
 | Baraquement | 1 | 1 | **1** | +1 travailleur **temporaire** : tant que la tuile tient | 2 | 3 |
 | Dortoir | 3 | 3 | — | **Renforcé 2** ; +1 travailleur **temporaire** : tant que la tuile tient | † | 3 |
 | Avant-poste du Nord / de l'Est / du Sud / de l'Ouest | 2 | 2 | — | Face visible ; +2 PV si posé dans la lane de son point cardinal (4 PV) ; **Aura d'épines** : +1 Épines à chaque bâtiment des 8 cases autour | 3 | 1 de chaque |
 | Ligne de front † | 2 | 1 + couronne (2 / 3 / 4) | **1** | Camouflée ; plus solide loin de la fusée | 3 en moyenne | 2 |
 | Réduit † | 2 | 5 − couronne (4 / 3 / 2) | **1** | Camouflé ; plus solide près de la fusée | 3 en moyenne | 2 |
-| Mine mineure / majeure / supérieure | 1 / 2 / 3 | 1 / 2 / 3 | — | Camouflée ; **1 / 2 / 3 dégâts** à la créature qui la révèle en l'attaquant, avant qu'elle frappe | † | 2 de chaque |
+| Mine mineure / majeure / supérieure | 1 / 2 / 3 | 1 / 2 / 3 | — | Camouflée ; **1 / 3 / 5 dégâts** à la créature qui la révèle en l'attaquant, avant qu'elle frappe | † | 2 de chaque |
 | Siphon mineur / majeur / supérieur | 1 / 2 / 3 | 1 / 2 / 3 | — | Camouflé ; révélé par une attaque de l'essaim, il lui retire **1 / 2 / 3 biomasse** (jamais sous 5) | † | 2 de chaque |
 | Abri blindé | 2 | 2 | — | Face visible ; +1 travailleur **temporaire** ; **Bouclier** | † | 3 |
 
@@ -369,12 +370,12 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Sortilèges
 
-28 cartes : 15 offensives, jouées pendant le tour de l'essaim, et 13 de soutien, jouées pendant le tour de la colonie. Les dégâts offensifs vont du coup unique lourd à la zone faible.
+30 cartes : 15 offensives, jouées pendant le tour de l'essaim, et 15 de soutien, jouées pendant le tour de la colonie. Les dégâts offensifs vont du coup unique lourd à la zone faible.
 
 | Sortilège | Type | Effet | Ex. |
 | --- | --- | --- | --- |
-| Frappe orbitale | Offensif | 4 dégâts à 1 créature | 3 |
-| Salve | Offensif | 2 dégâts à 2 créatures de la même case | 3 |
+| Frappe orbitale | Offensif | 5 dégâts à 1 créature | 3 |
+| Salve | Offensif | 3 dégâts à 2 créatures de la même case | 3 |
 | Barrage | Offensif | 1 dégât à chaque créature d'une lane | 2 |
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
 | Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines ; une attaque sur lui a quand même lieu : toute l'attaque passe en percée à la case suivante et les spores touchent les tuiles voisines (v0.5) | 2 |
@@ -383,6 +384,7 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 | Effort | Soutien | +2 points de construction ce tour | 3 |
 | Cadence | Soutien | +2 points de construction ce tour | 1 |
 | Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 2 |
+| Double bouclier | Soutien | deux bâtiments au choix gagnent un jeton **Bouclier** (la prochaine attaque ne leur fait rien) | 2 |
 | Réparation | Soutien | rendez 3 PV, répartis sur vos tuiles abîmées, sans dépasser leurs PV de départ | 3 |
 | Renouvellement | Soutien | défaussez autant de tuiles de votre main que vous voulez, puis repiochez-en autant | 2 |
 | Reconversion | Soutien | échangez une tuile de votre main avec une tuile construite : celle de la main prend sa place, entière, sans construction ; l'autre revient en main | 2 |
@@ -414,7 +416,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | --- | --- | --- | --- |
 | 1 | Côté A | Carapace épaisse | +1 PV ; les tanks ne subissent plus les dégâts d'Épines |
 | 1 | Côté B | Provocation | une tourelle ou un sortilège qui vise une créature non tank de la case de ce tank doit viser ce tank à la place ; les tanks subissent **1 dégât de moins** des tourelles |
-| 2 | Côté A (après Carapace épaisse) | Blindage | +2 PV (total +3) |
+| 2 | Côté A (après Carapace épaisse) | Blindage | +2 PV (total +3) ; les tanks subissent **1 dégât de moins** des tourelles |
 | 2 | Centre | Réincarnation | une fois par tour, quand un tank meurt, redéployez-le gratuitement au début de votre prochain tour, PV pleins, **là où il est mort** (à l'entrée de sa colonne si un bâtiment occupe désormais cette case) |
 | 2 | Côté B (après Provocation) | Masse vivante | +1 PV par autre créature sur sa case, tant qu'elle y reste |
 
@@ -426,7 +428,7 @@ Chaque type a un arbre à deux rangs : au rang 1, un choix entre 2 amélioration
 | 1 | Côté B | Griffes | Aura Griffes : tous les soutiens donnent +1 ATQ aux autres créatures de leur case (cumulable : +1 par soutien) ; et l'**Aura Mobilité 1** (comme la Mue) |
 | 2 | Côté A (après Mue) | Régénération | tous les soutiens gagnent l'**Aura Soin 2**, qui s'ajoute aux autres auras de soin (un Glaneur soigne alors 4) |
 | 2 | Centre | Clairvoyance | tant qu'au moins un soutien est en jeu, toutes les tuiles camouflées sont visibles ; les Œil-sonde de la pioche sortent du jeu (ceux en main ou en jeu restent, mais ne reviennent plus dans la pioche) |
-| 2 | Côté B (après Griffes) | Frénésie | **Aura Frénésie** : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim ; cumulable (deux soutiens sur la même créature : ×4 ; ou sur deux créatures différentes) |
+| 2 | Côté B (après Griffes) | Corrosion | **Aura Corrosion** : contre l'attaque d'une autre créature de sa case, le **Bouclier** du bâtiment est détruit sans effet et son **Renforcé** ne compte pas (remplace Frénésie, Oni 09/11/2026) |
 
 Une tuile camouflée rendue visible par Vision ou Clairvoyance ne déclenche plus son piège †.
 

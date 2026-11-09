@@ -149,7 +149,7 @@
     const pc = isPC() && !(online() && !NET.full);
     document.body.classList.toggle("pc", pc);
     if (pc) {
-      const main = S.handoff && !online() ? pcHandoff() : pcLayout(false);
+      const main = S.handoff ? pcHandoff() : pcLayout(false);
       $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + tipCard();
       placePop(); autoDraw();
       // carte de passage qui arrive en glissant : animation signalée comme les autres (data-anim), ou coupée
@@ -305,7 +305,7 @@
   const NODE_ICON = {
     aggro: { A1: "ferocite", B1: "mobilite", A2: "carnage", C2: "deploiement", B2: "essaim" },
     tank: { A1: "carapace", B1: "protection", A2: "blindage", C2: "reincarnation", B2: "masse" },
-    soutien: { A1: "mue", B1: "griffes", A2: "regeneration", C2: "clairvoyance", B2: "frenesie" },
+    soutien: { A1: "mue", B1: "griffes", A2: "regeneration", C2: "clairvoyance", B2: "corrosion" },
   };
   // résumé de l'essaim vu par la colonie : chiffres clés et améliorations en icônes (détail au survol)
   function swarmSummary() {
@@ -441,6 +441,13 @@
       case "Barrage": inner = lanes; break;
       case "Champ de stase": inner = `<p class="hint">Bâtiment à protéger ce tour (aucun dégât, pas d'Épines) :</p><div class="choices">${Object.keys(S.tiles).map(k => `<button data-a="spellArg" data-v="${k}">${E(tileLabel(k))}</button>`).join("")}${cancel}</div>`; break;
       case "Onde de choc": inner = `<div class="choices">${[1, 2, 3].map(r => `<button data-a="spellArg" data-v="${r}">Couronne ${r}</button>`).join("")}${cancel}</div>`; break;
+      case "Double bouclier": { // deux bâtiments différents (Oni, 09/11/2026)
+        const list = Object.keys(S.tiles).filter(k => !S.tiles[k].shield && !UI.picks.includes(k));
+        inner = `<p class="hint">Bâtiments choisis : ${UI.picks.length} / 2${UI.picks.length ? " (" + UI.picks.map(k => E(tileLabel(k))).join(", ") + ")" : ""}.</p><div class="choices">` +
+          (UI.picks.length < 2 ? list.map(k => `<button data-a="pick" data-k="${k}">${E(tileLabel(k))}</button>`).join("") : "") +
+          `<button data-a="spellArg" data-v="picks" class="primary"${UI.picks.length ? "" : " disabled"}>Valider</button>${cancel}</div>`;
+        break;
+      }
       case "Réparation": {
         const dmg = Object.keys(S.tiles).filter(k => S.tiles[k].hp < S.tiles[k].max);
         inner = `<p class="hint">Points posés : ${UI.picks.length} / 3.</p><div class="choices">` +
@@ -470,7 +477,7 @@
       : "Soutien · pendant votre tour, avant de passer aux tirs";
     return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Reste en main tant qu'il n'est pas joué.</small></span></div>`;
   }
-  const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Feu nourri": "tourelle", "Réparation": "reparation", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
+  const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Feu nourri": "tourelle", "Réparation": "reparation", "Double bouclier": "protection", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
   const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", butin: "biomasse", percee: "percee", cuirasse: "renforce", sabotage: "sabotage", spores: "spores" }[c] || "aura");
   const cardOf = uid => S.handA.find(c => c.uid === uid) || { name: "?" };
   function posTxt(c) { return c.k === 4 ? `entrée ${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}` : `${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}${c.k}`; }
@@ -586,7 +593,7 @@
   const FX_LABEL = {
     soin: () => ["+2 HEAL"], fureur: () => ["+1 ATQ", "+1 DEF"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
-    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ", "+1 MOV"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"],
+    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ", "+1 MOV"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"], corrosion: () => ["CORROSION"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
   function sumLabels(list) {
@@ -604,7 +611,7 @@
   }
   // aura d'une créature (jetons) : un soutien qui en donne une (icône blanche), ou une créature qui en profite (icône violette)
   const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
-  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "frenesie" } };
+  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "corrosion" } };
   function auraGiven(c) { // icône et nom de l'aura donnée par ce soutien, ou null
     const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return null;
     if (AURA_CAPS.includes(b.cap)) return { icon: capIcon(b.cap), name: b.capName };
@@ -632,7 +639,7 @@
     if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
     let actions = "";
     // Frénésie : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim (cumulable)
-    if (b.type === "soutien" && S.upgrades.soutien.r2 === "B") {
+    if (false && b.type === "soutien" && S.upgrades.soutien.r2 === "B") { // Frénésie retirée (Corrosion, 09/11/2026)
       const cur = SF.frenzyOf(S, c), others = S.creatures.filter(o => o !== c && SF.posKey(o) === SF.posKey(c));
       const canSet = S.view === "essaim" && ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase) && !c.acted;
       actions += `<p>Frénésie : ${cur ? `double les dégâts ${/^[AEIOUYÉÈÊŒ]/i.test(cur.name) ? "d'" : "de "}${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;
@@ -756,7 +763,7 @@
   // étapes du tour de chaque camp (chevrons) ; la réaction de la colonie a lieu pendant le tour de l'essaim
   const PC_STEPS = {
     essaim: [["A_deploy", "Déployer & améliorer"], ["A_attack", "Attaques"]],
-    colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_place", "Pose"], ["D_fire", "Tirs"]],
+    colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_fire", "Tirs"]], // « Pose » retirée (construction immédiate, v0.5.8)
   };
   function pcSteps(side) {
     const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase;
@@ -1006,7 +1013,8 @@
       if (!S || S.winner || confirmNew()) { const solo = S && S.ia ? IA.other(S.ia) : undefined; clearSave(); newGame(solo); } return;
     }
     if (a === "reveal") {
-      if (online() || UI.leaving) return;
+      if (UI.leaving) return;
+      if (online()) { NET.ho = false; S.handoff = null; render(); return; }
       const go = () => { UI.leaving = false; S.view = S.handoff; S.handoff = null; save(); render(); };
       const card = document.querySelector(".pc-ho .ho-card");
       if (card && animOn) { UI.leaving = true; card.classList.add("leave"); document.body.dataset.anim = "1"; setTimeout(() => { document.body.dataset.anim = "0"; go(); }, 320); } else go();
@@ -1029,7 +1037,7 @@
       case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
       case "spellCancel": UI.spell = null; UI.picks = []; UI.recoHand = null; break;
-      case "pick": if (UI.picks.length < 3) UI.picks.push(d.k); break;
+      case "pick": if (UI.picks.length < (S.spells[UI.spell] === "Double bouclier" ? 2 : 3) && !(S.spells[UI.spell] === "Double bouclier" && UI.picks.includes(d.k))) UI.picks.push(d.k); break;
       case "pickHand": { const i = Number(d.i); UI.picks = UI.picks.includes(i) ? UI.picks.filter(p => p !== i) : [...UI.picks, i]; break; }
       case "recoHand": UI.recoHand = Number(d.i); break;
       case "support": UI.support = UI.support === d.k ? null : d.k; break;
@@ -1204,6 +1212,11 @@
     },
     async tileDown(e) {
       const cell = cellAt(e.k); if (!cell) return;
+      if (FX.shown && FX.shown[e.k]) { // tuile retournée puis détruite : on la laisse à 0 PV le temps de la lire
+        const hp = cell.querySelector(".tile .hp"); if (hp) hp.innerHTML = `0<small>${hp.querySelector("small") ? hp.querySelector("small").textContent : ""}</small>`;
+        delete FX.shown[e.k];
+        await new Promise(r => setTimeout(r, FX.skip ? 0 : 1800));
+      }
       float(cell, "+" + (e.n || 1) + " biomasse", "bio");
       await fade(cell.querySelector(".tile") || cell.firstElementChild);
     },
@@ -1249,6 +1262,9 @@
     },
     async reveal(e) {
       const cell = cellAt(e.k); if (!cell) return;
+      // contenu montré pendant l'animation (Oni, 09/11/2026), même si la tuile tombe aussitôt
+      const tl = cell.querySelector(".tile");
+      if (tl && e.name) { tl.classList.remove("hidden"); tl.innerHTML = `<span class="tn">${E(short(e.name))}</span><b class="hp">${e.hp}<small>/${e.max}</small></b>`; FX.shown = FX.shown || {}; FX.shown[e.k] = true; }
       await flip(cell.querySelector(".tile") || cell);
       if (e.trap) float(cell, "Piège !", "cr-dmg");
     },
@@ -1422,6 +1438,27 @@
   }
   const pct = (a, n) => (n ? Math.round(100 * a / n) + " %" : "–");
   const avg = v => (Math.round(v * 10) / 10).toLocaleString("fr-FR");
+  // équilibrage (Oni, 09/11/2026) : taux de victoire de l'essaim par amélioration acquise, de la colonie par bâtiment construit
+  function balanceTables(list) {
+    if (!list.length) return "";
+    const up = {}, bat = {};
+    for (const r of list) {
+      for (const part of String(r.upgrades || "").split(" ")) {
+        const [ty, r1, r2] = part.split(":"); if (!SF.TREES[ty]) continue;
+        for (const [x, rk] of [[r1, "1"], [r2, "2"]]) if (x && x !== "-" && SF.TREES[ty][x + rk]) {
+          const n = SF.TREES[ty][x + rk][0], o = up[n] || (up[n] = { n: 0, w: 0, ty }); o.n++; if (r.winner === "essaim") o.w++;
+        }
+      }
+      for (const part of String(r.bats || "").split(" ").filter(Boolean)) {
+        const i = part.lastIndexOf(":"), n = part.slice(0, i), q = Number(part.slice(i + 1)) || 1;
+        const o = bat[n] || (bat[n] = { n: 0, w: 0, q: 0 }); o.n++; o.q += q; if (r.winner === "colonie") o.w++;
+      }
+    }
+    const rows = (obj, extra) => Object.entries(obj).sort((a, b) => b[1].n - a[1].n).map(([n, o]) => `<tr><td><b>${E(n)}</b>${extra ? ` <span class="small">${E(extra(o))}</span>` : ""}</td><td>${o.n}</td><td>${pct(o.w, o.n)}</td></tr>`).join("");
+    const t1 = Object.keys(up).length ? `<h4>Améliorations de l'essaim</h4><div class="tbl"><table><thead><tr><th>Amélioration</th><th>Parties</th><th>Victoires de l'essaim</th></tr></thead><tbody>${rows(up, o => o.ty)}</tbody></table></div>` : "";
+    const t2 = Object.keys(bat).length ? `<h4>Bâtiments de la colonie</h4><div class="tbl"><table><thead><tr><th>Bâtiment</th><th>Parties</th><th>Victoires de la colonie</th></tr></thead><tbody>${rows(bat, o => `${o.q} construit${o.q > 1 ? "s" : ""}`)}</tbody></table></div><p class="small">Les bâtiments sont comptés à partir de la v0.5.10.</p>` : "";
+    return t1 + t2;
+  }
   const shown = () => (STATS.list || []).filter(r => (STATS.test || !r.test) && (STATS.ia || !r.ia)); // parties contre l'IA à part (Oni, 08/11/2026)
   function statsPage() {
     const head = `<div class="st-head"><h2>Statistiques des parties</h2><button data-a="statsBack" class="ghost">Retour</button></div>`;
@@ -1439,11 +1476,11 @@
     return `<section class="statpage">${head}
       <p class="small">Version actuelle : v${E(SF.VERSION)} · ${list.length} partie${list.length > 1 ? "s" : ""} terminée${list.length > 1 ? "s" : ""}${STATS.test ? "" : ` (hors ${nTest} partie${nTest > 1 ? "s" : ""} de test)`}.</p>
       <div class="home-acts"><button data-a="statsTest" aria-pressed="${STATS.test}">Parties de test : ${STATS.test ? "affichées" : "masquées"}</button><button data-a="statsIa" aria-pressed="${!!STATS.ia}">Parties contre l'IA : ${STATS.ia ? "affichées" : "masquées"}</button><button data-a="statsCsv">Exporter en CSV</button></div>
-      ${table}
+      ${table}${balanceTables(games.length ? list.filter(r => !STATS.ver || r.version === STATS.ver) : [])}
       <h3>${STATS.ver ? `Parties de la v${E(STATS.ver)}` : "Dernières parties"}${STATS.ver ? ` <button data-a="statsVer" data-v="" class="ghost">Toutes les versions</button>` : ""}</h3>
       <div class="st-games">${games.map(card).join("") || "<p>Aucune partie.</p>"}</div></section>`;
   }
-  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "ia", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades"];
+  const CSV_COLS = ["id", "date", "version", "versionFin", "mode", "test", "decouverte", "ia", "winner", "rounds", "biomass", "reserve", "killed", "workers", "floors", "creatures", "buildings", "barbed", "supports", "upgrades", "bats"];
   function statsAction(a, d) {
     if (a === "statsBack" || a === "home") { MODE = "home"; STATS = null; history.replaceState(null, "", location.pathname); render(); return; }
     if (a === "help") { return; }
@@ -1472,7 +1509,12 @@
     const had = !!S, turnBefore = had && myTurn();
     if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help };
     S = j.S; NET.v = j.v; NET.full = j.players.essaim && j.players.colonie;
-    if (!turnBefore && myTurn()) { UI = { ...resetUI(), help: UI.help, selCreature: UI.selCreature }; NET.banner = had; }
+    if (!turnBefore && myTurn()) {
+      UI = { ...resetUI(), help: UI.help, selCreature: UI.selCreature }; NET.banner = had;
+      // écran de passage en ligne aussi (Oni, 09/11/2026), sauf pour les fenêtres de réaction (comme en local)
+      if (had && !S.winner && !REACT.includes(S.phase)) { NET.ho = true; NET.banner = false; }
+    }
+    if (NET.ho && myTurn() && !S.winner) S.handoff = NET.side; else NET.ho = false;
   }
   // animations des événements reçus (sur l'ancien plateau), puis nouvel état
   async function show(j, onOk) {
