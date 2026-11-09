@@ -277,6 +277,8 @@
     return `Étage ${n} : ${done}/${cost} travailleurs${n <= S.floors ? " (achevé)" : ""}\n+1 travailleur une fois achevé${extra ? "\n" + extra : ""}`;
   }
   // résumé de la colonie vu par l'essaim : chiffres clés, fusée en colonne, ateliers
+  // défausse des sortilèges, visible des deux camps (Oni, 09/11/2026)
+  const spellDiscardHtml = () => `<h4>Défausse des sortilèges</h4><p class="small">${(S.spellDiscard || []).filter(Boolean).length ? S.spellDiscard.filter(Boolean).map(E).join(", ") : "vide"}</p>`;
   function colonySummary() {
     const bonus = SF.bonusWorkers(S);
     const rocket = Array.from({ length: 12 }, (_, i) => {
@@ -300,7 +302,7 @@
           <span class="kc" tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b><small>sorts</small></span>
           <div class="sum-at" data-fx="ateliers">${ateliers}</div>
         </div>
-      </div>`;
+      </div>${spellDiscardHtml()}`;
   }
   // icône de chaque nœud d'amélioration (résumé de l'essaim vu par la colonie)
   const NODE_ICON = {
@@ -858,7 +860,7 @@
         <span tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b> tuiles</span>
       </div>
       ${pcRocket(true)}
-      <h4 data-fx="ateliers">Construits ce tour</h4><div class="pc-ateliers sum">${at}</div></div></aside>`;
+      <h4 data-fx="ateliers">Construits ce tour</h4><div class="pc-ateliers sum">${at}</div>${spellDiscardHtml()}</div></aside>`;
   }
   // résumé de l'essaim vu par la colonie (colonne de droite) : améliorations en grosses icônes
   function pcSwarmSum() {

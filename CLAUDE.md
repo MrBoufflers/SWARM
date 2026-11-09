@@ -98,7 +98,7 @@ Contrainte principale : **le jeu a des informations cachées**. Synchroniser l'�
 3. **Chaque joueur reçoit une vue filtrée** de `S` :
    - à l'essaim, ne jamais envoyer : `hand` (tuiles de la colonie), `spells` (sortilèges), le nom/les PV/les capacités des tuiles camouflées non révélées (`tile.camo && !tile.revealed`, sauf Clairvoyance — voir `clairvoyance(S)`), le nom des tuiles camouflées en chantier (`chantiers`) et à poser (`toPlace`) — les points restants d'un chantier restent visibles (validé par Oni le 30/10/2026) ;
    - à la colonie, ne jamais envoyer : `handA` (main de l'essaim) ;
-   - à personne : l'ordre des pioches (`piles`, `tileDeck`, `spellDeck`, défausses) — envoyer seulement les nombres ;
+   - à personne : l'ordre des pioches (`piles`, `tileDecks`, `spellDeck`, défausses de tuiles) — envoyer seulement les nombres ; la **défausse des sortilèges** (`spellDiscard`) est publique (Oni, 09/11/2026) ;
    - le journal (`S.log`) est commun : il évite déjà de nommer les tuiles camouflées (`pubName`) — à garder ainsi.
 4. **Fenêtres de réaction** : `A_famine` / `A_react` ne s'ouvrent que si la colonie tient le bon sortilège. **Validé par Oni (30/10/2026) : on garde ce comportement en ligne** (l'essaim ne voit pas quelle carte la colonie tient).
 5. **Reconnexion** : jeton par joueur conservé dans le navigateur ; une partie survit à un rechargement de page.

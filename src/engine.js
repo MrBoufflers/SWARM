@@ -1509,7 +1509,7 @@ const SF = (() => {
     const V = JSON.parse(JSON.stringify(S));
     V.view = side; V.handoff = null;
     V.tileDecks = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDecks[c])])); V.tileDiscards = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDiscards[c])]));
-    V.spellDeck = blank(V.spellDeck); V.spellDiscard = blank(V.spellDiscard);
+    V.spellDeck = blank(V.spellDeck); // la défausse des sortilèges est publique (Oni, 09/11/2026)
     for (const l of [1, 2, 3]) V.piles[l] = blank(V.piles[l]);
     if (side === "colonie") V.handA = blank(V.handA);
     if (side === "essaim") {

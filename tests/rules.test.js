@@ -255,6 +255,7 @@ const fresh = () => {
   ok(SF.apply(S, "colonie", "endD") === "" && S.phase === "D_spell" && S.spellOffer.length === 2 && S.spellOffer[0] === "Famine", "fin du tour : la colonie voit les 2 premiers sortilèges (09/11/2026)");
   const other = S.spellOffer[1], disc = S.spellDiscard.length;
   ok(SF.apply(S, "colonie", "spellPick", { i: 0 }) === "" && S.spells.includes("Famine") && S.spellDiscard.length === disc + 1 && S.spellDiscard.includes(other) && S.phase === "A_famine", "elle garde Famine, défausse l'autre ; puis fenêtre Famine ouverte");
+  ok(SF.viewFor(S, "essaim").spellDiscard.includes(S.spellDiscard[S.spellDiscard.length - 1]) && SF.viewFor(S, "essaim").spellDeck.every(x => x === null), "l'essaim voit la défausse des sortilèges, pas la pioche ni le choix");
   ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine, "Famine jouée");
 }
 // 25. vue filtrée : rien de caché n'est envoyé à l'autre camp

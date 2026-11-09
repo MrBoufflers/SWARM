@@ -253,7 +253,7 @@ Construisez vos bâtiments **un par un** (Oni, 08/11/2026 ; plus d'ateliers) : c
 2. **Supports** : posez les supports dont les conditions sont réunies, dès que leurs murs sont construits.
 3. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
 4. **Tirs** : chaque support de niveau 1 ou 2 inflige ses dégâts à une créature située sur l'une des **8 cases qui l'entourent** (diagonales comprises), au choix de la colonie. Niveau 1 : 1 dégât, +1 à chaque palier de la fusée (étages 3, 6 et 9), soit 1 / 2 / 3 / 4 † ; niveau 2 : 2 dégâts †. Les tourelles tirent **après** la construction et la fusée : un support apparu ce tour tire déjà, et un palier atteint ce tour compte déjà pour ses dégâts.
-5. **Pioche de sorts** : selon vos technologies en jeu (3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts). Pour chaque sort, regardez les **2 premières cartes**, gardez-en une et défaussez l'autre ; pioche vide : remélangez la défausse (Oni, 09/11/2026).
+5. **Pioche de sorts** : selon vos technologies en jeu (3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts). Pour chaque sort, regardez les **2 premières cartes**, gardez-en une et défaussez l'autre (l'essaim ne voit pas votre choix, mais la défausse des sortilèges est publique) ; pioche vide : remélangez la défausse (Oni, 09/11/2026).
 
 ### Les forteresses
 
