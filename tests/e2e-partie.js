@@ -41,6 +41,8 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     if (await click('[data-a="draw"]')) continue;
     if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="pickOne"]:not([disabled])')]; if (!b.length) return false; b[b.length - 1 - Math.floor(Math.random() * Math.min(3, b.length))].dataset.robot = '1'; return true; }) && await click('[data-a="pickOne"][data-robot]')) continue; // pioche au choix : prendre le maximum de cartes
     if (await click('[data-a="pickGo"]')) continue;
+    if (await click('[data-a="spellPick"]')) continue; // un sortilège parmi deux
+    if (await click('[data-a="relocate"]')) continue; // Reconversion
     if (await page.evaluate(() => { const b = [...document.querySelectorAll('[data-a="tdraw"]:not([disabled])')]; if (!b.length) return false; b[Math.floor(Math.random() * b.length)].dataset.robot = '1'; return true; }) && await click('[data-a="tdraw"][data-robot]')) continue; // pioche de la colonie, tuile par tuile
     const ph = await phase();
     if (!shots[ph]) { shots[ph] = 1;  }

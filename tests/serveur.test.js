@@ -74,6 +74,7 @@ const ok = (cond, msg) => { if (!cond) { fails++; console.log("ÉCHEC :", msg); 
       case "A_upgrade": type = view.reserve ? "invest" : "toAttacks"; args = { t: "aggro", s: view.upgrades.aggro.r1 ? "A2" : "A1", n: 99 }; break;
       case "A_react": type = "reactDone"; break;
       case "A_attack": type = view.creatures.some(c => !c.acted) ? "actAll" : "endA"; break;
+      case "D_spell": type = "spellPick"; args = { i: 0 }; break;
       case "D_draw": type = "tdraw"; args = { cat: ["renfort", "actif", "piege"][steps % 3] }; if (!view.tileDecks[args.cat].length && !view.tileDiscards[args.cat].length) args.cat = "renfort"; break;
       case "D_main": type = view.hand.length && !view.chantiers.N.length ? "startCh" : "build"; args = { i: 0, lane: "N" }; break;
       case "D_fire": type = "endD"; break;

@@ -63,6 +63,7 @@
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
     A_attack: ["essaim", "Attaques", "Touchez une créature : choisissez la case où elle avance sur son chemin vers la fusée (au moins 1 case, au plus sa vitesse), puis, si vous voulez, un bâtiment qui touche sa case (ou la fusée) à attaquer. « Tout résoudre et finir le tour » fait agir toutes les créatures restantes."],
+    D_spell: ["colonie", "Pioche de sortilège", "Choisissez un des deux sortilèges ; l'autre est défaussé."],
     D_draw: ["colonie", "Pioche de la colonie", "Complétez votre main carte par carte : pour chaque tuile, choisissez sa pioche (renforts, actifs ou pièges)."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, puis construction : choisissez une tuile et sa case, elle est payée et posée tout de suite (un bâtiment par lane et par tour). Les points restants vont à la fusée, puis les tourelles tirent."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
@@ -386,6 +387,12 @@
         body = `<p class="hint"><b>${E(sel.name)}</b>${sh ? "" : " · " + posTxt(sel)} : ${what}.</p>${tb}<div class="choices"><button data-a="rest" data-id="${sel.id}">${n && !sel.moved ? "Ne pas bouger" : "Terminer pour cette créature"}</button></div>`;
       } else body = `<p class="hint">Touchez une créature pour la déplacer puis attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>`;
       acts = `<button data-a="actAll" class="primary">Tout résoudre et finir le tour</button>`;
+    } else if (ph === "D_spell") { // un sortilège parmi deux (Oni, 09/11/2026)
+      const o = S.spellOffer || [];
+      body = `<p class="hint">Gardez un sortilège${S.spellDraws > 1 ? ` (encore ${S.spellDraws} à piocher)` : ""} ; l'autre est défaussé.</p><div class="spells">` +
+        o.map((n, i) => `<button data-a="spellPick" data-v="${i}" class="spell ${SF.SPELLS[n].kind}">${icon(spellIcon(n))}<span><b>${E(n)}</b><small>${E(SF.SPELLS[n].text)}</small></span></button>`).join("") + `</div>`;
+    } else if (ph === "D_main" && S.relocate) { // Reconversion : reposer la tuile remplacée
+      body = `<p class="hint">Reconversion : touchez une case surlignée pour reposer <b>${E(S.relocate.name)}</b>.</p>`;
     } else if (ph === "D_draw") {
       // pioche de la colonie (Oni, 07/11/2026) : une tuile à la fois, dans la pioche choisie
       const max = SF.handSize(S), CAT_HINT = { renfort: "murs, Épines, Renforcé (camouflés)", actif: "technologies, travailleurs, Avant-postes", piege: "Mines et Siphons" };
@@ -491,7 +498,8 @@
   function board() {
     const canDeployHere = (lane, u) => S.phase === "A_deploy" && S.view === "essaim" && UI.sel && SF.canDeploy(S, cardOf(UI.sel), lane);
     const buildHot = S.phase === "D_main" && S.view === "colonie" && UI.sel !== null && UI.spell === null ? SF.buildTargets(S, UI.sel) : [];
-    const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : buildHot;
+    const relHot = S.phase === "D_main" && S.view === "colonie" && S.relocate ? SF.relocateTargets(S) : null;
+    const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : relHot || buildHot;
     // créature choisie en phase d'attaque : cases où elle peut aller, cibles qu'elle peut attaquer
     const mover = S.phase === "A_attack" && S.view === "essaim" ? S.creatures.find(c => c.id === UI.selCreature && !c.acted) : null;
     const R = mover ? SF.reachable(S, mover) : {}, T = mover ? SF.strikeTargets(S, mover) : [];
@@ -547,7 +555,7 @@
       const [pu, pk] = SF.toLocal(lane, x, y);
       const drop = !t && S.phase === "A_deploy" && S.view === "essaim" && UI.sel && !UI.sap && SF.canDeploy(S, cardOf(UI.sel), lane) && SF.canDrop(S, cardOf(UI.sel).name, lane, pu, pk);
       const atk = !target && T.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target || drop ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="${S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target || drop ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -766,7 +774,7 @@
     colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_fire", "Tirs"]], // « Pose » retirée (construction immédiate, v0.5.8)
   };
   function pcSteps(side) {
-    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase;
+    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase === "D_spell" ? "D_fire" : S.phase;
     const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
     const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
@@ -1077,6 +1085,8 @@
       case "endA": return play("endA");
       case "startCh": if (UI.sel !== null) return play("startCh", { i: UI.sel, lane: d.l }, () => { UI.sel = null; }); break;
       case "placeAt": return play("placeAt", { k: d.k });
+      case "spellPick": return play("spellPick", { i: Number(d.v) });
+      case "relocate": return play("relocate", { k: d.k });
       case "buildAt": { const i = UI.sel; UI.sel = null; if (i !== null) return play("buildAt", { i, k: d.k }); break; }
       case "cancelCh": return play("cancelCh", { lane: d.l, i: Number(d.i) });
       case "alloc": return play("alloc", { lane: d.l, d: Number(d.d) });

@@ -84,23 +84,23 @@ const SF = (() => {
     "Baraquement": "+1 travailleur tant que la tuile tient.", "Dortoir": "Renforcé 2. +1 travailleur tant que la tuile tient.", "Archives": "+1 technologie. Bouclier.",
   };
   const SPELLS = {
-    "Frappe orbitale": { kind: "off", n: 3, text: "5 dégâts à 1 créature." },
-    "Salve": { kind: "off", n: 3, text: "3 dégâts à 2 créatures de la même case." },
-    "Barrage": { kind: "off", n: 2, text: "1 dégât à chaque créature d'une lane." },
+    // un seul exemplaire de chaque sortilège ; Cadence retirée (doublon d'Effort) — Oni, 09/11/2026
+    "Frappe orbitale": { kind: "off", n: 1, text: "5 dégâts à 1 créature." },
+    "Salve": { kind: "off", n: 1, text: "3 dégâts à 2 créatures de la même case." },
+    "Barrage": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une lane." },
     "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
     // Champ de stase (Oni, 04/11/2026 ; avant : toute une lane) : un seul bâtiment, et ses Épines sont suspendues
-    "Champ de stase": { kind: "off", n: 2, text: "Choisissez un bâtiment : ce tour, il ne subit aucun dégât et les créatures qui l'attaquent ne subissent pas ses Épines ; l'attaque passe quand même en percée et les spores touchent ses voisins." },
-    "Famine": { kind: "off", n: 2, text: "Au début du tour de l'essaim : ce tour, son budget est sa biomasse divisée par 2 (arrondie à l'inférieur)." },
+    "Champ de stase": { kind: "off", n: 1, text: "Choisissez un bâtiment : ce tour, il ne subit aucun dégât et les créatures qui l'attaquent ne subissent pas ses Épines ; l'attaque passe quand même en percée et les spores touchent ses voisins." },
+    "Famine": { kind: "off", n: 1, text: "Au début du tour de l'essaim : ce tour, son budget est sa biomasse divisée par 2 (arrondie à l'inférieur)." },
     // Brouillage (Oni, 04/11/2026 ; avant : annulait le déploiement d'une créature posée ce tour)
-    "Brouillage": { kind: "off", n: 2, text: "Choisissez une créature : ce tour, elle ne bouge pas et n'attaque pas." },
-    "Effort": { kind: "sup", n: 3, text: "+2 points de construction ce tour." },
-    "Cadence": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
+    "Brouillage": { kind: "off", n: 1, text: "Choisissez une créature : ce tour, elle ne bouge pas et n'attaque pas." },
+    "Effort": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
     // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
-    "Feu nourri": { kind: "sup", n: 2, text: "Ce tour, chaque tourelle tire 2 fois." },
-    "Réparation": { kind: "sup", n: 3, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
-    "Double bouclier": { kind: "sup", n: 2, text: "Deux bâtiments au choix gagnent un jeton Bouclier." }, // Oni, 09/11/2026
-    "Renouvellement": { kind: "sup", n: 2, text: "Défaussez des tuiles de votre main, puis repiochez-en autant, chacune dans la même pioche (renforts, actifs ou pièges)." },
-    "Reconversion": { kind: "sup", n: 2, text: "Échangez une tuile de votre main avec une tuile construite." },
+    "Feu nourri": { kind: "sup", n: 1, text: "Ce tour, chaque tourelle tire 2 fois." },
+    "Réparation": { kind: "sup", n: 1, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
+    "Double bouclier": { kind: "sup", n: 1, text: "Deux bâtiments au choix gagnent un jeton Bouclier." }, // Oni, 09/11/2026
+    "Renouvellement": { kind: "sup", n: 1, text: "Défaussez des tuiles de votre main, puis repiochez-en autant (chacune dans la même pioche) ; +1 point de construction ce tour." },
+    "Reconversion": { kind: "sup", n: 1, text: "Une tuile de votre main remplace une tuile construite, qui est aussitôt reposée sur une autre case de votre choix." },
   };
   const TIERS = [ // biomasse mini, N1, N2, N3, plafond
     // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 9, 15, 21 de biomasse (brièvement 10 / 15 / 20, puis 9 / 15 / 20)
@@ -139,7 +139,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.10";
+  const VERSION = "0.5.11";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1055,7 +1055,6 @@ const SF = (() => {
         return true;
       }
       case "Effort": S.extraPts += 2; return true;
-      case "Cadence": S.extraPts += 2; return true;
       case "Feu nourri": S.doubleFire = true; return true;
       case "Double bouclier": { // arg = 1 ou 2 clés de tuiles : chacune gagne un jeton Bouclier (non cumulable)
         if (!Array.isArray(arg) || !arg.length || arg.length > 2) return false;
@@ -1074,6 +1073,7 @@ const SF = (() => {
         const cats = [];
         for (const i of idx) if (S.hand[i]) { const n = S.hand.splice(i, 1)[0]; S.tileDiscards[tileCat(n)].push(n); cats.push(tileCat(n)); }
         for (const c of cats) drawOneTile(S, c);
+        S.extraPts += 1; // +1 point de construction (Oni, 09/11/2026)
         return true;
       }
       case "Reconversion": { // arg = {hand: index, tile: clé}
@@ -1083,8 +1083,11 @@ const SF = (() => {
         S.tiles[arg.tile] = tileStats(nn, x, y);
         fx(S, { t: "place", k: arg.tile });
         if (TILES[nn].perm) S.workersBase += 1;
-        S.hand[arg.hand] = old.name;
+        S.hand.splice(arg.hand, 1);
         log(S, "colonie", `Reconversion : ${pubName(nn)} remplace ${old.camo && !old.revealed ? "une tuile camouflée" : old.name}.`);
+        // la tuile remplacée ne revient plus en main : on la repose aussitôt où l'on veut (Oni, 09/11/2026)
+        S.relocate = old;
+        if (!relocateTargets(S).length) { S.hand.push(old.name); delete S.relocate; log(S, "colonie", "Aucune case libre : la tuile remplacée revient en main."); }
         return true;
       }
     }
@@ -1114,7 +1117,7 @@ const SF = (() => {
   // Construction immédiate (Oni, 08/11/2026 ; remplace les ateliers) : on paie d'un coup les points de construction d'une
   // tuile de la main et on la pose aussitôt sur une case valable ; un bâtiment par lane et par tour (2 au palier 6)
   function canBuildAt(S, name, k) {
-    const t = TILES[name]; if (!t || S.phase !== "D_main") return false;
+    const t = TILES[name]; if (!t || S.phase !== "D_main" || S.relocate) return false;
     const lane = cellLane(...parse(k)); if (!lane) return false;
     if (((S.built && S.built[lane]) || 0) + S.chantiers[lane].length >= S.chPerLane) return false;
     return t.d <= pointsLeft(S) && canTarget(S, lane, k);
@@ -1267,14 +1270,52 @@ const SF = (() => {
   function endColonyTurn(S) {
     autoFire(S); // tirs restants (automatiques)
     // sortilèges de soutien non joués : gardés en main (Oni, 01/11/2026) ; les tuiles se piochent au début du tour suivant
-    const n = spellsPerTurn(S);
-    for (let i = 0; i < n; i++) {
-      if (!S.spellDeck.length) { S.spellDeck = shuffle(S.spellDiscard); S.spellDiscard = []; }
-      if (S.spellDeck.length) S.spells.push(S.spellDeck.pop());
-    }
-    if (n) log(S, "colonie", `${n} sortilège${n > 1 ? "s" : ""} pioché${n > 1 ? "s" : ""}.`);
+    // pioche des sortilèges (Oni, 09/11/2026) : pour chaque sortilège, la colonie choisit une des deux premières cartes
+    // et défausse l'autre (étape D_spell) ; pioche vide : on remélange la défausse
+    S.spellDraws = spellsPerTurn(S);
+    if (!offerSpell(S)) finishColonyTurn(S);
+  }
+  function spellCard(S) {
+    if (!S.spellDeck.length) { S.spellDeck = shuffle(S.spellDiscard); S.spellDiscard = []; }
+    return S.spellDeck.length ? S.spellDeck.pop() : null;
+  }
+  function offerSpell(S) {
+    if (!(S.spellDraws > 0)) return false;
+    const a = spellCard(S); if (!a) return false;
+    const b = spellCard(S);
+    S.spellOffer = b ? [a, b] : [a]; S.phase = "D_spell";
+    return true;
+  }
+  function pickSpell(S, i) {
+    if (S.phase !== "D_spell" || !S.spellOffer || !S.spellOffer[i]) return false;
+    const got = S.spellOffer[i];
+    S.spells.push(got);
+    for (const [j, n] of S.spellOffer.entries()) if (j !== i) S.spellDiscard.push(n);
+    S.spellOffer = null; S.spellDraws -= 1;
+    log(S, "colonie", "Un sortilège pioché.");
+    if (!offerSpell(S)) finishColonyTurn(S);
+    return true;
+  }
+  function finishColonyTurn(S) {
+    S.spellOffer = null; S.spellDraws = 0;
     S.round += 1;
     startAttackerTurn(S);
+  }
+  // Reconversion : cases où reposer la tuile remplacée (libres, valables pour leur lane)
+  function relocateTargets(S) {
+    if (!S.relocate) return [];
+    const out = [];
+    for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) { const k = key(x, y), lane = cellLane(x, y); if (lane && canTarget(S, lane, k)) out.push(k); }
+    return out;
+  }
+  function relocate(S, k) {
+    if (!S.relocate || !relocateTargets(S).includes(k)) return false;
+    const t = S.relocate; delete S.relocate;
+    pushBack(S, k); S.tiles[k] = t;
+    fx(S, { t: "place", k });
+    placeSupports(S); visionSweep(S);
+    log(S, "colonie", `Reconversion : ${t.camo && !t.revealed ? "la tuile camouflée" : t.name} est reposée en lane ${LANE_NAME[cellLane(...parse(k))]}.`);
+    return true;
   }
   function drawOneTile(S, cat) {
     if (!S.tileDecks[cat].length) { S.tileDecks[cat] = shuffle(S.tileDiscards[cat]); S.tileDiscards[cat] = []; }
@@ -1306,6 +1347,9 @@ const SF = (() => {
       if (TREES[type] && TREES[type][slot] && got >= nodeCost(slot) && nodeState(S, type, slot) === "open") { delete S.invest[key]; acquire(S, type, slot); }
     }
     for (const list of [S.tileDiscard, S.tileDeck, S.hand]) if (Array.isArray(list)) for (let i = list.length - 1; i >= 0; i--) if (list[i] === "Mur de départ" || list[i] === "Haie de départ") list.splice(i, 1);
+    // Cadence retirée (Oni, 09/11/2026) : en main, elle devient Effort (même effet) ; elle sort des pioches
+    if (Array.isArray(S.spells)) S.spells = S.spells.map(n => (n === "Cadence" ? "Effort" : n));
+    for (const k of ["spellDeck", "spellDiscard"]) if (Array.isArray(S[k])) S[k] = S[k].filter(n => n !== "Cadence");
     // pioches de tuiles par catégorie (Oni, 07/11/2026) : Piège et Siphon renommés, pioche unique répartie en trois
     const ren = n => OLD_TILE[n] || n;
     if (Array.isArray(S.hand)) S.hand = S.hand.map(n => (n === null ? n : ren(n)));
@@ -1328,7 +1372,7 @@ const SF = (() => {
   // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
   // vérifie le camp, la phase et les paramètres, puis appelle les fonctions de règles ci-dessus.
   // Les transitions de phase qui vivaient dans l'interface (fenêtres Famine / Réaction, passage aux tirs) sont ici.
-  const PHASE_SIDE = { D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
+  const PHASE_SIDE = { D_spell: "colonie", D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
   const actor = S => PHASE_SIDE[S.phase] || null;
   const isInt = v => Number.isInteger(v);
   const isLane = l => LANES.includes(l);
@@ -1372,7 +1416,7 @@ const SF = (() => {
     } },
     reactDone: { phase: ["A_react"], run: S => { S.phase = "A_attack"; return true; } },
     spell: { phase: ["A_react", "D_main"], run(S, a) {
-      const name = isInt(a.i) ? S.spells[a.i] : undefined; if (!name) return false;
+      const name = isInt(a.i) ? S.spells[a.i] : undefined; if (!name || S.relocate) return false;
       const kind = S.phase === "A_react" ? "off" : "sup";
       if (SPELLS[name].kind !== kind || name === "Famine" || !spellArgOk(S, name, a.arg)) return false;
       return useSpell(S, a.i, a.arg === undefined ? null : a.arg);
@@ -1419,7 +1463,9 @@ const SF = (() => {
       if (v < 0 || allocated(S) + a.d > totalPoints(S)) return false;
       S.alloc[a.lane] = v; return true;
     } },
-    build: { phase: ["D_main"], run: S => { endDefenderTurn(S); return true; } }, // construction et fusée, puis tirs
+    build: { phase: ["D_main"], run: S => { if (S.relocate) return false; endDefenderTurn(S); return true; } }, // construction et fusée, puis tirs
+    relocate: { phase: ["D_main"], run: (S, a) => typeof a.k === "string" && relocate(S, a.k) }, // Reconversion : repose la tuile remplacée
+    spellPick: { phase: ["D_spell"], run(S, a) { if (!(isInt(a.i) && pickSpell(S, a.i))) return false; openFamine(S); return true; } },
     toFire: { phase: ["D_main"], run: S => { endDefenderTurn(S); return true; } }, // ancien nom (pages encore ouvertes)
     fire: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && isInt(a.id) && fire(S, a.sk, a.id) },
     autoFire: { phase: ["D_fire"], run: S => { autoFire(S); return true; } },
@@ -1467,7 +1513,8 @@ const SF = (() => {
     for (const l of [1, 2, 3]) V.piles[l] = blank(V.piles[l]);
     if (side === "colonie") V.handA = blank(V.handA);
     if (side === "essaim") {
-      V.hand = blank(V.hand); V.spells = blank(V.spells);
+      V.hand = blank(V.hand); V.spells = blank(V.spells); if (V.spellOffer) V.spellOffer = blank(V.spellOffer);
+      if (V.relocate) V.relocate = { hidden: true };
       const hideName = n => (TILES[n] && TILES[n].camo ? null : n);
       for (const l of LANES) for (const ch of V.chantiers[l]) ch.tile = hideName(ch.tile);
       for (const p of V.toPlace) p.tile = hideName(p.tile);
@@ -1492,7 +1539,7 @@ const SF = (() => {
 
   return {
     VERSION,
-    fxFor, migrate, famineBudget, MIN_BIOMASS, siphonLoss, buildTargets, canBuildAt, pointsLeft, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, famineBudget, MIN_BIOMASS, siphonLoss, relocateTargets, buildTargets, canBuildAt, pointsLeft, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
