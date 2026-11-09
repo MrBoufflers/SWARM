@@ -1,6 +1,6 @@
 # Swarm & Steel — Livret de règles v0.3
 
-2026-11-02 · @Oni · version du jeu v0.5.10 (journal des versions : `docs/versions.md`)
+2026-11-02 · @Oni · version du jeu v0.5.11 (journal des versions : `docs/versions.md`)
 
 Version de prototype. Les règles et valeurs suivies de † sont des hypothèses ou des propositions en attente de validation (voir la dernière section). Les valeurs du Catalogue sont chiffrées par barème et restent à confirmer en partie réelle.
 
@@ -253,7 +253,7 @@ Construisez vos bâtiments **un par un** (Oni, 08/11/2026 ; plus d'ateliers) : c
 2. **Supports** : posez les supports dont les conditions sont réunies, dès que leurs murs sont construits.
 3. **Fusée** : chaque fois que la fusée accumule assez de points, ajoutez un étage (voir La fusée).
 4. **Tirs** : chaque support de niveau 1 ou 2 inflige ses dégâts à une créature située sur l'une des **8 cases qui l'entourent** (diagonales comprises), au choix de la colonie. Niveau 1 : 1 dégât, +1 à chaque palier de la fusée (étages 3, 6 et 9), soit 1 / 2 / 3 / 4 † ; niveau 2 : 2 dégâts †. Les tourelles tirent **après** la construction et la fusée : un support apparu ce tour tire déjà, et un palier atteint ce tour compte déjà pour ses dégâts.
-5. **Pioche de sorts** : piochez selon vos technologies en jeu : 3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts.
+5. **Pioche de sorts** : selon vos technologies en jeu (3 → 1 sort, 6 → 2 sorts, 9 → 3 sorts). Pour chaque sort, regardez les **2 premières cartes**, gardez-en une et défaussez l'autre (l'essaim ne voit pas votre choix, mais la défausse des sortilèges est publique) ; pioche vide : remélangez la défausse (Oni, 09/11/2026).
 
 ### Les forteresses
 
@@ -370,24 +370,23 @@ Toutes les cartes et tuiles du jeu, avec leurs valeurs. Les chiffres viennent d'
 
 ### Sortilèges
 
-30 cartes : 15 offensives, jouées pendant le tour de l'essaim, et 15 de soutien, jouées pendant le tour de la colonie. Les dégâts offensifs vont du coup unique lourd à la zone faible.
+14 cartes, **un exemplaire de chaque** (Oni, 09/11/2026) : 7 offensives, jouées pendant le tour de l'essaim, et 7 de soutien, jouées pendant le tour de la colonie.
 
 | Sortilège | Type | Effet | Ex. |
 | --- | --- | --- | --- |
-| Frappe orbitale | Offensif | 5 dégâts à 1 créature | 3 |
-| Salve | Offensif | 3 dégâts à 2 créatures de la même case | 3 |
-| Barrage | Offensif | 1 dégât à chaque créature d'une lane | 2 |
+| Frappe orbitale | Offensif | 5 dégâts à 1 créature | 1 |
+| Salve | Offensif | 3 dégâts à 2 créatures de la même case | 1 |
+| Barrage | Offensif | 1 dégât à chaque créature d'une lane | 1 |
 | Onde de choc | Offensif | 1 dégât à chaque créature d'une couronne (sur les 4 lanes) | 1 |
-| Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines ; une attaque sur lui a quand même lieu : toute l'attaque passe en percée à la case suivante et les spores touchent les tuiles voisines (v0.5) | 2 |
-| Famine | Offensif | à jouer au début du tour de l'essaim : ce tour, son budget est sa biomasse **divisée par 2**, arrondie à l'inférieur (sa biomasse ne change pas) | 2 |
-| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation et Furtivité s'appliquent) : ce tour, elle ne bouge pas et n'attaque pas | 2 |
-| Effort | Soutien | +2 points de construction ce tour | 3 |
-| Cadence | Soutien | +2 points de construction ce tour | 1 |
-| Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 2 |
-| Double bouclier | Soutien | deux bâtiments au choix gagnent un jeton **Bouclier** (la prochaine attaque ne leur fait rien) | 2 |
-| Réparation | Soutien | rendez 3 PV, répartis sur vos tuiles abîmées, sans dépasser leurs PV de départ | 3 |
-| Renouvellement | Soutien | défaussez autant de tuiles de votre main que vous voulez, puis repiochez-en autant | 2 |
-| Reconversion | Soutien | échangez une tuile de votre main avec une tuile construite : celle de la main prend sa place, entière, sans construction ; l'autre revient en main | 2 |
+| Champ de stase | Offensif | choisissez un bâtiment : ce tour, il ne subit aucun dégât (attaque, percée, spores) et les créatures qui l'attaquent ne subissent pas ses Épines ; une attaque sur lui a quand même lieu : toute l'attaque passe en percée à la case suivante et les spores touchent les tuiles voisines (v0.5) | 1 |
+| Famine | Offensif | à jouer au début du tour de l'essaim : ce tour, son budget est sa biomasse **divisée par 2**, arrondie à l'inférieur (sa biomasse ne change pas) | 1 |
+| Brouillage | Offensif | à jouer avant les attaques, sur n'importe quelle créature (Provocation et Furtivité s'appliquent) : ce tour, elle ne bouge pas et n'attaque pas | 1 |
+| Effort | Soutien | +2 points de construction ce tour | 1 |
+| Feu nourri | Soutien | ce tour, chaque tourelle tire **2 fois** | 1 |
+| Double bouclier | Soutien | deux bâtiments au choix gagnent un jeton **Bouclier** (la prochaine attaque ne leur fait rien) | 1 |
+| Réparation | Soutien | rendez 3 PV, répartis sur vos tuiles abîmées, sans dépasser leurs PV de départ | 1 |
+| Renouvellement | Soutien | défaussez autant de tuiles de votre main que vous voulez, puis repiochez-en autant (chacune dans la même pioche) ; **+1 point de construction** ce tour | 1 |
+| Reconversion | Soutien | une tuile de votre main prend la place d'une tuile construite, entière, sans construction ; la tuile remplacée est **aussitôt reposée** sur une autre case valable de votre choix (elle ne revient plus en main) | 1 |
 
 ### Arbres d'amélioration
 

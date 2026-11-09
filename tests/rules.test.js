@@ -191,11 +191,11 @@ const fresh = () => {
   const S = fresh();
   ok([3, 9, 15, 21].map(b => { S.biomass = b; return SF.capOf(S); }).join() === "2,3,4,5", "plafonds 2 / 3 / 4 / 5 (biomasse départ / 9 / 15 / 21)");
 }
-// 19. Cadence : +2 points
+// 19. Effort : +2 points (Cadence, doublon, retirée le 09/11/2026)
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
-  const p0 = SF.totalPoints(S); S.spells = ["Cadence"]; SF.useSpell(S, 0);
-  ok(SF.totalPoints(S) === p0 + 2, "Cadence : +2 points (" + p0 + " → " + SF.totalPoints(S) + ")");
+  const p0 = SF.totalPoints(S); S.spells = ["Effort"]; SF.useSpell(S, 0);
+  ok(SF.totalPoints(S) === p0 + 2, "Effort : +2 points (" + p0 + " → " + SF.totalPoints(S) + ")");
 }
 // 20. chantier par lane, case choisie à la fin de la construction
 {
@@ -252,7 +252,10 @@ const fresh = () => {
   SF.apply(S, "colonie", "build");
   ok(S.phase === "D_place", "pose du bâtiment achevé");
   ok(SF.apply(S, "colonie", "placeAt", { k: "0,2" }) === "" && S.phase === "D_fire", "après la pose : les tourelles tirent");
-  ok(SF.apply(S, "colonie", "endD") === "" && S.spells.includes("Famine") && S.phase === "A_famine", "fin du tour : pioche, puis fenêtre Famine ouverte");
+  ok(SF.apply(S, "colonie", "endD") === "" && S.phase === "D_spell" && S.spellOffer.length === 2 && S.spellOffer[0] === "Famine", "fin du tour : la colonie voit les 2 premiers sortilèges (09/11/2026)");
+  const other = S.spellOffer[1], disc = S.spellDiscard.length;
+  ok(SF.apply(S, "colonie", "spellPick", { i: 0 }) === "" && S.spells.includes("Famine") && S.spellDiscard.length === disc + 1 && S.spellDiscard.includes(other) && S.phase === "A_famine", "elle garde Famine, défausse l'autre ; puis fenêtre Famine ouverte");
+  ok(SF.viewFor(S, "essaim").spellDiscard.includes(S.spellDiscard[S.spellDiscard.length - 1]) && SF.viewFor(S, "essaim").spellDeck.every(x => x === null), "l'essaim voit la défausse des sortilèges, pas la pioche ni le choix");
   ok(SF.apply(S, "colonie", "famine", { play: true }) === "" && S.phase === "A_start" && S.famine, "Famine jouée");
 }
 // 25. vue filtrée : rien de caché n'est envoyé à l'autre camp
@@ -608,7 +611,7 @@ const fresh = () => {
 // 48. Muraille et Palissade à 4 ex., Feu nourri, support de niveau 3 à +3 travailleurs (Oni, 02/11/2026)
 {
   ok(SF.TILES["Muraille"].n === 3 && SF.TILES["Palissade"].n === 3, "Muraille et Palissade : 3 exemplaires chacune");
-  ok(SF.SPELLS["Feu nourri"] && SF.SPELLS["Feu nourri"].kind === "sup" && SF.SPELLS["Feu nourri"].n === 2, "Feu nourri : sort de soutien, 2 exemplaires (pioche de 28 sorts)");
+  ok(SF.SPELLS["Feu nourri"] && SF.SPELLS["Feu nourri"].kind === "sup" && Object.values(SF.SPELLS).every(x => x.n === 1) && !SF.SPELLS["Cadence"], "Feu nourri : sort de soutien ; un seul exemplaire de chaque sortilège, Cadence retirée (09/11/2026)");
   const mk = () => {
     const S = fresh(); S.phase = "D_main";
     S.creatures.push({ id: 140, name: "Colosse", lane: "N", u: 0, k: 2, hp: 20, acted: false }); // à portée de (1,1) et (−1,1)
@@ -1204,6 +1207,17 @@ const fresh = () => {
   S.creatures.push({ id: 1, name: "Écorcheur", lane: "N", u: 0, k: 3, hp: 1, acted: false, moved: 1 }, { id: 2, name: "Glaneur", lane: "N", u: 0, k: 3, hp: 2, acted: false });
   SF.apply(S, "essaim", "strike", { id: 1, target: "0,2" });
   ok(S.tiles["0,2"].hp === 1 && !S.tiles["0,2"].shield, "Corrosion : Bouclier détruit et Renforcé sans effet (Rempart 4 → 1 sous 3 dégâts)");
+}
+// 75. Oni, 09/11/2026 : Reconversion repose la tuile remplacée ; Renouvellement +1 point
+{
+  const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
+  S.tiles["0,2"] = SF.tileStats("Muraille", 0, 2); S.hand = ["Bastion"]; S.spells = ["Reconversion", "Renouvellement"];
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: { hand: 0, tile: "0,2" } }) === "" && S.tiles["0,2"].name === "Bastion" && S.hand.length === 0 && S.relocate && S.relocate.name === "Muraille", "Reconversion : le Bastion remplace la Muraille, qui attend d'être reposée");
+  ok(SF.apply(S, "colonie", "build") !== "" && SF.apply(S, "colonie", "spell", { i: 0, arg: [] }) !== "", "rien d'autre tant qu'elle n'est pas reposée");
+  const k = SF.relocateTargets(S).find(x => SF.cellLane(...SF.parse(x)) === "E");
+  ok(SF.apply(S, "colonie", "relocate", { k }) === "" && S.tiles[k].name === "Muraille" && !S.relocate, "la Muraille est reposée en lane Est");
+  S.hand = ["Palissade"]; const p = SF.pointsLeft(S);
+  ok(SF.apply(S, "colonie", "spell", { i: 0, arg: [0] }) === "" && SF.pointsLeft(S) === p + 1, "Renouvellement : +1 point de construction");
 }
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {

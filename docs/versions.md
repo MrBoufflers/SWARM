@@ -4,6 +4,14 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.11 — 9 novembre 2026
+
+**Sortilèges (Oni)**
+- **Un seul exemplaire** de chaque sortilège (14 cartes) ; **Cadence** retirée (doublon d'Effort ; en main dans une partie en cours, elle devient Effort).
+- **Pioche** : pour chaque sortilège à piocher, la colonie voit les 2 premières cartes, en garde une et défausse l'autre (nouvelle étape « Pioche de sortilège ») ; pioche vide : la défausse est remélangée. L'essaim ne voit pas le choix, mais la **défausse des sortilèges est publique** (affichée dans le résumé de la colonie).
+- **Renouvellement** : +1 point de construction en plus.
+- **Reconversion** : la tuile remplacée ne revient plus en main ; elle est aussitôt reposée sur une case valable au choix.
+
 ## v0.5.10 — 9 novembre 2026
 
 **Règles (Oni)**
