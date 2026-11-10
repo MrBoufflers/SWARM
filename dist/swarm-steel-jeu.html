@@ -1084,6 +1084,43 @@ body.pc .po-bottom .phase { padding: 6px 10px; }
 body.pc .po-bottom .phase .hint { margin: 2px 0; }
 body.pc .po-bottom .pick-row { padding: 3px 8px; margin-bottom: 2px; }
 
+/* v0.5.13 (Oni, 10/11/2026) : cartes de créatures en main plus basses, comme les tuiles — petite image à gauche, capacités sur le côté */
+body.pc .ccard.sh { display: grid; grid-template-columns: 52px 1fr auto; column-gap: 8px; row-gap: 0; align-items: center; padding: 4px 8px 4px 4px; min-height: 0; overflow: visible; }
+body.pc .ccard.sh .thumb { position: static; grid-column: 1; grid-row: 1 / span 3; width: 52px; height: 52px; border-radius: 5px; box-shadow: 0 0 0 1px var(--rule);
+  -webkit-mask-image: none; mask-image: none; background-position: center 30%; background-size: cover; }
+body.pc .ccard.sh > b, body.pc .ccard.sh > small, body.pc .ccard.sh .stats { grid-column: 2; padding: 0; line-height: 1.2; text-shadow: none; }
+body.pc .ccard.sh .caps { grid-column: 3; grid-row: 1 / span 3; flex-direction: column; align-items: flex-end; justify-content: center; margin: 0; gap: 3px; }
+body.pc .ccard.sh .cap { padding: 1px 6px; }
+body.pc .ccard.sh > .cost { left: 0; top: 0; transform: none; width: 20px; height: 20px; z-index: 2; box-shadow: 0 0 0 2px var(--panel-2); }
+body.pc .ccard.sh:not(:has(.thumb)) { grid-template-columns: 20px 1fr auto; }
+.ccard .st.vit { color: var(--ink-soft); }
+/* fiche de créature : auras données et reçues (pastilles), tableau de la case */
+.detail .aulist { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.detail .aulist .lab { font-weight: 700; margin-right: 2px; }
+.detail .au-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 1rem; font-weight: 600; color: var(--soutien); background: color-mix(in srgb, var(--soutien) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--soutien) 35%, transparent); border-radius: 99px; padding: 1px 8px; cursor: help; }
+.detail .aulist.get .au-chip { color: #b383f0; background: color-mix(in srgb, #b383f0 14%, transparent); border-color: color-mix(in srgb, #b383f0 40%, transparent); }
+.detail .au-chip .i { width: 13px; height: 13px; }
+.detail .au-chip small { font-weight: 400; color: var(--ink-soft); }
+.detail .au-chip small::before { content: "· "; }
+.casegrid { display: grid; gap: 2px; margin-top: 6px; border-top: 1px solid var(--rule); padding-top: 6px; }
+.casegrid .cg-h { font-weight: 700; color: var(--ink-soft); }
+.casegrid .cg-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; row-gap: 2px; align-items: center; padding: 2px 6px; border-left: 3px solid var(--c, var(--rule)); border-radius: 3px; }
+.casegrid .cg-row.aggro { --c: var(--aggro); } .casegrid .cg-row.tank { --c: var(--tank); } .casegrid .cg-row.soutien { --c: var(--soutien); }
+.casegrid .cg-row.me { background: color-mix(in srgb, var(--hot) 14%, transparent); }
+.casegrid .cg-row b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.casegrid .cg-st { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; white-space: nowrap; }
+.casegrid .cg-st .i { width: 13px; height: 13px; }
+.casegrid .cg-fx { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 3px; }
+.casegrid .cg-fx:empty { display: none; }
+.casegrid .cg-fx i { font: 700 .85rem/1.3 var(--body); font-style: normal; white-space: nowrap; color: #b383f0; background: color-mix(in srgb, #b383f0 14%, transparent); border-radius: 4px; padding: 0 5px; }
+.detail .au-chip { white-space: nowrap; }
+.cpop:has(.casegrid) { width: 360px; }
+.cpop { max-height: calc(100vh - 16px); overflow: auto; }
+/* cartes de soutien : pastilles sur deux colonnes pour garder la carte basse */
+body.pc .ccard.sh .caps { display: grid; grid-auto-flow: row; grid-template-columns: repeat(2, auto); justify-content: end; justify-items: end; }
+body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
+
 .im-antenne{--img:url(data:image/webp;base64,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)}
 .im-archive{--img:url(data:image/webp;base64,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)}
 .im-avant-poste{--img:url(data:image/webp;base64,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)}
@@ -1251,14 +1288,14 @@ const SF = (() => {
     { min: 21, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 déplacement."],
+    aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 vitesse."],
       A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 2 cartes de niveau 1 gratuites en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "+1 PV. Insensibles aux Épines."], B1: ["Provocation", "Les tirs visant une autre créature de sa case visent ce tank. −1 dégât des tourelles."],
       A2: ["Blindage", "+2 PV. −1 dégât des tourelles."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au tour suivant, là où il est mort."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
-    soutien: { A1: ["Mue", "Aura Mobilité 1 et Aura +1 PV."], B1: ["Griffes", "Aura +1 ATQ et Aura Mobilité 1."],
+    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura +1 PV."], B1: ["Griffes", "Aura +1 ATQ et Aura Mobilité 1 (+1 vitesse)."],
       A2: ["Régénération", "Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
@@ -3142,13 +3179,36 @@ const IA = (() => {
     return best;
   }
 
+  // stratégie de la colonie (Oni, 10/11/2026) : la note de base pousse la fusée (≈ 22 par point au début) et un bâtiment
+  // n'y valait qu'une dizaine ; l'IA ne construisait qu'un bâtiment par manche. Pour ses choix de construction, la colonie
+  // ajoute donc une valeur de long terme : chaque bâtiment, les coins (supports II et III, +2 travailleurs), les
+  // travailleurs en plus et les technologies (sortilèges par tour) ; la fusée y pèse un peu moins.
+  function colonyLong(S) { // positif = bon pour la colonie
+    let v = 0;
+    const rocket = S.floors + S.rocketPts / E.floorCost(S);
+    v -= rocket * 16;
+    v += E.bonusWorkers(S) * 14 + E.spellsPerTurn(S) * 12 + E.tech(S) * 2;
+    for (const [k, t] of Object.entries(S.tiles)) if (!t.start) {
+      const near = S.creatures.some(c => { const [a, b] = E.toGlobal(c.lane, c.u, c.k), [x, y] = E.parse(k); return Math.abs(a - x) + Math.abs(b - y) <= 3; });
+      v += 9 + t.hp * 1.5 + (near ? 4 : 0);
+    }
+    for (let r = 2; r <= 3; r++) for (const sx of [1, -1]) for (const sy of [1, -1]) {
+      const x = sx * r, y = sy * r;
+      if (S.supports[E.key(x, y)]) { v += r === 3 ? 34 : 22; continue; }
+      const n = [E.key(x - sx, y), E.key(x, y - sy)].filter(k => S.tiles[k]).length;
+      v += n * (r === 3 ? 10 : 7); // une case du coin sur deux : l'autre suivra
+    }
+    return v;
+  }
   // choisit parmi des candidats { type, args } celui qui donne la meilleure note après la fin de tour simulée
-  function best(V, side, cands, finish) {
+  // (extra : valeur ajoutée, du point de vue de `side`, lue sur l'état simulé en fin de tour)
+  function best(V, side, cands, finish, extra) {
     let top = null, ts = -Infinity;
     for (const c of cands) {
       const W = clone(V);
       if (!ok(W, side, c.type, c.args)) continue;
-      const s = val(finish(W), side) - (c.cost || 0);
+      const F = finish(W);
+      const s = val(F, side) + (extra ? extra(F) : 0) - (c.cost || 0);
       if (s > ts) { ts = s; top = c; }
     }
     return { move: top, s: ts };
@@ -3261,17 +3321,25 @@ const IA = (() => {
         const hurt = Object.entries(V.tiles).filter(([, t]) => t.hp < t.max && !t.start).sort((a, b) => (b[1].max - b[1].hp) - (a[1].max - a[1].hp)).slice(0, 3).map(([k]) => k);
         if (hurt.length) return { type: "spell", args: { i, arg: hurt } };
       }
+      // Renouvellement : +1 point, et les tuiles de la main qui n'ont aucune case valable sont échangées
+      if (name === "Renouvellement") return { type: "spell", args: { i, arg: V.hand.map((n, j) => j).filter(j => !E.buildTargets(V, j).length) } };
+      // Double bouclier : sur les deux bâtiments sans bouclier les plus proches des créatures, dès que l'essaim approche
+      if (name === "Double bouclier" && V.creatures.filter(c => dist(c) <= 3).length >= 2) {
+        const gap = k => { const [x, y] = E.parse(k); return Math.min(...V.creatures.map(c => { const [a, b] = E.toGlobal(c.lane, c.u, c.k); return Math.abs(a - x) + Math.abs(b - y); })); };
+        const keys = Object.entries(V.tiles).filter(([, t]) => !t.shield).map(([k]) => k).sort((a, b) => gap(a) - gap(b) || V.tiles[b].hp - V.tiles[a].hp).slice(0, 2);
+        if (keys.length && gap(keys[0]) <= 2) return { type: "spell", args: { i, arg: keys } };
+      }
     }
     // chantiers : la meilleure tuile et la meilleure lane, tant que ça améliore la position
     const cands = [{ type: "build" }];
     // construction immédiate (v0.5.8) : chaque tuile de la main sur chaque case possible
     V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k } }); });
     if (cands.length === 1) return cands[0];
-    return best(V, "colonie", cands, finishColony).move || { type: "build" };
+    return best(V, "colonie", cands, finishColony, colonyLong).move || { type: "build" };
   }
   function colonyPlace(V) {
     const cands = E.placeTargets(V).map(k => ({ type: "placeAt", args: { k } }));
-    return best(V, "colonie", cands, finishColony).move || cands[0];
+    return best(V, "colonie", cands, finishColony, colonyLong).move || cands[0];
   }
   function colonyFire(V) {
     const cands = [{ type: "endD" }];
@@ -3962,7 +4030,6 @@ if (typeof module !== "undefined") module.exports = IA;
   const FX_LABEL = {
     soin: () => ["+2 HEAL"], fureur: () => ["+1 ATQ", "+1 DEF"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
-    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ", "+1 MOV"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"], corrosion: () => ["CORROSION"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
   function sumLabels(list) {
@@ -3970,53 +4037,84 @@ if (typeof module !== "undefined") module.exports = IA;
     for (const l of list) { const m = /^\+(\d+) (.+)$/.exec(l); if (m) n[m[2]] = (n[m[2]] || 0) + Number(m[1]); else if (!other.includes(l)) other.push(l); }
     return [...Object.entries(n).map(([u, v]) => `+${v} ${u}`), ...other];
   }
-  // effets donnés par un soutien : sa capacité (si c'est une aura) et les améliorations de soutien acquises
-  function givenLabels(c) {
-    const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return [];
-    const out = AURA_CAPS.includes(b.cap) ? FX_LABEL[b.cap]() : [];
-    const u = S.upgrades.soutien;
-    for (const r of ["r1", "r2"]) if (u[r] && UP_AURA[r][u[r]]) out.push(...FX_LABEL[UP_AURA[r][u[r]]]());
+  // Auras (Oni, 10/11/2026) : une liste unique — la capacité du soutien (si c'est une aura) et chaque aura donnée par les
+  // améliorations de soutien acquises (Mue, Griffes, Régénération, Corrosion), chacune avec son icône et son effet court.
+  // self : l'aura profite aussi au soutien qui la donne (Aura Mobilité 1, moteur : speedOf).
+  const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
+  const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+1 ATQ et +1 PV", butin: "+1 biomasse par bâtiment détruit", percee: "Percée",
+    cuirasse: "insensible aux Épines", spores: "2 dégâts autour de la cible" };
+  const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
+  const UP_AURAS = {
+    A1: [MOB, { icon: "pv", name: "Aura +1 PV", labs: ["+1 DEF"], fx: "+1 PV" }],
+    B1: [{ icon: "atq", name: "Aura +1 ATQ", labs: ["+1 ATQ"], fx: "+1 ATQ" }, MOB],
+    A2: [{ icon: "regeneration", name: "Aura Soin 2", labs: ["+2 HEAL"], fx: "+2 PV en fin de tour" }],
+    B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
+  };
+  function upAuras() { // auras données par chaque soutien grâce aux améliorations, avec le nom de l'amélioration
+    const u = S.upgrades.soutien, out = [];
+    for (const r of ["r1", "r2"]) if (u[r] && UP_AURAS[u[r] + r[1]]) for (const x of UP_AURAS[u[r] + r[1]]) out.push({ ...x, from: SF.TREES.soutien[u[r] + r[1]][0] });
     return out;
   }
+  function capAura(name) {
+    const b = SF.CREATURES[name];
+    return AURA_CAPS.includes(b.cap) ? { icon: capIcon(b.cap), name: b.capName, labs: FX_LABEL[b.cap](), fx: CAP_FX[b.cap], from: name } : null;
+  }
+  function givenAuras(c) { // auras que ce soutien donne aux autres créatures de sa case
+    if (SF.CREATURES[c.name].type !== "soutien") return [];
+    const own = capAura(c.name);
+    return [...(own ? [own] : []), ...upAuras()];
+  }
+  function receivedAuras(c) { // auras dont cette créature profite, regroupées (n = nombre de sources)
+    const all = SF.caseMates(S, c).flatMap(givenAuras);
+    if (SF.CREATURES[c.name].type === "soutien") all.push(...upAuras().filter(x => x.self));
+    // un soutien n'attaque pas : les effets d'attaque reçus (ATQ, Percée, Butin, Spores, Corrosion, Cuirasse) ne le concernent pas
+    const atk = SF.attacks(c), ATK_ONLY = ["percee", "biomasse", "spores", "corrosion", "renforce", "atq"];
+    const g = new Map();
+    for (let x of all) {
+      if (!atk) { if (ATK_ONLY.includes(x.icon)) continue; x = { ...x, labs: x.labs.filter(l => !/ATQ$/.test(l)) }; }
+      const k = x.name + "|" + x.from;
+      if (g.has(k)) g.get(k).n++; else g.set(k, { ...x, n: 1 });
+    }
+    return [...g.values()];
+  }
+  const recLabels = rec => sumLabels(rec.flatMap(x => Array.from({ length: x.n }, () => x.labs).flat()));
+  const auraName = x => `${x.name}${x.n > 1 ? " ×" + x.n : ""}${x.from && x.from !== x.name ? ` (${x.from})` : ""}`;
   // aura d'une créature (jetons) : un soutien qui en donne une (icône blanche), ou une créature qui en profite (icône violette)
-  const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
-  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "corrosion" } };
-  function auraGiven(c) { // icône et nom de l'aura donnée par ce soutien, ou null
-    const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return null;
-    if (AURA_CAPS.includes(b.cap)) return { icon: capIcon(b.cap), name: b.capName };
-    const u = S.upgrades.soutien;
-    for (const r of ["r1", "r2"]) if (u[r] && UP_AURA[r][u[r]]) return { icon: UP_AURA[r][u[r]], name: SF.TREES.soutien[u[r] + r[1]][0] };
-    return null;
-  }
   function auraOf(c) {
-    const g = auraGiven(c);
-    if (g) return { kind: "give", icon: g.icon, txt: `donne : ${g.name}`, lab: sumLabels(givenLabels(c)) };
-    const got = SF.caseMates(S, c).map(auraGiven).filter(Boolean);
-    if (!got.length) return null;
-    const icons = [...new Set(got.map(x => x.icon))];
-    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: `profite de : ${[...new Set(got.map(x => x.name))].join(", ")}`,
-      lab: sumLabels(SF.caseMates(S, c).flatMap(givenLabels)) };
+    const giv = givenAuras(c), rec = receivedAuras(c);
+    const recTxt = rec.length ? `profite de : ${rec.map(auraName).join(", ")}` : "";
+    if (giv.length) {
+      const icons = [...new Set(giv.map(x => x.icon))];
+      return { kind: "give", icon: icons.length === 1 ? icons[0] : "aura", txt: `donne : ${giv.map(x => x.name).join(", ")}${recTxt ? " · " + recTxt : ""}`,
+        lab: sumLabels(giv.flatMap(x => x.labs)) };
+    }
+    if (!rec.length) return null;
+    const icons = [...new Set(rec.map(x => x.icon))];
+    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: recTxt, lab: recLabels(rec) };
   }
+  const auraChip = (x, pre) => `<span class="cap au-chip" tabindex="0" data-tip="${E(`${auraName(x)} : ${x.fx}`)}">${icon(x.icon)}${E(pre ? x.name : x.labs.join(" "))}${x.n > 1 ? `<b>×${x.n}</b>` : ""}<small>${E(x.fx)}</small></span>`;
   function detail(id) {
     const c = S.creatures.find(o => o.id === (id === undefined ? UI.selCreature : id));
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.baseSpeed(c) > 1 ? "niveau 3 : vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", S.upgrades.soutien.r1 === "A" && SF.caseMates(S, c).some(o => SF.CREATURES[o.name].type === "soutien") ? "Aura Mobilité (Mue)" : ""].filter(Boolean).join(" + ")})`); }
+    // vitesse (Oni, 10/11/2026) : vitesse de base (1, ou 2 au niveau 3) + Mobilité + chaque Aura Mobilité 1 reçue
+    const v = SF.speedOf(S, c), vb = SF.baseSpeed(c), mob = receivedAuras(c).filter(x => x.icon === "mobilite").reduce((a, x) => a + x.n, 0);
+    const vWhy = [`base ${vb}`, SF.hasMobility(S, c) ? "+1 Mobilité" : "", mob ? `+${mob} Aura Mobilité 1` : ""].filter(Boolean);
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
-    if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
-    let actions = "";
-    // Frénésie : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim (cumulable)
-    if (false && b.type === "soutien" && S.upgrades.soutien.r2 === "B") { // Frénésie retirée (Corrosion, 09/11/2026)
-      const cur = SF.frenzyOf(S, c), others = S.creatures.filter(o => o !== c && SF.posKey(o) === SF.posKey(c));
-      const canSet = S.view === "essaim" && ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase) && !c.acted;
-      actions += `<p>Frénésie : ${cur ? `double les dégâts ${/^[AEIOUYÉÈÊŒ]/i.test(cur.name) ? "d'" : "de "}${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;
-      if (canSet && others.length > 1) actions += `<div class="choices"><span class="lab">Frénésie sur :</span>${others.map(o => `<button data-a="frenzy" data-id="${c.id}" data-v="${o.id}"${cur === o ? ` class="on" aria-pressed="true"` : ""}>${E(o.name)} · ATQ ${SF.effAtq(S, o)}</button>`).join("")}</div>`;
-    }
+    const giv = givenAuras(c), rec = receivedAuras(c);
+    // case de plusieurs créatures : tableau de chacune avec ses valeurs réelles et les effets qu'elle reçoit (lisibilité des gros groupes)
+    const here = S.creatures.filter(o => SF.posKey(o) === SF.posKey(c));
+    const grid = here.length > 1 ? `<div class="casegrid"><span class="cg-h">Sur cette case (${here.length})</span>${here.map(o => {
+      const r = recLabels(receivedAuras(o));
+      return `<span class="cg-row ${SF.CREATURES[o.name].type}${o === c ? " me" : ""}"><b>${E(o.name)}</b><span class="cg-st">${icon("atq")}${SF.effAtq(S, o)} ${icon("pv")}${o.hp + SF.bonusHp(S, o)} ${icon("mobilite")}${SF.speedOf(S, o)}</span><span class="cg-fx">${r.map(l => `<i>${E(l)}</i>`).join("")}</span></span>`;
+    }).join("")}</div>` : "";
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
-      <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${posTxt(c)}</p>
-      ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${actions}</section>`;
+      <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${icon("mobilite")} vitesse ${v}${v !== vb ? ` (${vWhy.join(" ")})` : ""} · ${posTxt(c)}</p>
+      ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}
+      ${giv.length ? `<p class="aulist"><span class="lab">Donne à sa case :</span>${giv.map(x => auraChip(x, true)).join("")}</p>` : ""}
+      ${rec.length ? `<p class="aulist get"><span class="lab">Reçoit :</span>${rec.map(x => auraChip(x, true)).join("")}</p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${grid}</section>`;
   }
 
   // ---------------------------------------------------------------- panneaux
@@ -4063,16 +4161,19 @@ if (typeof module !== "undefined") module.exports = IA;
       const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
       if (sh) { // mots-clés seulement, le détail au survol (comme les tuiles)
         const capLab = b.cap ? (FX_LABEL[b.cap] ? FX_LABEL[b.cap]() : [b.capName]) : [];
+        // soutiens : chaque aura donnée par une amélioration a sa pastille (icône + effet), comme la capacité (Oni, 10/11/2026)
+        const ua = b.type === "soutien" ? upAuras() : [], uaFrom = new Set(ua.map(x => x.from));
         const chips = capLab.map(l => `<span class="cap" tabindex="0" data-tip="${E(b.capName + " : " + b.capText)}">${icon(capIcon(b.cap))}${E(l)}</span>`).join("")
-          + acquiredUps(b.type).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon("palier")}${E(n)}</span>`).join("");
+          + ua.map(x => `<span class="cap" tabindex="0" data-tip="${E(`${x.name} (${x.from}) : ${x.fx}${x.self ? ", lui compris" : ""} pour les autres créatures de sa case`)}">${icon(x.icon)}${E(x.labs.join(" "))}</span>`).join("")
+          + acquiredUps(b.type).filter(([n]) => !uaFrom.has(n)).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon(n === "Mobilité" ? "mobilite" : "palier")}${E(n === "Mobilité" ? "+1 VIT" : n)}</span>`).join("");
         return `<button data-a="card" data-uid="${c.uid}" class="ccard sh ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
           <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
-          <span class="stats"><span class="st atq">${icon("atq")}${b.type === "soutien" ? 0 : atq}</span><span class="st pv">${icon("pv")}${pv}</span></span>${chips ? `<span class="caps">${chips}</span>` : ""}</button>`;
+          <span class="stats"><span class="st atq">${icon("atq")}${b.type === "soutien" ? 0 : atq}</span><span class="st pv">${icon("pv")}${pv}</span><span class="st vit" title="Vitesse de base">${icon("mobilite")}${SF.baseSpeed(c)}</span></span>${chips ? `<span class="caps">${chips}</span>` : ""}</button>`;
       }
       const ups = acquiredUps(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
       return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
         <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
-        <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""}</span>
+        <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""} · ${icon("mobilite")} vitesse ${SF.baseSpeed(c)}</span>
         ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
     }).join("")}</div>`;
   }

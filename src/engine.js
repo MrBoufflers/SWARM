@@ -109,14 +109,14 @@ const SF = (() => {
     { min: 21, n: [4, 3, 3], cap: 5 },
   ];
   const TREES = {
-    aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 déplacement."],
+    aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 vitesse."],
       A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 2 cartes de niveau 1 gratuites en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "+1 PV. Insensibles aux Épines."], B1: ["Provocation", "Les tirs visant une autre créature de sa case visent ce tank. −1 dégât des tourelles."],
       A2: ["Blindage", "+2 PV. −1 dégât des tourelles."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au tour suivant, là où il est mort."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
-    soutien: { A1: ["Mue", "Aura Mobilité 1 et Aura +1 PV."], B1: ["Griffes", "Aura +1 ATQ et Aura Mobilité 1."],
+    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura +1 PV."], B1: ["Griffes", "Aura +1 ATQ et Aura Mobilité 1 (+1 vitesse)."],
       A2: ["Régénération", "Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
