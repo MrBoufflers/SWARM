@@ -1851,8 +1851,10 @@ const SF = (() => {
     // un soutien (ou un groupe de soutiens) qui accompagne une autre créature restée sur place reste avec elle, au lieu
     // d'avancer seul (Oni, 09/11/2026 : les soutiens partaient dans la brèche et cessaient de la renforcer)
     if (isSoutien(c) && caseMates(S, c).some(o => !isSoutien(o) && (o.acted || o.struck || !pathCells(S, o).length))) { c.acted = true; return; }
-    // avance avec son bloc, puis seule (ou avec les plus rapides) tant qu'il lui reste des déplacements
-    for (let i = 0; i < 6 && !c.struck && !c.acted; i++) {
+    // avance avec son bloc, puis seule (ou avec les plus rapides) tant qu'il lui reste des déplacements ; une créature que le
+    // joueur a déjà déplacée ce tour garde la case choisie (le déplacement est un maximum, Oni 10/11/2026)
+    const manual = !!c.moved;
+    for (let i = 0; i < 6 && !manual && !c.struck && !c.acted; i++) {
       const p = pathCells(S, c);
       if (!p.length || !moveCreature(S, c.id, p[p.length - 1].u, p[p.length - 1].k)) break;
     }
@@ -4500,6 +4502,11 @@ if (typeof module !== "undefined") module.exports = IA;
         const id = Number(d.id);
         // attaques (Oni, 07/11/2026) : toucher une créature qui peut agir la choisit (cases de son chemin, puis cibles)
         const cr = S.creatures.find(o => o.id === id);
+        // créature choisie : toucher un jeton posé sur une case de son chemin l'y déplace (Oni, 10/11/2026 : sinon, une case
+        // de passage occupée ne pouvait pas être choisie et la créature allait forcément au bout de son déplacement)
+        const mover = S.phase === "A_attack" && S.view === "essaim" && UI.selCreature !== id ? S.creatures.find(o => o.id === UI.selCreature && !o.acted) : null;
+        const R = mover && cr ? SF.reachable(S, mover)[SF.posKey(cr)] : null;
+        if (R) { const mid = mover.id; return play("move", { id: mid, u: R.u, k: R.k }, () => { const c = S.creatures.find(o => o.id === mid); if (!c || !SF.canAct(S, c)) UI.selCreature = null; }); }
         if (S.phase === "A_attack" && S.view === "essaim" && cr && SF.canAct(S, cr)) { UI.pop = null; UI.selCreature = UI.selCreature === id ? null : id; break; }
         if (S.phase === "A_attack") { UI.pop = UI.pop === id ? null : id; break; }
         if (UI.selCreature === id) { UI.selCreature = null; UI.pop = null; break; }

@@ -672,8 +672,10 @@ const SF = (() => {
     // un soutien (ou un groupe de soutiens) qui accompagne une autre créature restée sur place reste avec elle, au lieu
     // d'avancer seul (Oni, 09/11/2026 : les soutiens partaient dans la brèche et cessaient de la renforcer)
     if (isSoutien(c) && caseMates(S, c).some(o => !isSoutien(o) && (o.acted || o.struck || !pathCells(S, o).length))) { c.acted = true; return; }
-    // avance avec son bloc, puis seule (ou avec les plus rapides) tant qu'il lui reste des déplacements
-    for (let i = 0; i < 6 && !c.struck && !c.acted; i++) {
+    // avance avec son bloc, puis seule (ou avec les plus rapides) tant qu'il lui reste des déplacements ; une créature que le
+    // joueur a déjà déplacée ce tour garde la case choisie (le déplacement est un maximum, Oni 10/11/2026)
+    const manual = !!c.moved;
+    for (let i = 0; i < 6 && !manual && !c.struck && !c.acted; i++) {
       const p = pathCells(S, c);
       if (!p.length || !moveCreature(S, c.id, p[p.length - 1].u, p[p.length - 1].k)) break;
     }

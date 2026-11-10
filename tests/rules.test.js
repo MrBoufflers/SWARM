@@ -1239,6 +1239,15 @@ const fresh = () => {
   SF.setRng(Math.random);
   ok(G.winner && refus === 0, `IA contre IA : partie terminée (victoire ${G.winner}, manche ${G.round}, ${n} actions, ${refus} coup refusé)`);
 }
+// 68. déplacement = maximum (Oni, 10/11/2026) : une créature de vitesse 2 peut s'arrêter après 1 case, et « Tout résoudre »
+// ne la fait pas repartir ; une créature qui n'a pas bougé avance toujours au maximum
+{
+  const S = SF.newGame(); S.phase = "A_attack"; S.tiles = {};
+  S.creatures = [{ id: 1, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1 }, { id: 2, name: "Massacreur", lane: "E", u: 0, k: 4, hp: 1 }];
+  ok(SF.apply(S, "essaim", "move", { id: 1, u: 0, k: 3 }) === "" && S.creatures[0].k === 3, "vitesse 2 : arrêt après 1 case possible");
+  SF.apply(S, "essaim", "actAll", {});
+  ok(S.creatures[0].k === 3 && S.creatures[1].k === 2, "Tout résoudre : la créature déjà déplacée garde sa case, l'autre avance de 2");
+}
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
   const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");

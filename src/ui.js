@@ -1080,6 +1080,11 @@
         const id = Number(d.id);
         // attaques (Oni, 07/11/2026) : toucher une créature qui peut agir la choisit (cases de son chemin, puis cibles)
         const cr = S.creatures.find(o => o.id === id);
+        // créature choisie : toucher un jeton posé sur une case de son chemin l'y déplace (Oni, 10/11/2026 : sinon, une case
+        // de passage occupée ne pouvait pas être choisie et la créature allait forcément au bout de son déplacement)
+        const mover = S.phase === "A_attack" && S.view === "essaim" && UI.selCreature !== id ? S.creatures.find(o => o.id === UI.selCreature && !o.acted) : null;
+        const R = mover && cr ? SF.reachable(S, mover)[SF.posKey(cr)] : null;
+        if (R) { const mid = mover.id; return play("move", { id: mid, u: R.u, k: R.k }, () => { const c = S.creatures.find(o => o.id === mid); if (!c || !SF.canAct(S, c)) UI.selCreature = null; }); }
         if (S.phase === "A_attack" && S.view === "essaim" && cr && SF.canAct(S, cr)) { UI.pop = null; UI.selCreature = UI.selCreature === id ? null : id; break; }
         if (S.phase === "A_attack") { UI.pop = UI.pop === id ? null : id; break; }
         if (UI.selCreature === id) { UI.selCreature = null; UI.pop = null; break; }
