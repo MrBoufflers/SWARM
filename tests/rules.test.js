@@ -1262,6 +1262,14 @@ const fresh = () => {
     "le Colosse choisi revient là où il est mort");
   ok(S.phase === "A_start" && !S.reincQueue.length && S.piles[1].filter(x => x === "Carapace").length === n2 + 1, "la Carapace retourne dans la pioche, le tour continue");
 }
+// 70. Nuke et Réincarnation (Oni, 10/11/2026) : les tanks détruits par la Nuke peuvent revenir
+{
+  const S = SF.newGame(); S.upgrades.tank.r2 = "C"; S.reincQueue = [];
+  S.creatures = [{ id: 1, name: "Béhémoth", lane: "S", u: 0, k: 2, hp: 5 }, { id: 2, name: "Ravageur", lane: "S", u: 0, k: 2, hp: 1 }];
+  S.floors = 8; S.rocketPts = 0; S.workersBase = 40; S.phase = "D_main";
+  SF.apply(S, "colonie", "build", {});
+  ok(S.floors >= 9 && !S.creatures.length && S.reincQueue.length === 1 && S.reincQueue[0].name === "Béhémoth", "Nuke : le Béhémoth est mis de côté pour la Réincarnation, le Ravageur part en pioche");
+}
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
   const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");

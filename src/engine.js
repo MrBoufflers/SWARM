@@ -1270,7 +1270,12 @@ const SF = (() => {
       if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
       if (S.floors === 9) {
         fx(S, { t: "nuke", ids: S.creatures.map(c => c.id) });
-        for (const c of S.creatures) toPile(S, c.name);
+        // Réincarnation (Oni, 10/11/2026) : les tanks détruits par la Nuke sont mis de côté comme les autres tanks morts
+        const reinc = S.upgrades.tank.r2 === "C";
+        for (const c of S.creatures) {
+          if (reinc && CREATURES[c.name].type === "tank") { S.reincQueue = S.reincQueue || []; S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u, k: c.k }); }
+          else toPile(S, c.name);
+        }
         for (const l of [1, 2, 3]) shuffle(S.piles[l]);
         log(S, "colonie", `Palier 9 · Nuke : ${S.creatures.length} créature${S.creatures.length > 1 ? "s" : ""} détruite${S.creatures.length > 1 ? "s" : ""}.`);
         S.creatures = [];
