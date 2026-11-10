@@ -4,6 +4,14 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.14 — 10 novembre 2026
+
+**Règles (Oni)**
+- **Réincarnation** : tous les tanks morts depuis le dernier tour de l'essaim (Nuke comprise) sont mis de côté ; au début de son tour, un seul revient d'office, s'il y en a plusieurs l'essaim choisit lequel (là où il est mort). Les autres retournent dans la pioche. Avant : seul le premier tank mort pouvait revenir.
+
+**Corrections**
+- **Déplacements** : ce sont des maximums ; « Tout résoudre » ne fait plus repartir une créature déjà déplacée ce tour.
+
 ## v0.5.13 — 10 novembre 2026
 
 **Interface (Oni)**
