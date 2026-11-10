@@ -114,7 +114,7 @@ const SF = (() => {
       B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "+1 PV. Insensibles aux Épines."], B1: ["Provocation", "Les tirs visant une autre créature de sa case visent ce tank. −1 dégât des tourelles."],
-      A2: ["Blindage", "+2 PV. −1 dégât des tourelles."], C2: ["Réincarnation", "Une fois par tour, un tank mort revient au tour suivant, là où il est mort."],
+      A2: ["Blindage", "+2 PV. −1 dégât des tourelles."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
       B2: ["Masse vivante", "+1 PV par autre créature sur sa case."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura +1 PV."], B1: ["Griffes", "Aura +1 ATQ et Aura Mobilité 1 (+1 vitesse)."],
       A2: ["Régénération", "Aura Soin 2."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
@@ -202,7 +202,7 @@ const SF = (() => {
       spellDeck: [], spellDiscard: [], spells: [],
       alloc: { N: 0, E: 0, S: 0, O: 0 }, extraPts: 0, cadence: false, firedSupports: [],
       biomass: 5, budget: 0, reserve: 0, famine: 0, startHand: true, // départ : 5 biomasse (Oni, 04/11/2026 ; avant 3)
-      piles: { 1: [], 2: [], 3: [] }, handA: [], creatures: [], reincQueue: [], reincUsed: false, raidUsed: false,
+      piles: { 1: [], 2: [], 3: [] }, handA: [], creatures: [], reincQueue: [], raidUsed: false,
       upgrades: { aggro: { r1: null, r2: null }, tank: { r1: null, r2: null }, soutien: { r1: null, r2: null } }, invest: {},
       stase: [], log: [],
     };
@@ -424,10 +424,12 @@ const SF = (() => {
       S.creatures.splice(S.creatures.indexOf(c), 1);
       fx(S, { t: "die", id: c.id });
       log(S, "colonie", `${c.name} est détruit.`);
-      if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "C" && !S.reincUsed) {
-        S.reincUsed = true;
-        S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u, k: c.k }); // revient là où il est mort (Oni, 07/11/2026)
-        log(S, "essaim", `Réincarnation : ${c.name} reviendra au début du prochain tour de l'essaim.`);
+      // Réincarnation (Oni, 10/11/2026) : chaque tank mort est mis de côté ; au début de son tour, l'essaim choisit celui qui
+      // revient (là où il est mort, Oni 07/11/2026), les autres retournent dans leur pioche (avant : le premier mort seulement)
+      if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "C") {
+        if (!S.reincQueue) S.reincQueue = [];
+        S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u, k: c.k });
+        log(S, "essaim", `Réincarnation : ${c.name} pourra revenir au début du prochain tour de l'essaim.`);
       } else {
         toPile(S, c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
       }
@@ -796,19 +798,25 @@ const SF = (() => {
 
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
-    S.phase = "A_start"; S.raidUsed = false; S.reincUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
+    S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
-    // Réincarnation
-    for (const r of S.reincQueue) {
-      // là où il est mort (Oni, 07/11/2026) ; si un bâtiment occupe désormais cette case, à l'entrée de sa colonne
-      const k = r.k && r.k < 4 && !S.tiles[key(...toGlobal(r.lane, r.u, r.k))] ? r.k : 4;
-      const nc = makeCreature(S, r.name, r.lane, r.u, { k });
-      S.creatures.push(nc);
-      fx(S, { t: "reinc", id: nc.id });
-      log(S, "essaim", `${r.name} se réincarne ${k === 4 ? "à l'entrée de la lane " + LANE_NAME[r.lane] : "là où il est mort (" + LANE_NAME[r.lane] + " " + cellName(r.u, k) + ")"}.`);
-    }
-    S.reincQueue = [];
+    // Réincarnation : un seul tank mort → il revient ; plusieurs → l'essaim choisit (étape A_reinc, action reinc)
+    S.reincQueue = S.reincQueue || [];
+    if (S.reincQueue.length === 1) reincarnate(S, 0);
+    else if (S.reincQueue.length > 1) S.phase = "A_reinc";
     S.famine = 0;
+  }
+  function reincarnate(S, i) {
+    const q = S.reincQueue || [], r = q[i]; if (!r) return false;
+    // là où il est mort (Oni, 07/11/2026) ; si un bâtiment occupe désormais cette case, à l'entrée de sa colonne
+    const k = r.k && r.k < 4 && !S.tiles[key(...toGlobal(r.lane, r.u, r.k))] ? r.k : 4;
+    const nc = makeCreature(S, r.name, r.lane, r.u, { k });
+    S.creatures.push(nc);
+    fx(S, { t: "reinc", id: nc.id });
+    log(S, "essaim", `${r.name} se réincarne ${k === 4 ? "à l'entrée de la lane " + LANE_NAME[r.lane] : "là où il est mort (" + LANE_NAME[r.lane] + " " + cellName(r.u, k) + ")"}.`);
+    q.forEach((o, j) => { if (j !== i) { toPile(S, o.name); shuffle(S.piles[CREATURES[o.name].lvl]); log(S, "essaim", `${o.name} retourne dans la pioche.`); } });
+    S.reincQueue = [];
+    return true;
   }
   function attackerDraw(S) {
     const t = TIERS[tier(S)];
@@ -1331,6 +1339,7 @@ const SF = (() => {
   // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
     if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
+    delete S.reincUsed; // Réincarnation au choix (v0.5.14)
     if (S.killed === undefined) S.killed = 0;
     // v0.5 : Hurleur et Catalyseur changent de niveau, donc de pioche
     if (S.piles && S.piles[1]) for (const l of [1, 2, 3]) {
@@ -1376,7 +1385,7 @@ const SF = (() => {
   // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
   // vérifie le camp, la phase et les paramètres, puis appelle les fonctions de règles ci-dessus.
   // Les transitions de phase qui vivaient dans l'interface (fenêtres Famine / Réaction, passage aux tirs) sont ici.
-  const PHASE_SIDE = { D_spell: "colonie", D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
+  const PHASE_SIDE = { A_reinc: "essaim", D_spell: "colonie", D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
   const actor = S => PHASE_SIDE[S.phase] || null;
   const isInt = v => Number.isInteger(v);
   const isLane = l => LANES.includes(l);
@@ -1403,6 +1412,8 @@ const SF = (() => {
       if (a.play) { const i = S.spells.indexOf("Famine"); if (i >= 0) useSpell(S, i, null); }
       return true;
     } },
+    // Réincarnation : l'essaim choisit le tank qui revient (Oni, 10/11/2026) ; ensuite, fenêtre Famine éventuelle
+    reinc: { phase: ["A_reinc"], run(S, a) { if (!isInt(a.i) || !reincarnate(S, a.i)) return false; S.phase = "A_start"; openFamine(S); return true; } },
     draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } }, // pioche au hasard (premier tour, tests)
     pickOne: { phase: ["A_start"], run: (S, a) => isInt(a.l) && pickOne(S, a.l) }, // une carte dans la pile choisie
     teleport: { phase: ["A_deploy"], run: (S, a) => isInt(a.id) && isLane(a.lane) && isInt(a.u) && teleport(S, a.id, a.lane, a.u) },

@@ -1248,6 +1248,20 @@ const fresh = () => {
   SF.apply(S, "essaim", "actAll", {});
   ok(S.creatures[0].k === 3 && S.creatures[1].k === 2, "Tout résoudre : la créature déjà déplacée garde sa case, l'autre avance de 2");
 }
+// 69. Réincarnation au choix (Oni, 10/11/2026) : tous les tanks morts sont mis de côté ; un seul revient tout seul,
+// plusieurs → l'essaim choisit au début de son tour, les autres retournent dans la pioche
+{
+  const S = SF.newGame(); S.upgrades.tank.r2 = "C"; S.tiles = {}; S.phase = "D_fire";
+  S.creatures = [{ id: 1, name: "Carapace", lane: "N", u: 0, k: 3, hp: 0 }, { id: 2, name: "Colosse", lane: "E", u: 1, k: 2, hp: 0 }];
+  SF.killCheck(S);
+  ok(S.reincQueue.length === 2 && !S.creatures.length, "Réincarnation : les deux tanks morts sont mis de côté");
+  const n2 = S.piles[1].filter(x => x === "Carapace").length;
+  SF.apply(S, "colonie", "endD", {});
+  ok(S.phase === "A_reinc" && SF.actor(S) === "essaim", "début du tour de l'essaim : choix du tank (étape Réincarnation)");
+  ok(SF.apply(S, "essaim", "reinc", { i: 1 }) === "" && S.creatures.length === 1 && S.creatures[0].name === "Colosse" && S.creatures[0].k === 2,
+    "le Colosse choisi revient là où il est mort");
+  ok(S.phase === "A_start" && !S.reincQueue.length && S.piles[1].filter(x => x === "Carapace").length === n2 + 1, "la Carapace retourne dans la pioche, le tour continue");
+}
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
   const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");
