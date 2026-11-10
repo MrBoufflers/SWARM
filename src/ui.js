@@ -58,6 +58,7 @@
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
+    A_reinc: ["essaim", "Réincarnation", "Plusieurs tanks sont morts depuis votre dernier tour : choisissez celui qui revient, là où il est mort. Les autres retournent dans la pioche."],
     A_start: ["essaim", "Tour de l'essaim", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe seulement le nombre total de cartes."],
     A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane ; un soutien peut être parachuté sur n'importe quelle case libre) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
@@ -352,6 +353,9 @@
     const ph = S.phase;
     if (ph === "A_famine") {
       acts = `<button data-a="famine" data-v="1" class="primary">Jouer Famine</button><button data-a="famine" data-v="0">Ne pas jouer</button>`;
+    } else if (ph === "A_reinc") { // Réincarnation au choix (Oni, 10/11/2026)
+      body = `<p class="hint">Réincarnation : choisissez le tank qui revient (les autres retournent dans la pioche).</p>`;
+      acts = (S.reincQueue || []).map((r, i) => `<button data-a="reinc" data-i="${i}"${i ? "" : ` class="primary"`}>${E(r.name)} · ${E(posTxt(r))}</button>`).join("");
     } else if (ph === "A_start" && S.startHand) {
       acts = `<button data-a="draw" class="primary">Recevoir la main de départ</button>`;
     } else if (ph === "A_start") {
@@ -818,7 +822,7 @@
     colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_fire", "Tirs"]], // « Pose » retirée (construction immédiate, v0.5.8)
   };
   function pcSteps(side) {
-    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase === "D_spell" ? "D_fire" : S.phase;
+    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" || S.phase === "A_reinc" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase === "D_spell" ? "D_fire" : S.phase;
     const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
     const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
@@ -1080,12 +1084,18 @@
         const id = Number(d.id);
         // attaques (Oni, 07/11/2026) : toucher une créature qui peut agir la choisit (cases de son chemin, puis cibles)
         const cr = S.creatures.find(o => o.id === id);
+        // créature choisie : toucher un jeton posé sur une case de son chemin l'y déplace (Oni, 10/11/2026 : sinon, une case
+        // de passage occupée ne pouvait pas être choisie et la créature allait forcément au bout de son déplacement)
+        const mover = S.phase === "A_attack" && S.view === "essaim" && UI.selCreature !== id ? S.creatures.find(o => o.id === UI.selCreature && !o.acted) : null;
+        const R = mover && cr ? SF.reachable(S, mover)[SF.posKey(cr)] : null;
+        if (R) { const mid = mover.id; return play("move", { id: mid, u: R.u, k: R.k }, () => { const c = S.creatures.find(o => o.id === mid); if (!c || !SF.canAct(S, c)) UI.selCreature = null; }); }
         if (S.phase === "A_attack" && S.view === "essaim" && cr && SF.canAct(S, cr)) { UI.pop = null; UI.selCreature = UI.selCreature === id ? null : id; break; }
         if (S.phase === "A_attack") { UI.pop = UI.pop === id ? null : id; break; }
         if (UI.selCreature === id) { UI.selCreature = null; UI.pop = null; break; }
         UI.selCreature = id; UI.pop = id; break;
       }
       case "popClose": UI.pop = null; break;
+      case "reinc": return play("reinc", { i: Number(d.i) });
       case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
       case "spellCancel": UI.spell = null; UI.picks = []; UI.recoHand = null; break;

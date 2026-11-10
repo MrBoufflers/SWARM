@@ -1239,6 +1239,37 @@ const fresh = () => {
   SF.setRng(Math.random);
   ok(G.winner && refus === 0, `IA contre IA : partie terminée (victoire ${G.winner}, manche ${G.round}, ${n} actions, ${refus} coup refusé)`);
 }
+// 68. déplacement = maximum (Oni, 10/11/2026) : une créature de vitesse 2 peut s'arrêter après 1 case, et « Tout résoudre »
+// ne la fait pas repartir ; une créature qui n'a pas bougé avance toujours au maximum
+{
+  const S = SF.newGame(); S.phase = "A_attack"; S.tiles = {};
+  S.creatures = [{ id: 1, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1 }, { id: 2, name: "Massacreur", lane: "E", u: 0, k: 4, hp: 1 }];
+  ok(SF.apply(S, "essaim", "move", { id: 1, u: 0, k: 3 }) === "" && S.creatures[0].k === 3, "vitesse 2 : arrêt après 1 case possible");
+  SF.apply(S, "essaim", "actAll", {});
+  ok(S.creatures[0].k === 3 && S.creatures[1].k === 2, "Tout résoudre : la créature déjà déplacée garde sa case, l'autre avance de 2");
+}
+// 69. Réincarnation au choix (Oni, 10/11/2026) : tous les tanks morts sont mis de côté ; un seul revient tout seul,
+// plusieurs → l'essaim choisit au début de son tour, les autres retournent dans la pioche
+{
+  const S = SF.newGame(); S.upgrades.tank.r2 = "C"; S.tiles = {}; S.phase = "D_fire";
+  S.creatures = [{ id: 1, name: "Carapace", lane: "N", u: 0, k: 3, hp: 0 }, { id: 2, name: "Colosse", lane: "E", u: 1, k: 2, hp: 0 }];
+  SF.killCheck(S);
+  ok(S.reincQueue.length === 2 && !S.creatures.length, "Réincarnation : les deux tanks morts sont mis de côté");
+  const n2 = S.piles[1].filter(x => x === "Carapace").length;
+  SF.apply(S, "colonie", "endD", {});
+  ok(S.phase === "A_reinc" && SF.actor(S) === "essaim", "début du tour de l'essaim : choix du tank (étape Réincarnation)");
+  ok(SF.apply(S, "essaim", "reinc", { i: 1 }) === "" && S.creatures.length === 1 && S.creatures[0].name === "Colosse" && S.creatures[0].k === 2,
+    "le Colosse choisi revient là où il est mort");
+  ok(S.phase === "A_start" && !S.reincQueue.length && S.piles[1].filter(x => x === "Carapace").length === n2 + 1, "la Carapace retourne dans la pioche, le tour continue");
+}
+// 70. Nuke et Réincarnation (Oni, 10/11/2026) : les tanks détruits par la Nuke peuvent revenir
+{
+  const S = SF.newGame(); S.upgrades.tank.r2 = "C"; S.reincQueue = [];
+  S.creatures = [{ id: 1, name: "Béhémoth", lane: "S", u: 0, k: 2, hp: 5 }, { id: 2, name: "Ravageur", lane: "S", u: 0, k: 2, hp: 1 }];
+  S.floors = 8; S.rocketPts = 0; S.workersBase = 40; S.phase = "D_main";
+  SF.apply(S, "colonie", "build", {});
+  ok(S.floors >= 9 && !S.creatures.length && S.reincQueue.length === 1 && S.reincQueue[0].name === "Béhémoth", "Nuke : le Béhémoth est mis de côté pour la Réincarnation, le Ravageur part en pioche");
+}
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
   const journal = require("fs").readFileSync(require("path").join(__dirname, "../docs/versions.md"), "utf8");

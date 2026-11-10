@@ -295,6 +295,11 @@ const IA = (() => {
     try {
       switch (V.phase) {
         case "A_famine": return { type: "famine", args: { play: V.spells.includes("Famine") } };
+        case "A_reinc": { // Réincarnation : le tank de plus haut niveau, puis le plus proche de la fusée
+          const q = V.reincQueue || [], lv = r => E.CREATURES[r.name].lvl;
+          let i = 0; q.forEach((r, j) => { if (lv(r) > lv(q[i]) || (lv(r) === lv(q[i]) && r.k < q[i].k)) i = j; });
+          return { type: "reinc", args: { i } };
+        }
         case "A_start": { // pioche carte par carte : la pile la plus haute encore prévue par le plan
           if (V.startHand) return { type: "draw" };
           const plan = swarmPick(V).args.n, got = [1, 2, 3].map(l => V.handA.filter(c => V.pickTotal != null && c.name && E.CREATURES[c.name].lvl === l).length);
@@ -325,6 +330,7 @@ const IA = (() => {
   function fallback(S, side) {
     switch (S.phase) {
       case "A_famine": return { type: "famine", args: { play: false } };
+      case "A_reinc": return { type: "reinc", args: { i: 0 } };
       case "A_start": {
         if (S.startHand) return { type: "draw" };
         return { type: "pickOne", args: { l: [1, 2, 3].find(l => S.piles[l].length > 0) } };
