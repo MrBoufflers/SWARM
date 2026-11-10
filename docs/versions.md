@@ -4,6 +4,17 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.13 — 10 novembre 2026
+
+**Interface (Oni)**
+- **Cartes de créatures en main** plus basses (écran PC) : petite image à gauche, capacités en pastilles sur le côté.
+- **Vitesse de base** (1 ou 2) affichée sur chaque carte de créature et sur sa fiche (vitesse réelle détaillée).
+- **Auras des améliorations** (Mue, Griffes, Régénération, Corrosion) : une pastille chacune ; l'Aura Mobilité 1 a son icône et s'écrit « +1 VIT » / « +1 vitesse ».
+- **Fiche de créature** : auras données et reçues (effet total si plusieurs sources : Mobilité 1 ×3 → +3 vitesse), et tableau « Sur cette case » (ATQ, PV, vitesse et effets de chaque créature).
+
+**IA de la colonie**
+- Construit beaucoup plus (bâtiments, coins pour les supports II et III, technologies) au lieu de tout mettre dans la fusée ; joue Renouvellement et Double bouclier.
+
 ## v0.5.12 — 9 novembre 2026
 
 **Règles (Oni)**

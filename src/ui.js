@@ -610,7 +610,6 @@
   const FX_LABEL = {
     soin: () => ["+2 HEAL"], fureur: () => ["+1 ATQ", "+1 DEF"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
-    mue: () => ["+1 MOV", "+1 DEF"], griffes: () => ["+1 ATQ", "+1 MOV"], regeneration: () => ["+2 HEAL"], frenesie: () => ["×2 ATQ"], corrosion: () => ["CORROSION"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
   function sumLabels(list) {
@@ -618,53 +617,86 @@
     for (const l of list) { const m = /^\+(\d+) (.+)$/.exec(l); if (m) n[m[2]] = (n[m[2]] || 0) + Number(m[1]); else if (!other.includes(l)) other.push(l); }
     return [...Object.entries(n).map(([u, v]) => `+${v} ${u}`), ...other];
   }
-  // effets donnés par un soutien : sa capacité (si c'est une aura) et les améliorations de soutien acquises
-  function givenLabels(c) {
-    const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return [];
-    const out = AURA_CAPS.includes(b.cap) ? FX_LABEL[b.cap]() : [];
-    const u = S.upgrades.soutien;
-    for (const r of ["r1", "r2"]) if (u[r] && UP_AURA[r][u[r]]) out.push(...FX_LABEL[UP_AURA[r][u[r]]]());
+  // Auras (Oni, 10/11/2026) : une liste unique — la capacité du soutien (si c'est une aura) et chaque aura donnée par les
+  // améliorations de soutien acquises (Mue, Griffes, Régénération, Corrosion), chacune avec son icône et son effet court.
+  // self : l'aura profite aussi au soutien qui la donne (Aura Mobilité 1, moteur : speedOf).
+  const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
+  const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+1 ATQ et +1 PV", butin: "+1 biomasse par bâtiment détruit", percee: "Percée",
+    cuirasse: "insensible aux Épines", spores: "2 dégâts autour de la cible" };
+  const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
+  const UP_AURAS = {
+    A1: [MOB, { icon: "pv", name: "Aura +1 PV", labs: ["+1 DEF"], fx: "+1 PV" }],
+    B1: [{ icon: "atq", name: "Aura +1 ATQ", labs: ["+1 ATQ"], fx: "+1 ATQ" }, MOB],
+    A2: [{ icon: "regeneration", name: "Aura Soin 2", labs: ["+2 HEAL"], fx: "+2 PV en fin de tour" }],
+    B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
+  };
+  function upAuras() { // auras données par chaque soutien grâce aux améliorations, avec le nom de l'amélioration
+    const u = S.upgrades.soutien, out = [];
+    for (const r of ["r1", "r2"]) if (u[r] && UP_AURAS[u[r] + r[1]]) for (const x of UP_AURAS[u[r] + r[1]]) out.push({ ...x, from: SF.TREES.soutien[u[r] + r[1]][0] });
     return out;
   }
+  function capAura(name) {
+    const b = SF.CREATURES[name];
+    return AURA_CAPS.includes(b.cap) ? { icon: capIcon(b.cap), name: b.capName, labs: FX_LABEL[b.cap](), fx: CAP_FX[b.cap], from: name } : null;
+  }
+  function givenAuras(c) { // auras que ce soutien donne aux autres créatures de sa case
+    if (SF.CREATURES[c.name].type !== "soutien") return [];
+    const own = capAura(c.name);
+    return [...(own ? [own] : []), ...upAuras()];
+  }
+  function receivedAuras(c) { // auras dont cette créature profite, regroupées (n = nombre de sources)
+    const all = SF.caseMates(S, c).flatMap(givenAuras);
+    if (SF.CREATURES[c.name].type === "soutien") all.push(...upAuras().filter(x => x.self));
+    // un soutien n'attaque pas : les effets d'attaque reçus (ATQ, Percée, Butin, Spores, Corrosion, Cuirasse) ne le concernent pas
+    const atk = SF.attacks(c), ATK_ONLY = ["percee", "biomasse", "spores", "corrosion", "renforce", "atq"];
+    const g = new Map();
+    for (let x of all) {
+      if (!atk) { if (ATK_ONLY.includes(x.icon)) continue; x = { ...x, labs: x.labs.filter(l => !/ATQ$/.test(l)) }; }
+      const k = x.name + "|" + x.from;
+      if (g.has(k)) g.get(k).n++; else g.set(k, { ...x, n: 1 });
+    }
+    return [...g.values()];
+  }
+  const recLabels = rec => sumLabels(rec.flatMap(x => Array.from({ length: x.n }, () => x.labs).flat()));
+  const auraName = x => `${x.name}${x.n > 1 ? " ×" + x.n : ""}${x.from && x.from !== x.name ? ` (${x.from})` : ""}`;
   // aura d'une créature (jetons) : un soutien qui en donne une (icône blanche), ou une créature qui en profite (icône violette)
-  const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
-  const UP_AURA = { r1: { A: "mue", B: "griffes" }, r2: { A: "regeneration", B: "corrosion" } };
-  function auraGiven(c) { // icône et nom de l'aura donnée par ce soutien, ou null
-    const b = SF.CREATURES[c.name]; if (b.type !== "soutien") return null;
-    if (AURA_CAPS.includes(b.cap)) return { icon: capIcon(b.cap), name: b.capName };
-    const u = S.upgrades.soutien;
-    for (const r of ["r1", "r2"]) if (u[r] && UP_AURA[r][u[r]]) return { icon: UP_AURA[r][u[r]], name: SF.TREES.soutien[u[r] + r[1]][0] };
-    return null;
-  }
   function auraOf(c) {
-    const g = auraGiven(c);
-    if (g) return { kind: "give", icon: g.icon, txt: `donne : ${g.name}`, lab: sumLabels(givenLabels(c)) };
-    const got = SF.caseMates(S, c).map(auraGiven).filter(Boolean);
-    if (!got.length) return null;
-    const icons = [...new Set(got.map(x => x.icon))];
-    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: `profite de : ${[...new Set(got.map(x => x.name))].join(", ")}`,
-      lab: sumLabels(SF.caseMates(S, c).flatMap(givenLabels)) };
+    const giv = givenAuras(c), rec = receivedAuras(c);
+    const recTxt = rec.length ? `profite de : ${rec.map(auraName).join(", ")}` : "";
+    if (giv.length) {
+      const icons = [...new Set(giv.map(x => x.icon))];
+      return { kind: "give", icon: icons.length === 1 ? icons[0] : "aura", txt: `donne : ${giv.map(x => x.name).join(", ")}${recTxt ? " · " + recTxt : ""}`,
+        lab: sumLabels(giv.flatMap(x => x.labs)) };
+    }
+    if (!rec.length) return null;
+    const icons = [...new Set(rec.map(x => x.icon))];
+    return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: recTxt, lab: recLabels(rec) };
   }
+  // effet total d'une aura reçue de n sources : « +1 vitesse » ×3 → « +3 vitesse » (Oni, 10/11/2026)
+  const fxTimes = (fx, n) => (n > 1 ? fx.replace(/\+(\d+)/g, (m, d) => "+" + d * n) : fx);
+  const auraChip = (x, pre) => `<span class="cap au-chip" tabindex="0" data-tip="${E(`${auraName(x)} : ${fxTimes(x.fx, x.n)}${x.n > 1 ? ` (${x.n} sources)` : ""}`)}">${icon(x.icon)}${E(pre ? x.name : x.labs.join(" "))}${x.n > 1 ? `<b>×${x.n}</b>` : ""}<small>${E(fxTimes(x.fx, x.n))}</small></span>`;
   function detail(id) {
     const c = S.creatures.find(o => o.id === (id === undefined ? UI.selCreature : id));
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
     const b = SF.CREATURES[c.name];
     const extras = [];
-    { const v = SF.speedOf(S, c); if (v > 1) extras.push(`${v} cases par tour (${[SF.baseSpeed(c) > 1 ? "niveau 3 : vitesse de base 2" : "", SF.hasMobility(S, c) ? "Mobilité" : "", S.upgrades.soutien.r1 === "A" && SF.caseMates(S, c).some(o => SF.CREATURES[o.name].type === "soutien") ? "Aura Mobilité (Mue)" : ""].filter(Boolean).join(" + ")})`); }
+    // vitesse (Oni, 10/11/2026) : vitesse de base (1, ou 2 au niveau 3) + Mobilité + chaque Aura Mobilité 1 reçue
+    const v = SF.speedOf(S, c), vb = SF.baseSpeed(c), mob = receivedAuras(c).filter(x => x.icon === "mobilite").reduce((a, x) => a + x.n, 0);
+    const vWhy = [`base ${vb}`, SF.hasMobility(S, c) ? "+1 Mobilité" : "", mob ? `+${mob} Aura Mobilité 1` : ""].filter(Boolean);
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
-    if (SF.caseMates(S, c).some(o => o.name === "Perforeur")) extras.push("Percée");
-    let actions = "";
-    // Frénésie : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim (cumulable)
-    if (false && b.type === "soutien" && S.upgrades.soutien.r2 === "B") { // Frénésie retirée (Corrosion, 09/11/2026)
-      const cur = SF.frenzyOf(S, c), others = S.creatures.filter(o => o !== c && SF.posKey(o) === SF.posKey(c));
-      const canSet = S.view === "essaim" && ["A_deploy", "A_upgrade", "A_attack"].includes(S.phase) && !c.acted;
-      actions += `<p>Frénésie : ${cur ? `double les dégâts ${/^[AEIOUYÉÈÊŒ]/i.test(cur.name) ? "d'" : "de "}${E(cur.name)}` : "aucune autre créature sur sa case"}.</p>`;
-      if (canSet && others.length > 1) actions += `<div class="choices"><span class="lab">Frénésie sur :</span>${others.map(o => `<button data-a="frenzy" data-id="${c.id}" data-v="${o.id}"${cur === o ? ` class="on" aria-pressed="true"` : ""}>${E(o.name)} · ATQ ${SF.effAtq(S, o)}</button>`).join("")}</div>`;
-    }
+    const giv = givenAuras(c), rec = receivedAuras(c);
+    // case de plusieurs créatures : tableau de chacune avec ses valeurs réelles et les effets qu'elle reçoit (lisibilité des gros groupes)
+    const here = S.creatures.filter(o => SF.posKey(o) === SF.posKey(c));
+    const grid = here.length > 1 ? `<div class="casegrid"><span class="cg-h">Sur cette case (${here.length})</span>${here.map(o => {
+      const r = recLabels(receivedAuras(o));
+      return `<span class="cg-row ${SF.CREATURES[o.name].type}${o === c ? " me" : ""}"><b>${E(o.name)}</b><span class="cg-st">${icon("atq")}${SF.effAtq(S, o)} ${icon("pv")}${o.hp + SF.bonusHp(S, o)} ${icon("mobilite")}${SF.speedOf(S, o)}</span><span class="cg-fx">${r.map(l => `<i>${E(l)}</i>`).join("")}</span></span>`;
+    }).join("")}</div>` : "";
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
-      <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${posTxt(c)}</p>
-      ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${actions}</section>`;
+      <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${icon("mobilite")} vitesse ${v}${v !== vb ? ` (${vWhy.join(" ")})` : ""} · ${posTxt(c)}</p>
+      ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}
+      ${giv.length ? `<p class="aulist"><span class="lab">Donne à sa case :</span>${giv.map(x => auraChip(x, true)).join("")}</p>` : ""}
+      ${rec.length ? `<p class="aulist get"><span class="lab">Reçoit :</span>${rec.map(x => auraChip(x, true)).join("")}</p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${grid}</section>`;
   }
 
   // ---------------------------------------------------------------- panneaux
@@ -711,16 +743,19 @@
       const atq = SF.baseAtq(S, c.name), pv = SF.maxHp(S, c.name);
       if (sh) { // mots-clés seulement, le détail au survol (comme les tuiles)
         const capLab = b.cap ? (FX_LABEL[b.cap] ? FX_LABEL[b.cap]() : [b.capName]) : [];
+        // soutiens : chaque aura donnée par une amélioration a sa pastille (icône + effet), comme la capacité (Oni, 10/11/2026)
+        const ua = b.type === "soutien" ? upAuras() : [], uaFrom = new Set(ua.map(x => x.from));
         const chips = capLab.map(l => `<span class="cap" tabindex="0" data-tip="${E(b.capName + " : " + b.capText)}">${icon(capIcon(b.cap))}${E(l)}</span>`).join("")
-          + acquiredUps(b.type).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon("palier")}${E(n)}</span>`).join("");
+          + ua.map(x => `<span class="cap" tabindex="0" data-tip="${E(`${x.name} (${x.from}) : ${x.fx}${x.self ? ", lui compris" : ""} pour les autres créatures de sa case`)}">${icon(x.icon)}${E(x.labs.join(" "))}</span>`).join("")
+          + acquiredUps(b.type).filter(([n]) => !uaFrom.has(n)).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon(n === "Mobilité" ? "mobilite" : "palier")}${E(n === "Mobilité" ? "+1 VIT" : n)}</span>`).join("");
         return `<button data-a="card" data-uid="${c.uid}" class="ccard sh ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
           <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
-          <span class="stats"><span class="st atq">${icon("atq")}${b.type === "soutien" ? 0 : atq}</span><span class="st pv">${icon("pv")}${pv}</span></span>${chips ? `<span class="caps">${chips}</span>` : ""}</button>`;
+          <span class="stats"><span class="st atq">${icon("atq")}${b.type === "soutien" ? 0 : atq}</span><span class="st pv">${icon("pv")}${pv}</span><span class="st vit" title="Vitesse de base">${icon("mobilite")}${SF.baseSpeed(c)}</span></span>${chips ? `<span class="caps">${chips}</span>` : ""}</button>`;
       }
       const ups = acquiredUps(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
       return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
         <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
-        <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""}</span>
+        <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""} · ${icon("mobilite")} vitesse ${SF.baseSpeed(c)}</span>
         ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
     }).join("")}</div>`;
   }

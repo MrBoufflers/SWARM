@@ -106,13 +106,36 @@ const IA = (() => {
     return best;
   }
 
+  // stratégie de la colonie (Oni, 10/11/2026) : la note de base pousse la fusée (≈ 22 par point au début) et un bâtiment
+  // n'y valait qu'une dizaine ; l'IA ne construisait qu'un bâtiment par manche. Pour ses choix de construction, la colonie
+  // ajoute donc une valeur de long terme : chaque bâtiment, les coins (supports II et III, +2 travailleurs), les
+  // travailleurs en plus et les technologies (sortilèges par tour) ; la fusée y pèse un peu moins.
+  function colonyLong(S) { // positif = bon pour la colonie
+    let v = 0;
+    const rocket = S.floors + S.rocketPts / E.floorCost(S);
+    v -= rocket * 16;
+    v += E.bonusWorkers(S) * 14 + E.spellsPerTurn(S) * 12 + E.tech(S) * 2;
+    for (const [k, t] of Object.entries(S.tiles)) if (!t.start) {
+      const near = S.creatures.some(c => { const [a, b] = E.toGlobal(c.lane, c.u, c.k), [x, y] = E.parse(k); return Math.abs(a - x) + Math.abs(b - y) <= 3; });
+      v += 9 + t.hp * 1.5 + (near ? 4 : 0);
+    }
+    for (let r = 2; r <= 3; r++) for (const sx of [1, -1]) for (const sy of [1, -1]) {
+      const x = sx * r, y = sy * r;
+      if (S.supports[E.key(x, y)]) { v += r === 3 ? 34 : 22; continue; }
+      const n = [E.key(x - sx, y), E.key(x, y - sy)].filter(k => S.tiles[k]).length;
+      v += n * (r === 3 ? 10 : 7); // une case du coin sur deux : l'autre suivra
+    }
+    return v;
+  }
   // choisit parmi des candidats { type, args } celui qui donne la meilleure note après la fin de tour simulée
-  function best(V, side, cands, finish) {
+  // (extra : valeur ajoutée, du point de vue de `side`, lue sur l'état simulé en fin de tour)
+  function best(V, side, cands, finish, extra) {
     let top = null, ts = -Infinity;
     for (const c of cands) {
       const W = clone(V);
       if (!ok(W, side, c.type, c.args)) continue;
-      const s = val(finish(W), side) - (c.cost || 0);
+      const F = finish(W);
+      const s = val(F, side) + (extra ? extra(F) : 0) - (c.cost || 0);
       if (s > ts) { ts = s; top = c; }
     }
     return { move: top, s: ts };
@@ -225,17 +248,25 @@ const IA = (() => {
         const hurt = Object.entries(V.tiles).filter(([, t]) => t.hp < t.max && !t.start).sort((a, b) => (b[1].max - b[1].hp) - (a[1].max - a[1].hp)).slice(0, 3).map(([k]) => k);
         if (hurt.length) return { type: "spell", args: { i, arg: hurt } };
       }
+      // Renouvellement : +1 point, et les tuiles de la main qui n'ont aucune case valable sont échangées
+      if (name === "Renouvellement") return { type: "spell", args: { i, arg: V.hand.map((n, j) => j).filter(j => !E.buildTargets(V, j).length) } };
+      // Double bouclier : sur les deux bâtiments sans bouclier les plus proches des créatures, dès que l'essaim approche
+      if (name === "Double bouclier" && V.creatures.filter(c => dist(c) <= 3).length >= 2) {
+        const gap = k => { const [x, y] = E.parse(k); return Math.min(...V.creatures.map(c => { const [a, b] = E.toGlobal(c.lane, c.u, c.k); return Math.abs(a - x) + Math.abs(b - y); })); };
+        const keys = Object.entries(V.tiles).filter(([, t]) => !t.shield).map(([k]) => k).sort((a, b) => gap(a) - gap(b) || V.tiles[b].hp - V.tiles[a].hp).slice(0, 2);
+        if (keys.length && gap(keys[0]) <= 2) return { type: "spell", args: { i, arg: keys } };
+      }
     }
     // chantiers : la meilleure tuile et la meilleure lane, tant que ça améliore la position
     const cands = [{ type: "build" }];
     // construction immédiate (v0.5.8) : chaque tuile de la main sur chaque case possible
     V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k } }); });
     if (cands.length === 1) return cands[0];
-    return best(V, "colonie", cands, finishColony).move || { type: "build" };
+    return best(V, "colonie", cands, finishColony, colonyLong).move || { type: "build" };
   }
   function colonyPlace(V) {
     const cands = E.placeTargets(V).map(k => ({ type: "placeAt", args: { k } }));
-    return best(V, "colonie", cands, finishColony).move || cands[0];
+    return best(V, "colonie", cands, finishColony, colonyLong).move || cands[0];
   }
   function colonyFire(V) {
     const cands = [{ type: "endD" }];
