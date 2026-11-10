@@ -4092,7 +4092,9 @@ if (typeof module !== "undefined") module.exports = IA;
     const icons = [...new Set(rec.map(x => x.icon))];
     return { kind: "get", icon: icons.length === 1 ? icons[0] : "aura", txt: recTxt, lab: recLabels(rec) };
   }
-  const auraChip = (x, pre) => `<span class="cap au-chip" tabindex="0" data-tip="${E(`${auraName(x)} : ${x.fx}`)}">${icon(x.icon)}${E(pre ? x.name : x.labs.join(" "))}${x.n > 1 ? `<b>×${x.n}</b>` : ""}<small>${E(x.fx)}</small></span>`;
+  // effet total d'une aura reçue de n sources : « +1 vitesse » ×3 → « +3 vitesse » (Oni, 10/11/2026)
+  const fxTimes = (fx, n) => (n > 1 ? fx.replace(/\+(\d+)/g, (m, d) => "+" + d * n) : fx);
+  const auraChip = (x, pre) => `<span class="cap au-chip" tabindex="0" data-tip="${E(`${auraName(x)} : ${fxTimes(x.fx, x.n)}${x.n > 1 ? ` (${x.n} sources)` : ""}`)}">${icon(x.icon)}${E(pre ? x.name : x.labs.join(" "))}${x.n > 1 ? `<b>×${x.n}</b>` : ""}<small>${E(fxTimes(x.fx, x.n))}</small></span>`;
   function detail(id) {
     const c = S.creatures.find(o => o.id === (id === undefined ? UI.selCreature : id));
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
