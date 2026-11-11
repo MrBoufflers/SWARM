@@ -1275,6 +1275,12 @@ const fresh = () => {
   const tk = B.creatures.at(-1); SF.damageCreature(B, tk, 2, "test");
   ok(tk.hp === 3 && !tk.blind, "le jeton annule la prochaine perte de PV, puis il est défaussé");
   SF.damageCreature(B, tk, 2, "test"); ok(tk.hp === 1, "ensuite, les dégâts passent");
+  const BA = SF.newGame(); const old = at(40, "Colosse", 3, 7); BA.creatures.push(old, at(41, "Écorcheur", 3, 1));
+  BA.invest = { "tank:A1": 0 }; BA.upgrades.tank.r1 = "A"; BA.invest["tank:A2"] = SF.COST_R2 - 1; BA.reserve = 5; BA.phase = "A_deploy";
+  SF.apply(BA, "essaim", "invest", { t: "tank", s: "A2", n: 1 });
+  ok(BA.upgrades.tank.r2 === "A" && old.blind === 1 && !BA.creatures[1].blind, "Blindage acheté : les tanks déjà en jeu reçoivent leur jeton");
+  const EC = SF.newGame(); EC.escaped = ["x"]; EC.phase = "D_fire"; SF.apply(EC, "colonie", "endD", {});
+  ok(EC.escaped.length === 0, "Échappée : remise à zéro au début de chaque tour");
   const M = SF.newGame(); M.supports = {}; for (const k of Object.keys(M.tiles)) delete M.tiles[k]; M.upgrades.tank.r1 = "A";
   M.tiles["0,1"] = SF.tileStats("Mine majeure", 0, 1); const c = at(20, "Carapace", 2, 4); M.creatures.push(c);
   SF.hitTile(M, c, "0,1", 1, true);
