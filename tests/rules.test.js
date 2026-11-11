@@ -98,7 +98,7 @@ const fresh = () => {
   const h = { id: 1, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 1 }, e = { id: 2, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 };
   const far = { id: 3, name: "Écorcheur", lane: "N", u: 1, k: 4, hp: 1 };
   S.creatures.push(h, e, far);
-  ok(SF.effAtq(S, e) === 4 && SF.effAtq(S, h) === 0 && SF.effAtq(S, far) === 3, "Fureur (+1 ATQ, 08/11/2026) : même case seulement ; le Hurleur lui-même a 0 ATQ");
+  ok(SF.effAtq(S, e) === 5 && SF.effAtq(S, h) === 0 && SF.effAtq(S, far) === 3, "Fureur (+2 ATQ, 11/11/2026) : même case seulement ; le Hurleur lui-même a 0 ATQ");
 }
 // 11. améliorations payées en plusieurs fois
 {
@@ -161,9 +161,9 @@ const fresh = () => {
   const g1 = { id: 1, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2 }, g2 = { id: 2, name: "Œil-sonde", lane: "N", u: 0, k: 4, hp: 2 };
   const e = { id: 3, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 };
   S.creatures.push(g1, g2, e);
-  ok(SF.effAtq(S, e) === 5, "Écorcheur 3 + 2 (Griffes de 2 soutiens : cumulable)");
+  ok(SF.effAtq(S, e) === 3, "Griffes ne donne plus d'ATQ (Coup de grâce, 11/11/2026)");
   S.creatures.push({ id: 4, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2 });
-  ok(SF.effAtq(S, e) === 7, "+ un Hurleur : 3 + 3 (Griffes de 3 soutiens) + 1 (Fureur)");
+  ok(SF.effAtq(S, e) === 5, "+ un Hurleur : 3 + 2 (Fureur)");
   ok(SF.effAtq(S, g1) === 0, "le soutien reste à 0 ATQ");
 }
 // 16. tourelles : 8 cases autour du support ; niveau I = 1 + paliers de fusée (3/6/9), niveau II = 2
@@ -501,7 +501,7 @@ const fresh = () => {
   delete S.tiles["0,2"];
   ok(SF.bonusWorkers(S) === w, "Dortoir détruit : le travailleur est perdu (temporaire)");
   S.upgrades.tank.r1 = "A"; const m1 = SF.maxHp(S, "Carapace"); S.upgrades.tank.r2 = "A";
-  ok(m1 === 4 && SF.maxHp(S, "Carapace") === 6, "Carapace épaisse +1 PV (3 → 4), Blindage +2 PV (→ 6, total +3)");
+  ok(m1 === 4 && SF.maxHp(S, "Carapace") === 4, "Carapace épaisse +1 PV (3 → 4) ; Blindage ne donne plus de PV (jeton, 11/11/2026)");
   ok(["Écorcheur", "Ravageur", "Massacreur"].every(n => SF.CREATURES[n].pv === 1), "aggros : 1 PV à tous les niveaux");
 }
 // 41. Aura d'épines des Avant-postes, Ronceraie, Piège à 3 dégâts (Oni, 01/11/2026)
@@ -735,12 +735,12 @@ const fresh = () => {
   const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 7 PV max
   U.upgrades.soutien.r2 = "A"; // Régénération : Aura Soin 2 pour chaque soutien
   SF.endAttackerTurn(U);
-  ok(t1.hp === 7, "Régénération + 2 Glaneurs : soin (2 + 2) × 2 = 8, plafonné aux PV max (Colosse 1 → 7 PV)");
+  ok(t1.hp === 7, "Régénération (11/11/2026) : soin total tant qu'un soutien est en jeu (Colosse 1 → 7 PV)");
   // Mue : Furtivité + Aura +1 PV aux autres, cumulable ; plus de +1 PV au soutien lui-même
   const V = fresh(); V.upgrades.soutien.r1 = "A";
   const m = at(230, "Écorcheur", 4, 1), s1 = at(231, "Hurleur", 4, 2), s2 = at(232, "Œil-sonde", 4, 2);
   V.creatures.push(m, s1, s2);
-  ok(SF.bonusHp(V, m) === 3 && SF.bonusHp(V, s1) === 1 && SF.maxHp(V, "Hurleur") === 4, "Mue : +1 PV par soutien de la case aux autres créatures (Écorcheur +2, +1 de la Fureur du Hurleur), plus de +1 PV propre");
+  ok(SF.bonusHp(V, m) === 0 && SF.bonusHp(V, s1) === 0 && SF.maxHp(V, "Hurleur") === 4, "Mue et Hurleur : plus aucun PV bonus (11/11/2026)");
   ok(!SF.isStealthy(V, s1) && !SF.isStealthy(V, m), "Mue : plus de Furtivité pour les soutiens (Oni, 05/11/2026)");
   ok(SF.TREES.tank.B1[0] === "Provocation", "tank, côté B : « Provocation » (ancienne Protection)");
   // Bouclier → Renforcé : une ancienne partie est convertie
@@ -756,7 +756,7 @@ const fresh = () => {
   const F = fresh(); F.phase = "A_attack"; F.upgrades.soutien.r2 = "B";
   const ec = at(250, "Écorcheur"), ca = at(251, "Carapace"), f1 = at(252, "Hurleur"), f2 = at(253, "Œil-sonde");
   F.creatures.push(ec, ca, f1, f2); // Écorcheur 3 (+2 Fureur) ; Carapace 1 (+2 Fureur)
-  ok(SF.effAtq(F, ec) === 4 && SF.effAtq(F, ca) === 2, "Frénésie remplacée par Corrosion (09/11/2026) : plus de multiplicateur (Écorcheur 3 + 1)");
+  ok(SF.effAtq(F, ec) === 5 && SF.effAtq(F, ca) === 3, "Frénésie remplacée par Corrosion (09/11/2026) : plus de multiplicateur (Écorcheur 3 + 2 Fureur)");
   ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 251 }) !== "", "l'action Frénésie est refusée");
   ok(SF.apply(F, "essaim", "frenzy", { src: 253, target: 253 }) !== "" && SF.apply(F, "colonie", "frenzy", { src: 253, target: 250 }) !== "", "pas sur soi-même ; la colonie ne peut pas choisir");
   const G = fresh(); G.phase = "A_attack"; const g1 = at(260, "Hurleur"); G.creatures.push(at(261, "Écorcheur"), g1);
@@ -897,7 +897,7 @@ const fresh = () => {
   const T = fresh(); T.upgrades.soutien.r1 = "A";
   const e = at(960, "Écorcheur", 1), h = at(961, "Hurleur", 2), o = at(962, "Œil-sonde", 2); T.creatures.push(e, h, o);
   ok(SF.speedOf(T, e) === 3 && SF.speedOf(T, h) === 3, "Mue : chaque soutien donne +1 case à sa case, lui compris (Écorcheur 1 + 2 = 3, Hurleur 1 + 2 = 3)");
-  ok(SF.bonusHp(T, e) === 3 && !SF.isStealthy(T, h), "Mue : Aura +1 PV de 2 soutiens, + 1 PV de la Fureur du Hurleur (3)");
+  ok(SF.bonusHp(T, e) === 0 && !SF.isStealthy(T, h), "Mue : plus d'Aura +1 PV (Échappée, 11/11/2026)");
   const G = fresh(); G.upgrades.soutien.r1 = "A"; const x = at(970, "Carapace", 3); G.creatures.push(x, at(971, "Glaneur", 2));
   ok(SF.speedOf(G, x) === 2, "Glaneur avec la Mue : une seule Aura Mobilité (+1), celle de la Mue");
   const U = fresh(); U.upgrades.aggro.r1 = "B"; const a = at(980, "Ravageur", 1), t = at(981, "Béhémoth", 5); U.creatures.push(a, t);
@@ -1071,16 +1071,13 @@ const fresh = () => {
 // 68. Oni, 08/11/2026 : PV bonus perdus = seul le maximum baisse ; spores sur les 8 cases autour, fusée comprise
 {
   const at = (id, name, k, hp, u = 0) => ({ id, name, lane: "N", u, k, hp, acted: false });
-  const S = fresh(); S.supports = {}; S.upgrades.soutien.r1 = "A"; // Mue : Aura +1 PV de chaque soutien
-  const blesse = at(1, "Carapace", 4, 1), plein = at(2, "Carapace", 4, 3), g = at(3, "Glaneur", 4, 2);
-  S.creatures.push(blesse, plein, g); SF.killCheck(S);
-  ok(blesse.hp + SF.bonusHp(S, blesse) === 2 && plein.hp + SF.bonusHp(S, plein) === 4, "avec la Mue : Carapace blessée 2 PV, Carapace intacte 4 PV (3 + 1)");
-  g.hp = 0; SF.killCheck(S);
-  ok(blesse.hp + SF.bonusHp(S, blesse) === 2 && plein.hp + SF.bonusHp(S, plein) === 3, "le soutien meurt : la blessée garde 2 PV, l'intacte passe à son maximum 3");
-  const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k]; T.phase = "A_attack"; T.upgrades.soutien.r1 = "A";
-  const e = at(10, "Écorcheur", 3, 0), h = at(11, "Glaneur", 3, 2); T.creatures.push(e, h, at(12, "Carapace", 4, 3)); SF.killCheck(T);
-  ok(e.hp + SF.bonusHp(T, e) === 1 && SF.apply(T, "essaim", "move", { id: 10, u: 0, k: 2 }) === "" && T.creatures.includes(e) && e.hp + SF.bonusHp(T, e) === 1,
-    "l'Écorcheur (1 PV grâce à la Mue) quitte la case du Glaneur : il garde 1 PV (avant : il mourait)");
+  // Échappée (Mue, 11/11/2026) : une fois par tour et par case, la créature qui devrait mourir recule d'une case avec 1 PV
+  const S = fresh(); S.supports = {}; for (const k of Object.keys(S.tiles)) delete S.tiles[k]; S.upgrades.soutien.r1 = "A";
+  const e1 = at(1, "Écorcheur", 2, 0), e2 = at(2, "Écorcheur", 2, 0), g = at(3, "Glaneur", 2, 2);
+  S.creatures.push(e1, e2, g); SF.killCheck(S);
+  ok(S.creatures.includes(e1) && e1.hp === 1 && e1.k === 3 && !S.creatures.includes(e2), "Échappée : la 1ʳᵉ recule en couronne 3 avec 1 PV, la 2ᵉ meurt (une fois par case)");
+  const T = fresh(); T.supports = {}; const lone = at(10, "Écorcheur", 2, 0); T.upgrades.soutien.r1 = "A"; T.creatures.push(lone); SF.killCheck(T);
+  ok(!T.creatures.includes(lone), "sans soutien sur sa case, pas d'Échappée");
   // spores : 8 cases, toutes lanes, fusée comprise
   const Z = fresh(); Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k]; Z.phase = "A_attack";
   for (const k of ["0,1", "1,2", "-1,0"]) { const [x, y] = SF.parse(k); Z.tiles[k] = Object.assign(SF.tileStats("Muraille", x, y), { revealed: true }); }
@@ -1111,9 +1108,9 @@ const fresh = () => {
 {
   const at = (id, name, k, hp, u = 0) => ({ id, name, lane: "N", u, k, hp, acted: false });
   const S = fresh(); const e = at(1, "Écorcheur", 4, 1), h = at(2, "Hurleur", 4, 4); S.creatures.push(e, h);
-  ok(SF.effAtq(S, e) === 4 && SF.bonusHp(S, e) === 1 && SF.bonusHp(S, h) === 0, "Hurleur : +1 ATQ et +1 PV aux autres créatures de sa case");
+  ok(SF.effAtq(S, e) === 5 && SF.bonusHp(S, e) === 0, "Hurleur (11/11/2026) : +2 ATQ aux autres créatures de sa case, plus de PV");
   const G = fresh(); G.upgrades.soutien.r1 = "B"; const c = at(3, "Carapace", 4, 3), g = at(4, "Glaneur", 4, 2); G.creatures.push(c, g);
-  ok(SF.speedOf(G, c) === 2 && SF.speedOf(G, g) === 2 && SF.effAtq(G, c) === 2, "Griffes : Aura Mobilité 1 (soutien compris) et +1 ATQ");
+  ok(SF.speedOf(G, c) === 2 && SF.speedOf(G, g) === 2 && SF.effAtq(G, c) === 1, "Griffes : Aura Mobilité 1 (soutien compris), plus d'ATQ");
   const T = fresh(); T.phase = "A_deploy"; T.upgrades.aggro.r2 = "C"; const a = at(5, "Ravageur", 2, 1), t = at(6, "Carapace", 2, 3); T.creatures.push(a, t);
   ok(SF.apply(T, "essaim", "teleport", { id: 6, lane: "E", u: 0 }) !== "", "téléportation : une aggro seulement");
   ok(SF.apply(T, "essaim", "teleport", { id: 5, lane: "E", u: 1 }) === "" && a.lane === "E" && a.u === 1 && a.k === 4, "le Ravageur est redéployé à l'entrée de la lane Est, colonne D");
@@ -1178,14 +1175,14 @@ const fresh = () => {
   ok(!S.creatures.includes(c), "Frappe orbitale : détruit la créature visée (Oni, 09/11/2026)");
   const B = fresh(); B.phase = "D_main"; B.spells = ["Double bouclier"]; B.tiles["0,3"] = SF.tileStats("Muraille", 0, 3);
   ok(SF.apply(B, "colonie", "spell", { i: 0, arg: ["0,1", "0,3"] }) === "" && B.tiles["0,1"].shield === 1 && B.tiles["0,3"].shield === 1, "Double bouclier : deux bâtiments gagnent un jeton Bouclier");
-  const F = fresh(); F.phase = "D_fire"; F.firedSupports = []; F.upgrades.tank.r1 = "A"; F.upgrades.tank.r2 = "A";
+  const F = fresh(); F.phase = "D_fire"; F.firedSupports = []; F.upgrades.tank.r1 = "B"; F.upgrades.tank.r2 = "B";
   const sk = Object.keys(F.supports).find(k => F.supports[k] === 1);
   const t = at(3, "Colosse", 4, 10); F.creatures.push(t);
   const spot = [];
   for (const l of ["N", "E", "S", "O"]) for (let u = -2; u <= 2; u++) for (let k = 1; k <= 4; k++) { t.lane = l; t.u = u; t.k = k; if (SF.supportTargets(F, sk).includes(t)) spot.push([l, u, k]); }
   [t.lane, t.u, t.k] = spot[0];
   SF.fire(F, sk, 3);
-  ok(t.hp === 10, "Blindage : la tourelle de niveau 1 (1 dégât) ne fait plus rien au tank");
+  ok(t.hp === 10, "Provocation + Masse vivante (−2) : la tourelle de niveau 1 ne fait plus rien au tank");
   const G = fresh(); G.supports = {}; for (const k of Object.keys(G.tiles)) delete G.tiles[k];
   G.tiles["1,3"] = SF.tileStats("Antenne", 1, 3); G.tiles["1,3"].revealed = true;
   const e = at(4, "Écorcheur", 3, 1); G.creatures.push(e); G.phase = "A_deploy"; SF.apply(G, "essaim", "endDeploy");
@@ -1269,6 +1266,27 @@ const fresh = () => {
   S.floors = 8; S.rocketPts = 0; S.workersBase = 40; S.phase = "D_main";
   SF.apply(S, "colonie", "build", {});
   ok(S.floors >= 9 && !S.creatures.length && S.reincQueue.length === 1 && S.reincQueue[0].name === "Béhémoth", "Nuke : le Béhémoth est mis de côté pour la Réincarnation, le Ravageur part en pioche");
+}
+// 71. Améliorations sans calcul (Oni, 11/11/2026) : Blindage (jeton), Carapace épaisse et Mines, Coup de grâce, Régénération
+{
+  const at = (id, name, k, hp, u = 0) => ({ id, name, lane: "N", u, k, hp, acted: false });
+  const B = SF.newGame(); B.upgrades.tank.r2 = "A"; B.phase = "A_deploy"; B.budget = 9; B.handA = [{ name: "Carapace", uid: 1 }];
+  ok(SF.apply(B, "essaim", "deploy", { uid: 1, lane: "N", u: 0 }) === "" && B.creatures.at(-1).blind === 1, "Blindage : le tank déployé arrive avec un jeton");
+  const tk = B.creatures.at(-1); SF.damageCreature(B, tk, 2, "test");
+  ok(tk.hp === 3 && !tk.blind, "le jeton annule la prochaine perte de PV, puis il est défaussé");
+  SF.damageCreature(B, tk, 2, "test"); ok(tk.hp === 1, "ensuite, les dégâts passent");
+  const M = SF.newGame(); M.supports = {}; for (const k of Object.keys(M.tiles)) delete M.tiles[k]; M.upgrades.tank.r1 = "A";
+  M.tiles["0,1"] = SF.tileStats("Mine majeure", 0, 1); const c = at(20, "Carapace", 2, 4); M.creatures.push(c);
+  SF.hitTile(M, c, "0,1", 1, true);
+  ok(c.hp === 2, "Carapace épaisse : la Mine majeure (3) ne fait que 2 dégâts");
+  const G = SF.newGame(); G.supports = {}; for (const k of Object.keys(G.tiles)) delete G.tiles[k]; G.upgrades.soutien.r1 = "B";
+  G.tiles["0,1"] = SF.tileStats("Muraille", 0, 1); G.tiles["0,1"].revealed = true; const e = at(30, "Écorcheur", 2, 1); G.creatures.push(e, at(31, "Œil-sonde", 2, 2));
+  SF.hitTile(G, e, "0,1", 3, true);
+  ok(!G.tiles["0,1"], "Coup de grâce : Muraille 4 PV − 3 = 1 PV → détruite");
+  const R = SF.newGame(); R.piles[1].push("Glaneur");
+  R.invest = { "soutien:A2": SF.COST_R2 - 1 }; R.upgrades.soutien.r1 = "A"; R.reserve = 5; R.phase = "A_deploy";
+  SF.apply(R, "essaim", "invest", { t: "soutien", s: "A2", n: 1 });
+  ok(!R.piles[1].includes("Glaneur"), "Régénération : les Glaneurs quittent la pioche");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {
