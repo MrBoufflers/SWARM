@@ -1,6 +1,6 @@
 # Swarm & Steel — prototype (dépôt SWARM)
 
-Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.5.14 au 10/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
+Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.5.15 au 11/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
 Tout est **en français** : réponds à Oni en français.
 
 Historique détaillé (décisions, lots, anciennes règles) : `docs/historique-claude.md`. Journal des versions : `docs/versions.md`. Livret : `docs/regles-v0.3.md` (le jeu fait foi en cas d'écart).
@@ -48,13 +48,13 @@ Serveur qui fait autorité, clients qui envoient des actions, vue filtrée :
 - à personne : ordre des pioches (seulement les nombres). La **défausse des sortilèges est publique**. Le journal évite de nommer les tuiles camouflées (`pubName`).
 Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (validé). Netlify : interrogation toutes les 2 s, écriture conditionnelle (etag).
 
-## Règles en vigueur (résumé, v0.5.14)
+## Règles en vigueur (résumé, v0.5.15)
 
 - **Pioche essaim** carte par carte (palier = total 3/5/7/10) ; main de départ sans Œil-sonde.
 - **Mouvement en blocs** (`moveBlock`) : même case = avance ensemble à la vitesse du plus lent ; les soutiens restent avec un compagnon immobile. Carnage : pas d'avancée après la frappe (`c.struck`).
 - **Construction immédiate** : points du tour fixés au début (`S.turnPts`), un bâtiment par lane et par tour, le reste va à la fusée.
 - **Tuiles** : 3 pioches (renfort / actif / piège). Mines 1/3/5. Siphon = niveau × (1 + biomasse ÷ 10), plancher 5. Bouclier sur Abri blindé, Palissade (1 PV), Égide (sans Renforcé), Archives et Observatoire (2 PV) ; Épines s'appliquent malgré le Bouclier.
-- **Améliorations (11/11, non déployé)** : plus aucun bonus de PV variable (`bonusHp` = 0). Carapace épaisse +1 PV, Épines, −1 Mines ; Blindage = jeton `c.blind` à l'arrivée (une fois) ; Provocation (tirs + sortilèges) −1 tourelle, Masse vivante −1 tourelle, cumulables ; Mue = Mobilité + Échappée (1×/tour/case, `S.escaped`) ; Griffes = Mobilité + Coup de grâce ; Régénération = soin total si un soutien vit, Glaneurs retirés de la pioche (`retired`).
+- **Améliorations (11/11)** : plus aucun bonus de PV variable (`bonusHp` = 0). Carapace épaisse +1 PV, Épines, −1 Mines ; Blindage = jeton `c.blind` à l'arrivée (une fois) ; Provocation (tirs + sortilèges) −1 tourelle, Masse vivante −1 tourelle, cumulables ; Mue = Mobilité + Échappée (1×/tour/case, `S.escaped`) ; Griffes = Mobilité + Coup de grâce ; Régénération = soin total si un soutien vit, Glaneurs retirés de la pioche (`retired`).
 - **Améliorations** : Corrosion (soutien B2, ignore Renforcé, détruit le Bouclier) remplace Frénésie ; Griffes = aussi Aura Mobilité 1 ; Férocité donne Furtivité aux aggros ; Blindage et Provocation −1 dégât de tourelle ; Déploiement = `teleport` 1×/tour. `invest` prend la réserve d'abord. Réincarnation : tous les tanks morts mis de côté (`reincQueue`) ; Nuke comprise ; au début du tour de l'essaim, 1 revient d'office, plusieurs → étape `A_reinc` (action `reinc {i}`), les autres retournent en pioche. Déplacements = maximum (« Tout résoudre » ne relance pas une créature déjà déplacée).
 - **Créatures** : Hurleur +2 ATQ (cumulable, plus de PV) ; Spores sur les 8 cases autour (fusée = −1 travailleur) ; perte de PV bonus = baisse du maximum seulement (`syncBonus`).
 - **Sortilèges** : 1 exemplaire chacun (14), Cadence retirée ; fin de tour : garder 1 des 2 du dessus, l'autre à la défausse. Frappe orbitale détruit ; Salve 3 dégâts à 2 créatures ; Brouillage immobilise toute une case ; Double bouclier (2 tuiles) ; Renouvellement +1 point ; Reconversion = déplacer un bâtiment.
