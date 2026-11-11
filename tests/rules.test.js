@@ -735,7 +735,9 @@ const fresh = () => {
   const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 7 PV max
   U.upgrades.soutien.r2 = "A"; // Régénération : Aura Soin 2 pour chaque soutien
   SF.endAttackerTurn(U);
-  ok(t1.hp === 7, "Régénération (11/11/2026) : soin total tant qu'un soutien est en jeu (Colosse 1 → 7 PV)");
+  ok(t1.hp === 7, "Régénération (11/11/2026) : Aura Soin total, le Colosse sur la case des soutiens remonte à 7 PV");
+  const U2 = fresh(); const far = at(225, "Colosse", 3, 1, 1); U2.creatures.push(far, at(226, "Glaneur")); U2.upgrades.soutien.r2 = "A"; SF.endAttackerTurn(U2);
+  ok(far.hp === 1, "Soin total : une créature hors de la case d'un soutien n'est pas soignée");
   // Mue : Furtivité + Aura +1 PV aux autres, cumulable ; plus de +1 PV au soutien lui-même
   const V = fresh(); V.upgrades.soutien.r1 = "A";
   const m = at(230, "Écorcheur", 4, 1), s1 = at(231, "Hurleur", 4, 2), s2 = at(232, "Œil-sonde", 4, 2);

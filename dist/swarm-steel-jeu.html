@@ -1301,7 +1301,7 @@ const SF = (() => {
       B2: ["Masse vivante", "−1 dégât des tourelles (cumulable avec Provocation)."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Échappée : une fois pendant chaque tour (essaim, colonie), une créature de sa case qui devrait mourir recule d'une case avec 1 PV."],
       B1: ["Griffes", "Aura Coup de grâce : un bâtiment laissé à 1 PV par une attaque de sa case est détruit. Aura Mobilité 1 (+1 vitesse)."],
-      A2: ["Régénération", "En fin de tour de l'essaim, si un soutien est en jeu, toutes les créatures retrouvent tous leurs PV. Les Glaneurs quittent la pioche."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      A2: ["Régénération", "Aura Soin total : en fin de tour de l'essaim, les autres créatures de sa case retrouvent tous leurs PV. Les Glaneurs quittent la pioche."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -2234,10 +2234,9 @@ const SF = (() => {
   function endAttackerTurn(S) {
     if (S.winner) return;
     // auras de soin
-    // Régénération (Oni, 11/11/2026) : soin total de toutes les créatures, tant qu'un soutien est en jeu
-    const regen = S.upgrades.soutien.r2 === "A" && anySoutien(S);
-    if (regen) log(S, "essaim", "Régénération : toutes les créatures retrouvent leurs PV.");
+    // Régénération = Aura Soin total (Oni, 11/11/2026) : les autres créatures de la case d'un soutien retrouvent tous leurs PV
     for (const c of S.creatures) {
+      const regen = S.upgrades.soutien.r2 === "A" && countMates(S, c, isSoutien) > 0;
       const m = maxHp(S, c.name), v = regen ? m : soinValue(S, c);
       if (v && c.hp < m) { const before = c.hp; c.hp = Math.min(m, c.hp + v); fx(S, { t: "cheal", id: c.id, n: c.hp - before, hp: c.hp + bonusHp(S, c) }); log(S, "essaim", `${c.name} regagne ${c.hp - before} PV.`); }
     }
@@ -4116,9 +4115,10 @@ if (typeof module !== "undefined") module.exports = IA;
   const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+2 ATQ", butin: "+1 biomasse par bâtiment détruit", percee: "Percée",
     cuirasse: "insensible aux Épines", spores: "2 dégâts autour de la cible" };
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
-  // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération n'est plus une aura (soin total, sur toutes les créatures)
+  // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
   const UP_AURAS = {
     A1: [MOB, { icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "1×/tour, survit à 1 PV", once: true }],
+    A2: [{ icon: "regeneration", name: "Aura Soin total", labs: ["SOIN TOTAL"], fx: "tous ses PV en fin de tour", once: true }],
     B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment à 1 PV détruit", once: true }, MOB],
     B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
   };
