@@ -223,6 +223,11 @@ const IA = (() => {
     }
     v -= E.tech(S) * 4 + E.spellsPerTurn(S) * 6;
     for (const [k, t] of Object.entries(S.tiles)) if (t.tech) prio.add(k);
+    // début de partie (Oni, 11/11/2026) : la biomasse est un revenu permanent (budget de chaque tour) ; chaque Barbelé détruit
+    // en rapporte 1 → on les vise en priorité pendant les 6 premières manches
+    const early = (S.round || 1) <= 6;
+    v += S.biomass * (early ? 9 : 3);
+    if (early) for (const [k, t] of Object.entries(S.tiles)) if (t.start) { v -= 4; prio.add(k); }
     // les attaquants près de ces cibles (à 3 cases au plus) valent un peu plus : l'IA les y envoie
     if (prio.size) {
       const pts = [...prio].map(k => E.parse(k));
