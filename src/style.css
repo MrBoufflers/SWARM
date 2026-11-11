@@ -1114,3 +1114,7 @@ body.pc .ccard.sh:not(:has(.thumb)) { grid-template-columns: 20px 1fr auto; }
 /* cartes de soutien : pastilles sur deux colonnes pour garder la carte basse */
 body.pc .ccard.sh .caps { display: grid; grid-auto-flow: row; grid-template-columns: repeat(2, auto); justify-content: end; justify-items: end; }
 body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
+/* jeton Blindage (Oni, 11/11/2026) : petit écusson en haut à gauche du jeton */
+.tok { position: relative; }
+.tok .blind { position: absolute; top: 2px; left: 2px; display: flex; padding: 1px; border-radius: 50%; color: #7fc8ff; background: rgba(0,0,0,.6); box-shadow: 0 0 0 1px #7fc8ff; }
+.tok .blind .i { width: max(9px, calc(var(--cell) / var(--n, 1) * .2)); height: max(9px, calc(var(--cell) / var(--n, 1) * .2)); }

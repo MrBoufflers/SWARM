@@ -4,6 +4,18 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.15 — 11 novembre 2026
+
+**Règles (Oni) : améliorations sans calcul (plus de bonus de PV qui varient selon la case)**
+- **Carapace épaisse** : +1 PV, insensibles aux Épines, −1 dégât des Mines.
+- **Provocation** : les tirs et les sortilèges visant une autre créature de sa case visent ce tank ; −1 dégât des tourelles.
+- **Blindage** : chaque tank arrive en jeu avec un jeton Blindage qui annule sa prochaine perte de PV (une seule fois) ; plus de PV ni de réduction des tourelles.
+- **Masse vivante** : −1 dégât des tourelles (cumulable avec Provocation).
+- **Mue** : Aura Mobilité 1 et Aura Échappée (une fois par tour et par case, une créature qui devrait mourir recule d'une case avec 1 PV).
+- **Griffes** : Aura Mobilité 1 et Aura Coup de grâce (un bâtiment laissé à 1 PV par une attaque de la case est détruit).
+- **Régénération** : en fin de tour de l'essaim, si un soutien est en jeu, toutes les créatures retrouvent tous leurs PV ; les Glaneurs quittent la pioche.
+- **Hurleur** : Aura Fureur +2 ATQ (cumulable), plus de PV.
+
 ## v0.5.14 — 10 novembre 2026
 
 **Règles (Oni)**
