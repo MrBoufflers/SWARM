@@ -4,13 +4,13 @@ const SF = (() => {
   // ------------------------------------------------------------------ données
   const CREATURES = {
     "Écorcheur": { type: "aggro", lvl: 1, cost: 3, pv: 1, atq: 3 },
-    // aggros : toujours 1 PV, quel que soit le niveau (Oni, 01/11/2026 ; avant Ravageur 2, Massacreur 3)
-    "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 1, atq: 5 },
-    "Massacreur": { type: "aggro", lvl: 3, cost: 6, pv: 1, atq: 7 }, // coût 6 (Oni, 07/11/2026 ; avant 7)
+    // niveaux 2 et 3 : +1/+1 et +2/+2 par rapport au niveau 1 (Oni, 11/11/2026 ; aggros à 1 PV du 01/11 au 11/11)
+    "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 2, atq: 4 }, // niveau 2 = niveau 1 +1 ATQ +1 PV (Oni, 11/11/2026 ; avant 5/1)
+    "Massacreur": { type: "aggro", lvl: 3, cost: 6, pv: 3, atq: 5 }, // niveau 3 = niveau 1 +2 ATQ +2 PV (Oni, 11/11/2026 ; avant 7/1) // coût 6 (Oni, 07/11/2026 ; avant 7)
     "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 3, atq: 1 },
-    // tous les tanks à 1 ATQ (Oni, 01/11/2026 ; avant Béhémoth 2, Colosse 3)
-    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 5, atq: 1 },
-    "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 7, atq: 1 }, // coût 6 (Oni, 07/11/2026 ; avant 7)
+    // tanks : 1/3, 2/4, 3/5 (ATQ/PV, Oni 11/11/2026 ; tous à 1 ATQ du 01/11 au 11/11)
+    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 4, atq: 2 }, // Oni, 11/11/2026 (avant 1/5)
+    "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 5, atq: 3 }, // Oni, 11/11/2026 (avant 1/7) // coût 6 (Oni, 07/11/2026 ; avant 7)
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV." },
@@ -133,7 +133,7 @@ const SF = (() => {
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
-  const FLOOR_COSTS = [2, 4, 6, 8]; // Oni, 04/11/2026 (avant 2 / 3 / 4 / 5 ; à l'origine 3 / 4 / 5 / 6)
+  const FLOOR_COSTS = [2, 4, 7, 10]; // Oni, 11/11/2026 (2 / 4 / 6 / 8 depuis le 04/11/2026 (avant 2 / 3 / 4 / 5 ; à l'origine 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
   // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
   // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).

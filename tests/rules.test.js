@@ -319,7 +319,7 @@ const fresh = () => {
   const S = fresh();
   const costs = [];
   for (let f = 0; f < 12; f++) { S.floors = f; costs.push(SF.floorCost(S)); }
-  ok(costs.join(" ") === "2 2 2 4 4 4 6 6 6 8 8 8", "coût par étage (2 / 4 / 6 / 8) : " + costs.join(" "));
+  ok(costs.join(" ") === "2 2 2 4 4 4 7 7 7 10 10 10", "coût par étage (2 / 4 / 7 / 10, 11/11/2026) : " + costs.join(" "));
   const T = fresh(); T.phase = "D_fire"; T.floors = 2; T.rocketPts = 0; T.workersBase = 6;
   T.alloc = { N: 0, E: 0, S: 0, O: 0 }; T.extraPts = 0;
   SF.endDefenderTurn(T);
@@ -327,12 +327,12 @@ const fresh = () => {
 }
 // 29. animations du lot 3 : fusée (étage, Nuke, décollage), Vision, améliorations — événements seulement, règles inchangées
 {
-  const T = fresh(); T.phase = "D_fire"; T.floors = 8; T.rocketPts = 0; T.workersBase = 6;
+  const T = fresh(); T.phase = "D_fire"; T.floors = 8; T.rocketPts = 0; T.workersBase = 7;
   T.alloc = { N: 0, E: 0, S: 0, O: 0 }; T.extraPts = 0;
   T.creatures.push({ id: 70, name: "Carapace", lane: "S", u: 0, k: 4, hp: 3, acted: false });
   T.fx = []; SF.endDefenderTurn(T);
   ok(T.floors === 9 && T.fx.some(e => e.t === "floor" && e.n === 9) && T.fx.some(e => e.t === "nuke" && e.ids.includes(70)) && T.creatures.length === 0, "étage 9 : événements étage + Nuke, créatures détruites");
-  const U = fresh(); U.phase = "D_fire"; U.floors = 11; U.rocketPts = 0; U.workersBase = 8;
+  const U = fresh(); U.phase = "D_fire"; U.floors = 11; U.rocketPts = 0; U.workersBase = 10;
   U.alloc = { N: 0, E: 0, S: 0, O: 0 }; U.extraPts = 0; U.fx = []; SF.endDefenderTurn(U);
   ok(U.winner === "colonie" && U.fx.some(e => e.t === "liftoff"), "étage 12 : décollage et victoire de la colonie");
   const V = fresh(); SF.attackerDraw(V); V.tiles["0,2"] = SF.tileStats("Muraille", 0, 2);
@@ -476,7 +476,7 @@ const fresh = () => {
 }
 // 39. tanks à 1 ATQ et Égide (3 PV, Bouclier 2) — Oni, 01/11/2026
 {
-  ok(["Carapace", "Béhémoth", "Colosse"].every(n => SF.CREATURES[n].atq === 1), "tous les tanks ont 1 ATQ");
+  ok(["Carapace", "Béhémoth", "Colosse"].map(n => SF.CREATURES[n].atq + "/" + SF.CREATURES[n].pv).join(" ") === "1/3 2/4 3/5", "tanks (11/11/2026) : 1/3, 2/4, 3/5");
   const E = SF.TILES["Égide"];
   ok(E && E.pv === 2 && !E.ren && E.shield === 1 && E.d === 2 && E.camo && E.n === 3 && E.ep === 0, "Égide : 2 PV, Bouclier (au lieu de Renforcé 2, 09/11/2026), 2 tours, camouflée, 3 exemplaires, sans Épines");
   { const G = SF.newGame(); ok(G.hand.length === 0 && Object.values(G.tileDecks).flat().length === 63, "pioches de forteresses : 63 tuiles en 3 pioches (Oni, 07/11/2026 : 6 Mines et Siphons de plus, 3 Abris blindés) ; main vide au départ"); }
@@ -502,7 +502,7 @@ const fresh = () => {
   ok(SF.bonusWorkers(S) === w, "Dortoir détruit : le travailleur est perdu (temporaire)");
   S.upgrades.tank.r1 = "A"; const m1 = SF.maxHp(S, "Carapace"); S.upgrades.tank.r2 = "A";
   ok(m1 === 4 && SF.maxHp(S, "Carapace") === 4, "Carapace épaisse +1 PV (3 → 4) ; Blindage ne donne plus de PV (jeton, 11/11/2026)");
-  ok(["Écorcheur", "Ravageur", "Massacreur"].every(n => SF.CREATURES[n].pv === 1), "aggros : 1 PV à tous les niveaux");
+  ok(["Écorcheur", "Ravageur", "Massacreur"].map(n => SF.CREATURES[n].atq + "/" + SF.CREATURES[n].pv).join(" ") === "3/1 4/2 5/3", "aggros (11/11/2026) : 3/1, 4/2, 5/3");
 }
 // 41. Aura d'épines des Avant-postes, Ronceraie, Piège à 3 dégâts (Oni, 01/11/2026)
 {
@@ -549,8 +549,8 @@ const fresh = () => {
 // 43. Piège avant l'attaque ; Percée limitée à la case suivante (Oni, 01/11/2026)
 {
   const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Mine majeure", 0, 1);
-  const t = { id: 99, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(t); SF.act(S, t);
-  ok(t.hp === 2 && S.tiles["0,1"].hp === 1, "Béhémoth (5 PV) survit à la Mine majeure (−3) puis frappe (1 ATQ : 2 → 1 PV)");
+  const t = { id: 99, name: "Carapace", lane: "N", u: 0, k: 4, hp: 5, acted: false }; S.creatures.push(t); SF.act(S, t);
+  ok(t.hp === 2 && S.tiles["0,1"].hp === 1, "un tank à 5 PV survit à la Mine majeure (−3) puis frappe (1 ATQ : 2 → 1 PV)");
   const P = (setup, k = 4) => {
     const T = fresh(); T.supports = {}; for (const k of Object.keys(T.tiles)) delete T.tiles[k];
     setup(T); for (const k of Object.keys(T.tiles)) T.tiles[k].revealed = true; // tuiles déjà retournées (une tuile camouflée ne subit pas la percée)
@@ -634,7 +634,7 @@ const fresh = () => {
 {
   const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Rempart", 0, 1); // 4 PV, Renforcé 2
   const m = { id: 150, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; S.creatures.push(m); SF.act(S, m);
-  ok(S.tiles["0,1"].hp === 1, "Rempart (Renforcé 2) frappé pour 7 : 3 PV perdus (4 → 1)");
+  ok(S.tiles["0,1"].hp === 2, "Rempart (Renforcé 2) frappé pour 5 (Massacreur, 11/11/2026) : 2 PV perdus (4 → 2)");
   const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Rempart", 0, 1);
   const e = { id: 151, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(e); SF.act(T, e);
   ok(T.tiles["0,1"].hp === 4, "Rempart frappé pour 1 (moins que 2) : aucun PV perdu");
@@ -732,10 +732,10 @@ const fresh = () => {
   SF.apply(T, "essaim", "act", { key: SF.posKey(x) });
   ok(x.k === 3 && y.k === 3, "la Carapace et le Glaneur avancent ensemble d'une case");
   // soins cumulés
-  const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 7 PV max
+  const U = fresh(); const t1 = at(220, "Colosse", 4, 1); U.creatures.push(t1, at(221, "Glaneur"), at(222, "Glaneur")); // Colosse : 5 PV max
   U.upgrades.soutien.r2 = "A"; // Régénération : Aura Soin 2 pour chaque soutien
   SF.endAttackerTurn(U);
-  ok(t1.hp === 7, "Régénération (11/11/2026) : Aura Soin total, le Colosse sur la case des soutiens remonte à 7 PV");
+  ok(t1.hp === 5, "Régénération (11/11/2026) : Aura Soin total, le Colosse sur la case des soutiens remonte à 5 PV (son maximum)");
   const U2 = fresh(); const far = at(225, "Colosse", 3, 1, 1); U2.creatures.push(far, at(226, "Glaneur")); U2.upgrades.soutien.r2 = "A"; SF.endAttackerTurn(U2);
   ok(far.hp === 1, "Soin total : une créature hors de la case d'un soutien n'est pas soignée");
   // Mue : Furtivité + Aura +1 PV aux autres, cumulable ; plus de +1 PV au soutien lui-même
