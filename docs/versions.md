@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.16 — 11 novembre 2026
+
+**Règles (Oni)**
+- **Blindage** : à l'achat, les tanks déjà en jeu reçoivent aussi leur jeton.
+- **Échappée** (Mue) : une fois par case pendant le tour de l'essaim, et encore une fois pendant celui de la colonie.
+
 ## v0.5.15 — 11 novembre 2026
 
 **Règles (Oni) : améliorations sans calcul (plus de bonus de PV qui varient selon la case)**
