@@ -628,9 +628,10 @@
   const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+2 ATQ", butin: "+1 biomasse par bâtiment détruit", percee: "Percée",
     cuirasse: "insensible aux Épines", spores: "2 dégâts autour de la cible" };
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
-  // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération n'est plus une aura (soin total, sur toutes les créatures)
+  // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
   const UP_AURAS = {
     A1: [MOB, { icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "1×/tour, survit à 1 PV", once: true }],
+    A2: [{ icon: "regeneration", name: "Aura Soin total", labs: ["SOIN TOTAL"], fx: "tous ses PV en fin de tour", once: true }],
     B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment à 1 PV détruit", once: true }, MOB],
     B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
   };
