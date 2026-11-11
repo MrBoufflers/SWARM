@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.18 — 11 novembre 2026
+
+**Règles (Oni)**
+- **Créatures** : niveau 2 = niveau 1 +1 ATQ +1 PV, niveau 3 = +2 ATQ +2 PV. Aggros 3/1, 4/2, 5/3 (avant 3/1, 5/1, 7/1) ; tanks 1/3, 2/4, 3/5 (avant 1/3, 1/5, 1/7).
+- **Fusée** : un étage coûte 2, puis 4, 7 et 10 points après les paliers 3 · 6 · 9 (avant 2 / 4 / 6 / 8).
+
 ## v0.5.17 — 11 novembre 2026
 
 **Règles (Oni)**

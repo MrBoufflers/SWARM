@@ -98,8 +98,8 @@ const AIDE = (() => {
       </ol>
       <h3>Vos créatures</h3>
       <ul>
-        <li><b>Aggros</b> : grosse attaque, 1 PV. Elles meurent vite sur les Épines.</li>
-        <li><b>Tanks</b> : beaucoup de PV, 1 ATQ. Ils encaissent les Épines et les tirs.</li>
+        <li><b>Aggros</b> : grosse attaque, peu de PV. Elles meurent vite sur les Épines.</li>
+        <li><b>Tanks</b> : beaucoup de PV, peu d'ATQ. Ils encaissent les Épines et les tirs.</li>
         <li><b>Soutiens</b> : ils n'attaquent jamais, mais leurs <b>auras</b> renforcent les <b>autres</b> créatures de leur case ; toutes les auras se cumulent.</li>
         <li><b>Vitesse</b> : 1 case par tour, 2 pour les créatures de niveau 3 ; avec la Mue ou les Griffes, chaque soutien donne +1 case à toutes les créatures de sa case, lui compris ; la Mobilité donne +1 case aux aggros. Le nombre de déplacements est fixé au premier pas du tour. En résolution automatique (« Tout résoudre »), les soutiens agissent en premier : les créatures parties de la même case les suivent et profitent encore de leurs auras quand elles attaquent.</li>
       </ul>
@@ -181,7 +181,7 @@ const AIDE = (() => {
     { id: "e-deploy", side: "essaim", img: "Carapace", title: "Déployer", when: S => S.phase === "A_deploy",
       text: S => `Touchez une carte, puis une case d'entrée (lettres A à E au bord) d'une lane ; un soutien se parachute sur n'importe quelle case libre. Chaque carte coûte de la biomasse. Votre budget du tour égale votre biomasse (${S.biomass}) : elle n'est jamais dépensée et revient chaque tour. Au plus ${SF.capOf(S)} créatures par lane. Dans la même étape, vous pouvez aussi investir dans les arbres d'amélioration. Le budget non dépensé va à la réserve.` },
     { id: "e-types", side: "essaim", img: "Hurleur", title: "Aggros, tanks et soutiens", when: S => S.phase === "A_deploy" && S.handA.length > 0,
-      text: () => `Aggros : grosse attaque mais 1 PV. Tanks : beaucoup de PV, 1 ATQ. Soutiens : ils n'attaquent pas, mais leurs auras renforcent les autres créatures de leur case (les auras se cumulent). Touchez une carte pour voir sa capacité.` },
+      text: () => `Aggros : grosse attaque, peu de PV. Tanks : beaucoup de PV, peu d'ATQ. Soutiens : ils n'attaquent pas, mais leurs auras renforcent les autres créatures de leur case (les auras se cumulent). Touchez une carte pour voir sa capacité.` },
     { id: "e-ameli", side: "essaim", img: "Béhémoth", title: "Améliorations", when: S => S.phase === "A_deploy" && SF.investable(S) >= 4,
       text: () => `Pendant le déploiement, touchez une carte des arbres d'amélioration (panneau Essaim) pour y investir votre budget ou votre réserve : ${SF.COST_R1} biomasse au rang 1, ${SF.COST_R2} au rang 2, payables en plusieurs tours. Un rang 1 ajoute les cartes de niveau 2 de ce type à votre pioche, un rang 2 celles de niveau 3.` },
     { id: "e-attaque", side: "essaim", img: "Ravageur", title: "Déplacer et attaquer", when: S => S.phase === "A_attack",
