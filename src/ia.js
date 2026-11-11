@@ -167,15 +167,63 @@ const IA = (() => {
     for (const l of [2, 3, 1]) while (miss > 0 && n[l - 1] < avail[l] && levels.includes(l)) { n[l - 1]++; miss--; }
     return { type: "pick", args: { n } };
   }
-  // ordre de préférence des améliorations
+  // ------------------------------------------------------------ stratégies de l'essaim (Oni, 11/11/2026)
+  // trois plans, tirés au début de la partie (d'après son identifiant) pour varier les parties ; chacun a son ordre
+  // d'améliorations et ses priorités : groupes autour des soutiens, tourelles à abattre, Percée et Spores vers la fusée
+  const PLANS = {
+    assaut: { // aggros en meute derrière Hurleurs et Griffes, Carnage
+      nodes: [["aggro", "A1"], ["soutien", "B1"], ["aggro", "A2"], ["aggro", "B1"], ["soutien", "B2"], ["aggro", "C2"], ["aggro", "B2"]],
+      w: { aggro: 1.4, tank: 0.8, soutien: 1 }, save: 0.15, group: 1, rocket: 1, turret: 1 },
+    rempart: { // tanks qui encaissent les tourelles, soutiens qui soignent ; on démonte les supports un à un
+      nodes: [["tank", "B1"], ["soutien", "A1"], ["tank", "B2"], ["soutien", "A2"], ["tank", "A1"], ["tank", "A2"], ["tank", "C2"]],
+      w: { aggro: 0.9, tank: 1.4, soutien: 1.1 }, save: 0.2, group: 1.2, rocket: 0.6, turret: 1.8 },
+    percee: { // Perforeur et Sporeur avec les attaquants, droit sur la fusée
+      nodes: [["soutien", "B1"], ["aggro", "A1"], ["soutien", "B2"], ["aggro", "A2"], ["soutien", "A2"], ["tank", "A1"]],
+      w: { aggro: 1.1, tank: 1, soutien: 1.3 }, save: 0.15, group: 1.3, rocket: 1.8, turret: 0.8 },
+  };
+  const PLAN_KEYS = Object.keys(PLANS);
+  function planOf(S) {
+    const id = String(S.gid || S.code || S.t0 || "");
+    let h = 7; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0;
+    return PLAN_KEYS[Math.abs(h) % PLAN_KEYS.length];
+  }
+  const AURA_SOUTIENS = ["Hurleur", "Perforeur", "Sporeur", "Phéromone", "Catalyseur", "Glaneur"];
+  // valeur de long terme pour l'essaim (positive = bon pour lui), lue sur l'état simulé en fin de tour
+  function swarmLong(S, plan) {
+    const P = PLANS[plan] || PLANS.assaut, upS = !!(S.upgrades.soutien.r1 || S.upgrades.soutien.r2);
+    let v = 0;
+    const cases = {};
+    for (const c of S.creatures) (cases[E.posKey(c)] = cases[E.posKey(c)] || []).push(c);
+    for (const group of Object.values(cases)) {
+      const sup = group.filter(c => E.CREATURES[c.name].type === "soutien"), att = group.filter(c => E.CREATURES[c.name].type !== "soutien");
+      const auras = sup.filter(c => AURA_SOUTIENS.includes(c.name) || upS).length;
+      // un soutien seul ne sert à rien ; avec des attaquants, chaque aura compte (jusqu'au nombre d'attaquants)
+      if (auras && att.length) v += P.group * (4 + 3 * Math.min(auras, att.length) + att.length);
+      // Percée et Spores : un groupe qui les porte vaut plus près de la fusée
+      if (att.length && sup.some(c => c.name === "Perforeur" || c.name === "Sporeur")) {
+        const d = Math.min(...att.map(dist));
+        v += P.rocket * Math.max(0, 7 - d) * 2.5;
+      }
+      for (const c of group) v += (P.w[E.CREATURES[c.name].type] - 1) * E.CREATURES[c.name].cost * 3;
+    }
+    // tourelles : chaque support en jeu est une menace ; les murs qui le tiennent sont des cibles
+    for (const [sk, l] of Object.entries(S.supports)) {
+      v -= P.turret * (l < 3 ? 6 + 3 * l : 10);
+      const walls = E.supportWalls(...E.parse(sk)).filter(w => S.tiles[w]);
+      v += P.turret * (4 - walls.length) * 2;
+    }
+    return v;
+  }
+  // ordre de préférence des améliorations (complète celui du plan)
   const NODES = [["aggro", "A1"], ["soutien", "B1"], ["aggro", "A2"], ["tank", "A1"], ["soutien", "B2"], ["tank", "A2"], ["aggro", "C2"], ["aggro", "B1"], ["aggro", "B2"], ["tank", "B1"], ["tank", "C2"], ["tank", "B2"], ["soutien", "A1"], ["soutien", "A2"], ["soutien", "C2"]];
   function swarmInvest(V) {
     const can = (V.budget || 0) + (V.reserve || 0);
     if (can <= 0) return null;
     // un nœud déjà entamé d'abord, sinon le premier ouvert de la liste
     const st = (t, s) => E.nodeState(V, t, s);
-    const started = NODES.find(([t, s]) => (V.invest || {})[t + ":" + s] > 0 && st(t, s) === "open");
-    const node = started || NODES.find(([t, s]) => st(t, s) === "open");
+    const order = [...(PLANS[V.__plan] || PLANS.assaut).nodes, ...NODES];
+    const started = order.find(([t, s]) => (V.invest || {})[t + ":" + s] > 0 && st(t, s) === "open");
+    const node = started || order.find(([t, s]) => st(t, s) === "open");
     return node ? { type: "invest", args: { t: node[0], s: node[1], n: 99 } } : null;
   }
   function deployCands(V) {
@@ -194,9 +242,22 @@ const IA = (() => {
     }
     return out;
   }
+  // épargne pour les améliorations (Oni, 11/11/2026 : l'IA n'en achetait presque jamais) : au début du déploiement, avant
+  // toute dépense du budget, la réserve et une part du budget vont au nœud du plan ; un nœud presque payé est terminé
+  function planInvest(V) {
+    const full = V.famine ? E.famineBudget(V.biomass) : V.biomass;
+    if (V.budget !== full) return null; // le budget du tour a déjà servi : on déploie
+    const inv = swarmInvest(V); if (!inv) return null;
+    const { t, s } = inv.args, left = E.nodeCost(s) - E.invested(V, t, s);
+    const share = Math.floor(V.budget * (PLANS[V.__plan] || PLANS.assaut).save);
+    const n = (V.reserve || 0) + V.budget * 0.6 >= left ? left : (V.reserve || 0) + share;
+    return n > 0 ? { type: "invest", args: { t, s, n: Math.min(n, left) } } : null;
+  }
   function swarmDeploy(V) {
-    const base = val(finishSwarm(clone(V)), "essaim");
-    const { move, s } = best(V, "essaim", deployCands(V), finishSwarm);
+    const pi = planInvest(V); if (pi) return pi;
+    const long = W => swarmLong(W, V.__plan);
+    const F = finishSwarm(clone(V)), base = val(F, "essaim") + long(F);
+    const { move, s } = best(V, "essaim", deployCands(V), finishSwarm, long);
     if (move && s > base + 0.5) return move;
     return swarmInvest(V) || { type: "endDeploy" };
   }
@@ -208,7 +269,7 @@ const IA = (() => {
       for (const t of E.strikeTargets(V, c)) cands.push({ type: "strike", args: { id: c.id, target: t } });
     }
     if (cands.length === 1) return cands[0];
-    const { move } = best(V, "essaim", cands, finishSwarm);
+    const { move } = best(V, "essaim", cands, finishSwarm, W => swarmLong(W, V.__plan));
     return move || { type: "actAll" };
   }
 
@@ -292,6 +353,7 @@ const IA = (() => {
     if (S.winner || E.actor(S) !== side) return null;
     const V = belief(S, side);
     V.__pileN = { 1: S.piles[1].length, 2: S.piles[2].length, 3: S.piles[3].length }; // nombres seulement (publics pour l'essaim)
+    V.__plan = planOf(S); // stratégie de l'essaim pour cette partie
     try {
       switch (V.phase) {
         case "A_famine": return { type: "famine", args: { play: V.spells.includes("Famine") } };
@@ -347,6 +409,6 @@ const IA = (() => {
     }
     return null;
   }
-  return { decide, fallback, score, belief, other };
+  return { decide, fallback, score, belief, other, planOf, PLANS };
 })();
 if (typeof module !== "undefined") module.exports = IA;

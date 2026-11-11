@@ -4,6 +4,13 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.19 — 11 novembre 2026
+
+**IA de l'essaim (Oni)**
+- **Trois stratégies**, tirées au début de chaque partie : *Assaut* (aggros, Griffes, Carnage), *Rempart* (tanks, Provocation, Masse vivante, soins) et *Percée* (Perforeur et Sporeur avec les attaquants, droit sur la fusée). Chacune a son ordre d'améliorations.
+- Elle **regroupe** les attaquants avec les soutiens (auras), vise les **murs qui tiennent les supports** pour faire tomber les tourelles, et pousse les groupes à **Percée / Spores** vers la fusée.
+- Elle **épargne** une part de son budget pour acheter ses améliorations (avant, elle n'en achetait presque jamais).
+
 ## v0.5.18 — 11 novembre 2026
 
 **Règles (Oni)**
