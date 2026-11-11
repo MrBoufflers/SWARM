@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.21 — 11 novembre 2026
+
+**IA de l'essaim (Oni)**
+- Début de partie : elle privilégie le gain de biomasse (revenu permanent) en détruisant les **Barbelés** pendant les 6 premières manches.
+
 ## v0.5.20 — 11 novembre 2026
 
 **IA de l'essaim (Oni)**
