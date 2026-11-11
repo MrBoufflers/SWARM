@@ -206,11 +206,32 @@ const IA = (() => {
       }
       for (const c of group) v += (P.w[E.CREATURES[c.name].type] - 1) * E.CREATURES[c.name].cost * 3;
     }
-    // tourelles : chaque support en jeu est une menace ; les murs qui le tiennent sont des cibles
+    // coins et technologies (Oni, 11/11/2026 : l'essaim doit les attaquer en priorité) — les supports en jeu (tourelles, et
+    // surtout les supports III à +2 travailleurs), les murs qui forment un coin pas encore actif, les bâtiments de technologie
+    const prio = new Set();
     for (const [sk, l] of Object.entries(S.supports)) {
-      v -= P.turret * (l < 3 ? 6 + 3 * l : 10);
+      v -= P.turret * (l < 3 ? 6 + 3 * l : 0) + (l === 3 ? 28 : 0);
       const walls = E.supportWalls(...E.parse(sk)).filter(w => S.tiles[w]);
-      v += P.turret * (4 - walls.length) * 2;
+      v += (4 - walls.length) * (l === 3 ? 4 : 2 * P.turret);
+      for (const w of walls) prio.add(w);
+    }
+    for (let r = 2; r <= 3; r++) for (const sx of [1, -1]) for (const sy of [1, -1]) {
+      const x = sx * r, y = sy * r; if (S.supports[E.key(x, y)]) continue;
+      const inner = [E.key(x - sx, y), E.key(x, y - sy)].filter(k => S.tiles[k]);
+      v -= inner.length * (r === 3 ? 9 : 5) + (inner.length === 2 ? 6 : 0); // un coin presque fermé est urgent
+      for (const k of inner) prio.add(k);
+    }
+    v -= E.tech(S) * 4 + E.spellsPerTurn(S) * 6;
+    for (const [k, t] of Object.entries(S.tiles)) if (t.tech) prio.add(k);
+    // les attaquants près de ces cibles (à 3 cases au plus) valent un peu plus : l'IA les y envoie
+    if (prio.size) {
+      const pts = [...prio].map(k => E.parse(k));
+      for (const c of S.creatures) {
+        if (E.CREATURES[c.name].type === "soutien") continue;
+        const [a, b] = E.toGlobal(c.lane, c.u, c.k);
+        const d = Math.min(...pts.map(([x, y]) => Math.abs(a - x) + Math.abs(b - y)));
+        v += Math.max(0, 4 - d) * 2;
+      }
     }
     return v;
   }
