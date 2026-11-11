@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.17 — 11 novembre 2026
+
+**Règles (Oni)**
+- **Régénération** : Aura Soin total — en fin de tour de l'essaim, les autres créatures de la case d'un soutien retrouvent tous leurs PV (avant : toutes les créatures du plateau). Les Glaneurs quittent toujours la pioche.
+
 ## v0.5.16 — 11 novembre 2026
 
 **Règles (Oni)**
