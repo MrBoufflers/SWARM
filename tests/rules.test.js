@@ -685,12 +685,12 @@ const fresh = () => {
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Siphon supérieur", 0, 2); });
   ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); T.tiles["1,3"].revealed = true; }, "Sporeur");
-  ok(r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed && !r.T.tiles["1,3"], "Spores : la tuile camouflée voisine ne subit rien, la Palissade révélée (2 PV) tombe sous 2 dégâts");
+  ok(r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed && r.T.tiles["1,3"] && r.T.tiles["1,3"].hp === 1, "Spores (1 dégât, 12/11/2026) : la tuile camouflée voisine ne subit rien, la Palissade révélée (2 PV) tombe à 1 PV");
   const clair = T => { T.upgrades.soutien.r2 = "C"; }; // Clairvoyance (un soutien est en jeu : le Perforeur / le Sporeur)
   r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); });
   ok(!r.T.tiles["0,2"], "Clairvoyance : l'Égide camouflée devient vulnérable à la percée (4 dégâts après bouclier → détruite)");
   r = P(T => { clair(T); T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["1,3"] = SF.tileStats("Palissade", 1, 3); }, "Sporeur");
-  ok(!r.T.tiles["1,3"], "Clairvoyance : la Palissade camouflée voisine subit les spores (détruite)");
+  ok(r.T.tiles["1,3"] && r.T.tiles["1,3"].hp === 1, "Clairvoyance : la Palissade camouflée voisine subit les spores (1 dégât : 2 → 1 PV)");
 }
 // 52. Déplacement : une case par tour, deux avec la Mobilité ; au contact, attaque aussitôt (Oni, 02/11/2026)
 {
@@ -753,12 +753,12 @@ const fresh = () => {
   // Bouclier → Renforcé : une ancienne partie est convertie
   const W = fresh(); W.tiles["3,0"] = { name: "Dortoir", hp: 3, max: 3, ep: 0, ren: 0, shield: 2, camo: 1, revealed: false }; SF.migrate(W);
   ok(W.tiles["3,0"].ren === 2 && !("shield" in W.tiles["3,0"]), "partie en cours : Bouclier 2 devient Renforcé 2");
-  // Spores cumulables : 2 Sporeurs → 2 dégâts aux tuiles voisines
+  // Spores cumulables : 2 Sporeurs → 2 dégâts aux tuiles voisines (1 par Sporeur depuis le 12/11/2026)
   const Z = fresh(); Z.supports = {}; for (const k of Object.keys(Z.tiles)) delete Z.tiles[k];
   Z.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); Z.tiles["1,3"] = SF.tileStats("Rempart", 1, 3); Z.tiles["1,3"].revealed = true;
   const a1 = at(240, "Carapace"); Z.creatures.push(a1, at(241, "Sporeur"), at(242, "Sporeur"));
   SF.actCase(Z, SF.posKey(a1), [240]);
-  ok(Z.tiles["1,3"].hp === 2, "2 Sporeurs : 2 × 2 = 4 dégâts de spores en une attaque (Rempart, Renforcé 2 : 4 → 2 PV)");
+  ok(Z.tiles["1,3"].hp === 3, "2 Sporeurs : 2 × 1 = 2 dégâts de spores en une attaque (Rempart, Renforcé 2 : 4 → 3 PV)");
   // Frénésie : au choix, cumulable (Oni, 02/11/2026)
   const F = fresh(); F.phase = "A_attack"; F.upgrades.soutien.r2 = "B";
   const ec = at(250, "Écorcheur"), ca = at(251, "Carapace"), f1 = at(252, "Hurleur"), f2 = at(253, "Œil-sonde");
@@ -1096,12 +1096,12 @@ const fresh = () => {
   const w = Z.workersBase;
   ok(SF.apply(Z, "essaim", "strike", { id: 20, target: "0,1" }) === "", "attaque du bâtiment C1 avec un Sporeur dans la case");
   ok(Z.workersBase === w - 1, "spores : la fusée derrière le bâtiment de la couronne 1 est touchée, −1 travailleur");
-  ok(Z.tiles["1,2"].hp === 2 && Z.tiles["-1,0"].hp === 2, "spores : les cases en diagonale (D2) et sur une autre lane (Ouest) sont touchées aussi");
+  ok(Z.tiles["1,2"].hp === 3 && Z.tiles["-1,0"].hp === 3, "spores : les cases en diagonale (D2) et sur une autre lane (Ouest) sont touchées aussi (1 dégât : 4 → 3)");
   const R = fresh(); R.supports = {}; for (const k of Object.keys(R.tiles)) delete R.tiles[k]; R.phase = "A_attack";
   R.tiles["1,0"] = Object.assign(SF.tileStats("Muraille", 1, 0), { revealed: true });
   R.creatures.push(Object.assign(at(30, "Écorcheur", 1, 5), { moved: 1 }), at(31, "Sporeur", 1, 6));
   const w2 = R.workersBase;
-  ok(SF.apply(R, "essaim", "strike", { id: 30, target: "fusee" }) === "" && R.workersBase === w2 - 1 && R.tiles["1,0"].hp === 2,
+  ok(SF.apply(R, "essaim", "strike", { id: 30, target: "fusee" }) === "" && R.workersBase === w2 - 1 && R.tiles["1,0"].hp === 3,
     "attaque de la fusée avec un Sporeur : −1 travailleur, et les spores touchent le bâtiment voisin de la fusée (lane Est)");
 }
 // 69. Férocité donne la Furtivité aux aggros (Oni, 08/11/2026)

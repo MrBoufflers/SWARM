@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.28 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Sporeur** : Aura Spores à **1 dégât** par Sporeur au lieu de 2 (toujours cumulable, toujours sur les 8 cases autour de la cible, fusée = −1 travailleur).
+
 ## v0.5.27 — 12 novembre 2026
 
 **Règles (Oni)**

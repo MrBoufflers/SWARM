@@ -22,7 +22,7 @@ const SF = (() => {
     "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case (cumulable)." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
-    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 2 dégâts par Sporeur ; la fusée touchée perd 1 travailleur." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 1 dégât par Sporeur ; la fusée touchée perd 1 travailleur." },
   };
   const PILES = {
     1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Catalyseur", 2]] },
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.27";
+  const VERSION = "0.5.28";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -525,11 +525,11 @@ const SF = (() => {
     if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); return; }
     sporeBurst(S, c, 0, 0); // les spores touchent aussi les 8 cases autour de la fusée (Oni, 08/11/2026)
   }
-  // Aura Spores (2 dégâts par Sporeur de la case, cumulable, Oni 02/11/2026) : quand une autre créature de la case attaque,
+  // Aura Spores (1 dégât par Sporeur de la case depuis le 12/11/2026, avant 2 ; cumulable, Oni 02/11/2026) : quand une autre créature de la case attaque,
   // les 8 cases autour de la cible (diagonales comprises, toutes lanes ; Oni 08/11/2026, avant : les 4 côtés) sont touchées.
   // La fusée parmi elles : −1 travailleur. Pas sur une tuile encore camouflée, ni en stase ; un Bouclier les absorbe.
   function sporeBurst(S, c, x, y) {
-    const spores = 2 * countMates(S, c, o => o.name === "Sporeur");
+    const spores = countMates(S, c, o => o.name === "Sporeur");
     if (!spores) return;
     for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
       if (!dx && !dy) continue;
@@ -765,7 +765,7 @@ const SF = (() => {
         log(S, "colonie", `Siphon : l'essaim perd ${before - S.biomass} biomasse (biomasse ${S.biomass}).`);
       }
     }
-    // spores (2 dégâts par Sporeur de la case, cumulable, Oni 02/11/2026) sur les tuiles qui touchent la cible
+    // spores (1 dégât par Sporeur de la case, cumulable) sur les tuiles qui touchent la cible
     const sporesAround = () => { if (primary) sporeBurst(S, c, x, y); };
     // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE, sans aller plus loin :
     // un bâtiment les subit, la fusée perd 1 travailleur, une case vide les perd. Pas d'enchaînement.

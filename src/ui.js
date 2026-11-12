@@ -626,7 +626,7 @@
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
   const FX_LABEL = {
     soin: () => ["+2 HEAL"], fureur: () => ["+2 ATQ"], percee: () => ["PERCÉE"],
-    cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
+    cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+1 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
   function sumLabels(list) {
@@ -639,7 +639,7 @@
   // self : l'aura profite aussi au soutien qui la donne (Aura Mobilité 1, moteur : speedOf).
   const AURA_CAPS = ["soin", "fureur", "percee", "cuirasse", "spores"]; // Dépouille (Charognard) n'est pas une aura
   const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+2 ATQ", percee: "Percée",
-    cuirasse: "insensible aux Épines", spores: "2 dégâts autour de la cible" };
+    cuirasse: "insensible aux Épines", spores: "1 dégât autour de la cible" };
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
   // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
   const UP_AURAS = {

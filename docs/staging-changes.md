@@ -22,3 +22,6 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.27
 - Percée : les dégâts en trop passent derrière la cible, du côté opposé à l'attaquant (plus toujours vers la fusée).
+
+## v0.5.28
+- Sporeur : ses spores font 1 dégât (au lieu de 2) par Sporeur sur les 8 cases autour de la cible.
