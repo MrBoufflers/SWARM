@@ -116,7 +116,7 @@ const SF = (() => {
     tank: { A1: ["Carapace épaisse", "+1 PV. Insensibles aux Épines. −1 dégât des Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank. −1 dégât des tourelles."],
       A2: ["Blindage", "Chaque tank en jeu, et chaque tank qui arrive ensuite, reçoit un jeton Blindage : la prochaine perte de PV qu'il subirait est annulée, puis le jeton est défaussé."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
       B2: ["Masse vivante", "−1 dégât des tourelles (cumulable avec Provocation)."] },
-    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Échappée : une fois pendant chaque tour (essaim, colonie), une créature de sa case qui devrait mourir recule d'une case avec 1 PV."],
+    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Échappée : chaque soutien a un jeton Échappée ; il sauve une créature de sa case qui devrait mourir (elle recule d'une case avec 1 PV), puis le jeton est défaussé."],
       B1: ["Griffes", "Aura Coup de grâce : un bâtiment laissé à 1 PV par une attaque de sa case est détruit. Aura Mobilité 1 (+1 vitesse)."],
       A2: ["Régénération", "Aura Soin total : en fin de tour de l'essaim, les autres créatures de sa case retrouvent tous leurs PV. Les Glaneurs quittent la pioche."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.25";
+  const VERSION = "0.5.26";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -398,6 +398,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ créatures
   function makeCreature(S, name, lane, u, extra) {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
+    if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r1 === "A") c.esc = 1; // Mue : jeton Échappée à l'arrivée (Oni, 12/11/2026)
     if (CREATURES[name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1; // Blindage : jeton à l'arrivée (Oni, 11/11/2026)
     return c;
   }
@@ -440,20 +441,20 @@ const SF = (() => {
     }
     if (dead.length) syncBonus(S); // les survivants qui perdent un bonus (soutien mort) gardent leurs PV
   }
-  // Échappée (Mue, Oni 11/11/2026) : une fois par case pendant chaque tour (essaim, puis colonie), une créature accompagnée d'un autre soutien qui devrait
-  // mourir recule d'une case (même colonne, vers l'entrée, au-delà des bâtiments) avec 1 PV ; sur la case d'entrée, elle reste
+  // Échappée (Mue, Oni 11/11/2026 ; jetons depuis le 12/11/2026, car trop forte) : chaque soutien porte un jeton Échappée (`esc`) ;
+  // une créature qui devrait mourir, accompagnée d'un autre soutien vivant qui a encore son jeton, recule d'une case (même colonne,
+  // vers l'entrée, au-delà des bâtiments) avec 1 PV, et ce jeton est défaussé pour de bon ; sur la case d'entrée, elle reste
   function escape(S, c) {
-    if (S.upgrades.soutien.r1 !== "A" || !caseMates(S, c).some(o => isSoutien(o) && o.hp + bonusHp(S, o) > 0)) return false;
-    const from = posKey(c);
-    S.escaped = S.escaped || [];
-    if (S.escaped.includes(from)) return false;
-    S.escaped.push(from);
+    if (S.upgrades.soutien.r1 !== "A") return false;
+    const saver = caseMates(S, c).find(o => isSoutien(o) && o.esc && o.hp + bonusHp(S, o) > 0);
+    if (!saver) return false;
+    saver.esc = 0;
     let nk = Math.min(4, c.k + 1);
     while (nk < 4 && S.tiles[key(...toGlobal(c.lane, c.u, nk))]) nk++;
     c.hp = 1;
     if (nk !== c.k) { fx(S, { t: "push", ids: [c.id], lane: c.lane, u: c.u, to: nk }); c.k = nk; }
     fx(S, { t: "cheal", id: c.id, n: 1, hp: 1 });
-    log(S, "essaim", `Échappée : ${c.name} survit avec 1 PV et recule ${nk === 4 ? "sur la case d'entrée" : "en " + cellName(c.u, nk)}.`);
+    log(S, "essaim", `Échappée : ${saver.name} sauve ${c.name} (jeton défaussé) : il survit avec 1 PV et recule ${nk === 4 ? "sur la case d'entrée" : "en " + cellName(c.u, nk)}.`);
     return true;
   }
   function damageCreature(S, c, n, why) {
@@ -829,7 +830,7 @@ const SF = (() => {
 
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
-    S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.escaped = []; S.tpUsed = false; delete S.pickTotal;
+    S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
     // Réincarnation : un seul tank mort → il revient ; plusieurs → l'essaim choisit (étape A_reinc, action reinc)
     S.reincQueue = S.reincQueue || [];
@@ -1032,6 +1033,9 @@ const SF = (() => {
     fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
+    if (type === "soutien" && slot === "A1") { // Mue : les soutiens déjà en jeu reçoivent aussi leur jeton Échappée (Oni, 12/11/2026)
+      for (const c of S.creatures) if (CREATURES[c.name].type === "soutien") c.esc = 1;
+    }
     if (type === "tank" && slot === "A2") { // Blindage : les tanks déjà en jeu reçoivent aussi leur jeton (Oni, 11/11/2026)
       for (const c of S.creatures) if (CREATURES[c.name].type === "tank") c.blind = 1;
     }
@@ -1168,7 +1172,6 @@ const SF = (() => {
   }
   function startDefenderTurn(S) {
     S.phase = needDraw(S) ? "D_draw" : "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
-    S.escaped = []; // Échappée : une fois par case pendant le tour de l'essaim, et encore une fois pendant celui de la colonie (Oni, 11/11/2026)
     // construction immédiate (Oni, 08/11/2026) : points du tour fixés au début du tour (un bâtiment posé ce tour, ou un
     // support de niveau 3 apparu, ne donne ses travailleurs qu'au tour suivant), dépensés bâtiment par bâtiment
     S.turnPts = S.workersBase + bonusWorkers(S); S.spent = 0; S.built = { N: 0, E: 0, S: 0, O: 0 };
@@ -1413,6 +1416,8 @@ const SF = (() => {
   function migrate(S) {
     if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
     if (!S.depouilles) S.depouilles = [];
+    if (S.upgrades && S.upgrades.soutien.r1 === "A") for (const c of S.creatures || []) if (CREATURES[c.name] && CREATURES[c.name].type === "soutien" && c.esc === undefined) c.esc = 1; // anciennes parties
+    delete S.escaped;
     { // Phéromone renommée Charognard (Oni, 12/11/2026)
       const ren = n => (n === "Phéromone" ? "Charognard" : n);
       for (const l of [1, 2, 3]) if (S.piles && S.piles[l]) S.piles[l] = S.piles[l].map(ren);

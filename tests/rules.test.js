@@ -1078,11 +1078,15 @@ const fresh = () => {
 // 68. Oni, 08/11/2026 : PV bonus perdus = seul le maximum baisse ; spores sur les 8 cases autour, fusée comprise
 {
   const at = (id, name, k, hp, u = 0) => ({ id, name, lane: "N", u, k, hp, acted: false });
-  // Échappée (Mue, 11/11/2026) : une fois par tour et par case, la créature qui devrait mourir recule d'une case avec 1 PV
+  // Échappée (Mue, jetons depuis le 12/11/2026) : chaque soutien sauve une seule créature (la créature recule d'une case avec 1 PV), puis son jeton est défaussé
   const S = fresh(); S.supports = {}; for (const k of Object.keys(S.tiles)) delete S.tiles[k]; S.upgrades.soutien.r1 = "A";
-  const e1 = at(1, "Écorcheur", 2, 0), e2 = at(2, "Écorcheur", 2, 0), g = at(3, "Glaneur", 2, 2);
+  const e1 = at(1, "Écorcheur", 2, 0), e2 = at(2, "Écorcheur", 2, 0), g = at(3, "Glaneur", 2, 2); g.esc = 1;
   S.creatures.push(e1, e2, g); SF.killCheck(S);
-  ok(S.creatures.includes(e1) && e1.hp === 1 && e1.k === 3 && !S.creatures.includes(e2), "Échappée : la 1ʳᵉ recule en couronne 3 avec 1 PV, la 2ᵉ meurt (une fois par case)");
+  ok(S.creatures.includes(e1) && e1.hp === 1 && e1.k === 3 && !S.creatures.includes(e2) && g.esc === 0, "Échappée : le soutien sauve la 1ʳᵉ (recule en couronne 3, 1 PV), son jeton est défaussé, la 2ᵉ meurt");
+  const S2 = fresh(); S2.supports = {}; for (const k of Object.keys(S2.tiles)) delete S2.tiles[k]; S2.upgrades.soutien.r1 = "A";
+  const f1 = at(4, "Écorcheur", 2, 0), f2 = at(5, "Écorcheur", 2, 0), h1 = at(6, "Glaneur", 2, 2), h2 = at(7, "Œil-sonde", 2, 2); h1.esc = 1; h2.esc = 1;
+  S2.creatures.push(f1, f2, h1, h2); SF.killCheck(S2);
+  ok(S2.creatures.includes(f1) && S2.creatures.includes(f2) && !h1.esc && !h2.esc, "deux soutiens avec chacun un jeton : deux créatures sauvées");
   const T = fresh(); T.supports = {}; const lone = at(10, "Écorcheur", 2, 0); T.upgrades.soutien.r1 = "A"; T.creatures.push(lone); SF.killCheck(T);
   ok(!T.creatures.includes(lone), "sans soutien sur sa case, pas d'Échappée");
   // spores : 8 cases, toutes lanes, fusée comprise
@@ -1287,8 +1291,9 @@ const fresh = () => {
   BA.invest = { "tank:A1": 0 }; BA.upgrades.tank.r1 = "A"; BA.invest["tank:A2"] = SF.COST_R2 - 1; BA.reserve = 5; BA.phase = "A_deploy";
   SF.apply(BA, "essaim", "invest", { t: "tank", s: "A2", n: 1 });
   ok(BA.upgrades.tank.r2 === "A" && old.blind === 1 && !BA.creatures[1].blind, "Blindage acheté : les tanks déjà en jeu reçoivent leur jeton");
-  const EC = SF.newGame(); EC.escaped = ["x"]; EC.phase = "D_fire"; SF.apply(EC, "colonie", "endD", {});
-  ok(EC.escaped.length === 0, "Échappée : remise à zéro au début de chaque tour");
+  const EC = SF.newGame(); EC.upgrades.soutien.r1 = "A"; EC.handA = [{ name: "Glaneur", uid: 1 }]; EC.phase = "A_deploy"; EC.budget = 9;
+  SF.apply(EC, "essaim", "deploy", { uid: 1, lane: "N", u: 0 });
+  ok(EC.creatures.at(-1).esc === 1, "Mue : un soutien déployé arrive avec son jeton Échappée");
   const M = SF.newGame(); M.supports = {}; for (const k of Object.keys(M.tiles)) delete M.tiles[k]; M.upgrades.tank.r1 = "A";
   M.tiles["0,1"] = SF.tileStats("Mine majeure", 0, 1); const c = at(20, "Carapace", 2, 4); M.creatures.push(c);
   SF.hitTile(M, c, "0,1", 1, true);

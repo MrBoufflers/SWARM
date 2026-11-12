@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.26 — 12 novembre 2026
+
+**Règles (Oni) : Échappée (Mue) trop forte**
+- Chaque soutien porte un **jeton Échappée** (donné à son arrivée, et à l'achat de la Mue pour ceux déjà en jeu). Il sauve **une seule** créature de sa case qui devrait mourir (elle recule d'une case avec 1 PV), puis le jeton est défaussé pour de bon. Plus de limite « une fois par tour » : plusieurs soutiens sur une case sauvent plusieurs créatures, chacun une fois.
+
 ## v0.5.25 — 12 novembre 2026
 
 **Règles (Oni)**

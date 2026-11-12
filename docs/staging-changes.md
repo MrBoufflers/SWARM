@@ -16,3 +16,6 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 - La Phéromone s'appelle maintenant Charognard (même effet : Dépouille).
 - Les jetons Dépouille sont dégagés par la Nuke, et par les sortilèges Barrage (sa lane) et Onde de choc (sa couronne).
 - Correctif : le résumé « Sur cette case » est visible dès qu'on sélectionne une créature (avant, seulement après son déplacement).
+
+## v0.5.26
+- Échappée (Mue) : chaque soutien a un jeton qui ne sauve qu'une seule créature, puis il est défaussé (plus de limite par tour).
