@@ -16,8 +16,8 @@ const SF = (() => {
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV." },
     // Catalyseur passe au niveau 1 (0/2) et le Hurleur au niveau 2 (0/4, Aura Fureur +2 ATQ) — Oni, 07/11/2026
     "Catalyseur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les autres créatures de sa case ne subissent pas les dégâts d'Épines." },
-    // Phéromone : Aura Butin (01/11/2026), remplacée par Dépouille (Oni, 12/11/2026)
-    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "depouille", capName: "Dépouille", capText: "Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case : la colonie ne peut plus y construire tant qu'une tourelle à portée n'a pas tiré dessus (un tir)." },
+    // Charognard : Aura Butin (01/11/2026), remplacée par Dépouille (Oni, 12/11/2026)
+    "Charognard": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "depouille", capName: "Dépouille", capText: "Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case : la colonie ne peut plus y construire tant qu'une tourelle à portée n'a pas tiré dessus (un tir)." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
     "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case (cumulable)." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
@@ -26,7 +26,7 @@ const SF = (() => {
   };
   const PILES = {
     1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Catalyseur", 2]] },
-    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Phéromone", 2], ["Perforeur", 2], ["Hurleur", 2]] },
+    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Charognard", 2], ["Perforeur", 2], ["Hurleur", 2]] },
     3: { aggro: [["Massacreur", 6]], tank: [["Colosse", 6]], soutien: [["Sapeur", 3], ["Sporeur", 3]] },
   };
   // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
@@ -87,8 +87,8 @@ const SF = (() => {
     // un seul exemplaire de chaque sortilège ; Cadence retirée (doublon d'Effort) — Oni, 09/11/2026
     "Frappe orbitale": { kind: "off", n: 1, text: "Détruit une créature." },
     "Salve": { kind: "off", n: 1, text: "3 dégâts à 2 créatures de la même case." },
-    "Barrage": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une lane." },
-    "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes." },
+    "Barrage": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une lane. Dégage les jetons Dépouille de cette lane." },
+    "Onde de choc": { kind: "off", n: 1, text: "1 dégât à chaque créature d'une couronne, sur les 4 lanes. Dégage les jetons Dépouille de cette couronne." },
     // Champ de stase (Oni, 04/11/2026 ; avant : toute une lane) : un seul bâtiment, et ses Épines sont suspendues
     "Champ de stase": { kind: "off", n: 1, text: "Choisissez un bâtiment : ce tour, il ne subit aucun dégât et les créatures qui l'attaquent ne subissent pas ses Épines ; l'attaque passe quand même en percée et les spores touchent ses voisins." },
     "Famine": { kind: "off", n: 1, text: "Au début du tour de l'essaim : ce tour, son budget est sa biomasse divisée par 2 (arrondie à l'inférieur)." },
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.24";
+  const VERSION = "0.5.25";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -342,13 +342,13 @@ const SF = (() => {
     }
     return e;
   }
-  // by : la créature dont l'attaque a détruit la tuile (attaque, percée ou spores), pour l'Aura Butin de la Phéromone
+  // by : la créature dont l'attaque a détruit la tuile (attaque, percée ou spores), pour l'Aura Butin de la Charognard
   function destroyTile(S, k, why, by) {
     const t = S.tiles[k]; if (!t) return;
     delete S.tiles[k];
     if (!t.start) S.tileDiscards[tileCat(t.name)].push(t.name);
     // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
-    const gain = 1; // plus d'Aura Butin (Phéromone → Dépouille, Oni 12/11/2026)
+    const gain = 1; // plus d'Aura Butin (Charognard → Dépouille, Oni 12/11/2026)
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
     const nm = t.camo && !t.revealed ? "Une tuile camouflée" : t.name; // ne pas nommer une tuile camouflée jamais révélée
@@ -420,8 +420,8 @@ const SF = (() => {
     const deadSet = new Set(dead);
     for (const c of dead) {
       if (escape(S, c)) { deadSet.delete(c); continue; }
-      // Dépouille (Phéromone, Oni 12/11/2026) : une créature qui meurt hors de la case d'entrée, avec une Phéromone vivante sur sa case, laisse un jeton
-      if (c.k < 4 && S.creatures.some(o => o !== c && o.name === "Phéromone" && !deadSet.has(o) && posKey(o) === posKey(c))) {
+      // Dépouille (Charognard, Oni 12/11/2026) : une créature qui meurt hors de la case d'entrée, avec une Charognard vivant sur sa case, laisse un jeton
+      if (c.k < 4 && S.creatures.some(o => o !== c && o.name === "Charognard" && !deadSet.has(o) && posKey(o) === posKey(c))) {
         const dk = posKey(c); S.depouilles = S.depouilles || [];
         if (!S.depouilles.includes(dk)) { S.depouilles.push(dk); fx(S, { t: "depouille", k: dk }); log(S, "essaim", `Dépouille : ${c.name} laisse un jeton sur la case ${cellName(c.u, c.k)} (lane ${LANE_NAME[c.lane]}) : plus de construction possible.`); }
       }
@@ -1083,6 +1083,13 @@ const SF = (() => {
     killCheck(S);
     return true;
   }
+  // Dépouilles dégagées par la Nuke et par les sortilèges de zone (Barrage : sa lane ; Onde de choc : sa couronne) — Oni, 12/11/2026
+  function clearDepouilles(S, inZone) {
+    const gone = (S.depouilles || []).filter(inZone);
+    if (!gone.length) return;
+    S.depouilles = S.depouilles.filter(k => !gone.includes(k));
+    log(S, "colonie", `${gone.length} jeton${gone.length > 1 ? "s" : ""} Dépouille dégagé${gone.length > 1 ? "s" : ""}.`);
+  }
   function applySpell(S, name, arg) {
     const cr = id => S.creatures.find(c => c.id === id);
     switch (name) {
@@ -1096,8 +1103,8 @@ const SF = (() => {
         damageCreature(S, first, 3, name); if (rest[0]) damageCreature(S, rest[0], 3, name); // 3 dégâts (Oni, 09/11/2026 ; avant 2)
         return true;
       }
-      case "Barrage": { if (!LANES.includes(arg)) return false; for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
-      case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
+      case "Barrage": { if (!LANES.includes(arg)) return false; clearDepouilles(S, k => cellLane(...parse(k)) === arg); for (const c of S.creatures.filter(c => c.lane === arg && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
+      case "Onde de choc": { const r = Number(arg); if (!(r >= 1 && r <= 3)) return false; clearDepouilles(S, k => ring(...parse(k)) === r); for (const c of S.creatures.filter(c => c.k === r && targetable(S, c))) damageCreature(S, c, 1, name); return true; }
       case "Champ de stase": { if (typeof arg !== "string" || !S.tiles[arg]) return false; S.stase.push(arg); return true; }
       case "Famine": { if (S.phase !== "A_start") return false; S.famine = 1; return true; }
       case "Brouillage": { // stase de toute une case (Oni, 09/11/2026) : ses créatures ne bougent pas et n'attaquent pas ce tour
@@ -1339,6 +1346,7 @@ const SF = (() => {
         for (const l of [1, 2, 3]) shuffle(S.piles[l]);
         log(S, "colonie", `Palier 9 · Nuke : ${S.creatures.length} créature${S.creatures.length > 1 ? "s" : ""} détruite${S.creatures.length > 1 ? "s" : ""}.`);
         S.creatures = [];
+        if ((S.depouilles || []).length) { log(S, "colonie", "Nuke : les jetons Dépouille sont dégagés."); S.depouilles = []; } // Oni, 12/11/2026
       }
       if (S.floors === FLOORS) { fx(S, { t: "liftoff" }); S.winner = "colonie"; log(S, "jeu", "La fusée décolle : la colonie gagne."); return; }
     }
@@ -1405,6 +1413,11 @@ const SF = (() => {
   function migrate(S) {
     if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
     if (!S.depouilles) S.depouilles = [];
+    { // Phéromone renommée Charognard (Oni, 12/11/2026)
+      const ren = n => (n === "Phéromone" ? "Charognard" : n);
+      for (const l of [1, 2, 3]) if (S.piles && S.piles[l]) S.piles[l] = S.piles[l].map(ren);
+      for (const c of [...(S.creatures || []), ...(S.handA || []), ...(S.reincQueue || [])]) if (c && c.name) c.name = ren(c.name);
+    }
     delete S.reincUsed; // Réincarnation au choix (v0.5.14)
     if (S.killed === undefined) S.killed = 0;
     // v0.5 : Hurleur et Catalyseur changent de niveau, donc de pioche

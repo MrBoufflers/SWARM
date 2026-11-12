@@ -134,7 +134,7 @@ const fresh = () => {
 {
   const S = fresh(); SF.attackerDraw(S);
   ok(["Œil-sonde","Glaneur","Catalyseur"].every(n => SF.CREATURES[n].pv === 2 && SF.CREATURES[n].atq === 0 && SF.CREATURES[n].lvl === 1), "soutiens N1 (Catalyseur depuis la v0.5) : 0 ATQ / 2 PV");
-  ok(["Phéromone","Perforeur","Hurleur"].every(n => SF.CREATURES[n].pv === 4 && SF.CREATURES[n].atq === 0 && SF.CREATURES[n].lvl === 2), "soutiens N2 (Hurleur depuis la v0.5) : 0 ATQ / 4 PV");
+  ok(["Charognard","Perforeur","Hurleur"].every(n => SF.CREATURES[n].pv === 4 && SF.CREATURES[n].atq === 0 && SF.CREATURES[n].lvl === 2), "soutiens N2 (Hurleur depuis la v0.5) : 0 ATQ / 4 PV");
   ok(["Sapeur","Sporeur"].every(n => SF.CREATURES[n].pv === 6 && SF.CREATURES[n].atq === 0), "soutiens N3 : 0 ATQ / 6 PV");
   const g = { id: 1, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2, new: true, acted: false };
   const h = { id: 2, name: "Hurleur", lane: "N", u: 0, k: 4, hp: 2, new: true, acted: false };
@@ -530,22 +530,22 @@ const fresh = () => {
   const c = { id: 97, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(c); SF.act(T, c);
   ok(c.hp === 3, "Piège vu par la Vision d'un Œil-sonde : il ne se déclenche plus");
 }
-// 42. Phéromone : Dépouille (remplace l'Aura Butin, Oni 12/11/2026)
+// 42. Charognard : Dépouille (remplace l'Aura Butin, Oni 12/11/2026)
 {
   const mk = (name, k, hp = 1) => ({ id: Math.floor(Math.random() * 1e6) + 1000, name, lane: "N", u: 0, k, hp, acted: false });
   const S = fresh(); S.supports = {}; S.phase = "D_main"; S.round = 2;
-  const dead = mk("Écorcheur", 2, 0), ph = mk("Phéromone", 2, 4); S.creatures.push(dead, ph);
+  const dead = mk("Écorcheur", 2, 0), ph = mk("Charognard", 2, 4); S.creatures.push(dead, ph);
   const k = SF.key(...SF.toGlobal("N", 0, 2));
   SF.killCheck(S);
-  ok(S.depouilles.length === 1 && S.depouilles[0] === k, "Phéromone : la créature morte de sa case laisse un jeton Dépouille");
+  ok(S.depouilles.length === 1 && S.depouilles[0] === k, "Charognard : la créature morte de sa case laisse un jeton Dépouille");
   S.hand = ["Palissade"]; S.turnPts = 5; S.spent = 0;
   ok(!SF.buildTargets(S, 0).includes(k), "Dépouille : aucun bâtiment ne peut être construit sur la case");
   const b = S.biomass; S.tiles["0,1"] = SF.tileStats("Palissade", 0, 1);
   SF.destroyTile && SF.destroyTile(S, "0,1", "", ph);
-  ok(SF.CREATURES["Phéromone"].capName === "Dépouille", "la Phéromone n'a plus l'Aura Butin");
+  ok(SF.CREATURES["Charognard"].capName === "Dépouille", "la Charognard n'a plus l'Aura Butin");
   const T = fresh(); T.supports = {}; const alone = mk("Écorcheur", 2, 0); T.creatures.push(alone); SF.killCheck(T);
-  ok(T.depouilles.length === 0, "sans Phéromone sur la case : pas de Dépouille");
-  const E = fresh(); const d2 = mk("Écorcheur", 4, 0); E.creatures.push(d2, mk("Phéromone", 4, 4)); SF.killCheck(E);
+  ok(T.depouilles.length === 0, "sans Charognard sur la case : pas de Dépouille");
+  const E = fresh(); const d2 = mk("Écorcheur", 4, 0); E.creatures.push(d2, mk("Charognard", 4, 4)); SF.killCheck(E);
   ok(E.depouilles.length === 0, "case d'entrée : pas de Dépouille");
   const F = fresh(); F.phase = "D_fire"; F.firedSupports = []; F.depouilles = [k];
   const sk = Object.keys(F.supports).find(x => { const [px, py] = SF.parse(x), [dx, dy] = SF.parse(k); return F.supports[x] === 1 && Math.max(Math.abs(px - dx), Math.abs(py - dy)) === 1; });
@@ -644,7 +644,7 @@ const fresh = () => {
   const e = { id: 151, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(e); SF.act(T, e);
   ok(T.tiles["0,1"].hp === 4, "Rempart frappé pour 1 (moins que 2) : aucun PV perdu");
   ok([3, 6, 7, 15].map(SF.famineBudget).join() === "1,3,3,7", "Famine : budget = biomasse ÷ 2 arrondie à l'inférieur (3→1, 6→3, 7→3, 15→7)");
-  ok(["Œil-sonde", "Glaneur", "Catalyseur"].every(n => SF.CREATURES[n].pv === 2) && ["Hurleur", "Phéromone"].every(n => SF.CREATURES[n].pv === 4) && ["Sapeur", "Sporeur"].every(n => SF.CREATURES[n].pv === 6), "soutiens : 2 PV (niveau 1), 4 (niveau 2), 6 (niveau 3)");
+  ok(["Œil-sonde", "Glaneur", "Catalyseur"].every(n => SF.CREATURES[n].pv === 2) && ["Hurleur", "Charognard"].every(n => SF.CREATURES[n].pv === 4) && ["Sapeur", "Sporeur"].every(n => SF.CREATURES[n].pv === 6), "soutiens : 2 PV (niveau 1), 4 (niveau 2), 6 (niveau 3)");
 }
 // 50. Siphon : révélé par une attaque, −3 biomasse à l'essaim (jamais sous 3) ; pas s'il a été vu avant (Oni, 02/11/2026)
 {

@@ -4,6 +4,15 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.25 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Phéromone renommée Charognard** (même carte, même effet Dépouille ; les anciennes parties sont converties).
+- **Dépouilles dégagées** par la **Nuke** (toutes) et par les sortilèges de zone : **Barrage** (celles de la lane visée) et **Onde de choc** (celles de la couronne visée).
+
+**Corrections**
+- **Résumé de la case** : il n'apparaissait qu'une fois la créature arrêtée ; il s'affiche maintenant dès qu'une créature est sélectionnée pour se déplacer (cadre d'étape, écran PC).
+
 ## v0.5.24 — 12 novembre 2026
 
 **Règles (Oni)**

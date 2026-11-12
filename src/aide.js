@@ -192,7 +192,7 @@ const AIDE = (() => {
       text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : le bâtiment ne perd qu'1 PV par tranche de X dégâts d'une même attaque.` },
     { id: "e-tourelles", side: "essaim", img: "support 2", title: "Les tourelles", when: S => S.phase === "A_attack" && S.creatures.some(c => c.k <= 3),
       text: () => `Les coins turquoise sont des supports. Ceux de niveau I et II sont des tourelles : à la fin de son tour, la colonie tire avec chacune sur une créature des 8 cases autour. Un support tombe quand tous les bâtiments qui le touchent sont détruits, et vous rapporte 1 biomasse.` },
-    { id: "e-biomasse", side: "essaim", img: "Phéromone", title: "Gagner de la biomasse", when: S => S.biomass > 5,
+    { id: "e-biomasse", side: "essaim", img: "Charognard", title: "Gagner de la biomasse", when: S => S.biomass > 5,
       text: S => `Chaque bâtiment détruit et chaque support tombé rapporte 1 biomasse. Paliers suivants : ${SF.TIERS.slice(1).map(t => t.min).join(", ")} de biomasse. Ils donnent plus de cartes, de meilleur niveau, et plus de créatures par lane.` },
     { id: "e-fusee", side: "essaim", img: "Fusée", title: "Frapper la fusée", when: S => nearRocket(S),
       text: () => `Une créature qui touche la fusée peut l'attaquer : chaque attaque tue 1 travailleur, quelle que soit sa force. La colonie perd quand elle n'a plus de travailleurs.` },

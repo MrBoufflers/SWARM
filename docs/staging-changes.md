@@ -11,3 +11,8 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.24
 - Phéromone : plus d'Aura Butin (+1 biomasse), remplacée par Dépouille — une créature morte sur sa case laisse un jeton qui bloque la construction jusqu'à ce qu'une tourelle à portée tire dessus.
+
+## v0.5.25
+- La Phéromone s'appelle maintenant Charognard (même effet : Dépouille).
+- Les jetons Dépouille sont dégagés par la Nuke, et par les sortilèges Barrage (sa lane) et Onde de choc (sa couronne).
+- Correctif : le résumé « Sur cette case » est visible dès qu'on sélectionne une créature (avant, seulement après son déplacement).

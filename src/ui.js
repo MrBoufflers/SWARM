@@ -398,7 +398,7 @@
         const t = SF.strikeTargets(S, sel), n = Object.keys(SF.reachable(S, sel)).length;
         const tb = t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "";
         const what = sel.struck ? (t.length ? "2ᵉ attaque possible (Carnage)" : "rien d'autre à attaquer") : n ? `avancez de 1 à ${n} case${n > 1 ? "s" : ""} (cases surlignées)` : SF.attacks(sel) ? (t.length ? "attaquez un bâtiment encadré, ou passez" : "rien à attaquer") : "un soutien n'attaque pas";
-        body = `<p class="hint"><b>${E(sel.name)}</b>${sh ? "" : " · " + posTxt(sel)} : ${what}.</p>${tb}<div class="choices"><button data-a="rest" data-id="${sel.id}">${n && !sel.moved ? "Ne pas bouger" : "Terminer pour cette créature"}</button></div>`;
+        body = `<p class="hint"><b>${E(sel.name)}</b>${sh ? "" : " · " + posTxt(sel)} : ${what}.</p>${tb}<div class="choices"><button data-a="rest" data-id="${sel.id}">${n && !sel.moved ? "Ne pas bouger" : "Terminer pour cette créature"}</button></div>${sh ? caseGrid(sel) : ""}`;
       } else body = `<p class="hint">Touchez une créature pour la déplacer puis attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>`;
       acts = `<button data-a="actAll" class="primary">Tout résoudre et finir le tour</button>`;
     } else if (ph === "D_spell") { // un sortilège parmi deux (Oni, 09/11/2026)
@@ -575,7 +575,7 @@
         }
       }
       const stased = S.stase.includes(k);
-      // Dépouille (Phéromone, Oni 12/11/2026) : jeton sur la case ; touchable quand une tourelle choisie l'a à portée
+      // Dépouille (Charognard, Oni 12/11/2026) : jeton sur la case ; touchable quand une tourelle choisie l'a à portée
       const dep = (S.depouilles || []).includes(k);
       const depHot = dep && S.phase === "D_fire" && S.view === "colonie" && UI.support && SF.depTargets(S, UI.support).includes(k);
       // soutien choisi en déploiement : parachutage sur n'importe quelle case libre (Oni, 07/11/2026)
@@ -637,7 +637,7 @@
   // Auras (Oni, 10/11/2026) : une liste unique — la capacité du soutien (si c'est une aura) et chaque aura donnée par les
   // améliorations de soutien acquises (Mue, Griffes, Régénération, Corrosion), chacune avec son icône et son effet court.
   // self : l'aura profite aussi au soutien qui la donne (Aura Mobilité 1, moteur : speedOf).
-  const AURA_CAPS = ["soin", "fureur", "percee", "cuirasse", "spores"]; // Dépouille (Phéromone) n'est pas une aura
+  const AURA_CAPS = ["soin", "fureur", "percee", "cuirasse", "spores"]; // Dépouille (Charognard) n'est pas une aura
   const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+2 ATQ", percee: "Percée",
     cuirasse: "insensible aux Épines", spores: "2 dégâts autour de la cible" };
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
@@ -694,6 +694,16 @@
   // effet total d'une aura reçue de n sources : « +1 vitesse » ×3 → « +3 vitesse » (Oni, 10/11/2026)
   const fxTimes = (fx, n) => (n > 1 ? fx.replace(/\+(\d+)/g, (m, d) => "+" + d * n) : fx);
   const auraChip = (x, pre) => `<span class="cap au-chip" tabindex="0" data-tip="${E(`${auraName(x)} : ${fxTimes(x.fx, x.n)}${x.n > 1 ? ` (${x.n} sources)` : ""}`)}">${icon(x.icon)}${E(pre ? x.name : x.labs.join(" "))}${x.n > 1 ? `<b>×${x.n}</b>` : ""}<small>${E(fxTimes(x.fx, x.n))}</small></span>`;
+  // résumé de la case d'une créature (si elle n'est pas seule) : tableau de chacune avec ses valeurs réelles et les effets qu'elle reçoit
+  // (lisibilité des gros groupes). Affiché dans la fiche, et dans le cadre d'étape pendant les déplacements (Oni, 12/11/2026 :
+  // la fiche flottante n'apparaissait qu'une fois la créature arrêtée)
+  function caseGrid(c) {
+    const here = S.creatures.filter(o => SF.posKey(o) === SF.posKey(c));
+    return here.length > 1 ? `<div class="casegrid"><span class="cg-h">Sur cette case (${here.length})</span>${here.map(o => {
+      const r = recLabels(receivedAuras(o));
+      return `<span class="cg-row ${SF.CREATURES[o.name].type}${o === c ? " me" : ""}"><b>${E(o.name)}</b><span class="cg-st">${icon("atq")}${SF.effAtq(S, o)} ${icon("pv")}${o.hp + SF.bonusHp(S, o)} ${icon("mobilite")}${SF.speedOf(S, o)}</span><span class="cg-fx">${r.map(l => `<i>${E(l)}</i>`).join("")}</span></span>`;
+    }).join("")}</div>` : "";
+  }
   function detail(id) {
     const c = S.creatures.find(o => o.id === (id === undefined ? UI.selCreature : id));
     if (!c) return `<p class="detail empty">Touchez une créature pour voir sa carte.</p>`;
@@ -706,12 +716,7 @@
     if (c.blind) extras.push("jeton Blindage (la prochaine perte de PV est annulée)");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     const giv = givenAuras(c), rec = receivedAuras(c);
-    // case de plusieurs créatures : tableau de chacune avec ses valeurs réelles et les effets qu'elle reçoit (lisibilité des gros groupes)
-    const here = S.creatures.filter(o => SF.posKey(o) === SF.posKey(c));
-    const grid = here.length > 1 ? `<div class="casegrid"><span class="cg-h">Sur cette case (${here.length})</span>${here.map(o => {
-      const r = recLabels(receivedAuras(o));
-      return `<span class="cg-row ${SF.CREATURES[o.name].type}${o === c ? " me" : ""}"><b>${E(o.name)}</b><span class="cg-st">${icon("atq")}${SF.effAtq(S, o)} ${icon("pv")}${o.hp + SF.bonusHp(S, o)} ${icon("mobilite")}${SF.speedOf(S, o)}</span><span class="cg-fx">${r.map(l => `<i>${E(l)}</i>`).join("")}</span></span>`;
-    }).join("")}</div>` : "";
+    const grid = caseGrid(c);
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
       <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${icon("mobilite")} vitesse ${v}${v !== vb ? ` (${vWhy.join(" ")})` : ""} · ${posTxt(c)}</p>
       ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}
@@ -786,7 +791,7 @@
   const NODE_FACE = {
     aggro: { A1: "Ravageur", B1: "Ravageur", A2: "Massacreur", C2: "Massacreur", B2: "Massacreur" },
     tank: { A1: "Béhémoth", B1: "Béhémoth", A2: "Colosse", C2: "Colosse", B2: "Colosse" },
-    soutien: { A1: "Phéromone", B1: "Perforeur", A2: "Sapeur", C2: "Sporeur", B2: "Sapeur" },
+    soutien: { A1: "Charognard", B1: "Perforeur", A2: "Sapeur", C2: "Sporeur", B2: "Sapeur" },
   };
   function treesHtml(mine) {
     let trees = "";
