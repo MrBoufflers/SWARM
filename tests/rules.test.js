@@ -1129,6 +1129,7 @@ const fresh = () => {
 //     un bâtiment par lane et par tour (2 au palier 6) ; les points restants vont à la fusée
 {
   const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
+  S.round = 2; S.turnPts = S.workersBase; // hors premier tour (un seul bâtiment au total, test 72)
   ok(S.phase === "D_main" && S.turnPts === 3 && SF.pointsLeft(S) === 3, "début du tour : 3 points de construction");
   S.hand = ["Muraille", "Palissade", "Bastion", "Antenne"];
   const t = SF.buildTargets(S, 0);
@@ -1295,6 +1296,20 @@ const fresh = () => {
   R.invest = { "soutien:A2": SF.COST_R2 - 1 }; R.upgrades.soutien.r1 = "A"; R.reserve = 5; R.phase = "A_deploy";
   SF.apply(R, "essaim", "invest", { t: "soutien", s: "A2", n: 1 });
   ok(!R.piles[1].includes("Glaneur"), "Régénération : les Glaneurs quittent la pioche");
+}
+// 72. Premier tour de la colonie (Oni, 12/11/2026) : un seul bâtiment au total
+{
+  const S = fresh(); SF.attackerDraw(S); SF.endDeploy(S); SF.startAttacks(S); SF.endAttackerTurn(S);
+  S.hand = ["Palissade", "Palissade", "Palissade"]; S.turnPts = 10; S.spent = 0;
+  ok(S.round === 1 && S.phase.startsWith("D_"), "le premier tour de la colonie est la manche 1");
+  const k1 = SF.buildTargets(S, 0)[0];
+  ok(SF.apply(S, "colonie", "buildAt", { i: 0, k: k1 }) === "" && SF.firstTurnCap(S), "premier tour : un premier bâtiment se pose");
+  ok(SF.buildTargets(S, 0).length === 0, "premier tour : plus aucun bâtiment, même dans une autre lane et avec des points");
+  SF.apply(S, "colonie", "build");
+  while (S.phase === "D_place") SF.apply(S, "colonie", "placeAt", { k: SF.placeTargets(S)[0] });
+  ok(S.round >= 1 && (S.rocketPts > 0 || S.floors > 0), "les points non dépensés vont à la fusée");
+  const T = fresh(); T.round = 2; T.phase = "D_main"; T.hand = ["Palissade"]; T.turnPts = 5; T.spent = 0;
+  ok(!SF.firstTurnCap(T) && SF.buildTargets(T, 0).length > 0, "dès la manche 2, la règle ne s'applique plus");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

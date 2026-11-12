@@ -898,7 +898,7 @@
         ${box2(S.spells.length, "sorts en main", "Sortilèges en main")}
       </div>
       <h4 data-fx="ateliers">Construction ${S.phase === "D_main" && S.view === "colonie" ? `<span class="small">${SF.pointsLeft(S)} point(s) restant(s)</span>` : ""}</h4>
-      <div class="built-row">${SF.LANES.map(l => { const d = (S.built && S.built[l]) || 0; return `<span class="bchip lane-${l}${d >= S.chPerLane ? " full" : ""}" title="Bâtiments construits ce tour en lane ${SF.LANE_NAME[l]}"><b>${l}</b>${d}/${S.chPerLane}</span>`; }).join("")}</div>
+      <div class="built-row">${SF.LANES.map(l => { const d = (S.built && S.built[l]) || 0; return `<span class="bchip lane-${l}${d >= S.chPerLane || SF.firstTurnCap(S) ? " full" : ""}" title="${SF.firstTurnCap(S) ? "Premier tour : un seul bâtiment au total" : "Bâtiments construits ce tour en lane " + SF.LANE_NAME[l]}"><b>${l}</b>${d}/${S.chPerLane}</span>`; }).join("")}</div>
       <div class="po-scroll">
         <h4 data-fx="tilehand">Main de tuiles <span class="small">${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}</span></h4>${tileHandHtml(true)}
         <h4>Sortilèges</h4>${spellsHtml(true)}

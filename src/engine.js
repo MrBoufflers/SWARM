@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.22";
+  const VERSION = "0.5.23";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1166,8 +1166,11 @@ const SF = (() => {
   const pointsLeft = S => (S.turnPts != null ? S.turnPts + S.extraPts : totalPoints(S)) - (S.spent || 0) - allocated(S);
   // Construction immédiate (Oni, 08/11/2026 ; remplace les ateliers) : on paie d'un coup les points de construction d'une
   // tuile de la main et on la pose aussitôt sur une case valable ; un bâtiment par lane et par tour (2 au palier 6)
+  // Premier tour de la colonie (Oni, 12/11/2026) : un seul bâtiment au total ; les points non dépensés vont à la fusée
+  const firstTurnCap = S => S.round === 1 && LANES.reduce((n, l) => n + ((S.built && S.built[l]) || 0), 0) >= 1;
   function canBuildAt(S, name, k) {
     const t = TILES[name]; if (!t || S.phase !== "D_main" || S.relocate) return false;
+    if (firstTurnCap(S)) return false;
     const lane = cellLane(...parse(k)); if (!lane) return false;
     if (((S.built && S.built[lane]) || 0) + S.chantiers[lane].length >= S.chPerLane) return false;
     return t.d <= pointsLeft(S) && canTarget(S, lane, k);
@@ -1598,7 +1601,7 @@ const SF = (() => {
 
   return {
     VERSION,
-    fxFor, migrate, damageCreature, hitTile, famineBudget, MIN_BIOMASS, siphonLoss, relocateTargets, buildTargets, canBuildAt, pointsLeft, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
+    fxFor, migrate, firstTurnCap, damageCreature, hitTile, famineBudget, MIN_BIOMASS, siphonLoss, relocateTargets, buildTargets, canBuildAt, pointsLeft, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,

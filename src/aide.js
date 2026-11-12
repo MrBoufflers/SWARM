@@ -130,7 +130,7 @@ const AIDE = (() => {
       <h3>Votre tour</h3>
       <ol>
         <li><b>Sortilèges de soutien</b> : jouez ceux que vous voulez.</li>
-        <li><b>Construction immédiate</b> : touchez une tuile de votre main, puis une case surlignée : vous payez tout de suite ses points de construction et le bâtiment est posé aussitôt. Un bâtiment par lane et par tour (deux après l'étage 6). Case valable : libre, dans la lane, touchant un bâtiment, un support ou la fusée (sans diagonale) ; les créatures présentes reculent d'une case.</li>
+        <li><b>Construction immédiate</b> : touchez une tuile de votre main, puis une case surlignée : vous payez tout de suite ses points de construction et le bâtiment est posé aussitôt. Un bâtiment par lane et par tour (deux après l'étage 6) ; au tout premier tour, un seul bâtiment au total. Case valable : libre, dans la lane, touchant un bâtiment, un support ou la fusée (sans diagonale) ; les créatures présentes reculent d'une case.</li>
         <li><b>Fusée</b> : les points non dépensés vont à la fusée quand vous terminez la construction. Les points du tour sont fixés au début du tour : un bâtiment posé ce tour ne donne ses travailleurs qu'au tour suivant.</li>
         <li><b>Supports et fusée</b> : les nouveaux supports apparaissent, puis la fusée gagne ses étages.</li>
         <li><b>Tirs</b> : touchez une tourelle surlignée, puis une créature surlignée (ou « Tirs automatiques »). « Terminer le tour » fait tirer les tourelles restantes. Le tour passe seul quand plus aucune tourelle ne peut tirer.</li>
