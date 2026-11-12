@@ -530,21 +530,26 @@ const fresh = () => {
   const c = { id: 97, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(c); SF.act(T, c);
   ok(c.hp === 3, "Piège vu par la Vision d'un Œil-sonde : il ne se déclenche plus");
 }
-// 42. Phéromone : Aura Butin (remplace l'Aura Leurre) — Oni, 01/11/2026
+// 42. Phéromone : Dépouille (remplace l'Aura Butin, Oni 12/11/2026)
 {
-  const run = mates => {
-    const S = fresh(); S.supports = {};
-    const c = { id: 98, name: "Écorcheur", lane: "N", u: 0, k: 2, hp: 1, acted: false }; S.creatures.push(c);
-    mates.forEach((n, i) => S.creatures.push({ id: 120 + i, name: n, lane: "N", u: 0, k: 2, hp: 5, acted: false }));
-    const b = S.biomass; SF.actCase(S, SF.posKey(c), [98]); // au contact : l'Écorcheur détruit la haie de départ (1 PV) en C1
-    return S.biomass - b;
-  };
-  ok(run([]) === 1, "sans Phéromone : +1 biomasse");
-  ok(run(["Phéromone"]) === 2, "Phéromone sur la case de la créature qui détruit : +1 en plus (+2)");
-  ok(run(["Phéromone", "Phéromone"]) === 3, "deux Phéromones : cumulable (+3)");
-  const S = fresh(); const a = { id: 1, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1 }, big = { id: 2, name: "Béhémoth", lane: "N", u: 0, k: 4, hp: 5 }, ph = { id: 3, name: "Phéromone", lane: "N", u: 0, k: 4, hp: 5 };
-  S.creatures.push(a, big, ph);
-  ok(SF.resolveTarget(S, a) === a && SF.CREATURES["Phéromone"].capName === "Aura Butin", "plus de Leurre : un tir sur l'Écorcheur le vise bien lui");
+  const mk = (name, k, hp = 1) => ({ id: Math.floor(Math.random() * 1e6) + 1000, name, lane: "N", u: 0, k, hp, acted: false });
+  const S = fresh(); S.supports = {}; S.phase = "D_main"; S.round = 2;
+  const dead = mk("Écorcheur", 2, 0), ph = mk("Phéromone", 2, 4); S.creatures.push(dead, ph);
+  const k = SF.key(...SF.toGlobal("N", 0, 2));
+  SF.killCheck(S);
+  ok(S.depouilles.length === 1 && S.depouilles[0] === k, "Phéromone : la créature morte de sa case laisse un jeton Dépouille");
+  S.hand = ["Palissade"]; S.turnPts = 5; S.spent = 0;
+  ok(!SF.buildTargets(S, 0).includes(k), "Dépouille : aucun bâtiment ne peut être construit sur la case");
+  const b = S.biomass; S.tiles["0,1"] = SF.tileStats("Palissade", 0, 1);
+  SF.destroyTile && SF.destroyTile(S, "0,1", "", ph);
+  ok(SF.CREATURES["Phéromone"].capName === "Dépouille", "la Phéromone n'a plus l'Aura Butin");
+  const T = fresh(); T.supports = {}; const alone = mk("Écorcheur", 2, 0); T.creatures.push(alone); SF.killCheck(T);
+  ok(T.depouilles.length === 0, "sans Phéromone sur la case : pas de Dépouille");
+  const E = fresh(); const d2 = mk("Écorcheur", 4, 0); E.creatures.push(d2, mk("Phéromone", 4, 4)); SF.killCheck(E);
+  ok(E.depouilles.length === 0, "case d'entrée : pas de Dépouille");
+  const F = fresh(); F.phase = "D_fire"; F.firedSupports = []; F.depouilles = [k];
+  const sk = Object.keys(F.supports).find(x => { const [px, py] = SF.parse(x), [dx, dy] = SF.parse(k); return F.supports[x] === 1 && Math.max(Math.abs(px - dx), Math.abs(py - dy)) === 1; });
+  ok(!sk || (SF.apply(F, "colonie", "fireDep", { sk, k }) === "" && F.depouilles.length === 0 && F.firedSupports.includes(sk)), "un tir de tourelle à portée retire la Dépouille");
 }
 // 43. Piège avant l'attaque ; Percée limitée à la case suivante (Oni, 01/11/2026)
 {

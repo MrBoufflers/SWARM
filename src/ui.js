@@ -424,9 +424,10 @@
       if (UI.support) {
         const c = SF.supportTargets(S, UI.support);
         body = `<p class="hint">Tourelle ${["", "I", "II"][S.supports[UI.support]]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : ${sh ? "touchez une cible" : "touchez une créature surlignée sur le plateau, ou choisissez-la ici"}.</p><div class="choices">` +
-          c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("") + `</div>`;
+          c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("")
+          + SF.depTargets(S, UI.support).map(k => `<button data-a="fireDep" data-k="${k}">${icon("depouille")} Dépouille · ${E(tileLabel(k))}</button>`).join("") + `</div>`;
       } else {
-        const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length);
+        const ready = Object.keys(S.supports).filter(k => S.supports[k] < 3 && SF.shotsLeft(S, k) > 0 && (SF.supportTargets(S, k).length || SF.depTargets(S, k).length));
         body = ready.length ? `<p class="hint">${sh ? "Cliquez une tourelle surlignée." : "Tourelles prêtes : cliquez une tourelle surlignée sur le plateau."}</p>` : `<p class="hint">Aucune tourelle n'a de cible.</p>`;
       }
       acts = `<button data-a="endD" class="primary">Tirer et finir le tour</button>`; // tirs restants automatiques (Oni, 08/11/2026)
@@ -506,7 +507,7 @@
     return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Reste en main tant qu'il n'est pas joué.</small></span></div>`;
   }
   const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Feu nourri": "tourelle", "Réparation": "reparation", "Double bouclier": "protection", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
-  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", butin: "biomasse", percee: "percee", cuirasse: "renforce", sabotage: "sabotage", spores: "spores" }[c] || "aura");
+  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", depouille: "depouille", percee: "percee", cuirasse: "renforce", sabotage: "sabotage", spores: "spores" }[c] || "aura");
   const cardOf = uid => S.handA.find(c => c.uid === uid) || { name: "?" };
   function posTxt(c) { return c.k === 4 ? `entrée ${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}` : `${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}${c.k}`; }
   function tileLabel(k) {
@@ -552,7 +553,7 @@
       }
       if (SF.isSupportCell(x, y)) {
         const lvl = S.supports[k];
-        const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && SF.shotsLeft(S, k) > 0 && SF.supportTargets(S, k).length;
+        const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && SF.shotsLeft(S, k) > 0 && (SF.supportTargets(S, k).length || SF.depTargets(S, k).length);
         const fired = lvl && lvl < 3 && SF.shotsLeft(S, k) <= 0;
         html += lvl ? `<div class="cell sup ${imCls("support " + lvl)}${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
             <span class="lv">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? icon("tourelle") + `<b>${SF.turretDmg(S, lvl)}</b>` : icon("travailleur") + `<b>+${SF.SUP3_WORKERS}</b>`}</div>`
@@ -574,11 +575,14 @@
         }
       }
       const stased = S.stase.includes(k);
+      // Dépouille (Phéromone, Oni 12/11/2026) : jeton sur la case ; touchable quand une tourelle choisie l'a à portée
+      const dep = (S.depouilles || []).includes(k);
+      const depHot = dep && S.phase === "D_fire" && S.view === "colonie" && UI.support && SF.depTargets(S, UI.support).includes(k);
       // soutien choisi en déploiement : parachutage sur n'importe quelle case libre (Oni, 07/11/2026)
       const [pu, pk] = SF.toLocal(lane, x, y);
       const drop = !t && S.phase === "A_deploy" && S.view === "essaim" && UI.sel && !UI.sap && SF.canDeploy(S, cardOf(UI.sel), lane) && SF.canDrop(S, cardOf(UI.sel).name, lane, pu, pk);
       const atk = !target && T.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target || drop || tt ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${tt ? tt : target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${rng(k)}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target || drop || tt || depHot ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${depHot ? `data-a="fireDep" data-k="${k}"` : tt ? tt : target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${dep ? `<span class="dep" title="Dépouille : aucune construction ici tant qu'une tourelle à portée n'a pas tiré dessus">${icon("depouille")}</span>` : ""}${rng(k)}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -621,7 +625,7 @@
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
   const FX_LABEL = {
-    soin: () => ["+2 HEAL"], fureur: () => ["+2 ATQ"], butin: () => ["+1 BIO"], percee: () => ["PERCÉE"],
+    soin: () => ["+2 HEAL"], fureur: () => ["+2 ATQ"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+2 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
@@ -633,8 +637,8 @@
   // Auras (Oni, 10/11/2026) : une liste unique — la capacité du soutien (si c'est une aura) et chaque aura donnée par les
   // améliorations de soutien acquises (Mue, Griffes, Régénération, Corrosion), chacune avec son icône et son effet court.
   // self : l'aura profite aussi au soutien qui la donne (Aura Mobilité 1, moteur : speedOf).
-  const AURA_CAPS = ["soin", "fureur", "butin", "percee", "cuirasse", "spores"];
-  const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+2 ATQ", butin: "+1 biomasse par bâtiment détruit", percee: "Percée",
+  const AURA_CAPS = ["soin", "fureur", "percee", "cuirasse", "spores"]; // Dépouille (Phéromone) n'est pas une aura
+  const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+2 ATQ", percee: "Percée",
     cuirasse: "insensible aux Épines", spores: "2 dégâts autour de la cible" };
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
   // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
@@ -661,7 +665,7 @@
   function receivedAuras(c) { // auras dont cette créature profite, regroupées (n = nombre de sources)
     const all = SF.caseMates(S, c).flatMap(givenAuras);
     if (SF.CREATURES[c.name].type === "soutien") all.push(...upAuras().filter(x => x.self));
-    // un soutien n'attaque pas : les effets d'attaque reçus (ATQ, Percée, Butin, Spores, Corrosion, Cuirasse) ne le concernent pas
+    // un soutien n'attaque pas : les effets d'attaque reçus (ATQ, Percée, Spores, Corrosion, Cuirasse) ne le concernent pas
     const atk = SF.attacks(c), ATK_ONLY = ["percee", "biomasse", "spores", "corrosion", "renforce", "atq", "griffes"];
     const g = new Map();
     for (let x of all) {
@@ -1172,6 +1176,7 @@
       case "tpPick": UI.tp = Number(d.id); break;
       case "tpAt": { const id = UI.tp; UI.tp = null; if (id) return play("teleport", { id, lane: d.l, u: Number(d.u) }); break; }
       case "pickOne": return play("pickOne", { l: Number(d.v) });
+      case "fireDep": if (UI.support) { const sk = UI.support; UI.support = null; return play("fireDep", { sk, k: d.k }); } break;
       case "fireAt": if (UI.support) { const sk = UI.support; UI.support = null; return play("fire", { sk, id: Number(d.id) }); } break;
       case "autoFire": UI.support = null; return play("autoFire");
       case "endD": return play("endD");

@@ -16,8 +16,8 @@ const SF = (() => {
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV." },
     // Catalyseur passe au niveau 1 (0/2) et le Hurleur au niveau 2 (0/4, Aura Fureur +2 ATQ) — Oni, 07/11/2026
     "Catalyseur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les autres créatures de sa case ne subissent pas les dégâts d'Épines." },
-    // Phéromone (Oni, 01/11/2026) : l'Aura Leurre est remplacée par l'Aura Butin
-    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "butin", capName: "Aura Butin", capText: "Chaque autre créature de sa case qui détruit un bâtiment rapporte +1 biomasse en plus." },
+    // Phéromone : Aura Butin (01/11/2026), remplacée par Dépouille (Oni, 12/11/2026)
+    "Phéromone": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "depouille", capName: "Dépouille", capText: "Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case : la colonie ne peut plus y construire tant qu'une tourelle à portée n'a pas tiré dessus (un tir)." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
     "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case (cumulable)." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.23";
+  const VERSION = "0.5.24";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -197,7 +197,7 @@ const SF = (() => {
   function newGame() {
     const S = {
       version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
-      tiles: {}, supports: {}, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
+      tiles: {}, supports: {}, depouilles: [], chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
       workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
       tileDecks: { renfort: [], actif: [], piege: [] }, tileDiscards: { renfort: [], actif: [], piege: [] }, hand: [],
       spellDeck: [], spellDiscard: [], spells: [],
@@ -348,13 +348,11 @@ const SF = (() => {
     delete S.tiles[k];
     if (!t.start) S.tileDiscards[tileCat(t.name)].push(t.name);
     // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
-    // Aura Butin : +1 par Phéromone sur la case de la créature (Oni, 01/11/2026 ; cumulable depuis le 02/11/2026)
-    const butin = by ? countMates(S, by, o => o.name === "Phéromone") : 0;
-    const gain = 1 + butin;
+    const gain = 1; // plus d'Aura Butin (Phéromone → Dépouille, Oni 12/11/2026)
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
     const nm = t.camo && !t.revealed ? "Une tuile camouflée" : t.name; // ne pas nommer une tuile camouflée jamais révélée
-    log(S, "essaim", `${nm} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse${butin ? " (Aura Butin)" : ""}.`);
+    log(S, "essaim", `${nm} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);
     checkSupportsFall(S);
   }
   function checkSupportsFall(S) {
@@ -393,7 +391,7 @@ const SF = (() => {
   function canTarget(S, lane, k) { // case cible valable pour un chantier de cette lane
     const [x, y] = parse(k);
     if (ring(x, y) > 3 || ring(x, y) < 1 || cellLane(x, y) !== lane) return false;
-    if (S.tiles[k]) return false;
+    if (S.tiles[k] || (S.depouilles || []).includes(k)) return false; // un jeton Dépouille bloque la case (Oni, 12/11/2026)
     return neighbors(x, y).some(([a, b]) => (a === 0 && b === 0) || S.tiles[key(a, b)] || S.supports[key(a, b)]);
   }
 
@@ -419,8 +417,14 @@ const SF = (() => {
   function killCheck(S) {
     syncBonus(S);
     const dead = S.creatures.filter(c => c.hp + bonusHp(S, c) <= 0);
+    const deadSet = new Set(dead);
     for (const c of dead) {
-      if (escape(S, c)) continue;
+      if (escape(S, c)) { deadSet.delete(c); continue; }
+      // Dépouille (Phéromone, Oni 12/11/2026) : une créature qui meurt hors de la case d'entrée, avec une Phéromone vivante sur sa case, laisse un jeton
+      if (c.k < 4 && S.creatures.some(o => o !== c && o.name === "Phéromone" && !deadSet.has(o) && posKey(o) === posKey(c))) {
+        const dk = posKey(c); S.depouilles = S.depouilles || [];
+        if (!S.depouilles.includes(dk)) { S.depouilles.push(dk); fx(S, { t: "depouille", k: dk }); log(S, "essaim", `Dépouille : ${c.name} laisse un jeton sur la case ${cellName(c.u, c.k)} (lane ${LANE_NAME[c.lane]}) : plus de construction possible.`); }
+      }
       S.creatures.splice(S.creatures.indexOf(c), 1);
       fx(S, { t: "die", id: c.id });
       log(S, "colonie", `${c.name} est détruit.`);
@@ -1230,6 +1234,20 @@ const SF = (() => {
     killCheck(S);
     return true;
   }
+  // Dépouille : cases à portée (8 cases autour) d'une tourelle, que la colonie peut nettoyer avec un tir (Oni, 12/11/2026)
+  function depTargets(S, sk) {
+    const [x, y] = parse(sk);
+    return (S.depouilles || []).filter(k => { const [a, b] = parse(k); return Math.max(Math.abs(a - x), Math.abs(b - y)) === 1; });
+  }
+  function fireDep(S, sk, k) {
+    const lvl = S.supports[sk];
+    if (!lvl || lvl === 3 || shotsLeft(S, sk) <= 0 || !depTargets(S, sk).includes(k)) return false;
+    S.firedSupports.push(sk);
+    S.depouilles = S.depouilles.filter(o => o !== k);
+    fx(S, { t: "shot", sk, k });
+    log(S, "colonie", `Une tourelle de niveau ${lvl} tire sur la Dépouille : la case est libérée.`);
+    return true;
+  }
   function autoFire(S) {
     const order = Object.keys(S.supports).sort((a, b) => S.supports[a] - S.supports[b]);
     for (const sk of order) while (S.supports[sk] && S.supports[sk] !== 3 && shotsLeft(S, sk) > 0) {
@@ -1386,6 +1404,7 @@ const SF = (() => {
   // de départ (1 PV, Épines 1), et les Épines des tuiles posées suivent les nouvelles valeurs. Sans effet sur une partie à jour.
   function migrate(S) {
     if (!S.version) S.version = "0.3"; // partie commencée avant le suivi des versions
+    if (!S.depouilles) S.depouilles = [];
     delete S.reincUsed; // Réincarnation au choix (v0.5.14)
     if (S.killed === undefined) S.killed = 0;
     // v0.5 : Hurleur et Catalyseur changent de niveau, donc de pioche
@@ -1530,6 +1549,7 @@ const SF = (() => {
     spellPick: { phase: ["D_spell"], run(S, a) { if (!(isInt(a.i) && pickSpell(S, a.i))) return false; openFamine(S); return true; } },
     toFire: { phase: ["D_main"], run: S => { endDefenderTurn(S); return true; } }, // ancien nom (pages encore ouvertes)
     fire: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && isInt(a.id) && fire(S, a.sk, a.id) },
+    fireDep: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && typeof a.k === "string" && fireDep(S, a.sk, a.k) },
     autoFire: { phase: ["D_fire"], run: S => { autoFire(S); return true; } },
     endD: { phase: ["D_fire"], run(S) { endColonyTurn(S); openFamine(S); return true; } },
     placeAt: { phase: ["D_place"], run(S, a) { if (!placeTile(S, a.k)) return false; openFamine(S); return true; } },
@@ -1549,7 +1569,7 @@ const SF = (() => {
   // Passage automatique (Oni, 04/11/2026) : quand le camp n'a plus rien à faire dans l'étape, le tour passe seul
   // (plus de bouton « Fin du tour de l'essaim » ; la colonie passe la main dès qu'aucune tourelle ne peut plus tirer).
   function canStillFire(S) {
-    return Object.entries(S.supports).some(([k, l]) => l < 3 && shotsLeft(S, k) > 0 && supportTargets(S, k).length);
+    return Object.entries(S.supports).some(([k, l]) => l < 3 && shotsLeft(S, k) > 0 && (supportTargets(S, k).length || depTargets(S, k).length));
   }
   function autoAdvance(S) {
     if (S.winner) return;
@@ -1608,7 +1628,7 @@ const SF = (() => {
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
     clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
-    useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
+    useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, depTargets, fireDep, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };
 })();

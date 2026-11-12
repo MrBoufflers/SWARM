@@ -1122,3 +1122,7 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 /* bouton « Changements » du staging (Oni, 12/11/2026) */
 .chg-btn { color: var(--hot); }
 .modal-card h3 { margin: 12px 0 4px; }
+
+/* jeton Dépouille (Phéromone, Oni 12/11/2026) */
+.cell .dep { position: absolute; left: 3px; bottom: 3px; z-index: 2; display: flex; padding: 2px; border-radius: 50%; color: #e8e0d0; background: rgba(60,20,20,.8); box-shadow: 0 0 0 1.5px #c97b7b; pointer-events: none; }
+.cell .dep .i { width: max(12px, calc(var(--cell) * .24)); height: max(12px, calc(var(--cell) * .24)); }

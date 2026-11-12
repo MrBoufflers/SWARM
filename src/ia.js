@@ -57,6 +57,7 @@ const IA = (() => {
       s -= (t.hp * 2.5 + (t.ren || 0) * 1.5 + (t.ep || 0) * 1.5 + (t.tech || 0) * 4 + (t.temp || 0) * 6 + (t.shield ? 3 : 0) + (t.trap || t.siphon ? 2 : 0)) * (1 + (3 - Math.min(3, r)) * 0.15);
     }
     for (const l of Object.values(S.supports)) s -= 5 + l * 3;
+    s += (S.depouilles || []).length * 6; // une Dépouille bloque une case de construction (bon pour l'essaim)
     s -= (S.hand || []).length * 2 + (S.spells || []).length * 3;
     return s;
   }
@@ -187,7 +188,7 @@ const IA = (() => {
     let h = 7; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) | 0;
     return PLAN_KEYS[Math.abs(h) % PLAN_KEYS.length];
   }
-  const AURA_SOUTIENS = ["Hurleur", "Perforeur", "Sporeur", "Phéromone", "Catalyseur", "Glaneur"];
+  const AURA_SOUTIENS = ["Hurleur", "Perforeur", "Sporeur", "Catalyseur", "Glaneur"];
   // valeur de long terme pour l'essaim (positive = bon pour lui), lue sur l'état simulé en fin de tour
   function swarmLong(S, plan) {
     const P = PLANS[plan] || PLANS.assaut, upS = !!(S.upgrades.soutien.r1 || S.upgrades.soutien.r2);
@@ -360,6 +361,7 @@ const IA = (() => {
     for (const sk of Object.keys(V.supports)) {
       if (V.supports[sk] === 3 || E.shotsLeft(V, sk) <= 0) continue;
       for (const c of E.supportTargets(V, sk)) cands.push({ type: "fire", args: { sk, id: c.id } });
+      for (const k of E.depTargets(V, sk)) cands.push({ type: "fireDep", args: { sk, k } }); // nettoyer une Dépouille
     }
     if (cands.length === 1) return cands[0];
     // tirs : note immédiate (créatures tuées ou blessées), la fin de tour faisant de toute façon les tirs restants

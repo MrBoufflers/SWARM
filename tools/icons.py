@@ -36,6 +36,8 @@ ICONS = {
                  '<circle cx="12" cy="12" r="9"/><path d="M12 4.5L14.2 12L12 19.5L9.8 12Z" fill="currentColor" stroke="none"/>'),
     "couronne": ("Couronne (anneau autour de la fusée)",
                  '<rect x="3" y="3" width="18" height="18"/><rect x="8" y="8" width="8" height="8"/>'),
+    "depouille": ("Dépouille : jeton laissé par une créature morte, bloque la construction",
+                  '<path d="M12 3C7.6 3 5 6 5 9.6C5 12 6.2 13.6 8 14.6V18H16V14.6C17.8 13.6 19 12 19 9.6C19 6 16.4 3 12 3Z"/><circle cx="9.3" cy="10" r="1.3"/><circle cx="14.7" cy="10" r="1.3"/><path d="M10.5 18V15.5M13.5 18V15.5"/>'),
     "piege": ("Piège camouflé",
               '<path d="M3 14H21M4 14L6 8.5L8 14L10 8.5L12 14L14 8.5L16 14L18 8.5L20 14M3 14C3 19 21 19 21 14"/>'),
     # --- capacités des créatures ---

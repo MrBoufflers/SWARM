@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.24 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Phéromone** : l'Aura Butin (+1 biomasse) est remplacée par **Dépouille**. Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case (pas sur les cases d'entrée) : la colonie ne peut plus y construire tant qu'une tourelle (niveau I ou II) à portée n'a pas tiré dessus (un tir, qui retire le jeton). Un seul jeton par case ; la Nuke n'en laisse pas.
+
 ## v0.5.23 — 12 novembre 2026
 
 **Règles (Oni)**

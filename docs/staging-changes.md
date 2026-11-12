@@ -8,3 +8,6 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.23
 - Règle : au premier tour de la colonie, un seul bâtiment au total (les points restants vont à la fusée).
+
+## v0.5.24
+- Phéromone : plus d'Aura Butin (+1 biomasse), remplacée par Dépouille — une créature morte sur sa case laisse un jeton qui bloque la construction jusqu'à ce qu'une tourelle à portée tire dessus.
