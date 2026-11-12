@@ -36,13 +36,13 @@ const fresh = () => {
   ok(S.biomass === 4 + 0 || S.biomass >= 4, "biomasse +1 après destruction (biomasse " + S.biomass + ")");
   ok(S.creatures.length === 0, "l'Écorcheur (1 PV) meurt sur Épines 1");
 }
-// 3. Renforcé 2 : 3 dégâts → 1 PV perdu
+// 3. Renforcé 1 (Rempart) : −1 dégât par attaque (12/11/2026)
 {
   const S = fresh(); SF.attackerDraw(S);
   S.tiles["0,1"] = SF.tileStats("Rempart", 0, 1);
   S.creatures.push({ id: 901, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, new: true, acted: false });
   SF.act(S, S.creatures[0]);
-  ok(S.tiles["0,1"].hp === 3, "Rempart (Renforcé 2) frappé pour 3 : 4 → 3 PV");
+  ok(S.tiles["0,1"].hp === 2, "Rempart (Renforcé 1) frappé pour 3 : −1 dégât, 2 PV perdus (4 → 2)");
 }
 // 4. piège : révélé à la première attaque, 2 dégâts à la créature
 {
@@ -493,7 +493,7 @@ const fresh = () => {
 // 40. Dortoir, Archives, améliorations des tanks, PV des aggros (Oni, 01/11/2026)
 {
   const D = SF.TILES["Dortoir"], A = SF.TILES["Archives"];
-  ok(D.d === 3 && D.pv === 3 && D.ren === 2 && D.temp === 1 && !D.perm && D.n === 3 && !D.camo, "Dortoir : 3 tours, 3 PV, Renforcé 2, +1 travailleur temporaire, 3 ex., face visible");
+  ok(D.d === 3 && D.pv === 3 && D.ren === 1 && D.temp === 1 && !D.perm && D.n === 3 && !D.camo, "Dortoir : 3 tours, 3 PV, Renforcé 1, +1 travailleur temporaire, 3 ex., face visible");
   ok(A.d === 2 && A.pv === 2 && A.shield === 1 && A.tech === 1 && A.n === 3 && !A.camo && A.ep === 0, "Archives : 2 tours, 2 PV + Bouclier (09/11/2026), +1 technologie, 3 ex., face visible");
   const S = fresh(); const w = SF.bonusWorkers(S), t = SF.tech(S);
   S.tiles["0,2"] = SF.tileStats("Dortoir", 0, 2); S.tiles["0,-2"] = SF.tileStats("Archives", 0, -2);
@@ -522,7 +522,7 @@ const fresh = () => {
   SF.migrate(old);
   ok(old.tiles["0,3"].revealed && !old.tiles["0,3"].camo, "partie en cours : un Avant-poste caché est retourné face visible");
   const R = SF.TILES["Ronceraie"];
-  ok(R.d === 3 && R.pv === 2 && R.ren === 2 && R.ep === 2 && R.camo && R.n === 3, "Ronceraie : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 ex.");
+  ok(R.d === 3 && R.pv === 2 && R.ren === 1 && R.ep === 2 && R.camo && R.n === 3, "Ronceraie : 3 tours, 2 PV, Renforcé 1, Épines 2, camouflée, 3 ex.");
   ok(SF.TRAP_DMG === 3, "Piège : 3 dégâts");
   const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
   T.handA = [{ name: "Œil-sonde", free: true, uid: 990 }]; T.phase = "A_deploy"; T.budget = 0;
@@ -639,10 +639,10 @@ const fresh = () => {
 {
   const S = fresh(); S.supports = {}; delete S.tiles["0,1"]; S.tiles["0,1"] = SF.tileStats("Rempart", 0, 1); // 4 PV, Renforcé 2
   const m = { id: 150, name: "Massacreur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; S.creatures.push(m); SF.act(S, m);
-  ok(S.tiles["0,1"].hp === 2, "Rempart (Renforcé 2) frappé pour 5 (Massacreur, 11/11/2026) : 2 PV perdus (4 → 2)");
+  ok(!S.tiles["0,1"], "Rempart (Renforcé 1) frappé pour 5 (Massacreur) : 4 dégâts, détruit (12/11/2026)");
   const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Rempart", 0, 1);
   const e = { id: 151, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(e); SF.act(T, e);
-  ok(T.tiles["0,1"].hp === 4, "Rempart frappé pour 1 (moins que 2) : aucun PV perdu");
+  ok(T.tiles["0,1"].hp === 4, "Rempart (Renforcé 1) frappé pour 1 : aucun PV perdu (sans minimum)");
   ok([3, 6, 7, 15].map(SF.famineBudget).join() === "1,3,3,7", "Famine : budget = biomasse ÷ 2 arrondie à l'inférieur (3→1, 6→3, 7→3, 15→7)");
   ok(["Œil-sonde", "Glaneur", "Catalyseur"].every(n => SF.CREATURES[n].pv === 2) && ["Hurleur", "Charognard"].every(n => SF.CREATURES[n].pv === 4) && ["Sapeur", "Sporeur"].every(n => SF.CREATURES[n].pv === 6), "soutiens : 2 PV (niveau 1), 4 (niveau 2), 6 (niveau 3)");
 }
@@ -758,7 +758,7 @@ const fresh = () => {
   Z.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); Z.tiles["1,3"] = SF.tileStats("Rempart", 1, 3); Z.tiles["1,3"].revealed = true;
   const a1 = at(240, "Carapace"); Z.creatures.push(a1, at(241, "Sporeur"), at(242, "Sporeur"));
   SF.actCase(Z, SF.posKey(a1), [240]);
-  ok(Z.tiles["1,3"].hp === 3, "2 Sporeurs : 2 × 1 = 2 dégâts de spores en une attaque (Rempart, Renforcé 2 : 4 → 3 PV)");
+  ok(Z.tiles["1,3"].hp === 3, "2 Sporeurs : 2 × 1 = 2 dégâts de spores en une attaque (Rempart, Renforcé 1 : 2 − 1 = 1 dégât, 4 → 3 PV)");
   // Frénésie : au choix, cumulable (Oni, 02/11/2026)
   const F = fresh(); F.phase = "A_attack"; F.upgrades.soutien.r2 = "B";
   const ec = at(250, "Écorcheur"), ca = at(251, "Carapace"), f1 = at(252, "Hurleur"), f2 = at(253, "Œil-sonde");
@@ -1320,6 +1320,26 @@ const fresh = () => {
   ok(S.round >= 1 && (S.rocketPts > 0 || S.floors > 0), "les points non dépensés vont à la fusée");
   const T = fresh(); T.round = 2; T.phase = "D_main"; T.hand = ["Palissade"]; T.turnPts = 5; T.spent = 0;
   ok(!SF.firstTurnCap(T) && SF.buildTargets(T, 0).length > 0, "dès la manche 2, la règle ne s'applique plus");
+}
+// 73. Renforcé = −X dégâts par attaque (sans minimum) ; tous les Renforcé réduits de 1 ; Avant-poste : 4 PV, sa lane seulement (Oni, 12/11/2026)
+{
+  const T = SF.TILES;
+  ok(T["Rempart"].ren === 1 && T["Bastion"].ren === 2 && T["Dortoir"].ren === 1 && T["Ronceraie"].ren === 1, "Renforcé réduits de 1 : Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1");
+  const hit = (name, atq) => {
+    const S = fresh(); S.supports = {}; for (const k of Object.keys(S.tiles)) delete S.tiles[k]; S.phase = "A_attack";
+    S.tiles["0,1"] = Object.assign(SF.tileStats(name, 0, 1), { revealed: true });
+    const c = { id: 1, name: "Écorcheur", lane: "N", u: 0, k: 2, hp: 9, acted: false, moved: 1 }; S.creatures.push(c);
+    SF.hitTile(S, c, "0,1", atq, true); return S.tiles["0,1"] ? S.tiles["0,1"].hp : 0;
+  };
+  ok(hit("Bastion", 2) === 3 && hit("Bastion", 3) === 2 && hit("Bastion", 5) === 0, "Bastion (Renforcé 2, 3 PV) : 2 dégâts → rien ; 3 → −1 PV ; 5 → détruit");
+  ok(hit("Rempart", 1) === 4 && hit("Rempart", 3) === 2, "Rempart (Renforcé 1, 4 PV) : 1 dégât → rien ; 3 → −2 PV");
+  const old = { tiles: { "0,1": { name: "Rempart", hp: 4, max: 4, ren: 2, ep: 0 } }, version: "0.5", creatures: [] };
+  SF.migrate(old); ok(old.tiles["0,1"].ren === 1 && old.renfV === 1, "ancienne partie : Renforcé 2 devient Renforcé 1 (une seule fois)");
+  SF.migrate(old); ok(old.tiles["0,1"].ren === 1, "la conversion ne se répète pas");
+  ok(["N", "E", "S", "O"].every(l => { const n = { N: "Avant-poste du Nord", E: "Avant-poste de l'Est", S: "Avant-poste du Sud", O: "Avant-poste de l'Ouest" }[l]; return T[n].pv === 4 && T[n].dir === l; }), "Avant-postes : 4 PV, une lane chacun");
+  const S = fresh(); S.round = 2; S.phase = "D_main"; S.hand = ["Avant-poste du Nord"]; S.turnPts = 5; S.spent = 0;
+  const ks = SF.buildTargets(S, 0);
+  ok(ks.length > 0 && ks.every(k => SF.cellLane(...SF.parse(k)) === "N"), "Avant-poste du Nord : seulement dans la lane Nord");
 }
 // 53. version du jeu : chaque version livrée a son entrée dans le journal (docs/versions.md)
 {

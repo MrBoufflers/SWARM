@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.29 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Renforcé X** : chaque attaque contre le bâtiment fait **X dégâts de moins, sans minimum** (avant : 1 PV perdu par tranche complète de X dégâts). Valeurs réduites de 1 : Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1 (les parties en cours sont converties une fois). Vaut aussi pour les spores.
+- **Avant-postes** : toujours **4 PV**, mais ne peuvent être construits (ou reposés par Reconversion) que dans **leur propre lane** (avant : 2 PV hors de leur lane).
+
 ## v0.5.28 — 12 novembre 2026
 
 **Règles (Oni)**

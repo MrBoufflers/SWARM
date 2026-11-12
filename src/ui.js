@@ -590,14 +590,14 @@
   // Carte de tuile en main : durée, PV, Épines et capacités (libellés du Catalogue du livret v0.3)
   function tileCard(name) {
     const t = SF.TILES[name], L = SF.LANE_NAME;
-    const pv = t.pv === "ap" ? `2 (4 en lane ${L[t.dir]})` : t.pv === "front" ? "2 à 4" : t.pv === "reduit" ? "2 à 4" : t.pv;
+    const pv = t.pv === "front" ? "2 à 4" : t.pv === "reduit" ? "2 à 4" : t.pv;
     const caps = [];
     const cap = (ic, n, txt) => caps.push(`<span class="cap" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon(ic)}${E(n)}</span>`);
     if (t.aura) cap("epines", "Aura d'épines", "+1 Épines à chaque bâtiment des 8 cases autour (cumulable).");
-    if (t.pv === "ap") cap("cardinal", "Avant-poste", `+2 PV si posé dans la lane ${L[t.dir]} (4 PV), sinon 2 PV.`);
+    if (t.dir) cap("cardinal", "Avant-poste", `ne peut être posé que dans la lane ${L[t.dir]}.`);
     if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
     if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
-    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `ne perd 1 PV que par tranche complète de ${t.ren} dégâts d'une même attaque.`);
+    if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `réduit de ${t.ren} les dégâts de chaque attaque (sans minimum).`);
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
     if (t.temp) cap("temp", "+1 travailleur", "+1 travailleur tant que la tuile tient.");
     if (t.perm) cap("perm", "Travailleur permanent", "+1 travailleur gagné à la construction, conservé même si la tuile tombe.");

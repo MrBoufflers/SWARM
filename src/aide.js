@@ -59,7 +59,7 @@ const AIDE = (() => {
       <ul>
         <li><b>ATQ</b> : dégâts infligés par une attaque. <b>PV</b> : points de vie ; à 0, la créature ou le bâtiment est détruit.</li>
         <li><b>Épines X</b> : une créature qui attaque ce bâtiment subit X dégâts après son attaque. +1 par Avant-poste dans les 8 cases autour.</li>
-        <li><b>Renforcé X</b> : le bâtiment perd 1 PV par tranche complète de X dégâts d'une même attaque (7 dégâts contre Renforcé 2 : −3 PV).</li>
+        <li><b>Renforcé X</b> : chaque attaque contre ce bâtiment fait X dégâts de moins, sans minimum (5 dégâts contre Renforcé 2 : −3 PV ; 2 dégâts contre Renforcé 2 : rien).</li>
         <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Une <b>Mine</b> camouflée inflige 1, 2 ou 3 dégâts (mineure, majeure, supérieure) à la créature qui la révèle, avant qu'elle frappe ; un <b>Siphon</b> retire 1, 2 ou 3 biomasse à l'essaim (jamais sous ${SF.MIN_BIOMASS}). Une tuile encore cachée ne subit ni la percée ni les spores.</li>
         <li><b>Percée</b> (Aura du Perforeur) : les dégâts en trop après la destruction d'un bâtiment passent à la case juste derrière la cible, du côté opposé à l'attaquant (la fusée perd 1 travailleur si c'est elle).</li>
         <li><b>Auras</b> : effets des soutiens sur les <b>autres</b> créatures de leur case ; elles se cumulent toutes.</li>
@@ -189,7 +189,7 @@ const AIDE = (() => {
     { id: "e-camo", side: "essaim", img: "Mine supérieure", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
       text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être une Mine (1 à 3 dégâts à votre créature avant qu'elle frappe) ou un Siphon (vous perdez 1 à 3 biomasse, jamais sous ${SF.MIN_BIOMASS}). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
     { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),
-      text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : le bâtiment ne perd qu'1 PV par tranche de X dégâts d'une même attaque.` },
+      text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : chaque attaque contre ce bâtiment fait X dégâts de moins (sans minimum).` },
     { id: "e-tourelles", side: "essaim", img: "support 2", title: "Les tourelles", when: S => S.phase === "A_attack" && S.creatures.some(c => c.k <= 3),
       text: () => `Les coins turquoise sont des supports. Ceux de niveau I et II sont des tourelles : à la fin de son tour, la colonie tire avec chacune sur une créature des 8 cases autour. Un support tombe quand tous les bâtiments qui le touchent sont détruits, et vous rapporte 1 biomasse.` },
     { id: "e-biomasse", side: "essaim", img: "Charognard", title: "Gagner de la biomasse", when: S => S.biomass > 5,

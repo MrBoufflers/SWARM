@@ -25,3 +25,7 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.28
 - Sporeur : ses spores font 1 dégât (au lieu de 2) par Sporeur sur les 8 cases autour de la cible.
+
+## v0.5.29
+- Renforcé X : −X dégâts à chaque attaque, sans minimum. Valeurs réduites de 1 (Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1).
+- Avant-postes : toujours 4 PV, mais seulement dans leur propre lane.
