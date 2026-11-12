@@ -1118,3 +1118,7 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 .tok { position: relative; }
 .tok .blind { position: absolute; top: 2px; left: 2px; display: flex; padding: 1px; border-radius: 50%; color: #7fc8ff; background: rgba(0,0,0,.6); box-shadow: 0 0 0 1px #7fc8ff; }
 .tok .blind .i { width: max(9px, calc(var(--cell) / var(--n, 1) * .2)); height: max(9px, calc(var(--cell) / var(--n, 1) * .2)); }
+
+/* bouton « Changements » du staging (Oni, 12/11/2026) */
+.chg-btn { color: var(--hot); }
+.modal-card h3 { margin: 12px 0 4px; }

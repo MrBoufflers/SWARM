@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.22 — 12 novembre 2026
+
+**Workflow (Oni)**
+- Branche **staging** (site staging-swarm.netlify.app) : les correctifs y passent d'abord (versions 0.5.22, 0.5.23…) ; quand c'est stable, fusion dans main avec la version mineure suivante (0.6.0).
+- Bouton « Changements » (accueil et menu en jeu) : liste des changements depuis le dernier passage sur main, lue dans `docs/staging-changes.md` (absent quand le fichier est vide, donc sur main).
+
 ## v0.5.21 — 11 novembre 2026
 
 **IA de l'essaim (Oni)**

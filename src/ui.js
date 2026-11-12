@@ -105,10 +105,10 @@
   const REACT = ["A_famine", "A_react"];
   function setPhaseHandoff(prev) { // passe la main si le joueur actif change
     const w = who();
-    if (S.ia) { S.view = IA.other(S.ia); S.handoff = null; if (w !== S.view) UI = { ...resetUI(), help: UI.help }; return; } // solo : pas d'écran de passage
+    if (S.ia) { S.view = IA.other(S.ia); S.handoff = null; if (w !== S.view) UI = { ...resetUI(), help: UI.help, changes: UI.changes }; return; } // solo : pas d'écran de passage
     if (S.view === w) return;
-    if (S.phase === "A_react" || prev === "A_react") { S.view = w; S.handoff = null; UI = { ...resetUI(), help: UI.help }; return; }
-    S.handoff = w; UI = { ...resetUI(), help: UI.help };
+    if (S.phase === "A_react" || prev === "A_react") { S.view = w; S.handoff = null; UI = { ...resetUI(), help: UI.help, changes: UI.changes }; return; }
+    S.handoff = w; UI = { ...resetUI(), help: UI.help, changes: UI.changes };
   }
 
   // ---------------------------------------------------------------- rendu
@@ -145,14 +145,14 @@
     if (MODE === "stats") { document.body.dataset.view = ""; $("#app").innerHTML = homeHeader() + bar + statsPage(); return; }
     const waiting = MODE !== "stats" && MODE !== "home" && S && online() && !NET.full;
     document.body.classList.toggle("on-home", MODE === "home" || !S || !!waiting);
-    if (waiting) { document.body.dataset.view = ""; document.body.classList.remove("pc"); $("#app").innerHTML = bar + waitingRoom() + (UI.help ? help() : ""); return; }
-    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = bar + home() + (UI.help ? help() : ""); return; }
+    if (waiting) { document.body.dataset.view = ""; document.body.classList.remove("pc"); $("#app").innerHTML = bar + waitingRoom() + (UI.help ? help() : "") + (UI.changes ? changesModal() : ""); return; }
+    if (MODE === "home" || !S) { document.body.dataset.view = ""; $("#app").innerHTML = bar + home() + (UI.help ? help() : "") + (UI.changes ? changesModal() : ""); return; }
     document.body.dataset.view = S.view || "";
     const pc = isPC() && !(online() && !NET.full);
     document.body.classList.toggle("pc", pc);
     if (pc) {
       const main = S.handoff ? pcHandoff() : pcLayout(false);
-      $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + tipCard();
+      $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + (UI.changes ? changesModal() : "") + tipCard();
       placePop(); autoDraw();
       // carte de passage qui arrive en glissant : animation signalée comme les autres (data-anim), ou coupée
       const card = $(".pc-ho .ho-card:not(.leave)");
@@ -165,7 +165,7 @@
       return;
     }
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
-    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + tipCard();
+    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + (UI.changes ? changesModal() : "") + tipCard();
     autoDraw();
   }
   function header() {
@@ -176,11 +176,20 @@
     const animBtn = `<button data-a="anim" class="ghost" aria-pressed="${animOn}">Animations : ${animOn ? "oui" : "non"}</button>`;
     return `<header class="top"><div class="brand"><span class="brand-mk" aria-hidden="true"></span><span class="brand-word" role="img" aria-label="Swarm &amp; Steel"></span><span>prototype v${SF.VERSION}</span></div>
       <div class="round">Manche <b>${S.round}</b><span class="dot ${p[0]}"></span>${E(p[1])}</div>
-      <div class="menu">${animBtn}${themeBtn()}${musicCtl()}${menu}</div></header>`;
+      <div class="menu">${animBtn}${themeBtn()}${musicCtl()}${changesBtn()}${menu}</div></header>`;
+  }
+  // Changements en test (branche staging, Oni 12/11/2026) : liste de ce qui est sur staging mais pas encore sur main ;
+  // STAGING_CHANGES vient de docs/staging-changes.md (vide sur main : bouton et fenêtre absents)
+  const hasChanges = () => typeof STAGING_CHANGES !== "undefined" && STAGING_CHANGES.length > 0;
+  const changesBtn = (cls = "ghost") => hasChanges() ? `<button data-a="changes" class="${cls} chg-btn" title="Changements depuis le dernier passage sur main">Changements (${STAGING_CHANGES.reduce((n, c) => n + c.items.length, 0)})</button>` : "";
+  function changesModal() {
+    return `<div class="modal" role="dialog" aria-label="Changements en test"><div class="modal-card rules"><button data-a="changes" class="x close" aria-label="Fermer">×</button>
+      <h2>Changements en test</h2><p class="small">Ce qui est sur le staging et pas encore sur la version principale.</p>
+      ${STAGING_CHANGES.map(c => `<h3>v${E(c.v)}</h3><ul>${c.items.map(i => `<li>${E(i)}</li>`).join("")}</ul>`).join("")}</div></div>`;
   }
   function homeHeader() {
     return `<header class="top"><div class="brand"><span class="brand-mk" aria-hidden="true"></span><span class="brand-word" role="img" aria-label="Swarm &amp; Steel"></span><span>prototype v${SF.VERSION}</span></div>
-      <div class="menu">${themeBtn()}<button data-a="help" class="ghost">Règles</button></div></header>`;
+      <div class="menu">${themeBtn()}${changesBtn()}<button data-a="help" class="ghost">Règles</button></div></header>`;
   }
   function staleBar() {
     return STALE ? `<div class="stale" role="alert"><span>Nouvelle version du jeu disponible (v${E(STALE)}). Rechargez la page pour continuer avec les règles à jour.</span><button data-a="reload" class="primary">Recharger</button></div>` : "";
@@ -192,7 +201,7 @@
     const preset = new URLSearchParams(location.search).get("code") || "";
     const resume = saved && saved.phase;
     return `<section class="home2">${homeBackdrop()}
-      <div class="h2-top"><button data-a="help" class="h2-ic" title="Règles">Règles</button>${themeBtn().replace('class="ghost"', 'class="h2-ic"')}</div>
+      <div class="h2-top">${changesBtn("h2-ic")}<button data-a="help" class="h2-ic" title="Règles">Règles</button>${themeBtn().replace('class="ghost"', 'class="h2-ic"')}</div>
       <div class="h2-hero">
         <div class="h2-emblem" aria-hidden="true"><span class="h2-glow"></span><span class="h2-mark"></span></div>
         <h1 class="h2-title"><span class="h2-word" aria-hidden="true"></span><span class="sr">Swarm &amp; Steel</span></h1>
@@ -222,7 +231,7 @@
   function waitingRoom() {
     const link = location.origin + location.pathname + "?code=" + NET.code;
     return `<section class="home2 h2-wait ${NET.side}">${homeBackdrop()}
-      <div class="h2-top"><button data-a="help" class="h2-ic">Règles</button></div>
+      <div class="h2-top">${changesBtn("h2-ic")}<button data-a="help" class="h2-ic">Règles</button></div>
       <div class="h2-hero small side-${NET.side}">
         <div class="h2-emblem" aria-hidden="true"><span class="h2-glow"></span><span class="h2-mark"></span></div>
         <h1 class="h2-title"><span class="h2-word" aria-hidden="true"></span><span class="sr">${NET.side === "essaim" ? "Essaim" : "Colonie"}</span></h1>
@@ -1049,6 +1058,7 @@
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
+    if (a === "changes") { UI.changes = !UI.changes; render(); return; }
     if (a === "helpTab") { UI.helpTab = d.v; render(); return; }
     if (a === "disc") { DISC = !DISC; if (DISC && S && MODE === "local") { S.decouverte = true; save(); } saveDisc(); render(); return; }
     if (a === "discReset") { SEEN = new Set(); saveDisc(); render(); return; }
@@ -1574,10 +1584,10 @@
     if (S && !REACT.includes(S.phase) && REACT.includes(j.S.phase)) NET.react = true;
     if (Number.isInteger(j.fxN)) NET.fx = j.fxN;
     const had = !!S, turnBefore = had && myTurn();
-    if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help };
+    if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help, changes: UI.changes };
     S = j.S; NET.v = j.v; NET.full = j.players.essaim && j.players.colonie;
     if (!turnBefore && myTurn()) {
-      UI = { ...resetUI(), help: UI.help, selCreature: UI.selCreature }; NET.banner = had;
+      UI = { ...resetUI(), help: UI.help, changes: UI.changes, selCreature: UI.selCreature }; NET.banner = had;
       // écran de passage en ligne aussi (Oni, 09/11/2026), sauf pour les fenêtres de réaction (comme en local)
       if (had && !S.winner && !REACT.includes(S.phase)) { NET.ho = true; NET.banner = false; }
     }
