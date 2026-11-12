@@ -19,3 +19,6 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.26
 - Échappée (Mue) : chaque soutien a un jeton qui ne sauve qu'une seule créature, puis il est défaussé (plus de limite par tour).
+
+## v0.5.27
+- Percée : les dégâts en trop passent derrière la cible, du côté opposé à l'attaquant (plus toujours vers la fusée).

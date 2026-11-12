@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.26";
+  const VERSION = "0.5.27";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -767,20 +767,22 @@ const SF = (() => {
     }
     // spores (2 dégâts par Sporeur de la case, cumulable, Oni 02/11/2026) sur les tuiles qui touchent la cible
     const sporesAround = () => { if (primary) sporeBurst(S, c, x, y); };
-    // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE du chemin, sans aller plus loin :
+    // Percée (Oni, 01/11/2026) : les dégâts en trop ne passent qu'à la case SUIVANTE, sans aller plus loin :
     // un bâtiment les subit, la fusée perd 1 travailleur, une case vide les perd. Pas d'enchaînement.
+    // Depuis le 12/11/2026, « suivante » = la case juste derrière la cible, du côté opposé à l'attaquant (une créature peut
+    // frapper un bâtiment par n'importe quel côté, pas seulement vers la fusée)
     const pierce = excess => {
       if (!(primary && excess > 0 && hasPercee(S, c))) return;
-      const [nu, nk] = nextStep(...toLocal(lane, x, y));
-      if (nk === 0) {
+      const [ax, ay] = gpos(c), bx = x + (x - ax), by = y + (y - ay);
+      if (bx === 0 && by === 0) {
         S.workersBase -= 1; S.killed = (S.killed || 0) + 1;
         fx(S, { t: "rocket", id: c.id });
         log(S, "essaim", "Percée : la fusée est touchée, −1 travailleur.");
         if (S.workersBase <= 0) S.winner = "essaim";
       } else {
-        const next = key(...toGlobal(lane, nu, nk));
+        const next = key(bx, by);
         if (S.tiles[next]) hitTile(S, c, next, excess, false);
-        else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case suivante est vide.`);
+        else log(S, "essaim", `Percée : ${excess} dégât${excess > 1 ? "s" : ""} perdu${excess > 1 ? "s" : ""}, la case derrière est vide.`);
       }
     };
     // Corrosion (soutien, rang 2 côté B ; Oni, 09/11/2026 ; remplace Frénésie) : contre l'attaque d'une créature accompagnée

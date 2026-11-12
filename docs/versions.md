@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.27 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Percée** : les dégâts en trop passent à la case juste **derrière la cible, du côté opposé à l'attaquant** (avant : toujours la case suivante vers la fusée). Une créature qui frappe un bâtiment par l'arrière ou par le côté perce donc dans l'autre sens ; vers la fusée, la fusée perd toujours 1 travailleur. Case vide ou hors plateau : dégâts perdus. Toujours pas d'enchaînement.
+
 ## v0.5.26 — 12 novembre 2026
 
 **Règles (Oni) : Échappée (Mue) trop forte**
