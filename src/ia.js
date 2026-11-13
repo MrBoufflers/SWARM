@@ -332,10 +332,7 @@ const IA = (() => {
       const name = V.spells[i];
       if (name === "Effort" || name === "Cadence") return { type: "spell", args: { i } };
       if (name === "Feu nourri" && Object.keys(V.supports).some(sk => V.supports[sk] !== 3 && E.supportTargets(V, sk).length)) return { type: "spell", args: { i } };
-      if (name === "Réparation") {
-        const hurt = Object.entries(V.tiles).filter(([, t]) => t.hp < t.max && !t.start).sort((a, b) => (b[1].max - b[1].hp) - (a[1].max - a[1].hp)).slice(0, 3).map(([k]) => k);
-        if (hurt.length) return { type: "spell", args: { i, arg: hurt } };
-      }
+      if (name === "Tir de précision" && Object.keys(V.supports).some(sk => V.supports[sk] !== 3 && E.supportTargets(V, sk).length)) return { type: "spell", args: { i } };
       // Renouvellement : +1 point, et les tuiles de la main qui n'ont aucune case valable sont échangées
       if (name === "Renouvellement") return { type: "spell", args: { i, arg: V.hand.map((n, j) => j).filter(j => !E.buildTargets(V, j).length) } };
       // Double bouclier : sur les deux bâtiments sans bouclier les plus proches des créatures, dès que l'essaim approche
@@ -405,7 +402,7 @@ const IA = (() => {
         case "D_place": return colonyPlace(V);
         case "D_fire": return colonyFire(V);
         case "D_spell": { // pioche d'un sortilège parmi deux : ordre de préférence fixe
-          const PREF = ["Frappe orbitale", "Salve", "Effort", "Double bouclier", "Champ de stase", "Famine", "Barrage", "Feu nourri", "Réparation", "Brouillage", "Onde de choc", "Renouvellement", "Reconversion"];
+          const PREF = ["Frappe orbitale", "Salve", "Effort", "Double bouclier", "Champ de stase", "Famine", "Barrage", "Feu nourri", "Tir de précision", "Brouillage", "Onde de choc", "Renouvellement", "Reconversion"];
           const o = S.spellOffer || []; let i = 0;
           o.forEach((n, j) => { if (PREF.indexOf(n) >= 0 && (PREF.indexOf(o[i]) < 0 || PREF.indexOf(n) < PREF.indexOf(o[i]))) i = j; });
           return { type: "spellPick", args: { i } };

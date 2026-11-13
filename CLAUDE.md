@@ -65,7 +65,7 @@ Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (vali
 
 ## Points ouverts (ne pas trancher sans Oni)
 
-- **Branche `test`** (partie de `staging` le 13/11, **sans l'extension**) : règle « dégâts du tour : tout ou rien » (un bâtiment ou une créature n'est détruit que si les dégâts du tour, toutes sources cumulées, atteignent ses PV ; sinon rien ne reste) pour simplifier le jeu de plateau. Analyse dans `docs/test-degats-par-tour.md` ; **rien n'est codé**. Tout ce qui s'y rapporte vit sur cette branche.
+- **Branche `test`** (partie de `staging` le 13/11, **sans l'extension**) : règle « dégâts du tour : tout ou rien » **codée** (`clearDamage` au début de chaque tour ; Carapace 1/2, Colosse 3/6, soutiens 2/3/4 PV ; Bélier, Aura Récolte, Tir de précision, soins retirés). Détail dans `docs/test-degats-par-tour.md`. **`tests/rules.test.js` n'est pas encore réécrit pour cette règle** (ne pas s'y fier sur cette branche).
 
 - **Extension « Titans & Quarters »** : tout son travail (document de conception, futur code) va sur la **branche `extension`** (partie de `staging` le 13/11), **jamais sur `staging`** tant qu'Oni n'a pas décidé de la fusionner.
 

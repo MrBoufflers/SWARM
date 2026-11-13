@@ -1,6 +1,6 @@
 # Branche `test` — « dégâts du tour : tout ou rien » (analyse, brouillon)
 
-> **Statut : analyse seulement, rien n'est codé.** Branche `test`, partie de `staging` (sans l'extension Titans & Quarters) le
+> **Statut : première version jouable codée le 13/11/2026** (moteur, interface, IA, aide ; les tests de règles ne sont pas encore réécrits). Branche `test`, partie de `staging` (sans l'extension Titans & Quarters) le
 > 13/11/2026. Tout ce qui touche à ce changement vit sur cette branche, jamais sur `staging` ni `main` sans accord d'Oni.
 > Objectif de fond (Oni) : **simplifier pour le jeu de plateau**. Compter des PV et des dégâts devient très lourd en fin de partie
 > (5 créatures par lane), le jeu ressemble de plus en plus à un jeu vidéo.
@@ -212,7 +212,19 @@ Les bâtiments à 3 points (Rempart, Bastion) demandent donc un Massacreur, ou p
 4. **Tests** de règles réécrits.
 5. **Équilibrage** chiffré (leviers 3.4) à partir de parties jouées, puis éventuellement 10 parties IA contre IA sur demande.
 
+## 6 bis. Ce qui est codé (13/11/2026)
+- **Règle** : `clearDamage` au début de chaque tour (essaim et colonie) : les PV perdus ne durent que le tour ; destruction seulement si le cumul
+  du tour atteint les PV. Affichage : PV restants en rouge pendant le tour, infobulle « encore N pour le détruire ».
+- **Stats** : Carapace 1/2, Colosse 3/6, soutiens 2 / 3 / 4 PV.
+- **Cartes** : Carapace épaisse (insensible aux Épines et aux Mines, sans +1 PV) ; Provocation sans −1 ; Masse vivante → **Bélier** (+1 ATQ des
+  tanks) ; Coup de grâce (s'il ne manque qu'1 dégât) ; Régénération (jetons Blindage et Échappée rendus à chaque tour de l'essaim) ; Glaneur →
+  **Aura Récolte** (+1 biomasse, non cumulable) et il ne quitte plus la pioche ; Échappée (survit sans PV à noter) ; sort Réparation →
+  **Tir de précision** (le premier tir de tourelle du tour fait +2). Soins retirés.
+- **Inchangés** : tourelles, Spores (1), PV des bâtiments.
+- **Reste à faire** : réécrire `tests/rules.test.js` (une soixantaine de vérifications portent sur l'ancien modèle), le livret, et l'équilibrage en jouant.
+
 ## 7. Journal
+- **13/11/2026 (Oni)** : vue d'ensemble validée en entier ; première version codée (section 6 bis).
 - **13/11/2026 (Oni)** : recommandations validées sauf Spores (restent à 1) et tourelles (inchangées) ; demande d'une vue d'ensemble des stats (section 4 bis).
 - **13/11/2026 (Oni)** : nouvelle règle à tester sur une branche `test` partie de `staging` : un bâtiment ou une créature n'est détruit que si
   les dégâts **du tour** atteignent ses PV (toutes sources cumulées) ; sinon rien ne reste. But : simplifier au maximum pour le jeu de plateau.

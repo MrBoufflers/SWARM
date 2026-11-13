@@ -464,7 +464,6 @@
     if (name === "Champ de stase") return { keys: all, a: "spellArg" };
     if (name === "Reconversion" && UI.recoHand !== null) return { keys: all.filter(k => !S.tiles[k].start), a: "spellArg" };
     if (name === "Double bouclier" && UI.picks.length < 2) return { keys: all.filter(k => !S.tiles[k].shield && !UI.picks.includes(k)), a: "pick" };
-    if (name === "Réparation" && UI.picks.length < 3) return { keys: all.filter(k => S.tiles[k].hp + UI.picks.filter(p => p === k).length < S.tiles[k].max), a: "pick" };
     return null;
   }
   const canTp = () => S.phase === "A_deploy" && S.view === "essaim" && (!online() || myTurn()) && !iaTurn() && S.upgrades.aggro.r2 === "C" && !S.tpUsed && S.creatures.some(c => SF.CREATURES[c.name].type === "aggro");
@@ -483,11 +482,6 @@
       case "Onde de choc": inner = `<div class="choices">${[1, 2, 3].map(r => `<button data-a="spellArg" data-v="${r}">Couronne ${r}</button>`).join("")}${cancel}</div>`; break;
       case "Double bouclier": { // deux bâtiments différents (Oni, 09/11/2026), touchés sur le plateau
         inner = `<p class="hint">Touchez jusqu'à 2 bâtiments : ${UI.picks.length} / 2${UI.picks.length ? " (" + UI.picks.map(k => E(tileLabel(k))).join(", ") + ")" : ""}.</p><div class="choices">` +
-          `<button data-a="spellArg" data-v="picks" class="primary"${UI.picks.length ? "" : " disabled"}>Valider</button>${cancel}</div>`;
-        break;
-      }
-      case "Réparation": { // touchez les tuiles abîmées sur le plateau (+1 PV par toucher, 3 au total)
-        inner = `<p class="hint">Touchez les tuiles abîmées à réparer : ${UI.picks.length} / 3 PV${UI.picks.length ? " (" + UI.picks.map(k => E(tileLabel(k))).join(", ") + ")" : ""}.</p><div class="choices">` +
           `<button data-a="spellArg" data-v="picks" class="primary"${UI.picks.length ? "" : " disabled"}>Valider</button>${cancel}</div>`;
         break;
       }
@@ -513,8 +507,8 @@
       : "Soutien · pendant votre tour, avant de passer aux tirs";
     return `<div class="spell ${sp.kind} card">${icon(spellIcon(s))}<span><b>${E(s)}</b><small class="when">${E(when)}</small><small>${E(sp.text)}</small><small class="lost">Reste en main tant qu'il n'est pas joué.</small></span></div>`;
   }
-  const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Feu nourri": "tourelle", "Réparation": "reparation", "Double bouclier": "protection", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
-  const capIcon = c => ({ vision: "vision", soin: "soin", fureur: "fureur", depouille: "depouille", percee: "percee", cuirasse: "renforce", sabotage: "sabotage", spores: "spores" }[c] || "aura");
+  const spellIcon = s => ({ "Frappe orbitale": "frappe", "Salve": "salve", "Barrage": "lane", "Onde de choc": "couronne", "Champ de stase": "stase", "Famine": "famine", "Brouillage": "brouillage", "Effort": "effort", "Cadence": "cadence", "Feu nourri": "tourelle", "Tir de précision": "tourelle", "Double bouclier": "protection", "Renouvellement": "renouvellement", "Reconversion": "reconversion" }[s]);
+  const capIcon = c => ({ vision: "vision", recolte: "biomasse", fureur: "fureur", depouille: "depouille", percee: "percee", cuirasse: "renforce", sabotage: "sabotage", spores: "spores" }[c] || "aura");
   const cardOf = uid => S.handA.find(c => c.uid === uid) || { name: "?" };
   function posTxt(c) { return c.k === 4 ? `entrée ${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}` : `${SF.LANE_NAME[c.lane]} ${SF.COLS[c.u + 2]}${c.k}`; }
   function tileLabel(k) {
@@ -577,7 +571,7 @@
         if (hiddenTrap(t)) inner = `<div class="tile hidden"><b>?</b><small>camouflée</small>${newBadge(t.new && S.view === "essaim")}</div>`;
         else {
           const ep = SF.epinesOf(S, k, S.view === "essaim");
-          inner = `<div class="tile ${imCls(t.name)}${t.camo && !t.revealed ? " trap" : ""}"${t.camo && !t.revealed ? ` data-tip="Camouflée : l'essaim ne la voit pas (révélée à la première attaque)"` : ""}><span class="tn">${E(short(t.name))}</span>${newBadge(t.new && S.view === "essaim")}<b class="hp" tabindex="0" data-tip="Points de vie : ${t.hp} sur ${t.max}">${t.hp}<small>/${t.max}</small></b>
+          inner = `<div class="tile ${imCls(t.name)}${t.camo && !t.revealed ? " trap" : ""}"${t.camo && !t.revealed ? ` data-tip="Camouflée : l'essaim ne la voit pas (révélée à la première attaque)"` : ""}><span class="tn">${E(short(t.name))}</span>${newBadge(t.new && S.view === "essaim")}<b class="hp${t.hp < t.max ? " dmg" : ""}" tabindex="0" data-tip="${t.hp < t.max ? `${t.max - t.hp} dégât${t.max - t.hp > 1 ? "s" : ""} ce tour : encore ${t.hp} pour le détruire avant la fin du tour, sinon tout est effacé.` : `${t.max} PV : il faut ${t.max} dégât${t.max > 1 ? "s" : ""} dans le même tour pour le détruire.`}">${t.hp}<small>/${t.max}</small></b>
             <span class="tb">${ep ? ic("epines", ep, `Épines ${ep} : une créature qui attaque ce bâtiment subit ${ep} dégât${ep > 1 ? "s" : ""} après son attaque (+1 par Avant-poste dans les 8 cases autour).`) : ""}${t.ren ? ic("renforce", t.ren, `Renforcé ${t.ren} : chaque attaque contre ce bâtiment fait ${t.ren} dégât${t.ren > 1 ? "s" : ""} de moins (sans minimum).`) : ""}${t.tech ? ic("tech", t.tech, `+${t.tech} technologie${t.tech > 1 ? "s" : ""} tant que le bâtiment tient (technologies = sortilèges par tour).`) : ""}${t.temp ? ic("temp", "", "+1 travailleur tant que le bâtiment tient.") : ""}${t.trap ? ic("piege", t.trap, `Mine ${t.trap} : ${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui la révèle en l'attaquant, avant qu'elle frappe.`) : ""}${t.siphon ? ic("biomasse", t.siphon, `Siphon ${t.siphon} : révélé par une attaque, l'essaim perd ${t.siphon} biomasse (+${t.siphon} par tranche de 10 qu'il possède, jamais sous ${SF.MIN_BIOMASS}).`) : ""}${t.shield ? `<span class="shield-tk" tabindex="0" data-tip="Bouclier : la prochaine attaque ne lui fait rien (la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.">${icon("protection")}</span>` : ""}</span></div>`;
         }
       }
@@ -631,12 +625,12 @@
       const tgt = (S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c)) || spT || tpT;
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" ? (SF.canAct(S, c) ? (S.view === "essaim" ? " go" : "") : " done") : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       const au = auraOf(c);
-      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${c.esc ? `<i class="blind" title="Jeton Échappée : sauvera une créature de sa case">${icon("mue")}</i>` : ""}${newBadge(c.new && S.view === "colonie")}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${c.esc ? `<i class="blind" title="Jeton Échappée : sauvera une créature de sa case">${icon("mue")}</i>` : ""}${newBadge(c.new && S.view === "colonie")}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp${c.hp < SF.maxHp(S, c.name) ? " dmg" : ""}">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
   const FX_LABEL = {
-    soin: () => ["+2 HEAL"], fureur: () => ["+2 ATQ"], percee: () => ["PERCÉE"],
+    recolte: () => ["+1 BIO"], fureur: () => ["+2 ATQ"], percee: () => ["PERCÉE"],
     cuirasse: () => ["ANTI-ÉPINES"], spores: () => ["+1 SPORES"], vision: () => ["VISION"], sabotage: () => ["SABOTAGE"],
   };
   // somme des effets identiques (« +1 ATQ » deux fois → « +2 ATQ »)
@@ -648,15 +642,14 @@
   // Auras (Oni, 10/11/2026) : une liste unique — la capacité du soutien (si c'est une aura) et chaque aura donnée par les
   // améliorations de soutien acquises (Mue, Griffes, Régénération, Corrosion), chacune avec son icône et son effet court.
   // self : l'aura profite aussi au soutien qui la donne (Aura Mobilité 1, moteur : speedOf).
-  const AURA_CAPS = ["soin", "fureur", "percee", "cuirasse", "spores"]; // Dépouille (Charognard) n'est pas une aura
-  const CAP_FX = { soin: "+2 PV en fin de tour", fureur: "+2 ATQ", percee: "Percée",
+  const AURA_CAPS = ["recolte", "fureur", "percee", "cuirasse", "spores"]; // Dépouille (Charognard) n'est pas une aura
+  const CAP_FX = { recolte: "+1 biomasse par bâtiment détruit", fureur: "+2 ATQ", percee: "Percée",
     cuirasse: "insensible aux Épines", spores: "1 dégât autour de la cible" };
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
   // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
   const UP_AURAS = {
-    A1: [MOB, { icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "chaque soutien sauve 1 créature (jeton défaussé)" }],
-    A2: [{ icon: "regeneration", name: "Aura Soin total", labs: ["SOIN TOTAL"], fx: "tous ses PV en fin de tour", once: true }],
-    B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment à 1 PV détruit", once: true }, MOB],
+    A1: [MOB, { icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "chaque soutien sauve 1 créature de la destruction (jeton défaussé)" }],
+    B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment détruit s'il ne manque qu'1 dégât", once: true }, MOB],
     B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
   };
   function upAuras() { // auras données par chaque soutien grâce aux améliorations, avec le nom de l'amélioration
@@ -677,7 +670,7 @@
     const all = SF.caseMates(S, c).flatMap(givenAuras);
     if (SF.CREATURES[c.name].type === "soutien") all.push(...upAuras().filter(x => x.self));
     // un soutien n'attaque pas : les effets d'attaque reçus (ATQ, Percée, Spores, Corrosion, Cuirasse) ne le concernent pas
-    const atk = SF.attacks(c), ATK_ONLY = ["percee", "biomasse", "spores", "corrosion", "renforce", "atq", "griffes"];
+    const atk = SF.attacks(c), ATK_ONLY = ["percee", "spores", "corrosion", "renforce", "atq", "griffes"];
     const g = new Map();
     for (let x of all) {
       if (!atk) { if (ATK_ONLY.includes(x.icon)) continue; x = { ...x, labs: x.labs.filter(l => !/ATQ$/.test(l)) }; }
@@ -724,13 +717,13 @@
     const v = SF.speedOf(S, c), vb = SF.baseSpeed(c), mob = receivedAuras(c).filter(x => x.icon === "mobilite").reduce((a, x) => a + x.n, 0);
     const vWhy = [`base ${vb}`, SF.hasMobility(S, c) ? "+1 Mobilité" : "", mob ? `+${mob} Aura Mobilité 1` : ""].filter(Boolean);
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
-    if (c.blind) extras.push("jeton Blindage (la prochaine perte de PV est annulée)");
+    if (c.blind) extras.push("jeton Blindage (les prochains dégâts sont annulés)");
     if (c.esc) extras.push("jeton Échappée (sauvera une créature de sa case qui devrait mourir)");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     const giv = givenAuras(c), rec = receivedAuras(c);
     const grid = caseGrid(c);
     return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
-      <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${icon("mobilite")} vitesse ${v}${v !== vb ? ` (${vWhy.join(" ")})` : ""} · ${posTxt(c)}</p>
+      <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${SF.maxHp(S, c.name)}${c.hp < SF.maxHp(S, c.name) ? ` <span class="pvr">(${SF.maxHp(S, c.name) - c.hp} dégât${SF.maxHp(S, c.name) - c.hp > 1 ? "s" : ""} ce tour)</span>` : ""} · ${icon("mobilite")} vitesse ${v}${v !== vb ? ` (${vWhy.join(" ")})` : ""} · ${posTxt(c)}</p>
       ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}
       ${giv.length ? `<p class="aulist"><span class="lab">Donne à sa case :</span>${giv.map(x => auraChip(x, true)).join("")}</p>` : ""}
       ${rec.length ? `<p class="aulist get"><span class="lab">Reçoit :</span>${rec.map(x => auraChip(x, true)).join("")}</p>` : ""}${extras.length ? `<p>Gagne : ${extras.join(", ")}.</p>` : ""}${grid}</section>`;
@@ -1055,7 +1048,7 @@
           if (o.shield && !P.corr) why = " · Bouclier : l'attaque ne fait rien, le jeton est défaussé";
           else { why = ` · ATQ ${P.atq}`; if (o.shield) why += " · Corrosion : Bouclier détruit"; if (o.ren) why += P.corr ? " · Renforcé ignoré (Corrosion)" : ` · Renforcé ${o.ren} : −${o.ren}`; }
         }
-        lines.push(`<p class="${t.main ? "pv-main" : ""}"><b>${t.how ? t.how + " : " : ""}${E(t.name)}</b> ${t.from} → <span class="pvr">${t.gone ? "détruit" : t.to + " PV"}</span>${E(why)}</p>`);
+        lines.push(`<p class="${t.main ? "pv-main" : ""}"><b>${t.how ? t.how + " : " : ""}${E(t.name)}</b> ${t.gone ? `<span class="pvr">détruit</span>` : `<span class="pvr">pas détruit</span> (il manquera ${t.to} dégât${t.to > 1 ? "s" : ""} ce tour)`}${E(why)}</p>`);
       }
       if (P.target === "fusee" || P.workers > 0) {
         const core = document.querySelector(".cell.core small");
@@ -1063,8 +1056,8 @@
         lines.push(`<p><b>${P.workersHow ? P.workersHow + " : " : ""}Fusée</b> ${P.workers > 0 ? `<span class="pvr">−${P.workers} travailleur${P.workers > 1 ? "s" : ""}</span>` : "aucun travailleur perdu"}</p>`);
       }
       lines.push(P.atkTo !== P.atkFrom || P.dead
-        ? `<p><b>${E(P.c.name)}</b> (défense) ${P.atkFrom} → <span class="pvr">${P.dead ? "meurt" : P.atkTo + " PV"}</span> · Épines / Mine</p>`
-        : `<p><b>${E(P.c.name)}</b> (défense) ${P.atkFrom} PV, aucun dégât subi</p>`);
+        ? `<p><b>${E(P.c.name)}</b> <span class="pvr">${P.dead ? "meurt" : `subit ${P.atkFrom - P.atkTo} dégât${P.atkFrom - P.atkTo > 1 ? "s" : ""}, survit`}</span> · Épines / Mine</p>`
+        : `<p><b>${E(P.c.name)}</b> aucun dégât subi</p>`);
       const tok = document.querySelector(`.tok[data-id="${P.c.id}"] .tp`);
       if (tok && P.atkTo !== P.atkFrom) pvSet(tok, P.dead ? "✕" : String(P.atkTo));
       if (P.bio) lines.push(`<p>Biomasse +${P.bio}</p>`);

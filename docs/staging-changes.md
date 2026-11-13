@@ -45,3 +45,8 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.33
 - La pastille NEW devient un petit rond jaune avec un « N » centré.
+
+## Branche test : dégâts du tour « tout ou rien »
+- Une créature ou un bâtiment n'est détruit que si les dégâts du tour (toutes sources) atteignent ses PV ; sinon ils sont effacés à la fin du tour.
+- Stats : Carapace 1/2, Colosse 3/6, soutiens 2 / 3 / 4 PV. Plus aucun soin.
+- Cartes revues : Carapace épaisse, Provocation, Bélier (ex-Masse vivante), Coup de grâce, Régénération, Glaneur (Aura Récolte), Tir de précision (ex-Réparation).
