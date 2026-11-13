@@ -65,6 +65,8 @@ Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (vali
 
 ## Points ouverts (ne pas trancher sans Oni)
 
+- **Extension « Titans & Bastions »** (hors version de base, activable sur l'accueil, menu vert acide) : brouillon dans `docs/extension-titans-et-bastions.md` — Titans (essaim : pioche de 10 mythiques une fois les 3 arbres finis) et Bastions (colonie : quartiers = formes de bâtiments + bonus). **Rien n'est codé** ; questions ouvertes dans le document.
+
 - Livret de référence (document Claude d'Oni) à mettre à jour depuis le jeu.
 - Coûts aggros/tanks (3/4/7), exemplaires des soutiens ; « Déploiement » = nom d'amélioration et d'étape.
 - Barbelés face visible ; Percée sur la fusée = 1 travailleur ; bâtiment sans case valable → retour en main (interprétations).
