@@ -129,6 +129,71 @@ ne sont à portée d'**aucune**). **Les tanks deviennent quasi intouchables** pa
 
 ---
 
+## 4 bis. Vue d'ensemble des changements proposés (13/11/2026, après les réponses d'Oni)
+
+### Décisions d'Oni
+- Recommandations validées : dégâts effacés à la fin de chaque tour ; Percée = dégâts au-delà du seuil ; soins retirés ; « −1 tourelle » de
+  Provocation et Masse vivante supprimé ; dégâts du tour visibles ; PV des bâtiments inchangés pour la première version.
+- **Spores : restent à 1 dégât** (elles détruisent les Barbelés et les bâtiments à 1 PV autour de la cible).
+- **Tourelles : inchangées** (niveau I : 1 dégât, +1 par palier de la fusée, jusqu'à 4 ; niveau II : 2).
+- Principe demandé : **les PV de la créature la plus solide = le maximum de dégâts de 2 tourelles** ; et **progression** : les bâtiments les plus
+  durs ne tombent (presque) que devant les meilleures créatures.
+
+### A. Créatures (ATQ / PV)
+| | Niveau 1 | Niveau 2 | Niveau 3 | Changement |
+|---|---|---|---|---|
+| **Aggros** | 3 / 1 | 4 / 2 | 5 / 3 | aucun |
+| **Tanks** | 1 / **2** | 2 / 4 | 3 / **6** | Carapace 3 → 2 PV, Colosse 5 → 6 PV |
+| **Soutiens** | 0 / 2 | 0 / **3** | 0 / **4** | niveau 2 : 4 → 3 PV, niveau 3 : 6 → 4 PV |
+
+Pourquoi :
+- **Tank = 2 × les PV de l'aggro du même niveau** (2 / 4 / 6) : une règle facile à retenir.
+- **Deux tourelles (I + II) suivent la progression des tanks** : au départ 1 + 2 = 3 (Carapace 2 ✓), après le palier 3 : 2 + 2 = 4 (Béhémoth 4 ✓),
+  après le palier 9 : 4 + 2 = 6 (Colosse 6 ✓). Le plus gros tank tombe exactement devant le maximum de 2 tourelles I + II.
+- **Carapace à 2 PV** : devant la fusée (couronne 1), elle est à portée de deux tourelles de niveau I (1 + 1 = 2) : elle ne va plus
+  « jusqu'au bout sans rien risquer ». Les Épines 2 (Haie d'épines, Mur hérissé, Ronceraie) la tuent aussi quand elle les attaque.
+- **Soutiens plus fragiles** (2 / 3 / 4) : ils ne se battent pas, une seule grosse tourelle ou deux petites doivent pouvoir les abattre.
+
+### B. Bâtiments : l'échelle existe déjà (valeurs inchangées)
+Qui détruit quoi **seul, en une attaque** (Renforcé déduit) :
+
+| Attaquant | Bâtiments qu'il détruit seul |
+|---|---|
+| Tanks (ATQ 1 à 3) | Barbelés et bâtiments à 1 PV ; le Colosse (3) jusqu'à 3 PV |
+| **Écorcheur** (ATQ 3) | tout ce qui a 3 PV ou moins sans Renforcé, et la Ronceraie |
+| **Ravageur** (ATQ 4) | + **Muraille**, **Avant-postes** (4 PV), **Dortoir** (3 PV, Renforcé 1) |
+| **Massacreur** (ATQ 5) | + **Rempart** (4 PV, Renforcé 1), **Bastion** (3 PV, Renforcé 2) |
+
+Les bâtiments à 3 points (Rempart, Bastion) demandent donc un Massacreur, ou plusieurs attaquants de la même case, ou un Hurleur (+2 ATQ).
+À revoir plus tard : Ligne de front et Réduit (PV variables selon la couronne), formule du Siphon.
+
+### C. Épines, Mines, sorts : ce qui tue qui (dégâts cumulés pendant le tour de l'essaim)
+- **Épines 1** (Barbelé, Baraquement) : tuent l'Écorcheur. **Épines 2** : tuent aussi Ravageur et Carapace. Avec Carnage (2 attaques), les Épines
+  comptent deux fois.
+- **Mines 1 / 3 / 5** : la Mine supérieure tue tout sauf le Colosse.
+- **Sorts de réaction + Épines se cumulent** dans le même tour : Salve (3) + Épines 1 tue un Béhémoth qui attaque ; Barrage ou Onde de choc (1)
+  préparent le terrain. **Feu nourri** (2 tirs par tourelle) devient un sort clé.
+
+### D. Améliorations et cartes à revoir
+| Carte | Aujourd'hui | Proposition |
+|---|---|---|
+| **Carapace épaisse** (tank A1) | +1 PV, immunité Épines, −1 Mines | **Insensibles aux Épines et aux Mines** (plus de chiffre ; le +1 PV casserait l'échelle des tourelles) |
+| **Provocation** (tank B1) | tirs et sorts redirigés, −1 tourelle | tirs et sorts redirigés (sans le −1, déjà validé) |
+| **Blindage** (tank A2) | jeton : annule la prochaine perte de PV | jeton : annule **une source de dégâts**, puis défaussé (inchangé dans l'esprit) |
+| **Masse vivante** (tank B2) | −1 tourelle | à remplacer. Proposition : **« Bélier » : +1 ATQ pour les tanks** (ils aident enfin à franchir les seuils) |
+| **Griffes** (soutien B1) | Mobilité + Coup de grâce (bâtiment à 1 PV détruit) | Mobilité + **Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit** |
+| **Régénération** (soutien A2) | Aura Soin total | sans objet. Proposition : **les jetons Blindage et Échappée utilisés reviennent au début de chaque tour de l'essaim** |
+| **Glaneur** (soutien N1) | Aura Soin 2 | sans objet. Proposition : **Aura Récolte : +1 biomasse quand une créature de sa case détruit un bâtiment** (l'ancien Butin, qui va bien à son nom) |
+| **Échappée** (Mue) | survit à 1 PV et recule | survit à la destruction et recule (plus de PV à noter) |
+| **Sort Réparation** | rend 3 PV | sans objet. Proposition : **« Tir de précision » : une tourelle fait +2 dégâts ce tour** (aide à concentrer) |
+| Férocité, Carnage, Mobilité, Déploiement, Essaim agrandi, Réincarnation, Clairvoyance, Corrosion, Hurleur, Perforeur, Sporeur, Catalyseur, Charognard, Sapeur | — | inchangés (Férocité +1 ATQ, Carnage et Hurleur +2 ATQ deviennent les outils pour franchir les seuils) |
+
+### E. Points d'attention
+- **Renforcé X** reste une soustraction par attaque. Piste de simplification pour plus tard : « Blindé X : les attaques d'ATQ ≤ X ne comptent
+  pas » (aucun calcul, seulement un filtre).
+- **Début de partie** : plafond de 2 créatures par lane ; une Muraille (4 PV) demande alors Écorcheur + Carapace sur la même case (3 + 1).
+- **Fusée** : toute attaque tue toujours 1 travailleur, quelle que soit l'ATQ ; les tanks restent donc utiles au contact.
+
 ## 5. Questions à trancher avant de coder
 1. **Moment d'effacement** des dégâts sur les créatures : à la fin de chaque tour (essaim puis colonie) comme dans le tableau 1 ?
 2. **Percée** : l'excédent est-il bien « les dégâts au-delà du seuil de la cible » ? (avec plusieurs attaquants, c'est celui qui franchit
@@ -148,5 +213,6 @@ ne sont à portée d'**aucune**). **Les tanks deviennent quasi intouchables** pa
 5. **Équilibrage** chiffré (leviers 3.4) à partir de parties jouées, puis éventuellement 10 parties IA contre IA sur demande.
 
 ## 7. Journal
+- **13/11/2026 (Oni)** : recommandations validées sauf Spores (restent à 1) et tourelles (inchangées) ; demande d'une vue d'ensemble des stats (section 4 bis).
 - **13/11/2026 (Oni)** : nouvelle règle à tester sur une branche `test` partie de `staging` : un bâtiment ou une créature n'est détruit que si
   les dégâts **du tour** atteignent ses PV (toutes sources cumulées) ; sinon rien ne reste. But : simplifier au maximum pour le jeu de plateau.
