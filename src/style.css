@@ -1131,7 +1131,8 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 .cell.sup .ic { gap: 2px; }
 .tile .hp, .tile .shield-tk, .cell .lv { cursor: help; }
 /* pastille NEW : posé au dernier tour de l'adversaire (Oni, 13/11/2026) */
-.newb { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); z-index: 3; padding: 0 4px; border-radius: 99px; background: #ffd24a; color: #1b1f1d; font: 800 max(8px, calc(var(--cell) * .11))/1.25 var(--body); font-style: normal; letter-spacing: .04em; box-shadow: 0 0 0 1px rgba(0,0,0,.45); pointer-events: auto; }
+.newb { position: absolute; top: 2px; left: 2px; z-index: 3; padding: 3px 1px; border-radius: 99px; background: #ffd24a; color: #1b1f1d; font: 800 max(8px, calc(var(--cell) * .1))/1 var(--body); font-style: normal; writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 0; box-shadow: 0 0 0 1px rgba(0,0,0,.45); pointer-events: auto; }
+.tok:has(.newb) .blind { top: calc(max(8px, var(--cell) * .1) * 3 + 10px); } /* le jeton Blindage / Échappée passe sous la pastille */
 /* aperçu de la résolution d'une attaque (Oni, 13/11/2026) */
 .pvr { color: #ff5c5c !important; font-weight: 800; }
 .tile .hp.pvr small { color: #ff9a9a; }

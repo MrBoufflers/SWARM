@@ -1,6 +1,6 @@
 # Swarm & Steel — prototype (dépôt SWARM)
 
-Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.5.30 au 13/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
+Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.5.31 au 13/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
 Tout est **en français** : réponds à Oni en français.
 
 Historique détaillé (décisions, lots, anciennes règles) : `docs/historique-claude.md`. Journal des versions : `docs/versions.md`. Livret : `docs/regles-v0.3.md` (le jeu fait foi en cas d'écart).
@@ -49,7 +49,7 @@ Serveur qui fait autorité, clients qui envoient des actions, vue filtrée :
 - à personne : ordre des pioches (seulement les nombres). La **défausse des sortilèges est publique**. Le journal évite de nommer les tuiles camouflées (`pubName`).
 Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (validé). Netlify : interrogation toutes les 2 s, écriture conditionnelle (etag).
 
-## Règles en vigueur (résumé, v0.5.30)
+## Règles en vigueur (résumé, v0.5.31)
 
 - **Pioche essaim** carte par carte (palier = total 3/5/7/10) ; main de départ sans Œil-sonde.
 - **Mouvement en blocs** (`moveBlock`) : même case = avance ensemble à la vitesse du plus lent ; les soutiens restent avec un compagnon immobile. Carnage : pas d'avancée après la frappe (`c.struck`).

@@ -36,3 +36,6 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 - Aperçu de la résolution d'une attaque au survol d'un bâtiment (créature choisie) : PV en rouge, Percée, Spores, Épines, Bouclier, Renforcé.
 - Nouvelle icône de construction : travailleur avec clé à molette (à la place du sablier).
 - Pastille NEW sur ce que l'adversaire a posé à son dernier tour.
+
+## v0.5.31
+- La pastille NEW est verticale, en haut à gauche (ne cache plus les noms).
