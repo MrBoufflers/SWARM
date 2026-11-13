@@ -405,7 +405,7 @@
         const t = SF.strikeTargets(S, sel), n = Object.keys(SF.reachable(S, sel)).length;
         const tb = t.length ? `<div class="choices">${t.map(k => `<button data-a="strike" data-k="${k}">Attaquer ${k === "fusee" ? "la fusée" : E(tileLabel(k))}</button>`).join("")}</div>` : "";
         const what = sel.struck ? (t.length ? "2ᵉ attaque possible (Carnage)" : "rien d'autre à attaquer") : n ? `avancez de 1 à ${n} case${n > 1 ? "s" : ""} (cases surlignées)` : SF.attacks(sel) ? (t.length ? "attaquez un bâtiment encadré, ou passez" : "rien à attaquer") : "un soutien n'attaque pas";
-        body = `<p class="hint"><b>${E(sel.name)}</b>${sh ? "" : " · " + posTxt(sel)} : ${what}.</p>${tb}<div class="choices"><button data-a="rest" data-id="${sel.id}">${n && !sel.moved ? "Ne pas bouger" : "Terminer pour cette créature"}</button></div>${sh ? caseGrid(sel) : ""}`;
+        body = `<p class="hint"><b>${E(sel.name)}</b>${sh ? "" : " · " + posTxt(sel)} : ${what}.</p>${tb}<div class="choices">${SF.mustAdvance(S, sel) ? `<span class="hint small">Elle doit avancer d'au moins une case (rien devant elle).</span>` : `<button data-a="rest" data-id="${sel.id}">${n && !sel.moved ? "Ne pas bouger" : "Terminer pour cette créature"}</button>`}</div>${sh ? caseGrid(sel) : ""}`;
       } else body = `<p class="hint">Touchez une créature pour la déplacer puis attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>`;
       acts = `<button data-a="actAll" class="primary">Tout résoudre et finir le tour</button>`;
     } else if (ph === "D_spell") { // un sortilège parmi deux (Oni, 09/11/2026)

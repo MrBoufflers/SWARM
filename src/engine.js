@@ -690,8 +690,12 @@ const SF = (() => {
     return true;
   }
   // la créature renonce à agir (ou à sa 2ᵉ attaque) pour ce tour
+  // branche test (Oni, 13/11/2026) : une aggro ou un tank n'a pas le choix de rester sur place : s'il n'y a pas de bâtiment ni la fusée
+  // devant lui, il doit avancer d'au moins une case (les soutiens, eux, peuvent rester avec leur groupe)
+  const mustAdvance = (S, c) => !c.acted && !c.moved && !c.struck && CREATURES[c.name].type !== "soutien" && pathCells(S, c).length > 0;
   function restCreature(S, id) {
     const c = S.creatures.find(o => o.id === id); if (!c || c.acted) return false;
+    if (mustAdvance(S, c)) return false; // il doit d'abord avancer
     c.acted = true; return true;
   }
   // résolution automatique d'une créature (bouton « Tout résoudre ») : elle avance au maximum sur son chemin, puis attaque
@@ -1550,7 +1554,7 @@ const SF = (() => {
       for (const c of todo) { if (S.winner) break; if (S.creatures.includes(c)) autoCreature(S, c); }
       return true;
     } },
-    endA: { phase: ["A_attack"], run(S) { endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
+    endA: { phase: ["A_attack"], run(S) { if (S.creatures.some(c => mustAdvance(S, c))) return false; endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
     tdraw: { phase: ["D_draw"], run: (S, a) => drawTileFrom(S, a.cat) }, // pioche d'une tuile dans la pioche choisie
     buildAt: { phase: ["D_main"], run: (S, a) => isInt(a.i) && typeof a.k === "string" && /^-?\d,-?\d$/.test(a.k) && buildAt(S, a.i, a.k) },
     startCh: { phase: ["D_main"], run(S, a) {
@@ -1651,7 +1655,7 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, mustAdvance, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
     attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, depTargets, fireDep, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
