@@ -65,7 +65,7 @@ Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (vali
 
 ## Points ouverts (ne pas trancher sans Oni)
 
-- **Extension « Titans & Bastions »** : tout son travail (document de conception, futur code) va sur la **branche `extension`** (partie de `staging` le 13/11), **jamais sur `staging`** tant qu'Oni n'a pas décidé de la fusionner.
+- **Extension « Titans & Quarters »** : tout son travail (document de conception, futur code) va sur la **branche `extension`** (partie de `staging` le 13/11), **jamais sur `staging`** tant qu'Oni n'a pas décidé de la fusionner.
 
 - Livret de référence (document Claude d'Oni) à mettre à jour depuis le jeu.
 - Coûts aggros/tanks (3/4/7), exemplaires des soutiens ; « Déploiement » = nom d'amélioration et d'étape.
