@@ -13,7 +13,7 @@ NOMS = {
     "Écorcheur": "écorcheur.jpg", "Ravageur": "ravageur.jpg", "Massacreur": "massacreur.jpg",
     "Carapace": "carapace.jpg", "Béhémoth": "béhémoth.jpg", "Colosse": "colosse.jpg",
     "Œil-sonde": "oeil sonde.jpg", "Glaneur": "glaneur.jpg", "Hurleur": "hurleur.jpg",
-    "Phéromone": "phéromone.jpg", "Perforeur": "perforeur.jpg", "Catalyseur": "catalyseur.jpg",
+    "Charognard": "phéromone.jpg", "Perforeur": "perforeur.jpg", "Catalyseur": "catalyseur.jpg",
     "Sapeur": "sapeur.jpg", "Sporeur": "sporeur.jpg",
     "Palissade": "palissade.jpg", "Barbelé": "barbelé.jpg", "Antenne": "antenne.jpg", "Bastion": "bastion.jpg", "Haie d'épines": "haie d'épines.jpg",
     "Laboratoire": "laboratoire.jpg", "Mur hérissé": "mur hérissé.jpg", "Muraille": "muraille.jpg",
@@ -35,7 +35,7 @@ TAILLES = {"champs de bataille.jpg": (840, 55),
 # nom → (centre x, centre y, côté du carré), en fraction de la largeur de l'illustration
 VISAGES = {
     "Ravageur": (.59, .30, .34), "Massacreur": (.60, .27, .34), "Béhémoth": (.60, .52, .36), "Colosse": (.67, .52, .36),
-    "Phéromone": (.63, .41, .34), "Perforeur": (.52, .44, .34), "Catalyseur": (.67, .42, .30), "Sapeur": (.74, .50, .30), "Sporeur": (.63, .60, .34),
+    "Charognard": (.63, .41, .34), "Perforeur": (.52, .44, .34), "Catalyseur": (.67, .42, .30), "Sapeur": (.74, .50, .30), "Sporeur": (.63, .60, .34),
 }
 TAILLE_VISAGE = 180
 

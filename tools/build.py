@@ -21,6 +21,16 @@ img_css = "".join(
 # logos des camps (tools/logos.js) : masques CSS --logo-colonie / --logo-essaim (la couleur vient du camp)
 logos = ROOT / "assets/logos"
 img_css += ":root{" + "".join(f"--logo-{k}:url(data:image/png;base64,{base64.b64encode((logos / (k + '.png')).read_bytes()).decode()});" for k in ("colonie", "essaim", "jeu", "titre", "titre-colonie", "titre-essaim") if (logos / (k + ".png")).exists()) + "}\n"
+# changements en test (branche staging) : docs/staging-changes.md, « ## vX.Y.Z » puis des puces ; vide sur main (le bouton disparaît)
+import re
+chg_file = ROOT / "docs/staging-changes.md"
+changes = []
+if chg_file.exists():
+    for blk in re.split(r"^## ", chg_file.read_text(encoding="utf-8"), flags=re.M)[1:]:
+        head, *rest = blk.strip().splitlines()
+        items = [l[2:].strip() for l in rest if l.startswith("- ")]
+        if items: changes.append({"v": head.strip().lstrip("v").split(" ")[0], "items": items})
+changes_js = "const STAGING_CHANGES = " + json.dumps(changes, ensure_ascii=False) + ";"
 img_js = "const IMG_CLASS = " + json.dumps({n: "im im-" + f[:-5] for n, f in table.items()}, ensure_ascii=False) + ";"
 
 page = f"""<!doctype html>
@@ -35,6 +45,7 @@ page = f"""<!doctype html>
 <div id="flash" role="status" hidden></div>
 <script>{icons_js}
 {img_js}
+{changes_js}
 {engine}
 {bilan}
 {aide}

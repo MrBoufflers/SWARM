@@ -4,6 +4,98 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.0 — 13 novembre 2026
+
+**Version stable : fusion de la branche staging (versions 0.5.22 à 0.5.33).**
+
+**Règles**
+- **Premier tour de la colonie** : un seul bâtiment au total.
+- **Phéromone** renommée **Charognard** : plus d'Aura Butin, elle laisse un jeton **Dépouille** sur la case d'une créature morte (bloque la construction
+  tant qu'une tourelle à portée n'a pas tiré dessus ; dégagé aussi par la Nuke, Barrage et Onde de choc).
+- **Percée** : l'excédent passe derrière la cible, du côté opposé à l'attaquant. **Sporeur** : 1 dégât par Sporeur.
+- **Échappée** (Mue) : un jeton par soutien, une créature sauvée, puis le jeton est défaussé. **Renforcé X** : −X dégâts par attaque, valeurs réduites
+  de 1 (Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1). **Avant-postes** : 4 PV, seulement dans leur lane.
+- Améliorations sans calcul (v0.5.15 à 0.5.17) : Carapace épaisse, Provocation, Blindage (jeton), Masse vivante, Mue, Griffes (Coup de grâce), Régénération
+  (Aura Soin total), Hurleur +2 ATQ. Créatures de niveau 2 et 3 : +1/+1 et +2/+2 du niveau 1 ; fusée à 2 / 4 / 7 / 10 points par étage.
+
+**Interface**
+- Paliers de biomasse détaillés au survol ; infobulles sur toutes les icônes des bâtiments ; **aperçu de la résolution d'une attaque** (PV en rouge,
+  Percée, Spores, Épines, Bouclier, Renforcé) ; icône de construction « travailleur + clé » ; pastille **NEW** (rond jaune) sur ce que l'adversaire a
+  posé à son dernier tour ; bouton « Changements » pour les versions de test ; résumé « Sur cette case » dès la sélection d'une créature.
+
+**IA**
+- IA de l'essaim à trois stratégies (assaut, rempart, percée), IA de la colonie qui construit davantage et prend les coins.
+
+## v0.5.33 — 13 novembre 2026
+
+**Interface (Oni)**
+- Pastille **NEW** réduite : un petit rond jaune avec un « N » centré, en haut à gauche (l'infobulle dit « NEW : posé au dernier tour de l'adversaire »).
+
+## v0.5.32 — 13 novembre 2026
+
+**Correctif (Oni)**
+- Les bâtiments camouflés (vue colonie) ne remplissaient plus toute leur case : la règle des infobulles forçait leur position. Elle ne prend plus le dessus sur le positionnement des éléments (tuiles, cases à portée de tourelle, niveaux des coins, pastille NEW).
+
+## v0.5.31 — 13 novembre 2026
+
+**Interface (Oni)**
+- Pastille **NEW** à la verticale, en haut à gauche, pour ne plus cacher le nom des bâtiments et des créatures.
+
+## v0.5.30 — 13 novembre 2026
+
+**Interface (Oni)**
+- **Paliers de biomasse** : au survol de la biomasse et du palier, tous les paliers sont listés (seuil de biomasse, nombre de cartes piochées, créatures max par lane), le palier actuel marqué.
+- **Infobulles sur toutes les icônes des bâtiments** du plateau : Épines, Renforcé, technologies, travailleur, Mines, Siphons, Bouclier, PV, supports et coins, fusée, cases à portée, Dépouille.
+- **Aperçu de la résolution d'une attaque** : créature choisie, au survol d'un bâtiment attaquable, nouveaux PV en rouge sur le plateau (bâtiments touchés par la Percée ou les Spores, PV de l'attaquant après Épines ou Mine, travailleurs perdus de la fusée) et une carte de détail (Bouclier, Renforcé, Corrosion, biomasse gagnée). Un bâtiment camouflé n'est pas simulé.
+- **Icône de construction** : le sablier devient un travailleur avec une clé à molette (N points = N travailleurs à mobiliser).
+- **Pastille NEW** : sur les bâtiments posés au dernier tour de la colonie (vue essaim) et sur les créatures déployées au dernier tour de l'essaim (vue colonie).
+
+## v0.5.29 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Renforcé X** : chaque attaque contre le bâtiment fait **X dégâts de moins, sans minimum** (avant : 1 PV perdu par tranche complète de X dégâts). Valeurs réduites de 1 : Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1 (les parties en cours sont converties une fois). Vaut aussi pour les spores.
+- **Avant-postes** : toujours **4 PV**, mais ne peuvent être construits (ou reposés par Reconversion) que dans **leur propre lane** (avant : 2 PV hors de leur lane).
+
+## v0.5.28 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Sporeur** : Aura Spores à **1 dégât** par Sporeur au lieu de 2 (toujours cumulable, toujours sur les 8 cases autour de la cible, fusée = −1 travailleur).
+
+## v0.5.27 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Percée** : les dégâts en trop passent à la case juste **derrière la cible, du côté opposé à l'attaquant** (avant : toujours la case suivante vers la fusée). Une créature qui frappe un bâtiment par l'arrière ou par le côté perce donc dans l'autre sens ; vers la fusée, la fusée perd toujours 1 travailleur. Case vide ou hors plateau : dégâts perdus. Toujours pas d'enchaînement.
+
+## v0.5.26 — 12 novembre 2026
+
+**Règles (Oni) : Échappée (Mue) trop forte**
+- Chaque soutien porte un **jeton Échappée** (donné à son arrivée, et à l'achat de la Mue pour ceux déjà en jeu). Il sauve **une seule** créature de sa case qui devrait mourir (elle recule d'une case avec 1 PV), puis le jeton est défaussé pour de bon. Plus de limite « une fois par tour » : plusieurs soutiens sur une case sauvent plusieurs créatures, chacun une fois.
+
+## v0.5.25 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Phéromone renommée Charognard** (même carte, même effet Dépouille ; les anciennes parties sont converties).
+- **Dépouilles dégagées** par la **Nuke** (toutes) et par les sortilèges de zone : **Barrage** (celles de la lane visée) et **Onde de choc** (celles de la couronne visée).
+
+**Corrections**
+- **Résumé de la case** : il n'apparaissait qu'une fois la créature arrêtée ; il s'affiche maintenant dès qu'une créature est sélectionnée pour se déplacer (cadre d'étape, écran PC).
+
+## v0.5.24 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Phéromone** : l'Aura Butin (+1 biomasse) est remplacée par **Dépouille**. Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case (pas sur les cases d'entrée) : la colonie ne peut plus y construire tant qu'une tourelle (niveau I ou II) à portée n'a pas tiré dessus (un tir, qui retire le jeton). Un seul jeton par case ; la Nuke n'en laisse pas.
+
+## v0.5.23 — 12 novembre 2026
+
+**Règles (Oni)**
+- **Premier tour de la colonie** : un seul bâtiment au total (les points non dépensés vont à la fusée). Dès la manche 2, la règle habituelle s'applique (un bâtiment par lane).
+
+## v0.5.22 — 12 novembre 2026
+
+**Workflow (Oni)**
+- Branche **staging** (site staging-swarm.netlify.app) : les correctifs y passent d'abord (versions 0.5.22, 0.5.23…) ; quand c'est stable, fusion dans main avec la version mineure suivante (0.6.0).
+- Bouton « Changements » (accueil et menu en jeu) : liste des changements depuis le dernier passage sur main, lue dans `docs/staging-changes.md` (absent quand le fichier est vide, donc sur main).
+
 ## v0.5.21 — 11 novembre 2026
 
 **IA de l'essaim (Oni)**
