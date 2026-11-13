@@ -1,6 +1,6 @@
 # Swarm & Steel — prototype (dépôt SWARM)
 
-Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.6.0 au 13/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
+Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.6.1 au 13/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
 Tout est **en français** : réponds à Oni en français.
 
 Historique détaillé (décisions, lots, anciennes règles) : `docs/historique-claude.md`. Journal des versions : `docs/versions.md`. Livret : `docs/regles-v0.3.md` (le jeu fait foi en cas d'écart).
@@ -49,7 +49,7 @@ Serveur qui fait autorité, clients qui envoient des actions, vue filtrée :
 - à personne : ordre des pioches (seulement les nombres). La **défausse des sortilèges est publique**. Le journal évite de nommer les tuiles camouflées (`pubName`).
 Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (validé). Netlify : interrogation toutes les 2 s, écriture conditionnelle (etag).
 
-## Règles en vigueur (résumé, v0.6.0)
+## Règles en vigueur (résumé, v0.6.1)
 
 - **Pioche essaim** carte par carte (palier = total 3/5/7/10) ; main de départ sans Œil-sonde.
 - **Mouvement en blocs** (`moveBlock`) : même case = avance ensemble à la vitesse du plus lent ; les soutiens restent avec un compagnon immobile. Carnage : pas d'avancée après la frappe (`c.struck`).
@@ -58,12 +58,14 @@ Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (vali
 - **Tuiles** : 3 pioches (renfort / actif / piège). Mines 1/3/5. Siphon = niveau × (1 + biomasse ÷ 10), plancher 5. Bouclier sur Abri blindé, Palissade (1 PV), Égide (sans Renforcé), Archives et Observatoire (2 PV) ; Épines s'appliquent malgré le Bouclier.
 - **Améliorations (11/11)** : plus aucun bonus de PV variable (`bonusHp` = 0). Carapace épaisse +1 PV, Épines, −1 Mines ; Blindage = jeton `c.blind` à l'achat (tanks en jeu) et à l'arrivée ; Provocation (tirs + sortilèges) −1 tourelle, Masse vivante −1 tourelle, cumulables ; Mue = Mobilité + Échappée (jeton `c.esc` par soutien, à l'arrivée et à l'achat ; sauve une créature de sa case, puis défaussé) ; Griffes = Mobilité + Coup de grâce ; Régénération = Aura Soin total (autres créatures de la case d'un soutien), Glaneurs retirés de la pioche (`retired`).
 - **Améliorations** : Corrosion (soutien B2, ignore Renforcé, détruit le Bouclier) remplace Frénésie ; Griffes = aussi Aura Mobilité 1 ; Férocité donne Furtivité aux aggros ; Déploiement = `teleport` 1×/tour. `invest` prend la réserve d'abord. Réincarnation : tous les tanks morts mis de côté (`reincQueue`) ; Nuke comprise ; au début du tour de l'essaim, 1 revient d'office, plusieurs → étape `A_reinc` (action `reinc {i}`), les autres retournent en pioche. Déplacements = maximum (« Tout résoudre » ne relance pas une créature déjà déplacée).
-- **Créatures (11/11)** : ATQ/PV aggros 3/1, 4/2, 5/3 ; tanks 1/3, 2/4, 3/5. Fusée : étages à 2 / 4 / 7 / 10 points (`FLOOR_COSTS`).
+- **Dégâts du tour (13/11) : tout ou rien** : les PV ne se perdent pas durablement ; la cible n'est détruite que si les dégâts du tour (toutes sources) atteignent ses PV ; `clearDamage` les efface au début de chaque tour. **Créatures** : ATQ/PV aggros 3/1, 4/2, 5/3 ; tanks 1/2, 2/4, 3/6 ; soutiens 2 / 3 / 4 PV. Aggro et tank doivent avancer d'au moins une case s'il n'y a rien devant (`mustAdvance`). Cartes : Carapace épaisse = insensible Épines et Mines ; Bélier (+1 ATQ des tanks) ; Aura Récolte (Glaneur) ; Tir de précision ; Régénération rend les jetons ; plus de soins. Fusée : étages à 2 / 4 / 7 / 10 points (`FLOOR_COSTS`).
 - **Percée** : l'excédent passe à la case derrière la cible, du côté opposé à l'attaquant (`pierce` dans `hitTile`, d'après `gpos(c)`), pas toujours vers la fusée.
 - **Créatures** : Charognard = Dépouille (jeton `S.depouilles` sur la case d'une créature morte avec une Charognard vivant ; bloque `canTarget` ; retiré par un tir de tourelle I/II à portée, action `fireDep {sk,k}`, ou par la Nuke, Barrage (lane), Onde de choc (couronne) ; ex-Phéromone) ; Hurleur +2 ATQ (cumulable, plus de PV) ; Spores 1 dégât par Sporeur sur les 8 cases autour (fusée = −1 travailleur) ; perte de PV bonus = baisse du maximum seulement (`syncBonus`).
 - **Sortilèges** : 1 exemplaire chacun (14), Cadence retirée ; fin de tour : garder 1 des 2 du dessus, l'autre à la défausse. Frappe orbitale détruit ; Salve 3 dégâts à 2 créatures ; Brouillage immobilise toute une case ; Double bouclier (2 tuiles) ; Renouvellement +1 point ; Reconversion = déplacer un bâtiment.
 
 ## Points ouverts (ne pas trancher sans Oni)
+
+- **Règle « tout ou rien » (v0.6.1, ex-branche `test`, fusionnée dans `staging` le 13/11)** : à tester en jouant ; **`tests/rules.test.js` n'est pas réécrit pour elle** (une soixantaine de vérifications portent sur l'ancien modèle de PV : `npm test` échouera tant qu'on ne les a pas adaptées). Détail et plan d'équilibrage : `docs/test-degats-par-tour.md`.
 
 - **Extension « Titans & Quarters »** : tout son travail (document de conception, futur code) va sur la **branche `extension`** (partie de `staging` le 13/11), **jamais sur `staging`** tant qu'Oni n'a pas décidé de la fusionner.
 

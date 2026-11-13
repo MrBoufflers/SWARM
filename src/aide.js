@@ -57,9 +57,10 @@ const AIDE = (() => {
       <p>L'essaim joue d'abord, puis la colonie. La colonie peut jouer certains sortilèges pendant le tour de l'essaim (fenêtres de réaction).</p>
       <h3>Combat</h3>
       <ul>
-        <li><b>ATQ</b> : dégâts infligés par une attaque. <b>PV</b> : points de vie ; à 0, la créature ou le bâtiment est détruit.</li>
+        <li><b>ATQ</b> : dégâts infligés par une attaque. <b>PV</b> : dégâts à infliger <b>dans le même tour</b> pour détruire la créature ou le bâtiment.</li>
+        <li><b>Tout ou rien</b> : les dégâts de toutes les sources s'additionnent pendant le tour (plusieurs attaquants, plusieurs tourelles, sortilèges, Épines, Mines). S'ils atteignent les PV, la cible est détruite ; sinon, ils sont <b>effacés à la fin du tour</b>. Une Muraille (4 PV) résiste à un Écorcheur (3) seul, mais pas à un Écorcheur et une Carapace (3 + 1).</li>
         <li><b>Épines X</b> : une créature qui attaque ce bâtiment subit X dégâts après son attaque. +1 par Avant-poste dans les 8 cases autour.</li>
-        <li><b>Renforcé X</b> : chaque attaque contre ce bâtiment fait X dégâts de moins, sans minimum (5 dégâts contre Renforcé 2 : −3 PV ; 2 dégâts contre Renforcé 2 : rien).</li>
+        <li><b>Renforcé X</b> : chaque attaque contre ce bâtiment fait X dégâts de moins, sans minimum (5 dégâts contre Renforcé 2 : 3 dégâts comptés ; 2 dégâts contre Renforcé 2 : rien).</li>
         <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Une <b>Mine</b> camouflée inflige 1, 2 ou 3 dégâts (mineure, majeure, supérieure) à la créature qui la révèle, avant qu'elle frappe ; un <b>Siphon</b> retire 1, 2 ou 3 biomasse à l'essaim (jamais sous ${SF.MIN_BIOMASS}). Une tuile encore cachée ne subit ni la percée ni les spores.</li>
         <li><b>Percée</b> (Aura du Perforeur) : les dégâts en trop après la destruction d'un bâtiment passent à la case juste derrière la cible, du côté opposé à l'attaquant (la fusée perd 1 travailleur si c'est elle).</li>
         <li><b>Auras</b> : effets des soutiens sur les <b>autres</b> créatures de leur case ; elles se cumulent toutes.</li>
@@ -94,7 +95,7 @@ const AIDE = (() => {
             <li><b>Attaque, facultative</b> : elle frappe n'importe quel bâtiment qui touche sa case par un côté, ou la fusée. Avec Carnage, une aggro peut attaquer deux fois. Les soutiens n'attaquent jamais.</li>
           </ul>
           Touchez une créature, puis une case surlignée de son chemin, puis une cible encadrée (ou « Terminer pour cette créature »). « Tout résoudre et finir le tour » fait agir toutes les créatures restantes (elles avancent au maximum et frappent devant elles), puis termine le tour.</li>
-        <li><b>Fin du tour</b> : les auras de soin agissent.</li>
+        <li><b>Fin du tour</b> : tous les dégâts du tour sont effacés.</li>
       </ol>
       <h3>Vos créatures</h3>
       <ul>

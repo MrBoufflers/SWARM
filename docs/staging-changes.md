@@ -2,3 +2,9 @@
 
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
+
+## v0.6.1
+- **Nouvelle règle de combat « tout ou rien »** : un bâtiment ou une créature n'est détruit que si les dégâts du tour (toutes sources cumulées) atteignent ses PV ; sinon ils sont effacés à la fin du tour. Plus de soins.
+- Stats : Carapace 1/2, Colosse 3/6, soutiens à 2 / 3 / 4 PV.
+- Cartes revues : Carapace épaisse (insensible aux Épines et aux Mines), Provocation (sans −1 tourelle), Masse vivante → Bélier (+1 ATQ des tanks), Coup de grâce (s'il ne manque qu'1 dégât), Régénération (jetons Blindage et Échappée rendus à chaque tour), Glaneur → Aura Récolte (+1 biomasse), Réparation → Tir de précision (premier tir +2).
+- Une aggro ou un tank doit avancer d'au moins une case s'il n'y a pas de bâtiment devant lui.

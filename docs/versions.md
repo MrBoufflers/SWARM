@@ -4,6 +4,21 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.1 — 13 novembre 2026
+
+**Règles (Oni) : combat « tout ou rien » (ex-branche test)**
+- Un bâtiment ou une créature n'est **détruit que si les dégâts du tour** (toutes sources cumulées : plusieurs attaquants, plusieurs tourelles, sortilèges,
+  Épines, Mines) **atteignent ses PV** ; sinon les dégâts sont **effacés à la fin du tour** (essaim et colonie). Plus aucun soin.
+- **Stats** : Carapace 1/2, Colosse 3/6, soutiens à 2 / 3 / 4 PV selon le niveau.
+- **Cartes** : Carapace épaisse (insensible aux Épines et aux Mines, sans +1 PV), Provocation sans −1 tourelle, Masse vivante → **Bélier** (+1 ATQ des
+  tanks), Coup de grâce (s'il ne manque qu'1 dégât), Régénération (jetons Blindage et Échappée rendus à chaque tour de l'essaim), Glaneur → **Aura Récolte**
+  (+1 biomasse), Réparation → **Tir de précision** (le premier tir de tourelle du tour fait +2), Échappée (survit sans PV à noter).
+- **Mouvement** : une aggro ou un tank doit avancer d'au moins une case s'il n'y a pas de bâtiment devant lui (les soutiens restent libres).
+
+**Interface** : PV entamés en rouge pendant le tour, aperçu d'attaque « détruit / pas détruit », aide mise à jour.
+
+**Attention** : `tests/rules.test.js` n'est pas encore adapté à cette règle (environ 60 vérifications sur l'ancien modèle de PV).
+
 ## v0.6.0 — 13 novembre 2026
 
 **Version stable : fusion de la branche staging (versions 0.5.22 à 0.5.33).**
