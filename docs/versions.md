@@ -4,6 +4,28 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.0 — 13 novembre 2026
+
+**Version stable : fusion de la branche staging (versions 0.5.22 à 0.5.33).**
+
+**Règles**
+- **Premier tour de la colonie** : un seul bâtiment au total.
+- **Phéromone** renommée **Charognard** : plus d'Aura Butin, elle laisse un jeton **Dépouille** sur la case d'une créature morte (bloque la construction
+  tant qu'une tourelle à portée n'a pas tiré dessus ; dégagé aussi par la Nuke, Barrage et Onde de choc).
+- **Percée** : l'excédent passe derrière la cible, du côté opposé à l'attaquant. **Sporeur** : 1 dégât par Sporeur.
+- **Échappée** (Mue) : un jeton par soutien, une créature sauvée, puis le jeton est défaussé. **Renforcé X** : −X dégâts par attaque, valeurs réduites
+  de 1 (Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1). **Avant-postes** : 4 PV, seulement dans leur lane.
+- Améliorations sans calcul (v0.5.15 à 0.5.17) : Carapace épaisse, Provocation, Blindage (jeton), Masse vivante, Mue, Griffes (Coup de grâce), Régénération
+  (Aura Soin total), Hurleur +2 ATQ. Créatures de niveau 2 et 3 : +1/+1 et +2/+2 du niveau 1 ; fusée à 2 / 4 / 7 / 10 points par étage.
+
+**Interface**
+- Paliers de biomasse détaillés au survol ; infobulles sur toutes les icônes des bâtiments ; **aperçu de la résolution d'une attaque** (PV en rouge,
+  Percée, Spores, Épines, Bouclier, Renforcé) ; icône de construction « travailleur + clé » ; pastille **NEW** (rond jaune) sur ce que l'adversaire a
+  posé à son dernier tour ; bouton « Changements » pour les versions de test ; résumé « Sur cette case » dès la sélection d'une créature.
+
+**IA**
+- IA de l'essaim à trois stratégies (assaut, rempart, percée), IA de la colonie qui construit davantage et prend les coins.
+
 ## v0.5.33 — 13 novembre 2026
 
 **Interface (Oni)**
