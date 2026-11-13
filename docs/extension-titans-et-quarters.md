@@ -83,11 +83,16 @@ dessous gagne le **bonus** du quartier. Le quartier ne coûte aucun point de con
 - **Bonus fixes, sans calcul**, sur des **pièces transparentes** posées au-dessus des tuiles de bâtiments.
 - **Les Barbelés comptent** comme des bâtiments pour former la forme et recevoir le bonus (mais pas pour remplir une condition, voir 4.4).
 - **Chute du quartier** : le quartier tombe quand **2 cases** de sa pièce sont **vides en même temps** (bâtiments détruits ; pas
-  forcément au même tour). Si l'on reconstruit sous la pièce avant, elle est réparée. Un bâtiment reconstruit sous le quartier reçoit
+  forcément au même tour). **Un support recouvert compte comme une case** : s'il tombe, c'est une case vide de plus. La fusée, elle, ne
+  peut pas être « vide ». Si l'on reconstruit sous la pièce avant, elle est réparée. Un bâtiment reconstruit sous le quartier reçoit
   de nouveau le bonus. Un quartier tombé **retourne en bas de la pioche de quartiers**.
 - **Pioche de quartiers** : **10 quartiers**. Au début de la partie, la colonie en pioche **3 au hasard** ; dès qu'elle en pose un, elle en
   repioche un pour **toujours avoir 3 choix**. Ils sont **visibles** de l'adversaire dès la pioche.
-- **Bonus sur la fusée** : certains quartiers donnent de l'**Épines** ou du **Renforcé** à la fusée (voir 4.6).
+- **Bonus sur la fusée** : certains quartiers donnent de l'**Épines** ou du **Renforcé** à la fusée (voir 4.5).
+- **Critère vérifié à la pose seulement** : si le bâtiment qui le remplit tombe ensuite, le quartier reste (seule la règle des 2 cases
+  vides le fait tomber).
+- **Pas d'échange** des 3 quartiers de départ : le tirage est définitif.
+- **Au moins un bâtiment** sous chaque quartier (voir 4.7) : une pièce ne peut pas recouvrir seulement la fusée et un support.
 
 ### 4.3 Géométrie du plateau (vérifiée dans le moteur)
 - Chaque lane est un triangle de **9 cases** : 1 en couronne 1, 3 en couronne 2, 5 en couronne 3. Au départ, les couronnes 1 et 2 portent
@@ -132,7 +137,7 @@ remplit avec un **bâtiment construit** (les Barbelés ne comptent pas, sinon «
 
 **Sur la fusée** : un quartier qui la recouvre peut lui donner **Épines X** (l'attaquant subit X dégâts) ou **Renforcé X** (une attaque
 d'ATQ ≤ X ne tue aucun travailleur ; aujourd'hui toute attaque contre la fusée en tue un, quelle que soit sa force). **Sur un support** :
-le support recouvert ne tombe plus tant que le quartier tient.
+**aucune protection** (« ne tombe plus » a été jugé trop fort) ; le support peut seulement recevoir un bonus de tir.
 
 ### 4.6 Les 10 quartiers (proposition)
 Bonus pour **chaque bâtiment dessous**, sauf mention « entier ». Les critères sont ceux de 4.4 (bâtiments construits différents).
@@ -144,7 +149,7 @@ Bonus pour **chaque bâtiment dessous**, sauf mention « entier ». Les critère
 | 3 | **Laboratoire central** | 3 en ligne | Piège | +1 technologie (entier) |
 | 4 | **Mur d'enceinte** | 3 en L | Travailleur | +1 Renforcé |
 | 5 | **Sanctuaire de la fusée** | 3 en L : fusée + 2 bâtiments | Renforcé | la fusée gagne Épines 2 |
-| 6 | **Batterie** | 4 en T (recouvre un support) | Support + Épines | le support recouvert ne tombe plus ; ses tirs font +1 dégât |
+| 6 | **Batterie** | 4 en T (recouvre un support) | Support + Épines | les tirs du support recouvert font +1 dégât (il compte comme une case de la pièce) |
 | 7 | **Zone de recherche** | 4 en éclair | Technologie + Piège | jeton Bouclier partagé, rendu à chaque tour |
 | 8 | **Quartier ouvrier** | 4 en ligne | Renforcé + Piège | +2 travailleurs (entier) |
 | 9 | **Citadelle** | 4 en carré | Renforcé + Technologie | +1 Renforcé |
@@ -159,6 +164,8 @@ distinctes à fabriquer).
 - **Grands quartiers** : 3 critères pour la Forteresse = une vraie planification ; sa chute (2 cases vides sur 5) est un seuil bas
   pour un tel investissement, à surveiller.
 - **Fusée dans un quartier** : elle devient plus difficile à tuer. À tester : Épines 2 sur la fusée fait mal aux aggros (1 à 3 PV).
+  Comme la fusée n'est jamais « vide », un quartier ne comprenant que la fusée et un support serait presque indestructible : d'où la règle
+  « au moins un bâtiment sous chaque quartier ».
 - **IA** : elle doit chercher les formes réalisables (recherche de polyominos) et les critères ; l'IA de l'essaim doit viser les cases clés.
 - **Matériel** : 8 pièces transparentes teintées de 2 à 5 cases, à la taille exacte des cases.
 
@@ -176,13 +183,11 @@ distinctes à fabriquer).
 - **Livret** : un chapitre d'extension séparé.
 
 ## 6. Questions ouvertes
-1. **Critères et bonus** (4.4 à 4.6) : cette proposition vous convient-elle ? Principe 2 (bâtiments différents pour chaque critère) et
-   principe 3 (le bonus d'une autre famille que la condition) en particulier.
-2. **Renforcé sur la fusée** : « une attaque d'ATQ ≤ X ne tue aucun travailleur » est-il le bon sens ? (les tanks à 1 ATQ seraient inoffensifs)
-3. **Critère revérifié ?** On ne vérifie le critère qu'à la pose (si le bâtiment qui le remplit tombe ensuite, le quartier reste). À confirmer.
-4. **Tirage des 3 quartiers** : tirage purement au hasard, ou possibilité d'échanger un quartier de départ une fois ?
-5. **Quartier et support** : un support recouvert « ne tombe plus » tant que le quartier tient. Souhaité, ou trop fort ?
-6. **Fusée** : un quartier qui la recouvre exige-t-il toujours des bâtiments autour (au moins un), ou la fusée seule avec un support suffit ?
+Les principes sont validés (voir le journal). Il reste à décider, plus tard :
+1. **Valeurs chiffrées** des 10 Titans (ATQ / PV / vitesse / coût) et de leur faiblesse.
+2. **Détail des formes** (orientations autorisées, symétries) et fabrication des 8 pièces transparentes.
+3. **Pose d'un quartier dans le tour** : avant ou après les bâtiments construits ce tour ? (je recommande : après, pour que le bâtiment
+   qui remplit la condition puisse être posé le même tour)
 
 ## 7. Journal des décisions
 - **13/11/2026 (Oni)** : extension **hors version de base**, activable sur l'accueil, menu vert acide (jaune orangé sans l'extension). Titans :
@@ -192,3 +197,6 @@ distinctes à fabriquer).
   de la pièce sont vides en même temps**, 10 quartiers dont 3 piochés au hasard et toujours 3 disponibles, visibles, un quartier tombé retourne
   **en bas de la pioche**, jamais posé au premier tour, certains quartiers donnent de l'Épines ou du Renforcé (fusée comprise).
 - **13/11/2026 (Oni)** : l'extension s'appelle **Titans & Quarters**. Tout le travail est sur la branche **`extension`**.
+- **13/11/2026 (Oni)** : **validés** : la proposition de critères, de bonus et des 10 quartiers ; le sens du Renforcé sur la fusée (ATQ ≤ X
+  sans effet) ; critère vérifié **à la pose seulement** ; **pas d'échange** des quartiers de départ. **Refusé** : « le support recouvert
+  ne tombe plus » (trop fort). **Ajouté** : un support recouvert **compte comme une des 2 cases** qui font tomber le quartier.
