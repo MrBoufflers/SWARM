@@ -5,7 +5,7 @@
   --wall: #9c6a32; --wall-bg: #f3e7d6; --support: #1e7469; --support-bg: #d8ece8;
   --off: #c4611d; --sup: #3a7a4a;
   --north: #2563a8; --east: #2f8a55; --south: #c98a12; --west: #a03d8a;
-  --colonie: #1e7469; --essaim: #6b4c97; --hot: #e2a400; --danger: #b0372b;
+  --colonie: #1e7469; --essaim: #6b4c97; --hot: #e2a400; --hot-hi: #ffd27a; --hot-lo: #c97a1a; --hot-bd: #ffdf9c; --hot-rgb: 240,164,58; --hot-rgb2: 240,120,40; --danger: #b0372b;
   --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --cell: min(96px, calc((100vw - 52px) / 9)); /* plateau agrandi pour les illustrations (Oni, 04/11/2026 ; avant 64 px) */
@@ -22,7 +22,7 @@
   color-scheme: dark;
 }
 :root[data-theme="dark"] body, :root[data-theme="auto"].sys-dark body {
-  background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(240,120,40,.10), transparent 60%),
+  background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(var(--hot-rgb2),.10), transparent 60%),
               radial-gradient(ellipse 60% 50% at 100% 100%, rgba(167,127,217,.07), transparent 70%), var(--bg);
   background-attachment: fixed;
 }
@@ -663,7 +663,7 @@ body.pc [data-tip]:hover::after, body.pc [data-tip]:focus::after, body.pc [data-
 .pc-go.l { left: 9px; } .pc-go.r { right: 9px; }
 .pc-go button { width: 100%; padding: 8px 10px; border-radius: 9px; font: 600 1rem/1.1 var(--body); background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--rule); box-shadow: 0 4px 12px rgba(0,0,0,.35); }
 .pc-go button.primary { position: relative; padding: 14px 12px; font: 700 1.05rem/1.1 var(--display); letter-spacing: .07em; text-transform: uppercase; color: #1b120a;
-  background: linear-gradient(180deg, #ffc75f, var(--hot) 55%, #c97a1a); border: 0; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 10px 50%);
+  background: linear-gradient(180deg, var(--hot-hi), var(--hot) 55%, var(--hot-lo)); border: 0; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 10px 50%);
   box-shadow: none; animation: goPulse 2.6s ease-in-out infinite; }
 .pc-go.colonie button.primary { background: linear-gradient(180deg, #7fe0cf, var(--colonie) 55%, #237a6c); }
 .pc-go.essaim button.primary { background: linear-gradient(180deg, #d2b3ff, var(--essaim) 55%, #5c3d8f); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
@@ -684,14 +684,14 @@ body.pc .tok .au .i { width: max(11px, calc(var(--cell) / var(--n) * .26)); heig
 /* bouton de passage (Oni, 06/11/2026) : jaune comme tous les éléments actionnables, sans forme de flèche */
 .pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary {
   clip-path: none; border-radius: 12px; padding: 14px 34px 14px 14px; color: #1b120a; text-shadow: none;
-  background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 48%, #d98a1e 100%);
-  border: 1px solid #ffdf9c; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45);
+  background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 48%, var(--hot-lo) 100%);
+  border: 1px solid var(--hot-bd); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45);
   animation: goGlow 2.6s ease-in-out infinite; filter: none; }
 .pc-go button.primary::after { content: "»"; position: absolute; right: 12px; top: 50%; transform: translateY(-52%); font: 800 1.5rem/1 var(--body); opacity: .75; }
 .pc-go button.primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .pc-go button.primary:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(120,60,0,.35), 0 3px 8px rgba(0,0,0,.4); }
-@keyframes goGlow { 0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 0 rgba(240,164,58,0); }
-  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 18px rgba(240,164,58,.65); } }
+@keyframes goGlow { 0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 0 rgba(var(--hot-rgb),0); }
+  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 18px rgba(var(--hot-rgb),.65); } }
 /* étapes du tour (Oni, 06/11/2026) : halo seulement sur l'étape en cours, couleur du camp, sans changement de teinte.
    La forme (chevron) passe sur le <span> pour que le halo du <li> ne soit pas coupé. */
 .pc-steps, .pc-steps:has(li.on) { animation: none; filter: none; }
@@ -896,8 +896,8 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
   clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); transition: filter .15s, transform .15s, border-color .15s; }
 .h2-btn small { font: 500 1rem/1 var(--body); letter-spacing: 0; text-transform: none; color: #b9ad9f; }
 .h2-btn:hover { border-color: var(--hot); filter: brightness(1.2); transform: translateY(-1px); }
-.h2-btn.main { color: #1b120a; background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); border-color: #ffdf9c; font-size: 1.35rem; padding: 17px 20px;
-  box-shadow: 0 0 24px rgba(240,164,58,.45); animation: goGlow 2.6s ease-in-out infinite; }
+.h2-btn.main { color: #1b120a; background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%); border-color: var(--hot-bd); font-size: 1.35rem; padding: 17px 20px;
+  box-shadow: 0 0 24px rgba(var(--hot-rgb),.45); animation: goGlow 2.6s ease-in-out infinite; }
 .h2-btn.main small { color: #3a2508; }
 .h2-online { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: rgba(8,6,5,.55); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(3px); }
 .h2-k { font: 600 1rem/1 var(--display); letter-spacing: .3em; text-transform: uppercase; color: #a89b8e; text-align: center; }
@@ -975,7 +975,7 @@ body:not(.pc):not(.on-home) .top { margin-left: calc(-1 * max(16px, env(safe-are
   clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px); transition: filter .15s, border-color .15s; }
 .top .menu button:hover { border-color: var(--hot); filter: brightness(1.2); }
 .top .menu .code-chip { cursor: default; color: #b9ad9f; } .top .menu .code-chip b { color: #fff; }
-.top .menu button[data-a="new"], .top .menu button[data-a="quit"] { color: #1b120a; background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); border-color: #ffdf9c; }
+.top .menu button[data-a="new"], .top .menu button[data-a="quit"] { color: #1b120a; background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%); border-color: var(--hot-bd); }
 /* languette « Menu » plus grande, plus facile à survoler (Oni, 06/11/2026) */
 body.pc .pc-hot { height: 12px; }
 body.pc .pc-hot span { height: 30px; padding: 0 30px; display: flex; align-items: center; gap: 8px; font: 700 1rem/1 var(--display); letter-spacing: .2em; color: #efe7dd;
@@ -992,11 +992,11 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
   padding: 16px 14px; font: 800 1.15rem/1.1 var(--display); letter-spacing: .14em; color: #1b120a;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' preserveAspectRatio='xMaxYMid meet'%3E%3Cpath d='M22 40 H108 Q124 40 133 53 L249 240 Q258 256 249 272 L133 459 Q124 472 108 472 H22 Q2 472 13 455 L122 256 L13 57 Q2 40 22 40 Z' fill='%237a3f00' fill-opacity='.3'/%3E%3Cpath d='M22 40 H108 Q124 40 133 53 L249 240 Q258 256 249 272 L133 459 Q124 472 108 472 H22 Q2 472 13 455 L122 256 L13 57 Q2 40 22 40 Z' transform='translate%28256 0%29' fill='%237a3f00' fill-opacity='.3'/%3E%3C/svg%3E") right 6px center / auto 92% no-repeat,
-    linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%);
-  border: 1px solid #ffdf9c; }
+    linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%);
+  border: 1px solid var(--hot-bd); }
 .pc-go button.primary::after { content: none; }
 /* bouton principal : double flèche dessinée dans le bouton (Oni, 06/11/2026) */
-.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary { background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); overflow: hidden; }
+.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary { background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%); overflow: hidden; }
 .pc-go .go-arr { position: absolute; right: 6px; top: 4%; height: 92%; width: auto; aspect-ratio: 1; fill: #7a3f00; fill-opacity: .3; pointer-events: none; }
 .pc-go .go-lab { position: relative; z-index: 1; }
 /* étapes du tour : textes bien plus grands, presque toute la hauteur du chevron */
@@ -1014,9 +1014,9 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
 .react-banner { position: fixed; inset: 0; z-index: 45; pointer-events: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .rb-band { position: absolute; left: 0; right: 0; top: 50%; height: clamp(120px, 22vh, 220px); transform: translateY(-50%) scaleY(0);
   background: linear-gradient(90deg, transparent 0%, rgba(10,6,4,.88) 12%, rgba(10,6,4,.92) 50%, rgba(10,6,4,.88) 88%, transparent 100%);
-  box-shadow: 0 -2px 0 rgba(240,164,58,.55), 0 2px 0 rgba(240,164,58,.55), 0 0 60px rgba(240,120,40,.25);
+  box-shadow: 0 -2px 0 rgba(var(--hot-rgb),.55), 0 2px 0 rgba(var(--hot-rgb),.55), 0 0 60px rgba(var(--hot-rgb2),.25);
   animation: rbBand 2.3s cubic-bezier(.2,.8,.2,1) forwards; }
-.rb-band::before, .rb-band::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #ffd27a 30%, #fff 50%, #ffd27a 70%, transparent);
+.rb-band::before, .rb-band::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--hot-hi) 30%, #fff 50%, var(--hot-hi) 70%, transparent);
   animation: rbStreak 2.3s ease-in-out forwards; }
 .rb-band::before { top: -2px; } .rb-band::after { bottom: -2px; animation-direction: reverse; }
 .rb-txt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; animation: rbTxt 2.3s cubic-bezier(.6,0,.4,1) forwards; }
@@ -1140,3 +1140,29 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 #pvcard h5 { margin: 0 0 4px; font: 700 1rem/1.2 var(--display); text-transform: uppercase; letter-spacing: .06em; color: #ff8a8a; }
 #pvcard p { margin: 3px 0; line-height: 1.3; }
 #pvcard .pv-main { border-left: 3px solid #ff5c5c; padding-left: 6px; }
+
+/* ================================================================ extension « Titans & Quarters » (Oni, 13/11/2026) */
+/* thème : le jaune orangé du menu devient un vert acide quand l'extension est active */
+body.ext { --hot: #b5f01a; --hot-hi: #e6ff82; --hot-lo: #5f8f00; --hot-bd: #f0ffb0; --hot-rgb: 181,240,26; --hot-rgb2: 120,200,30; }
+.h2-btn.ext-btn.on { border-color: var(--hot); color: var(--hot); box-shadow: 0 0 16px rgba(var(--hot-rgb), .35); }
+/* quartiers : pièce transparente teintée posée sur les cases (bordure seulement sur le pourtour) */
+.qov { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-style: solid; border-color: var(--qc); background: color-mix(in srgb, var(--qc) 24%, transparent); border-radius: 3px; box-sizing: border-box; }
+.qlab { position: absolute; top: 3px; right: 3px; z-index: 4; display: flex; padding: 2px; border-radius: 50%; color: var(--qc); background: rgba(10,8,7,.75); box-shadow: 0 0 0 1.5px var(--qc); cursor: help; }
+.qlab .i { width: max(11px, calc(var(--cell) * .16)); height: max(11px, calc(var(--cell) * .16)); }
+.cell.qcand { outline: 2px dashed var(--hot); outline-offset: -2px; cursor: pointer; }
+.cell.qcand:hover { background-color: color-mix(in srgb, var(--hot) 25%, transparent); }
+.cell.qpv { outline: 3px solid var(--hot); outline-offset: -3px; background-color: color-mix(in srgb, var(--hot) 35%, transparent); }
+.qhand { display: grid; gap: 6px; margin: 4px 0 6px; }
+.qcard { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; padding: 5px 8px; border: 1px solid var(--rule); border-left: 4px solid var(--qc); border-radius: 6px; background: var(--panel-2); }
+.qcard.sel { outline: 2px solid var(--hot); outline-offset: 1px; }
+.qcard .qbody { display: grid; gap: 1px; min-width: 0; line-height: 1.2; }
+.qcard .qbody small { color: var(--ink-soft); font-size: 1rem; }
+.qcard .qbody .qbonus { color: var(--ink); }
+.qcard button { grid-column: 1 / -1; font-size: 1rem; padding: 4px 8px; }
+.qgrid { display: grid; grid-template-columns: repeat(var(--w), 11px); gap: 2px; padding: 3px; }
+.qgrid i { width: 11px; height: 11px; border-radius: 2px; background: transparent; }
+.qgrid i.on { background: var(--c); box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
+.qplaced { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.qchip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 1rem; font-weight: 600; color: var(--qc); background: color-mix(in srgb, var(--qc) 14%, transparent); border: 1px solid color-mix(in srgb, var(--qc) 45%, transparent); cursor: help; }
+.qchip .i { width: 12px; height: 12px; } .qchip.warn { box-shadow: 0 0 8px var(--danger); } .qchip b { font-size: .95rem; }
+.myth { margin: 6px 0; } .myth button { margin: 2px 4px 2px 0; } .myth small { color: var(--ink-soft); }

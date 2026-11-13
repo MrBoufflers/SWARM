@@ -45,3 +45,8 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.33
 - La pastille NEW devient un petit rond jaune avec un « N » centré.
+
+## Extension Titans & Quarters (branche extension, v0.1)
+- Nouveau bouton « Titans & Quarters » sur l'accueil : active l'extension (menu vert acide), choisie à la création de la partie.
+- Titans (essaim) : une fois les 3 arbres terminés, pioche mythique à 15 biomasse (2 cartes, on en garde une) de 10 créatures mythiques.
+- Quartiers (colonie) : 3 quartiers visibles, pièces transparentes de 2 à 5 cases posées sur des bâtiments, la fusée ou des supports ; tombent à 2 cases vides.

@@ -27,7 +27,7 @@ function sideOf(room, token) {
   if (typeof token !== "string" || !token) return null;
   return SIDES.find(s => room.tokens[s] && room.tokens[s] === token) || null;
 }
-function freshGame() { const S = SF.newGame(); S.handoff = null; return S; }
+function freshGame(ext) { const S = SF.newGame({ ext: !!ext }); S.handoff = null; return S; } // ext : extension Titans & Quarters (choix de l'hôte)
 const stale = cv => out(409, { error: `Nouvelle version du jeu (v${SF.VERSION}) : rechargez la page.`, reload: true, version: SF.VERSION });
 // partie en ligne terminée : résumé + mini-plan enregistrés pour les statistiques (une seule fois par partie)
 async function saveResult(rawStore, room) {
@@ -88,7 +88,7 @@ async function handle(rawStore, method, route, query, body) {
     if (!SIDES.includes(side)) return err(400, "Camp inconnu.");
     for (let i = 0; i < 8; i++) {
       const code = newCode(), token = newToken();
-      const room = { code, tokens: { essaim: null, colonie: null }, S: freshGame(), v: 1, created: Date.now(), started: Date.now(), updated: Date.now(), test: !!body.test, decouverte: !!body.disc };
+      const room = { code, tokens: { essaim: null, colonie: null }, S: freshGame(body.ext), v: 1, created: Date.now(), started: Date.now(), updated: Date.now(), test: !!body.test, decouverte: !!body.disc };
       room.tokens[side] = token;
       if (await store.create(code, room)) return out(200, pub(room, side, { token }));
     }
@@ -133,7 +133,7 @@ async function handle(rawStore, method, route, query, body) {
       if (!side) return err(403, "Jeton inconnu pour cette partie.");
       let refusal = "";
       if (!room.tokens.essaim || !room.tokens.colonie) refusal = "En attente de l'adversaire.";
-      else if (type === "rematch") { if (room.S.winner) { room.S = freshGame(); room.fx = []; room.started = Date.now(); room.recorded = false; } else refusal = "La partie n'est pas terminée."; }
+      else if (type === "rematch") { if (room.S.winner) { room.S = freshGame(room.S.ext); room.fx = []; room.started = Date.now(); room.recorded = false; } else refusal = "La partie n'est pas terminée."; }
       else {
         const before = JSON.stringify(room.S);
         room.S.fx = [];

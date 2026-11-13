@@ -12,7 +12,7 @@ const AIDE = (() => {
     return `<table class="rt"><thead><tr><th>Palier</th><th>Biomasse</th><th>Cartes à piocher</th><th>Créatures max par lane</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
   function creaturesTable(h) {
-    const rows = Object.entries(SF.CREATURES).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
+    const rows = Object.entries(SF.CREATURES).filter(([, c]) => !c.myth).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
     return `<div class="rt-wrap"><table class="rt"><thead><tr><th>Créature</th><th>Type</th><th>Niv.</th><th>Coût</th><th>PV</th><th>ATQ</th><th>Capacité</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   function tilePv(t) { return t.pv === "ap" ? "2 (4 dans sa lane)" : t.pv === "front" ? "1 + couronne" : t.pv === "reduit" ? "5 − couronne" : t.pv; }
@@ -69,7 +69,14 @@ const AIDE = (() => {
       <h3>Jouer en ligne</h3>
       <p>Créez une partie en choisissant votre camp et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p>
       <h3>Mode découverte</h3>
-      <p>Activé sur l'accueil ou ici, il affiche un conseil la première fois que chaque situation se présente, selon le camp que vous jouez. « Compris » le range ; il ne revient plus.</p>`;
+      <p>Activé sur l'accueil ou ici, il affiche un conseil la première fois que chaque situation se présente, selon le camp que vous jouez. « Compris » le range ; il ne revient plus.</p>
+      <h3>Extension « Titans &amp; Quarters » (optionnelle)</h3>
+      <p>Activée sur l'accueil (le menu passe au vert acide), choisie à la création de la partie.</p>
+      <ul>
+        <li><b>Titans (essaim)</b> : une fois les 3 arbres terminés (rang 2), une pioche de <b>10 créatures mythiques</b> s'ouvre. Pendant le déploiement, une pioche par tour coûte ${SF.MYTH_COST} biomasse : on tire 2 cartes, on en garde une (l'autre repart sous la pioche), puis on la déploie en payant son coût. Un mythique mort est perdu pour la partie ; il compte dans le plafond de la lane.</li>
+        <li><b>Quartiers (colonie)</b> : 3 quartiers visibles des deux camps, piochés parmi 10. Un quartier est une <b>pièce transparente de 2 à 5 cases</b> posée sur des bâtiments (Barbelés compris), sur la fusée et/ou sur des supports, y compris à cheval sur plusieurs lanes. Il ne coûte aucun point mais exige des bâtiments précis dessous (technologie, Renforcé, piège…), vérifiés à la pose ; <b>un seul quartier par tour, jamais au premier tour</b>. Tout ce qui est dessous gagne le bonus. Un bâtiment ne peut être que dans un quartier.</li>
+        <li><b>Chute</b> : quand <b>2 cases</b> de la pièce sont vides en même temps (bâtiment détruit, support tombé), le quartier tombe et repart sous la pioche des quartiers ; on en repioche un pour toujours avoir 3 choix.</li>
+      </ul>`;
   }
 
   function essaim(h) {

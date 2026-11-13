@@ -11,7 +11,7 @@
   --wall: #9c6a32; --wall-bg: #f3e7d6; --support: #1e7469; --support-bg: #d8ece8;
   --off: #c4611d; --sup: #3a7a4a;
   --north: #2563a8; --east: #2f8a55; --south: #c98a12; --west: #a03d8a;
-  --colonie: #1e7469; --essaim: #6b4c97; --hot: #e2a400; --danger: #b0372b;
+  --colonie: #1e7469; --essaim: #6b4c97; --hot: #e2a400; --hot-hi: #ffd27a; --hot-lo: #c97a1a; --hot-bd: #ffdf9c; --hot-rgb: 240,164,58; --hot-rgb2: 240,120,40; --danger: #b0372b;
   --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --cell: min(96px, calc((100vw - 52px) / 9)); /* plateau agrandi pour les illustrations (Oni, 04/11/2026 ; avant 64 px) */
@@ -28,7 +28,7 @@
   color-scheme: dark;
 }
 :root[data-theme="dark"] body, :root[data-theme="auto"].sys-dark body {
-  background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(240,120,40,.10), transparent 60%),
+  background: radial-gradient(ellipse 90% 60% at 50% -10%, rgba(var(--hot-rgb2),.10), transparent 60%),
               radial-gradient(ellipse 60% 50% at 100% 100%, rgba(167,127,217,.07), transparent 70%), var(--bg);
   background-attachment: fixed;
 }
@@ -669,7 +669,7 @@ body.pc [data-tip]:hover::after, body.pc [data-tip]:focus::after, body.pc [data-
 .pc-go.l { left: 9px; } .pc-go.r { right: 9px; }
 .pc-go button { width: 100%; padding: 8px 10px; border-radius: 9px; font: 600 1rem/1.1 var(--body); background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--rule); box-shadow: 0 4px 12px rgba(0,0,0,.35); }
 .pc-go button.primary { position: relative; padding: 14px 12px; font: 700 1.05rem/1.1 var(--display); letter-spacing: .07em; text-transform: uppercase; color: #1b120a;
-  background: linear-gradient(180deg, #ffc75f, var(--hot) 55%, #c97a1a); border: 0; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 10px 50%);
+  background: linear-gradient(180deg, var(--hot-hi), var(--hot) 55%, var(--hot-lo)); border: 0; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 10px 50%);
   box-shadow: none; animation: goPulse 2.6s ease-in-out infinite; }
 .pc-go.colonie button.primary { background: linear-gradient(180deg, #7fe0cf, var(--colonie) 55%, #237a6c); }
 .pc-go.essaim button.primary { background: linear-gradient(180deg, #d2b3ff, var(--essaim) 55%, #5c3d8f); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
@@ -690,14 +690,14 @@ body.pc .tok .au .i { width: max(11px, calc(var(--cell) / var(--n) * .26)); heig
 /* bouton de passage (Oni, 06/11/2026) : jaune comme tous les éléments actionnables, sans forme de flèche */
 .pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary {
   clip-path: none; border-radius: 12px; padding: 14px 34px 14px 14px; color: #1b120a; text-shadow: none;
-  background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 48%, #d98a1e 100%);
-  border: 1px solid #ffdf9c; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45);
+  background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 48%, var(--hot-lo) 100%);
+  border: 1px solid var(--hot-bd); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45);
   animation: goGlow 2.6s ease-in-out infinite; filter: none; }
 .pc-go button.primary::after { content: "»"; position: absolute; right: 12px; top: 50%; transform: translateY(-52%); font: 800 1.5rem/1 var(--body); opacity: .75; }
 .pc-go button.primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .pc-go button.primary:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(120,60,0,.35), 0 3px 8px rgba(0,0,0,.4); }
-@keyframes goGlow { 0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 0 rgba(240,164,58,0); }
-  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 18px rgba(240,164,58,.65); } }
+@keyframes goGlow { 0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 0 rgba(var(--hot-rgb),0); }
+  50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(120,60,0,.35), 0 6px 16px rgba(0,0,0,.45), 0 0 18px rgba(var(--hot-rgb),.65); } }
 /* étapes du tour (Oni, 06/11/2026) : halo seulement sur l'étape en cours, couleur du camp, sans changement de teinte.
    La forme (chevron) passe sur le <span> pour que le halo du <li> ne soit pas coupé. */
 .pc-steps, .pc-steps:has(li.on) { animation: none; filter: none; }
@@ -902,8 +902,8 @@ body.on-home > #app > .stale { position: fixed; top: 12px; left: 50%; transform:
   clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); transition: filter .15s, transform .15s, border-color .15s; }
 .h2-btn small { font: 500 1rem/1 var(--body); letter-spacing: 0; text-transform: none; color: #b9ad9f; }
 .h2-btn:hover { border-color: var(--hot); filter: brightness(1.2); transform: translateY(-1px); }
-.h2-btn.main { color: #1b120a; background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); border-color: #ffdf9c; font-size: 1.35rem; padding: 17px 20px;
-  box-shadow: 0 0 24px rgba(240,164,58,.45); animation: goGlow 2.6s ease-in-out infinite; }
+.h2-btn.main { color: #1b120a; background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%); border-color: var(--hot-bd); font-size: 1.35rem; padding: 17px 20px;
+  box-shadow: 0 0 24px rgba(var(--hot-rgb),.45); animation: goGlow 2.6s ease-in-out infinite; }
 .h2-btn.main small { color: #3a2508; }
 .h2-online { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: rgba(8,6,5,.55); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(3px); }
 .h2-k { font: 600 1rem/1 var(--display); letter-spacing: .3em; text-transform: uppercase; color: #a89b8e; text-align: center; }
@@ -981,7 +981,7 @@ body:not(.pc):not(.on-home) .top { margin-left: calc(-1 * max(16px, env(safe-are
   clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px); transition: filter .15s, border-color .15s; }
 .top .menu button:hover { border-color: var(--hot); filter: brightness(1.2); }
 .top .menu .code-chip { cursor: default; color: #b9ad9f; } .top .menu .code-chip b { color: #fff; }
-.top .menu button[data-a="new"], .top .menu button[data-a="quit"] { color: #1b120a; background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); border-color: #ffdf9c; }
+.top .menu button[data-a="new"], .top .menu button[data-a="quit"] { color: #1b120a; background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%); border-color: var(--hot-bd); }
 /* languette « Menu » plus grande, plus facile à survoler (Oni, 06/11/2026) */
 body.pc .pc-hot { height: 12px; }
 body.pc .pc-hot span { height: 30px; padding: 0 30px; display: flex; align-items: center; gap: 8px; font: 700 1rem/1 var(--display); letter-spacing: .2em; color: #efe7dd;
@@ -998,11 +998,11 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
   padding: 16px 14px; font: 800 1.15rem/1.1 var(--display); letter-spacing: .14em; color: #1b120a;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' preserveAspectRatio='xMaxYMid meet'%3E%3Cpath d='M22 40 H108 Q124 40 133 53 L249 240 Q258 256 249 272 L133 459 Q124 472 108 472 H22 Q2 472 13 455 L122 256 L13 57 Q2 40 22 40 Z' fill='%237a3f00' fill-opacity='.3'/%3E%3Cpath d='M22 40 H108 Q124 40 133 53 L249 240 Q258 256 249 272 L133 459 Q124 472 108 472 H22 Q2 472 13 455 L122 256 L13 57 Q2 40 22 40 Z' transform='translate%28256 0%29' fill='%237a3f00' fill-opacity='.3'/%3E%3C/svg%3E") right 6px center / auto 92% no-repeat,
-    linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%);
-  border: 1px solid #ffdf9c; }
+    linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%);
+  border: 1px solid var(--hot-bd); }
 .pc-go button.primary::after { content: none; }
 /* bouton principal : double flèche dessinée dans le bouton (Oni, 06/11/2026) */
-.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary { background: linear-gradient(180deg, #ffd27a 0%, var(--hot) 50%, #c97a1a 100%); overflow: hidden; }
+.pc-go button.primary, .pc-go.colonie button.primary, .pc-go.essaim button.primary { background: linear-gradient(180deg, var(--hot-hi) 0%, var(--hot) 50%, var(--hot-lo) 100%); overflow: hidden; }
 .pc-go .go-arr { position: absolute; right: 6px; top: 4%; height: 92%; width: auto; aspect-ratio: 1; fill: #7a3f00; fill-opacity: .3; pointer-events: none; }
 .pc-go .go-lab { position: relative; z-index: 1; }
 /* étapes du tour : textes bien plus grands, presque toute la hauteur du chevron */
@@ -1020,9 +1020,9 @@ body.pc .pc-hot:hover span { border-color: var(--hot); }
 .react-banner { position: fixed; inset: 0; z-index: 45; pointer-events: none; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .rb-band { position: absolute; left: 0; right: 0; top: 50%; height: clamp(120px, 22vh, 220px); transform: translateY(-50%) scaleY(0);
   background: linear-gradient(90deg, transparent 0%, rgba(10,6,4,.88) 12%, rgba(10,6,4,.92) 50%, rgba(10,6,4,.88) 88%, transparent 100%);
-  box-shadow: 0 -2px 0 rgba(240,164,58,.55), 0 2px 0 rgba(240,164,58,.55), 0 0 60px rgba(240,120,40,.25);
+  box-shadow: 0 -2px 0 rgba(var(--hot-rgb),.55), 0 2px 0 rgba(var(--hot-rgb),.55), 0 0 60px rgba(var(--hot-rgb2),.25);
   animation: rbBand 2.3s cubic-bezier(.2,.8,.2,1) forwards; }
-.rb-band::before, .rb-band::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #ffd27a 30%, #fff 50%, #ffd27a 70%, transparent);
+.rb-band::before, .rb-band::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--hot-hi) 30%, #fff 50%, var(--hot-hi) 70%, transparent);
   animation: rbStreak 2.3s ease-in-out forwards; }
 .rb-band::before { top: -2px; } .rb-band::after { bottom: -2px; animation-direction: reverse; }
 .rb-txt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; animation: rbTxt 2.3s cubic-bezier(.6,0,.4,1) forwards; }
@@ -1147,6 +1147,32 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 #pvcard p { margin: 3px 0; line-height: 1.3; }
 #pvcard .pv-main { border-left: 3px solid #ff5c5c; padding-left: 6px; }
 
+/* ================================================================ extension « Titans & Quarters » (Oni, 13/11/2026) */
+/* thème : le jaune orangé du menu devient un vert acide quand l'extension est active */
+body.ext { --hot: #b5f01a; --hot-hi: #e6ff82; --hot-lo: #5f8f00; --hot-bd: #f0ffb0; --hot-rgb: 181,240,26; --hot-rgb2: 120,200,30; }
+.h2-btn.ext-btn.on { border-color: var(--hot); color: var(--hot); box-shadow: 0 0 16px rgba(var(--hot-rgb), .35); }
+/* quartiers : pièce transparente teintée posée sur les cases (bordure seulement sur le pourtour) */
+.qov { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-style: solid; border-color: var(--qc); background: color-mix(in srgb, var(--qc) 24%, transparent); border-radius: 3px; box-sizing: border-box; }
+.qlab { position: absolute; top: 3px; right: 3px; z-index: 4; display: flex; padding: 2px; border-radius: 50%; color: var(--qc); background: rgba(10,8,7,.75); box-shadow: 0 0 0 1.5px var(--qc); cursor: help; }
+.qlab .i { width: max(11px, calc(var(--cell) * .16)); height: max(11px, calc(var(--cell) * .16)); }
+.cell.qcand { outline: 2px dashed var(--hot); outline-offset: -2px; cursor: pointer; }
+.cell.qcand:hover { background-color: color-mix(in srgb, var(--hot) 25%, transparent); }
+.cell.qpv { outline: 3px solid var(--hot); outline-offset: -3px; background-color: color-mix(in srgb, var(--hot) 35%, transparent); }
+.qhand { display: grid; gap: 6px; margin: 4px 0 6px; }
+.qcard { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; align-items: center; padding: 5px 8px; border: 1px solid var(--rule); border-left: 4px solid var(--qc); border-radius: 6px; background: var(--panel-2); }
+.qcard.sel { outline: 2px solid var(--hot); outline-offset: 1px; }
+.qcard .qbody { display: grid; gap: 1px; min-width: 0; line-height: 1.2; }
+.qcard .qbody small { color: var(--ink-soft); font-size: 1rem; }
+.qcard .qbody .qbonus { color: var(--ink); }
+.qcard button { grid-column: 1 / -1; font-size: 1rem; padding: 4px 8px; }
+.qgrid { display: grid; grid-template-columns: repeat(var(--w), 11px); gap: 2px; padding: 3px; }
+.qgrid i { width: 11px; height: 11px; border-radius: 2px; background: transparent; }
+.qgrid i.on { background: var(--c); box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
+.qplaced { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.qchip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 1rem; font-weight: 600; color: var(--qc); background: color-mix(in srgb, var(--qc) 14%, transparent); border: 1px solid color-mix(in srgb, var(--qc) 45%, transparent); cursor: help; }
+.qchip .i { width: 12px; height: 12px; } .qchip.warn { box-shadow: 0 0 8px var(--danger); } .qchip b { font-size: .95rem; }
+.myth { margin: 6px 0; } .myth button { margin: 2px 4px 2px 0; } .myth small { color: var(--ink-soft); }
+
 .im-antenne{--img:url(data:image/webp;base64,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)}
 .im-archive{--img:url(data:image/webp;base64,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)}
 .im-avant-poste{--img:url(data:image/webp;base64,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)}
@@ -1201,9 +1227,9 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 </style></head><body>
 <div id="app"></div>
 <div id="flash" role="status" hidden></div>
-<script>const ICONS = {"atq": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "pv": "<path d=\"M12 20C4.5 14.5 2.5 10 5.5 6.2C7.9 3.6 10.8 4.6 12 7.2C13.2 4.6 16.1 3.6 18.5 6.2C21.5 10 19.5 14.5 12 20Z\" fill=\"currentColor\" stroke=\"none\"/>", "biomasse": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><circle cx=\"10\" cy=\"14\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14\" cy=\"16.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "duree": "<circle cx=\"8\" cy=\"7.2\" r=\"3\"/><path d=\"M5 6.2H11M2.5 20.5C2.5 16 5 13 8 13C9.6 13 11 13.7 12 15\"/><g transform=\"translate(10.2 9.4) scale(0.57)\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/></g>", "travailleur": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M7.5 7.2H16.5M4.5 21C4.5 16.5 7.8 13.8 12 13.8C16.2 13.8 19.5 16.5 19.5 21\"/>", "tech": "<circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M12 11V21M8.5 21H15.5M8.6 5.6A4.8 4.8 0 0 0 8.6 12.4M15.4 5.6A4.8 4.8 0 0 1 15.4 12.4M5.6 3A8.6 8.6 0 0 0 5.6 15M18.4 3A8.6 8.6 0 0 1 18.4 15\"/>", "fusee": "<path d=\"M12 2C15.8 5 16.8 10 15.8 15H8.2C7.2 10 8.2 5 12 2Z\"/><circle cx=\"12\" cy=\"9\" r=\"1.8\"/><path d=\"M8.2 15L5 19.5L8.6 18.4M15.8 15L19 19.5L15.4 18.4M10.6 18L12 22L13.4 18\"/>", "chantier": "<path d=\"M5 21V4H19M5 4L10.5 9.5M19 4V8M17 8H21V11H17ZM3 21H9\"/>", "mur": "<path d=\"M3 5H21V19H3ZM3 9.7H21M3 14.3H21M9 5V9.7M15 5V9.7M6 9.7V14.3M12 9.7V14.3M18 9.7V14.3M9 14.3V19M15 14.3V19\"/>", "tourelle": "<circle cx=\"12\" cy=\"12\" r=\"6.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M12 2.5V6.5M12 17.5V21.5M2.5 12H6.5M17.5 12H21.5\"/>", "epines": "<path d=\"M2 20H22M3 20L6 11L9 20M9 20L12 4.5L15 20M15 20L18 11L21 20\"/>", "renforce": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/>", "temp": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4M15 13H21M15 21H21M16 13C16 16 18 16.5 18 17C18 17.5 16 18 16 21M20 13C20 16 18 16.5 18 17C18 17.5 20 18 20 21\"/>", "perm": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4\"/><path d=\"M18 11.5L19.3 14.6L22.6 14.8L20 17L20.9 20.2L18 18.4L15.1 20.2L16 17L13.4 14.8L16.7 14.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "cardinal": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 4.5L14.2 12L12 19.5L9.8 12Z\" fill=\"currentColor\" stroke=\"none\"/>", "couronne": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\"/><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\"/>", "depouille": "<path d=\"M12 3C7.6 3 5 6 5 9.6C5 12 6.2 13.6 8 14.6V18H16V14.6C17.8 13.6 19 12 19 9.6C19 6 16.4 3 12 3Z\"/><circle cx=\"9.3\" cy=\"10\" r=\"1.3\"/><circle cx=\"14.7\" cy=\"10\" r=\"1.3\"/><path d=\"M10.5 18V15.5M13.5 18V15.5\"/>", "piege": "<path d=\"M3 14H21M4 14L6 8.5L8 14L10 8.5L12 14L14 8.5L16 14L18 8.5L20 14M3 14C3 19 21 19 21 14\"/>", "aura": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "soin": "<path d=\"M9 3H15V9H21V15H15V21H9V15H3V9H9Z\"/>", "fureur": "<path d=\"M12 21C7.4 21 5.4 17.6 6.2 14.2C7 11.2 9.6 10.1 9 5.8C12 7.8 13.2 10 13 12.4C14.2 11.4 15 9.8 15 8.2C18 11 19.2 14 18.2 16.8C17.2 19.6 15 21 12 21Z\"/>", "vision": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "furtivite": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><path d=\"M4 3L20 21\"/>", "leurre": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>", "percee": "<path d=\"M9.5 3.5H14.5V20.5H9.5ZM9.5 9H14.5M9.5 15H14.5M2 12H21M17.5 8.5L21 12L17.5 15.5\"/>", "instinct": "<path d=\"M12 2L13.9 10.1L22 12L13.9 13.9L12 22L10.1 13.9L2 12L10.1 10.1Z\"/>", "spores": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"4\" r=\"1.6\"/><circle cx=\"12\" cy=\"20\" r=\"1.6\"/><circle cx=\"4\" cy=\"12\" r=\"1.6\"/><circle cx=\"20\" cy=\"12\" r=\"1.6\"/><circle cx=\"6.3\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"17.7\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"6.3\" cy=\"17.7\" r=\"1.2\"/>", "sabotage": "<circle cx=\"10\" cy=\"14.5\" r=\"6.5\"/><path d=\"M14.6 9.9L17.5 7M17.5 7L19 8.5M19.5 3V4.8M22 5.5H20.2M21.3 3.7L20.1 4.9\"/>", "mobilite": "<path d=\"M12 21V12M12 12L6 5M12 12L18 5M6 5V9M6 5H10M18 5V9M18 5H14\"/>", "deploiement": "<path d=\"M6 4L12 10L18 4M6 12L12 18L18 12M5 21H19\"/>", "reincarnation": "<path d=\"M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2\"/><path d=\"M12 15.5C9.2 13.5 8.5 12 9.6 10.6C10.4 9.7 11.5 10 12 11C12.5 10 13.6 9.7 14.4 10.6C15.5 12 14.8 13.5 12 15.5Z\" fill=\"currentColor\" stroke=\"none\"/>", "protection": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/><circle cx=\"12\" cy=\"10\" r=\"2.2\"/><path d=\"M8.5 16.5C9 14.5 10.3 13.5 12 13.5C13.7 13.5 15 14.5 15.5 16.5\"/>", "clairvoyance": "<path d=\"M4 12C6.2 8.2 8.8 7 12 7C15.2 7 17.8 8.2 20 12C17.8 15.8 15.2 17 12 17C8.8 17 6.2 15.8 4 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\"/><path d=\"M12 1.5V4M12 20V22.5M3.5 3.5L5.3 5.3M18.7 18.7L20.5 20.5M20.5 3.5L18.7 5.3M5.3 18.7L3.5 20.5\"/>", "frenesie": "<path d=\"M3 13C5 10 6.5 7.5 8.5 4.5M6 17C8 13.5 10 10.5 12.5 7M15 11L21 17M21 11L15 17\"/>", "frappe": "<path d=\"M13.5 2L5 13.5H11L9.5 22L19 9.5H13Z\"/>", "salve": "<path d=\"M8 2L3.5 9H7L6 15L11 7.5H7.5ZM17 6L12.5 13H16L15 19L20 11.5H16.5Z\"/>", "lane": "<path d=\"M8 3H16L20.5 21H3.5Z\"/><path d=\"M12 7V17M9.5 14.5L12 17L14.5 14.5\"/>", "stase": "<path d=\"M12 2V22M3.3 7L20.7 17M3.3 17L20.7 7M9.5 3.5L12 6L14.5 3.5M9.5 20.5L12 18L14.5 20.5\"/>", "famine": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><path d=\"M8.5 14.5H15.5\"/>", "brouillage": "<rect x=\"6\" y=\"3\" width=\"12\" height=\"18\"/><path d=\"M8.5 7.5L15.5 16.5M15.5 7.5L8.5 16.5\"/>", "effort": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"7.2\" stroke-width=\"3.2\" stroke-dasharray=\"2.6 2.1\"/>", "cadence": "<circle cx=\"8.5\" cy=\"9.5\" r=\"2\"/><circle cx=\"8.5\" cy=\"9.5\" r=\"5\" stroke-width=\"2.6\" stroke-dasharray=\"2 1.8\"/><circle cx=\"17\" cy=\"16.5\" r=\"1.6\"/><circle cx=\"17\" cy=\"16.5\" r=\"4\" stroke-width=\"2.4\" stroke-dasharray=\"1.8 1.6\"/>", "reparation": "<path d=\"M13 3L21 11L18 14L10 6ZM11.5 9.5L3 18L6 21L14.5 12.5\"/>", "renouvellement": "<path d=\"M20 12A8 8 0 1 1 17.7 6.3M18.5 2.5V6.8H14.2\"/>", "reconversion": "<path d=\"M4 8H19M15.5 4.5L19 8L15.5 11.5M20 16H5M8.5 12.5L5 16L8.5 19.5\"/>", "nuke": "<circle cx=\"12\" cy=\"12\" r=\"9.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(0 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(120 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(240 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "aggro": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "tank": "<path d=\"M3 15C3 9.5 7 5.5 12 5.5C17 5.5 21 9.5 21 15ZM3 15H21M8 15C8 11 9.8 8 12 8C14.2 8 16 11 16 15M12 5.5V15M2 18.5H22\"/>", "soutien": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "sort": "<path d=\"M12 2L13.6 8.4L20 10L13.6 11.6L12 18L10.4 11.6L4 10L10.4 8.4Z\"/><path d=\"M18.5 15.5L19.2 18.3L22 19L19.2 19.7L18.5 22.5L17.8 19.7L15 19L17.8 18.3Z\" fill=\"currentColor\" stroke=\"none\"/>", "palier": "<path d=\"M3 20H8V15H13V10H18V5H21\"/>", "ferocite": "<path d=\"M4 17C7 13 9 10 12 6M8 21C11 16 13 13 16 9\"/><path d=\"M18 3V9M15 6H21\"/>", "carnage": "<path d=\"M3 15C6 11 8 8 11 4M6 19C9 14 12 10 15 6M10 21C13 16 15 13 18 10\"/><path d=\"M19 2V6M17 4H21\"/><path d=\"M19 13.5C20.2 15 20.6 16 20.6 16.8A1.6 1.6 0 0 1 17.4 16.8C17.4 16 17.8 15 19 13.5Z\" fill=\"currentColor\" stroke=\"none\"/>", "essaim": "<circle cx=\"7.5\" cy=\"8.5\" r=\"2.3\"/><circle cx=\"13.5\" cy=\"7\" r=\"2.3\"/><circle cx=\"10\" cy=\"14.5\" r=\"2.3\"/><path d=\"M16.5 15H22M19.25 12.25V17.75\"/>", "carapace": "<path d=\"M3 17C3 11 7 6.5 12 6.5C17 6.5 21 11 21 17Z\"/><path d=\"M8 17C8 13 9.8 9.8 12 9.8C14.2 9.8 16 13 16 17M12 6.5V17\"/>", "blindage": "<path d=\"M4 7L12 3L20 7V13.5L12 21L4 13.5Z\"/><path d=\"M4 12.5L12 8.5L20 12.5M12 8.5V21\"/>", "masse": "<circle cx=\"8.5\" cy=\"9.5\" r=\"4\"/><circle cx=\"15.5\" cy=\"9.5\" r=\"4\"/><circle cx=\"12\" cy=\"15.5\" r=\"4\"/>", "mue": "<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3.5 20C3.5 16 5.8 13 9 13C12.2 13 14.5 16 14.5 20\"/><circle cx=\"15.5\" cy=\"8\" r=\"3\" stroke-dasharray=\"1.6 1.9\"/><path d=\"M15.5 13C18.7 13 20.5 16 20.5 20\" stroke-dasharray=\"1.6 1.9\"/>", "griffes": "<path d=\"M5 21C5 15 7.5 9 12.5 4.5M10 21C10 16 12 11.5 16.5 8M15 21C15 17.5 16.8 14.5 20.5 12.5\"/>", "regeneration": "<path d=\"M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2\"/><path d=\"M10.6 8.6H13.4V11.1H15.9V13.9H13.4V16.4H10.6V13.9H8.1V11.1H10.6Z\"/>"};
+<script>const ICONS = {"atq": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "pv": "<path d=\"M12 20C4.5 14.5 2.5 10 5.5 6.2C7.9 3.6 10.8 4.6 12 7.2C13.2 4.6 16.1 3.6 18.5 6.2C21.5 10 19.5 14.5 12 20Z\" fill=\"currentColor\" stroke=\"none\"/>", "biomasse": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><circle cx=\"10\" cy=\"14\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"14\" cy=\"16.5\" r=\"1\" fill=\"currentColor\" stroke=\"none\"/>", "duree": "<circle cx=\"8\" cy=\"7.2\" r=\"3\"/><path d=\"M5 6.2H11M2.5 20.5C2.5 16 5 13 8 13C9.6 13 11 13.7 12 15\"/><g transform=\"translate(10.2 9.4) scale(0.57)\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"/></g>", "travailleur": "<circle cx=\"12\" cy=\"8.5\" r=\"3.8\"/><path d=\"M7.5 7.2H16.5M4.5 21C4.5 16.5 7.8 13.8 12 13.8C16.2 13.8 19.5 16.5 19.5 21\"/>", "tech": "<circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M12 11V21M8.5 21H15.5M8.6 5.6A4.8 4.8 0 0 0 8.6 12.4M15.4 5.6A4.8 4.8 0 0 1 15.4 12.4M5.6 3A8.6 8.6 0 0 0 5.6 15M18.4 3A8.6 8.6 0 0 1 18.4 15\"/>", "fusee": "<path d=\"M12 2C15.8 5 16.8 10 15.8 15H8.2C7.2 10 8.2 5 12 2Z\"/><circle cx=\"12\" cy=\"9\" r=\"1.8\"/><path d=\"M8.2 15L5 19.5L8.6 18.4M15.8 15L19 19.5L15.4 18.4M10.6 18L12 22L13.4 18\"/>", "chantier": "<path d=\"M5 21V4H19M5 4L10.5 9.5M19 4V8M17 8H21V11H17ZM3 21H9\"/>", "mur": "<path d=\"M3 5H21V19H3ZM3 9.7H21M3 14.3H21M9 5V9.7M15 5V9.7M6 9.7V14.3M12 9.7V14.3M18 9.7V14.3M9 14.3V19M15 14.3V19\"/>", "tourelle": "<circle cx=\"12\" cy=\"12\" r=\"6.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M12 2.5V6.5M12 17.5V21.5M2.5 12H6.5M17.5 12H21.5\"/>", "epines": "<path d=\"M2 20H22M3 20L6 11L9 20M9 20L12 4.5L15 20M15 20L18 11L21 20\"/>", "renforce": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/>", "temp": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4M15 13H21M15 21H21M16 13C16 16 18 16.5 18 17C18 17.5 16 18 16 21M20 13C20 16 18 16.5 18 17C18 17.5 20 18 20 21\"/>", "perm": "<circle cx=\"9\" cy=\"8.5\" r=\"3.4\"/><path d=\"M2.5 21C2.5 16.8 5.4 14 9 14C10.6 14 12 14.5 13.2 15.4\"/><path d=\"M18 11.5L19.3 14.6L22.6 14.8L20 17L20.9 20.2L18 18.4L15.1 20.2L16 17L13.4 14.8L16.7 14.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "cardinal": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 4.5L14.2 12L12 19.5L9.8 12Z\" fill=\"currentColor\" stroke=\"none\"/>", "couronne": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\"/><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\"/>", "depouille": "<path d=\"M12 3C7.6 3 5 6 5 9.6C5 12 6.2 13.6 8 14.6V18H16V14.6C17.8 13.6 19 12 19 9.6C19 6 16.4 3 12 3Z\"/><circle cx=\"9.3\" cy=\"10\" r=\"1.3\"/><circle cx=\"14.7\" cy=\"10\" r=\"1.3\"/><path d=\"M10.5 18V15.5M13.5 18V15.5\"/>", "quartier": "<path d=\"M4 4H12V12H4ZM12 12H20V20H12ZM12 4H20V12M4 12H12V20H4Z\" stroke-dasharray=\"2 2\"/><path d=\"M4 4H12V12H4Z\"/><path d=\"M12 12H20V20H12Z\"/>", "piege": "<path d=\"M3 14H21M4 14L6 8.5L8 14L10 8.5L12 14L14 8.5L16 14L18 8.5L20 14M3 14C3 19 21 19 21 14\"/>", "aura": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "soin": "<path d=\"M9 3H15V9H21V15H15V21H9V15H3V9H9Z\"/>", "fureur": "<path d=\"M12 21C7.4 21 5.4 17.6 6.2 14.2C7 11.2 9.6 10.1 9 5.8C12 7.8 13.2 10 13 12.4C14.2 11.4 15 9.8 15 8.2C18 11 19.2 14 18.2 16.8C17.2 19.6 15 21 12 21Z\"/>", "vision": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "furtivite": "<path d=\"M2 12C5 6.5 8.5 5 12 5C15.5 5 19 6.5 22 12C19 17.5 15.5 19 12 19C8.5 19 5 17.5 2 12Z\"/><path d=\"M4 3L20 21\"/>", "leurre": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>", "percee": "<path d=\"M9.5 3.5H14.5V20.5H9.5ZM9.5 9H14.5M9.5 15H14.5M2 12H21M17.5 8.5L21 12L17.5 15.5\"/>", "instinct": "<path d=\"M12 2L13.9 10.1L22 12L13.9 13.9L12 22L10.1 13.9L2 12L10.1 10.1Z\"/>", "spores": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"4\" r=\"1.6\"/><circle cx=\"12\" cy=\"20\" r=\"1.6\"/><circle cx=\"4\" cy=\"12\" r=\"1.6\"/><circle cx=\"20\" cy=\"12\" r=\"1.6\"/><circle cx=\"6.3\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"17.7\" r=\"1.2\"/><circle cx=\"17.7\" cy=\"6.3\" r=\"1.2\"/><circle cx=\"6.3\" cy=\"17.7\" r=\"1.2\"/>", "sabotage": "<circle cx=\"10\" cy=\"14.5\" r=\"6.5\"/><path d=\"M14.6 9.9L17.5 7M17.5 7L19 8.5M19.5 3V4.8M22 5.5H20.2M21.3 3.7L20.1 4.9\"/>", "mobilite": "<path d=\"M12 21V12M12 12L6 5M12 12L18 5M6 5V9M6 5H10M18 5V9M18 5H14\"/>", "deploiement": "<path d=\"M6 4L12 10L18 4M6 12L12 18L18 12M5 21H19\"/>", "reincarnation": "<path d=\"M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2\"/><path d=\"M12 15.5C9.2 13.5 8.5 12 9.6 10.6C10.4 9.7 11.5 10 12 11C12.5 10 13.6 9.7 14.4 10.6C15.5 12 14.8 13.5 12 15.5Z\" fill=\"currentColor\" stroke=\"none\"/>", "protection": "<path d=\"M12 3L20 6V11.5C20 16.2 16.6 19.6 12 21C7.4 19.6 4 16.2 4 11.5V6Z\"/><circle cx=\"12\" cy=\"10\" r=\"2.2\"/><path d=\"M8.5 16.5C9 14.5 10.3 13.5 12 13.5C13.7 13.5 15 14.5 15.5 16.5\"/>", "clairvoyance": "<path d=\"M4 12C6.2 8.2 8.8 7 12 7C15.2 7 17.8 8.2 20 12C17.8 15.8 15.2 17 12 17C8.8 17 6.2 15.8 4 12Z\"/><circle cx=\"12\" cy=\"12\" r=\"2.2\"/><path d=\"M12 1.5V4M12 20V22.5M3.5 3.5L5.3 5.3M18.7 18.7L20.5 20.5M20.5 3.5L18.7 5.3M5.3 18.7L3.5 20.5\"/>", "frenesie": "<path d=\"M3 13C5 10 6.5 7.5 8.5 4.5M6 17C8 13.5 10 10.5 12.5 7M15 11L21 17M21 11L15 17\"/>", "frappe": "<path d=\"M13.5 2L5 13.5H11L9.5 22L19 9.5H13Z\"/>", "salve": "<path d=\"M8 2L3.5 9H7L6 15L11 7.5H7.5ZM17 6L12.5 13H16L15 19L20 11.5H16.5Z\"/>", "lane": "<path d=\"M8 3H16L20.5 21H3.5Z\"/><path d=\"M12 7V17M9.5 14.5L12 17L14.5 14.5\"/>", "stase": "<path d=\"M12 2V22M3.3 7L20.7 17M3.3 17L20.7 7M9.5 3.5L12 6L14.5 3.5M9.5 20.5L12 18L14.5 20.5\"/>", "famine": "<path d=\"M12 3C15.5 7 19 10 19 14.2A7 7 0 0 1 5 14.2C5 10 8.5 7 12 3Z\"/><path d=\"M8.5 14.5H15.5\"/>", "brouillage": "<rect x=\"6\" y=\"3\" width=\"12\" height=\"18\"/><path d=\"M8.5 7.5L15.5 16.5M15.5 7.5L8.5 16.5\"/>", "effort": "<circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"12\" cy=\"12\" r=\"7.2\" stroke-width=\"3.2\" stroke-dasharray=\"2.6 2.1\"/>", "cadence": "<circle cx=\"8.5\" cy=\"9.5\" r=\"2\"/><circle cx=\"8.5\" cy=\"9.5\" r=\"5\" stroke-width=\"2.6\" stroke-dasharray=\"2 1.8\"/><circle cx=\"17\" cy=\"16.5\" r=\"1.6\"/><circle cx=\"17\" cy=\"16.5\" r=\"4\" stroke-width=\"2.4\" stroke-dasharray=\"1.8 1.6\"/>", "reparation": "<path d=\"M13 3L21 11L18 14L10 6ZM11.5 9.5L3 18L6 21L14.5 12.5\"/>", "renouvellement": "<path d=\"M20 12A8 8 0 1 1 17.7 6.3M18.5 2.5V6.8H14.2\"/>", "reconversion": "<path d=\"M4 8H19M15.5 4.5L19 8L15.5 11.5M20 16H5M8.5 12.5L5 16L8.5 19.5\"/>", "nuke": "<circle cx=\"12\" cy=\"12\" r=\"9.5\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(0 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(120 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/><path transform=\"rotate(240 12 12)\" d=\"M12 9.2L9.6 4.6A8 8 0 0 1 14.4 4.6Z\" fill=\"currentColor\" stroke=\"none\"/>", "aggro": "<path d=\"M4 15C7 11 9 8 12 4M7 19C10 14 13 10 17 5M11 21C14 16 17 12 21 8\"/>", "tank": "<path d=\"M3 15C3 9.5 7 5.5 12 5.5C17 5.5 21 9.5 21 15ZM3 15H21M8 15C8 11 9.8 8 12 8C14.2 8 16 11 16 15M12 5.5V15M2 18.5H22\"/>", "soutien": "<circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.2 7.2A6.8 6.8 0 0 0 7.2 16.8M16.8 7.2A6.8 6.8 0 0 1 16.8 16.8M4.2 4.2A11 11 0 0 0 4.2 19.8M19.8 4.2A11 11 0 0 1 19.8 19.8\"/>", "sort": "<path d=\"M12 2L13.6 8.4L20 10L13.6 11.6L12 18L10.4 11.6L4 10L10.4 8.4Z\"/><path d=\"M18.5 15.5L19.2 18.3L22 19L19.2 19.7L18.5 22.5L17.8 19.7L15 19L17.8 18.3Z\" fill=\"currentColor\" stroke=\"none\"/>", "palier": "<path d=\"M3 20H8V15H13V10H18V5H21\"/>", "ferocite": "<path d=\"M4 17C7 13 9 10 12 6M8 21C11 16 13 13 16 9\"/><path d=\"M18 3V9M15 6H21\"/>", "carnage": "<path d=\"M3 15C6 11 8 8 11 4M6 19C9 14 12 10 15 6M10 21C13 16 15 13 18 10\"/><path d=\"M19 2V6M17 4H21\"/><path d=\"M19 13.5C20.2 15 20.6 16 20.6 16.8A1.6 1.6 0 0 1 17.4 16.8C17.4 16 17.8 15 19 13.5Z\" fill=\"currentColor\" stroke=\"none\"/>", "essaim": "<circle cx=\"7.5\" cy=\"8.5\" r=\"2.3\"/><circle cx=\"13.5\" cy=\"7\" r=\"2.3\"/><circle cx=\"10\" cy=\"14.5\" r=\"2.3\"/><path d=\"M16.5 15H22M19.25 12.25V17.75\"/>", "carapace": "<path d=\"M3 17C3 11 7 6.5 12 6.5C17 6.5 21 11 21 17Z\"/><path d=\"M8 17C8 13 9.8 9.8 12 9.8C14.2 9.8 16 13 16 17M12 6.5V17\"/>", "blindage": "<path d=\"M4 7L12 3L20 7V13.5L12 21L4 13.5Z\"/><path d=\"M4 12.5L12 8.5L20 12.5M12 8.5V21\"/>", "masse": "<circle cx=\"8.5\" cy=\"9.5\" r=\"4\"/><circle cx=\"15.5\" cy=\"9.5\" r=\"4\"/><circle cx=\"12\" cy=\"15.5\" r=\"4\"/>", "mue": "<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3.5 20C3.5 16 5.8 13 9 13C12.2 13 14.5 16 14.5 20\"/><circle cx=\"15.5\" cy=\"8\" r=\"3\" stroke-dasharray=\"1.6 1.9\"/><path d=\"M15.5 13C18.7 13 20.5 16 20.5 20\" stroke-dasharray=\"1.6 1.9\"/>", "griffes": "<path d=\"M5 21C5 15 7.5 9 12.5 4.5M10 21C10 16 12 11.5 16.5 8M15 21C15 17.5 16.8 14.5 20.5 12.5\"/>", "regeneration": "<path d=\"M19.5 12A7.5 7.5 0 1 1 16.8 6.2M17.5 2.5V6.8H13.2\"/><path d=\"M10.6 8.6H13.4V11.1H15.9V13.9H13.4V16.4H10.6V13.9H8.1V11.1H10.6Z\"/>"};
 const IMG_CLASS = {"Écorcheur": "im im-ecorcheur", "Ravageur": "im im-ravageur", "Massacreur": "im im-massacreur", "Carapace": "im im-carapace", "Béhémoth": "im im-behemoth", "Colosse": "im im-colosse", "Œil-sonde": "im im-oeil-sonde", "Glaneur": "im im-glaneur", "Hurleur": "im im-hurleur", "Charognard": "im im-pheromone", "Perforeur": "im im-perforeur", "Catalyseur": "im im-catalyseur", "Sapeur": "im im-sapeur", "Sporeur": "im im-sporeur", "Palissade": "im im-palissade", "Barbelé": "im im-barbele", "Antenne": "im im-antenne", "Bastion": "im im-bastion", "Haie d'épines": "im im-haie-d-epines", "Laboratoire": "im im-laboratoire", "Mur hérissé": "im im-mur-herisse", "Muraille": "im im-muraille", "Observatoire": "im im-observatroire", "Rempart": "im im-rempart", "Archives": "im im-archive", "Baraquement": "im im-baraquement", "Dortoir": "im im-dortoir", "Égide": "im im-egide", "Ligne de front": "im im-ligne-de-front", "Réduit": "im im-reduit", "Piège": "im im-piege", "Siphon": "im im-siphon", "Ronceraie": "im im-ronceraie", "Avant-poste du Nord": "im im-avant-poste", "Avant-poste de l'Est": "im im-avant-poste", "Avant-poste du Sud": "im im-avant-poste", "Avant-poste de l'Ouest": "im im-avant-poste", "support 1": "im im-support-1", "support 2": "im im-support-2", "support 3": "im im-support-niveau-3", "Fusée": "im im-fusee", "Champ de bataille": "im im-champs-de-bataille", "Passage colonie": "im im-pop-up-tour-colonie", "Passage essaim": "im im-pop-up-tour-essaim", "Visage Ravageur": "im im-visage-ravageur", "Visage Massacreur": "im im-visage-massacreur", "Visage Béhémoth": "im im-visage-behemoth", "Visage Colosse": "im im-visage-colosse", "Visage Charognard": "im im-visage-pheromone", "Visage Perforeur": "im im-visage-perforeur", "Visage Catalyseur": "im im-visage-catalyseur", "Visage Sapeur": "im im-visage-sapeur", "Visage Sporeur": "im im-visage-sporeur", "Mine mineure": "im im-piege", "Mine majeure": "im im-piege", "Mine supérieure": "im im-piege", "Siphon mineur": "im im-siphon", "Siphon majeur": "im im-siphon", "Siphon supérieur": "im im-siphon"};
-const STAGING_CHANGES = [{"v": "0.5.22", "items": ["Nouveau bouton « Changements » (accueil et menu en jeu) : liste de ce qui est sur le staging et pas encore sur main."]}, {"v": "0.5.23", "items": ["Règle : au premier tour de la colonie, un seul bâtiment au total (les points restants vont à la fusée)."]}, {"v": "0.5.24", "items": ["Phéromone : plus d'Aura Butin (+1 biomasse), remplacée par Dépouille — une créature morte sur sa case laisse un jeton qui bloque la construction jusqu'à ce qu'une tourelle à portée tire dessus."]}, {"v": "0.5.25", "items": ["La Phéromone s'appelle maintenant Charognard (même effet : Dépouille).", "Les jetons Dépouille sont dégagés par la Nuke, et par les sortilèges Barrage (sa lane) et Onde de choc (sa couronne).", "Correctif : le résumé « Sur cette case » est visible dès qu'on sélectionne une créature (avant, seulement après son déplacement)."]}, {"v": "0.5.26", "items": ["Échappée (Mue) : chaque soutien a un jeton qui ne sauve qu'une seule créature, puis il est défaussé (plus de limite par tour)."]}, {"v": "0.5.27", "items": ["Percée : les dégâts en trop passent derrière la cible, du côté opposé à l'attaquant (plus toujours vers la fusée)."]}, {"v": "0.5.28", "items": ["Sporeur : ses spores font 1 dégât (au lieu de 2) par Sporeur sur les 8 cases autour de la cible."]}, {"v": "0.5.29", "items": ["Renforcé X : −X dégâts à chaque attaque, sans minimum. Valeurs réduites de 1 (Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1).", "Avant-postes : toujours 4 PV, mais seulement dans leur propre lane."]}, {"v": "0.5.30", "items": ["Paliers de biomasse : au survol de la biomasse ou du palier, tous les paliers et ce qu'ils apportent.", "Infobulles sur toutes les icônes des bâtiments du plateau (Épines, Renforcé, tech, Mines, Siphons, Bouclier, supports, fusée…).", "Aperçu de la résolution d'une attaque au survol d'un bâtiment (créature choisie) : PV en rouge, Percée, Spores, Épines, Bouclier, Renforcé.", "Nouvelle icône de construction : travailleur avec clé à molette (à la place du sablier).", "Pastille NEW sur ce que l'adversaire a posé à son dernier tour."]}, {"v": "0.5.31", "items": ["La pastille NEW est verticale, en haut à gauche (ne cache plus les noms)."]}, {"v": "0.5.32", "items": ["Correctif : les bâtiments camouflés (vue colonie) remplissent de nouveau toute leur case."]}, {"v": "0.5.33", "items": ["La pastille NEW devient un petit rond jaune avec un « N » centré."]}];
+const STAGING_CHANGES = [{"v": "0.5.22", "items": ["Nouveau bouton « Changements » (accueil et menu en jeu) : liste de ce qui est sur le staging et pas encore sur main."]}, {"v": "0.5.23", "items": ["Règle : au premier tour de la colonie, un seul bâtiment au total (les points restants vont à la fusée)."]}, {"v": "0.5.24", "items": ["Phéromone : plus d'Aura Butin (+1 biomasse), remplacée par Dépouille — une créature morte sur sa case laisse un jeton qui bloque la construction jusqu'à ce qu'une tourelle à portée tire dessus."]}, {"v": "0.5.25", "items": ["La Phéromone s'appelle maintenant Charognard (même effet : Dépouille).", "Les jetons Dépouille sont dégagés par la Nuke, et par les sortilèges Barrage (sa lane) et Onde de choc (sa couronne).", "Correctif : le résumé « Sur cette case » est visible dès qu'on sélectionne une créature (avant, seulement après son déplacement)."]}, {"v": "0.5.26", "items": ["Échappée (Mue) : chaque soutien a un jeton qui ne sauve qu'une seule créature, puis il est défaussé (plus de limite par tour)."]}, {"v": "0.5.27", "items": ["Percée : les dégâts en trop passent derrière la cible, du côté opposé à l'attaquant (plus toujours vers la fusée)."]}, {"v": "0.5.28", "items": ["Sporeur : ses spores font 1 dégât (au lieu de 2) par Sporeur sur les 8 cases autour de la cible."]}, {"v": "0.5.29", "items": ["Renforcé X : −X dégâts à chaque attaque, sans minimum. Valeurs réduites de 1 (Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1).", "Avant-postes : toujours 4 PV, mais seulement dans leur propre lane."]}, {"v": "0.5.30", "items": ["Paliers de biomasse : au survol de la biomasse ou du palier, tous les paliers et ce qu'ils apportent.", "Infobulles sur toutes les icônes des bâtiments du plateau (Épines, Renforcé, tech, Mines, Siphons, Bouclier, supports, fusée…).", "Aperçu de la résolution d'une attaque au survol d'un bâtiment (créature choisie) : PV en rouge, Percée, Spores, Épines, Bouclier, Renforcé.", "Nouvelle icône de construction : travailleur avec clé à molette (à la place du sablier).", "Pastille NEW sur ce que l'adversaire a posé à son dernier tour."]}, {"v": "0.5.31", "items": ["La pastille NEW est verticale, en haut à gauche (ne cache plus les noms)."]}, {"v": "0.5.32", "items": ["Correctif : les bâtiments camouflés (vue colonie) remplissent de nouveau toute leur case."]}, {"v": "0.5.33", "items": ["La pastille NEW devient un petit rond jaune avec un « N » centré."]}, {"v": "Extension", "items": ["Nouveau bouton « Titans & Quarters » sur l'accueil : active l'extension (menu vert acide), choisie à la création de la partie.", "Titans (essaim) : une fois les 3 arbres terminés, pioche mythique à 15 biomasse (2 cartes, on en garde une) de 10 créatures mythiques.", "Quartiers (colonie) : 3 quartiers visibles, pièces transparentes de 2 à 5 cases posées sur des bâtiments, la fusée ou des supports ; tombent à 2 cases vides."]}];
 // Swarm & Steel — moteur de règles v0.3 (livret v0.3). Aucun accès au DOM : testable sous Node.
 "use strict";
 const SF = (() => {
@@ -1228,6 +1254,17 @@ const SF = (() => {
     "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case (cumulable)." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
     "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
+    // ---- Extension « Titans & Quarters » (Oni, 13/11/2026) : mythiques, uniquement via la pioche mythique (S.ext) ; lvl 4, speed fixe
+    "Briseur de coins": { type: "aggro", lvl: 4, myth: true, cost: 7, pv: 3, atq: 4, speed: 2, cap: "briseur", capName: "Briseur de coins", capText: "Quand il est déployé, détruit un support au choix, pour toute la partie (+1 biomasse)." },
+    "Léviathan": { type: "tank", lvl: 4, myth: true, cost: 8, pv: 8, atq: 3, speed: 1, cap: "leviathan", capName: "Léviathan", capText: "Tous les tirs de tourelle de sa lane le visent. Arrive avec un jeton Blindage." },
+    "Titan écorcheur": { type: "aggro", lvl: 4, myth: true, cost: 8, pv: 4, atq: 8, speed: 2, cap: "titan", capName: "Frappe double", capText: "Attaque deux fois par tour." },
+    "Mère des spores": { type: "soutien", lvl: 4, myth: true, cost: 6, pv: 6, atq: 0, speed: 1, cap: "spores", capName: "Aura Spores 3", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 3 dégâts." },
+    "Ver des profondeurs": { type: "aggro", lvl: 4, myth: true, cost: 6, pv: 3, atq: 6, speed: 2, cap: "ver", capName: "Parachutage", capText: "Se déploie sur n'importe quelle case libre de sa lane." },
+    "Oracle": { type: "soutien", lvl: 4, myth: true, cost: 5, pv: 5, atq: 0, speed: 1, cap: "vision", capName: "Clairvoyance", capText: "Tant qu'il est en vie, toutes les tuiles camouflées sont visibles (pièges et Siphons ne se déclenchent plus)." },
+    "Phénix": { type: "aggro", lvl: 4, myth: true, cost: 7, pv: 3, atq: 6, speed: 2, cap: "phenix", capName: "Renaissance", capText: "Revient une fois à sa mort, à l'entrée de sa lane, avec tous ses PV." },
+    "Dévoreur de technologies": { type: "aggro", lvl: 4, myth: true, cost: 7, pv: 4, atq: 5, speed: 2, cap: "devoreur", capName: "Dévoreur", capText: "Quand il est déployé, détruit tous les bâtiments de technologie de sa lane." },
+    "Reine de la ruche": { type: "soutien", lvl: 4, myth: true, cost: 6, pv: 6, atq: 0, speed: 1, cap: "reine", capName: "Aura Ruche", capText: "Toutes les créatures de sa lane gagnent +1 vitesse." },
+    "Source de biomasse": { type: "soutien", lvl: 4, myth: true, cost: 5, pv: 5, atq: 0, speed: 1, cap: "source", capName: "Source", capText: "Chaque bâtiment détruit rapporte +1 biomasse de plus." },
     "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 1 dégât par Sporeur ; la fusée touchée perd 1 travailleur." },
   };
   const PILES = {
@@ -1400,7 +1437,7 @@ const SF = (() => {
   const log = (S, who, msg) => { S.log.unshift({ r: S.round, who, msg }); if (S.log.length > 250) S.log.pop(); };
 
   // ------------------------------------------------------------------ mise en place
-  function newGame() {
+  function newGame(opts) {
     const S = {
       version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
       tiles: {}, supports: {}, depouilles: [], renfV: 1, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
@@ -1426,14 +1463,15 @@ const SF = (() => {
     shuffle(S.spellDeck);
     addPile(S, 1, "aggro"); addPile(S, 1, "tank"); addPile(S, 1, "soutien");
     // main de la colonie : vide au départ ; elle la compose au début de son premier tour (pioche au choix, D_draw)
-    log(S, "jeu", "Nouvelle partie. L'essaim commence.");
+    if (opts && opts.ext) initExt(S);
+    log(S, "jeu", "Nouvelle partie. L'essaim commence." + (S.ext ? " Extension Titans & Quarters." : ""));
     startAttackerTurn(S);
     return S;
   }
   // une carte revient dans sa pioche (créature morte, carte non jouée, Nuke) — sauf l'Œil-sonde une fois Clairvoyance
   // acquise : il sort du jeu (Oni, 04/11/2026)
   const retired = (S, name) => (name === "Œil-sonde" && S.upgrades.soutien.r2 === "C") || (name === "Glaneur" && S.upgrades.soutien.r2 === "A");
-  function toPile(S, name) { if (!retired(S, name)) S.piles[CREATURES[name].lvl].push(name); }
+  function toPile(S, name) { if (CREATURES[name].myth) return; if (!retired(S, name)) S.piles[CREATURES[name].lvl].push(name); } // un mythique mort ne revient jamais (Oni, 13/11)
   function addPile(S, lvl, type) {
     for (const [name, n] of PILES[lvl][type]) for (let i = 0; i < n; i++) S.piles[lvl].push(name);
     shuffle(S.piles[lvl]);
@@ -1444,11 +1482,11 @@ const SF = (() => {
   // plafond de population par lane : celui du palier, +3 avec l'amélioration aggro « Essaim agrandi » (décision d'Oni, 30/10/2026)
   const capOf = S => TIERS[tier(S)].cap + (S.upgrades.aggro.r2 === "B" ? 3 : 0);
   const laneCount = (S, lane) => S.creatures.filter(c => c.lane === lane).length;
-  const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
+  const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus + qSum(S, "tech");
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
   // support de niveau 3 : +3 travailleurs tant qu'il tient (Oni, 02/11/2026 ; avant +2)
   const SUP3_WORKERS = 2; // Oni, 06/11/2026 soir (+3 le 06/11 en journée, +2 du 04/11 au 06/11, +3 du 02/11 au 04/11)
-  const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + SUP3_WORKERS * Object.values(S.supports).filter(l => l === 3).length;
+  const bonusWorkers = S => Object.values(S.tiles).reduce((a, t) => a + (t.temp || 0), 0) + qSum(S, "workers") + SUP3_WORKERS * Object.values(S.supports).filter(l => l === 3).length;
   const totalPoints = S => S.workersBase + bonusWorkers(S) + S.extraPts;
   const allocated = S => LANES.reduce((a, l) => a + S.alloc[l], 0);
   // main de tuiles : 4, +1 à chaque palier de la fusée atteint (étages 3, 6, 9) → 4 / 5 / 6 / 7 (décision d'Oni, 30/10/2026 ;
@@ -1457,7 +1495,7 @@ const SF = (() => {
   const posKey = c => { const [x, y] = toGlobal(c.lane, c.u, c.k); return c.k === 4 ? "in:" + c.lane + ":" + c.u : key(x, y); };
   const caseMates = (S, c) => S.creatures.filter(o => o !== c && posKey(o) === posKey(c));
   const anySoutien = S => S.creatures.some(c => CREATURES[c.name].type === "soutien");
-  const clairvoyance = S => S.upgrades.soutien.r2 === "C" && anySoutien(S);
+  const clairvoyance = S => (S.upgrades.soutien.r2 === "C" && anySoutien(S)) || S.creatures.some(c => c.name === "Oracle");
   function hasMobility(S, c) {
     return CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r1 === "B";
   }
@@ -1537,6 +1575,7 @@ const SF = (() => {
   // visibleOnly : pour l'affichage côté essaim, ne compte pas l'aura d'un Avant-poste encore caché.
   function epinesOf(S, k, visibleOnly) {
     let e = S.tiles[k].ep || 0;
+    const qb = qBonusAt(S, k), qep = qb && qb.ep ? qb.ep : 0; // quartier : +Épines, plafond 4 (Oni, 13/11)
     const [x, y] = parse(k), clair = clairvoyance(S);
     for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
       if (!dx && !dy) continue;
@@ -1545,7 +1584,7 @@ const SF = (() => {
       if (visibleOnly && o.camo && !o.revealed && !clair) continue;
       e += 1;
     }
-    return e;
+    return qep ? Math.max(e, Math.min(4, e + qep)) : e;
   }
   // by : la créature dont l'attaque a détruit la tuile (attaque, percée ou spores), pour l'Aura Butin de la Charognard
   function destroyTile(S, k, why, by) {
@@ -1553,12 +1592,13 @@ const SF = (() => {
     delete S.tiles[k];
     if (!t.start) S.tileDiscards[tileCat(t.name)].push(t.name);
     // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
-    const gain = 1; // plus d'Aura Butin (Charognard → Dépouille, Oni 12/11/2026)
+    const gain = 1 + (S.creatures.some(o => o.name === "Source de biomasse") ? 1 : 0); // Source de biomasse (mythique) : +1 ; plus d'Aura Butin (Charognard → Dépouille, Oni 12/11/2026)
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
     const nm = t.camo && !t.revealed ? "Une tuile camouflée" : t.name; // ne pas nommer une tuile camouflée jamais révélée
     log(S, "essaim", `${nm} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);
     checkSupportsFall(S);
+    checkQuarters(S);
   }
   function checkSupportsFall(S) {
     for (const sk of Object.keys(S.supports)) {
@@ -1573,7 +1613,7 @@ const SF = (() => {
   function placeSupports(S) {
     for (let r = 1; r <= 3; r++) for (const sx of [1, -1]) for (const sy of [1, -1]) {
       const x = sx * r, y = sy * r, k = key(x, y);
-      if (!S.supports[k] && supportInner(x, y).every(w => S.tiles[w])) {
+      if (!S.supports[k] && !(S.deadSup || []).includes(k) && supportInner(x, y).every(w => S.tiles[w])) {
         S.supports[k] = r;
         fx(S, { t: "supUp", k });
         log(S, "colonie", `Un support de niveau ${r} apparaît en couronne ${r}.`);
@@ -1604,6 +1644,7 @@ const SF = (() => {
   function makeCreature(S, name, lane, u, extra) {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
     if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r1 === "A") c.esc = 1; // Mue : jeton Échappée à l'arrivée (Oni, 12/11/2026)
+    if (name === "Léviathan") c.blind = 1; // mythique : arrive avec un jeton Blindage
     if (CREATURES[name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1; // Blindage : jeton à l'arrivée (Oni, 11/11/2026)
     return c;
   }
@@ -1626,6 +1667,11 @@ const SF = (() => {
     const deadSet = new Set(dead);
     for (const c of dead) {
       if (escape(S, c)) { deadSet.delete(c); continue; }
+      // Phénix (mythique) : revient une fois à sa mort, à l'entrée de sa lane, avec tous ses PV
+      if (c.name === "Phénix" && !c.rebirth) {
+        c.rebirth = 1; c.hp = maxHp(S, c.name); c.k = 4; c.moved = 0; delete c.struck; c.acted = false;
+        fx(S, { t: "cheal", id: c.id, n: c.hp, hp: c.hp }); log(S, "essaim", "Phénix : il renaît à l'entrée de sa lane avec tous ses PV."); continue;
+      }
       // Dépouille (Charognard, Oni 12/11/2026) : une créature qui meurt hors de la case d'entrée, avec une Charognard vivant sur sa case, laisse un jeton
       if (c.k < 4 && S.creatures.some(o => o !== c && o.name === "Charognard" && !deadSet.has(o) && posKey(o) === posKey(c))) {
         const dk = posKey(c); S.depouilles = S.depouilles || [];
@@ -1636,12 +1682,12 @@ const SF = (() => {
       log(S, "colonie", `${c.name} est détruit.`);
       // Réincarnation (Oni, 10/11/2026) : chaque tank mort est mis de côté ; au début de son tour, l'essaim choisit celui qui
       // revient (là où il est mort, Oni 07/11/2026), les autres retournent dans leur pioche (avant : le premier mort seulement)
-      if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "C") {
+      if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "C" && !CREATURES[c.name].myth) {
         if (!S.reincQueue) S.reincQueue = [];
         S.reincQueue.push({ name: c.name, lane: c.lane, u: c.u, k: c.k });
         log(S, "essaim", `Réincarnation : ${c.name} pourra revenir au début du prochain tour de l'essaim.`);
       } else {
-        toPile(S, c.name); shuffle(S.piles[CREATURES[c.name].lvl]);
+        if (!CREATURES[c.name].myth) { toPile(S, c.name); shuffle(S.piles[CREATURES[c.name].lvl]); }
       }
     }
     if (dead.length) syncBonus(S); // les survivants qui perdent un bonus (soutien mort) gardent leurs PV
@@ -1724,17 +1770,20 @@ const SF = (() => {
     if (auras.length) fx(S, { t: "aura", id: c.id, names: auras });
   }
   function hitRocket(S, c) {
+    const rb = (qCovers(S)["0,0"] && QUARTERS[qCovers(S)["0,0"].name].bonus) || {};
+    if (rb.rocketRen && effAtq(S, c) <= rb.rocketRen) { log(S, "essaim", `${c.name} frappe la fusée : Renforcé ${rb.rocketRen}, aucun travailleur tué.`); return; }
     S.workersBase -= 1; S.killed = (S.killed || 0) + 1; // une attaque contre la fusée tue un seul travailleur, quelle que soit la force
     fx(S, { t: "rocket", id: c.id });
     log(S, "essaim", `${c.name} frappe la fusée : −1 travailleur.`);
     if (S.workersBase <= 0) { S.winner = "essaim"; log(S, "jeu", "La colonie n'a plus de travailleurs : l'essaim gagne."); return; }
     sporeBurst(S, c, 0, 0); // les spores touchent aussi les 8 cases autour de la fusée (Oni, 08/11/2026)
+    if (rb.rocketEp) { damageCreature(S, c, rb.rocketEp, "Épines de la fusée"); killCheck(S); } // quartier : Épines sur la fusée (Oni, 13/11)
   }
   // Aura Spores (1 dégât par Sporeur de la case depuis le 12/11/2026, avant 2 ; cumulable, Oni 02/11/2026) : quand une autre créature de la case attaque,
   // les 8 cases autour de la cible (diagonales comprises, toutes lanes ; Oni 08/11/2026, avant : les 4 côtés) sont touchées.
   // La fusée parmi elles : −1 travailleur. Pas sur une tuile encore camouflée, ni en stase ; un Bouclier les absorbe.
   function sporeBurst(S, c, x, y) {
-    const spores = countMates(S, c, o => o.name === "Sporeur");
+    const spores = countMates(S, c, o => o.name === "Sporeur") + 3 * countMates(S, c, o => o.name === "Mère des spores");
     if (!spores) return;
     for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
       if (!dx && !dy) continue;
@@ -1753,7 +1802,7 @@ const SF = (() => {
         log(S, "colonie", `Bouclier : ${nt.name} ne subit rien des spores ; le jeton est défaussé.`);
         continue;
       }
-      const spLoss = Math.max(0, spores - (nt.ren || 0)); // Renforcé X : −X dégâts (Oni, 12/11/2026)
+      const spLoss = Math.max(0, spores - tileRen(S, nk)); // Renforcé X : −X dégâts (Oni, 12/11/2026)
       nt.hp -= spLoss;
       fx(S, { t: "hit", id: null, k: nk, n: spLoss, hp: Math.max(0, nt.hp) });
       if (nt.hp <= 0) destroyTile(S, nk, "spores", c);
@@ -1766,9 +1815,9 @@ const SF = (() => {
   // Aura Mobilité : +1 case par Glaneur de la case, et par soutien de la case avec la Mue (Oni, 05/11/2026) ; tout se cumule
   // vitesse de base : 2 pour le Glaneur et toutes les créatures de niveau 3 (Oni, 06/11/2026), sinon 1
   // (le Glaneur a perdu sa vitesse de 2 et son Aura Mobilité 1 le 06/11/2026, Oni)
-  const baseSpeed = c => (CREATURES[c.name].lvl === 3 ? 2 : 1);
+  const baseSpeed = c => CREATURES[c.name].speed || (CREATURES[c.name].lvl === 3 ? 2 : 1);
   // Mue : l'Aura Mobilité 1 profite aussi au soutien qui la donne (Oni, 07/11/2026)
-  const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0)
+  const speedOf = (S, c) => baseSpeed(c) + (hasMobility(S, c) ? 1 : 0) + (S.creatures.some(o => o.name === "Reine de la ruche" && o.lane === c.lane) ? 1 : 0)
     + (S.upgrades.soutien.r1 ? countMates(S, c, isSoutien) + (isSoutien(c) ? 1 : 0) : 0); // Aura Mobilité 1 : Mue, et Griffes depuis le 08/11/2026
   function actCase(S, key, order) {
     if (!readyCases(S).includes(key)) return false;
@@ -1860,7 +1909,7 @@ const SF = (() => {
     return out;
   }
   // nombre d'attaques par tour : 1, 2 pour les aggros avec Carnage (Oni, 07/11/2026)
-  const strikesPerTurn = (S, c) => (CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r2 === "A" ? 2 : 1);
+  const strikesPerTurn = (S, c) => Math.max(c.name === "Titan écorcheur" ? 2 : 1, CREATURES[c.name].type === "aggro" && S.upgrades.aggro.r2 === "A" ? 2 : 1);
   // Attaque (Oni, 07/11/2026) : facultative, sur n'importe quel bâtiment qui touche sa case par un côté, ou la fusée ;
   // seulement après avoir avancé d'au moins une case quand elle le pouvait
   function strikeTargets(S, c) {
@@ -1994,9 +2043,11 @@ const SF = (() => {
     // d'un soutien, le Bouclier est défaussé sans effet et le Renforcé ne compte pas
     const corr = primary && S.upgrades.soutien.r2 === "B" && countMates(S, c, isSoutien) > 0;
     if (corr && t.shield > 0 && !S.stase.includes(tk)) { t.shield = 0; log(S, "essaim", `Corrosion : le Bouclier de ${t.name} est détruit.`); }
-    const shielded = !S.stase.includes(tk) && t.shield > 0;
+    const qh = qCovers(S)[tk], qsh = qh && qh.sh && QUARTERS[qh.name].bonus.shield ? qh : null; // jeton Bouclier partagé du quartier
+    if (corr && qsh && !S.stase.includes(tk)) { qsh.sh = false; log(S, "essaim", `Corrosion : le Bouclier du quartier ${qsh.name} est détruit.`); }
+    const shielded = !S.stase.includes(tk) && (t.shield > 0 || !!(qsh && qsh.sh));
     if (shielded) { // Bouclier (Oni, 07/11/2026) : comme en stase pour cette attaque, puis le jeton est défaussé
-      t.shield = 0;
+      if (t.shield > 0) t.shield = 0; else { qsh.sh = false; log(S, "colonie", `Bouclier du quartier ${qsh.name} : l'attaque ne fait rien ; il revient au prochain tour de la colonie.`); }
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
       log(S, "colonie", `Bouclier : ${t.name} ne subit rien de cette attaque ; le jeton est défaussé.`);
       sporesAround();
@@ -2010,7 +2061,7 @@ const SF = (() => {
       pierce(dmg);
     } else {
       // Renforcé X : −X dégâts à chaque attaque, sans minimum (Oni, 12/11/2026 ; avant : 1 PV par tranche complète de X dégâts)
-      const ren = corr ? 0 : t.ren; // Corrosion : Renforcé sans effet
+      const ren = corr ? 0 : tileRen(S, tk); // Corrosion : Renforcé sans effet
       const loss = Math.max(0, dmg - ren);
       const excess = loss - t.hp;
       t.hp -= loss;
@@ -2035,6 +2086,7 @@ const SF = (() => {
 
   // ------------------------------------------------------------------ tour de l'essaim
   function startAttackerTurn(S) {
+    S.mythDrawn = false; // une pioche mythique par tour
     S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
     // Réincarnation : un seul tank mort → il revient ; plusieurs → l'essaim choisit (étape A_reinc, action reinc)
@@ -2051,7 +2103,7 @@ const SF = (() => {
     S.creatures.push(nc);
     fx(S, { t: "reinc", id: nc.id });
     log(S, "essaim", `${r.name} se réincarne ${k === 4 ? "à l'entrée de la lane " + LANE_NAME[r.lane] : "là où il est mort (" + LANE_NAME[r.lane] + " " + cellName(r.u, k) + ")"}.`);
-    q.forEach((o, j) => { if (j !== i) { toPile(S, o.name); shuffle(S.piles[CREATURES[o.name].lvl]); log(S, "essaim", `${o.name} retourne dans la pioche.`); } });
+    q.forEach((o, j) => { if (j !== i) { if (!CREATURES[o.name].myth) { toPile(S, o.name); shuffle(S.piles[CREATURES[o.name].lvl]); } log(S, "essaim", `${o.name} retourne dans la pioche.`); } });
     S.reincQueue = [];
     return true;
   }
@@ -2154,7 +2206,7 @@ const SF = (() => {
   // pas seulement l'entrée ; la limite de population de la lane s'applique comme d'habitude
   function canDrop(S, name, lane, u, k) {
     if (k === undefined || k === 4) return Math.abs(u) <= 2;
-    if (CREATURES[name].type !== "soutien") return false;
+    if (CREATURES[name].type !== "soutien" && name !== "Ver des profondeurs") return false;
     const [x, y] = toGlobal(lane, u, k);
     return walkable(S, lane, x, y);
   }
@@ -2164,6 +2216,8 @@ const SF = (() => {
     if (!canDeploy(S, card, lane) || !canDrop(S, card.name, lane, u, k)) return false;
     // Sapeur : s'il y a des bâtiments dans sa lane, il faut en désigner un (target)
     if (card.name === "Sapeur" && laneTiles(S, lane).length && !laneTiles(S, lane).includes(target)) return false;
+    // Briseur de coins (mythique) : il faut désigner un support
+    if (card.name === "Briseur de coins" && Object.keys(S.supports).length && !S.supports[target]) return false;
     S.budget -= card.free ? 0 : CREATURES[card.name].cost;
     S.handA.splice(i, 1);
     const c = makeCreature(S, card.name, lane, u, k && k < 4 ? { k } : {});
@@ -2176,6 +2230,14 @@ const SF = (() => {
       destroyTile(S, target, "sabotage", c);
     }
     if (card.name === "Œil-sonde") revealLane(S, lane);
+    if (card.name === "Briseur de coins" && S.supports[target]) { // détruit pour toute la partie : il ne réapparaît pas (Oni, 13/11)
+      const lv = S.supports[target]; delete S.supports[target]; (S.deadSup = S.deadSup || []).push(target); S.biomass += 1;
+      fx(S, { t: "tileDown", k: target, n: 1 }); log(S, "essaim", `Briseur de coins : le support de niveau ${lv} est détruit pour la partie : +1 biomasse.`);
+      checkQuarters(S);
+    }
+    if (card.name === "Dévoreur de technologies") for (const k of laneTiles(S, lane).filter(k => S.tiles[k] && S.tiles[k].tech > 0)) {
+      log(S, "essaim", `Dévoreur de technologies : ${S.tiles[k].camo && !S.tiles[k].revealed ? "un bâtiment" : S.tiles[k].name} est détruit.`); destroyTile(S, k, "dévoreur", c);
+    }
     return true;
   }
   // Vision de l'Œil-sonde (Oni, 04/11/2026) : tant qu'il est en vie, les tuiles camouflées de sa lane sont révélées,
@@ -2191,7 +2253,7 @@ const SF = (() => {
   function endDeploy(S) {
     if (S.budget > 0) { S.reserve += S.budget; log(S, "essaim", `${S.budget} biomasse versée à la réserve (réserve ${S.reserve}).`); }
     S.budget = 0;
-    for (const c of S.handA) toPile(S, c.name);
+    for (const c of S.handA) { if (CREATURES[c.name].myth) (S.mythPile = S.mythPile || []).push(c.name); else toPile(S, c.name); } // mythique non joué : sous la pioche mythique
     for (const l of [1, 2, 3]) shuffle(S.piles[l]);
     S.handA = [];
     S.phase = "A_upgrade";
@@ -2376,6 +2438,7 @@ const SF = (() => {
     return true;
   }
   function startDefenderTurn(S) {
+    S.qPlaced = false; for (const q of S.quarters || []) q.sh = !!QUARTERS[q.name].bonus.shield; // un quartier par tour ; le Bouclier partagé revient
     for (const t of Object.values(S.tiles)) delete t.new; // les bâtiments posés au tour précédent ne sont plus « nouveaux »
     S.phase = needDraw(S) ? "D_draw" : "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
     // construction immédiate (Oni, 08/11/2026) : points du tour fixés au début du tour (un bâtiment posé ce tour, ou un
@@ -2440,14 +2503,16 @@ const SF = (() => {
     if (!lvl || lvl === 3 || shotsLeft(S, sk) <= 0) return false;
     const c = S.creatures.find(o => o.id === creatureId);
     if (!c || !supportTargets(S, sk).includes(c)) return false;
-    const t = resolveTarget(S, c);
+    let t = resolveTarget(S, c);
+    const lev = S.creatures.find(o => o.name === "Léviathan" && o.lane === c.lane); // mythique : attire tous les tirs de sa lane
+    if (lev && lev !== t) t = lev;
     S.firedSupports.push(sk);
     fx(S, { t: "shot", sk, id: t.id });
     // Provocation (tank, côté B) : les tanks subissent 1 dégât de moins des tourelles (Oni, 07/11/2026)
     // Blindage (tank, rang 2 côté A) : aussi −1 dégât des tourelles (Oni, 09/11/2026)
     // −1 par Provocation et −1 par Masse vivante, cumulables (Oni, 11/11/2026 ; avant Provocation ou Blindage)
     const tk = CREATURES[t.name].type === "tank", red = [tk && S.upgrades.tank.r1 === "B" ? "Provocation −1" : "", tk && S.upgrades.tank.r2 === "B" ? "Masse vivante −1" : ""].filter(Boolean);
-    damageCreature(S, t, Math.max(0, turretDmg(S, lvl) - red.length), `tourelle de niveau ${lvl}${red.length ? ", " + red.join(", ") : ""}`);
+    damageCreature(S, t, Math.max(0, turretDmgAt(S, sk) - red.length), `tourelle de niveau ${lvl}${red.length ? ", " + red.join(", ") : ""}`);
     killCheck(S);
     return true;
   }
@@ -2469,7 +2534,7 @@ const SF = (() => {
     const order = Object.keys(S.supports).sort((a, b) => S.supports[a] - S.supports[b]);
     for (const sk of order) while (S.supports[sk] && S.supports[sk] !== 3 && shotsLeft(S, sk) > 0) {
       const cands = supportTargets(S, sk); if (!cands.length) { S.firedSupports.push(sk); continue; }
-      const d = turretDmg(S, S.supports[sk]);
+      const d = turretDmgAt(S, sk);
       cands.sort((a, b) => ((resolveTarget(S, b).hp <= d) - (resolveTarget(S, a).hp <= d)) || a.k - b.k || effAtq(S, b) - effAtq(S, a));
       if (!fire(S, sk, cands[0].id)) break;
     }
@@ -2639,7 +2704,7 @@ const SF = (() => {
     // v0.5 : Hurleur et Catalyseur changent de niveau, donc de pioche
     if (S.piles && S.piles[1]) for (const l of [1, 2, 3]) {
       const wrong = S.piles[l].filter(n => CREATURES[n] && CREATURES[n].lvl !== l);
-      if (wrong.length) { S.piles[l] = S.piles[l].filter(n => !wrong.includes(n)); for (const n of wrong) S.piles[CREATURES[n].lvl].push(n); }
+      if (wrong.length) { S.piles[l] = S.piles[l].filter(n => !wrong.includes(n)); for (const n of wrong) if (S.piles[CREATURES[n].lvl]) S.piles[CREATURES[n].lvl].push(n); }
     }
     // ancien « Bouclier X » → Renforcé X (02/11/2026) ; le Bouclier de l'Abri blindé (jeton, 07/11/2026) n'est pas concerné
     for (const t of Object.values(S.tiles || {})) if (t.shield && !(TILES[t.name] && TILES[t.name].shield)) { t.ren = t.shield; delete t.shield; }
@@ -2718,7 +2783,10 @@ const SF = (() => {
     deploy: { phase: ["A_deploy"], run: (S, a) => isInt(a.uid) && isLane(a.lane) && isInt(a.u) && Math.abs(a.u) <= 2 && (a.target === undefined || typeof a.target === "string") && (a.k === undefined || (isInt(a.k) && a.k >= 1 && a.k <= 4)) && deploy(S, a.uid, a.lane, a.u, a.target, a.k) },
     // déploiement et améliorations dans la même étape (Oni, 06/11/2026) : terminer le déploiement passe directement aux attaques
     // (la biomasse non dépensée va à la réserve) ; l'étape A_upgrade ne sert plus qu'aux parties enregistrées avant
-    endDeploy: { phase: ["A_deploy"], run: S => { endDeploy(S); ACTIONS.toAttacks.run(S); return true; } },
+    endDeploy: { phase: ["A_deploy"], run: S => { if (S.mythOffer) return false; endDeploy(S); ACTIONS.toAttacks.run(S); return true; } }, // pioche mythique en attente : à trancher d'abord
+    mythDraw: { phase: ["A_deploy"], run: S => mythDraw(S) },
+    mythPick: { phase: ["A_deploy"], run: (S, a) => isInt(a.i) && mythPick(S, a.i) },
+    quartier: { phase: ["D_main"], run: (S, a) => typeof a.name === "string" && Array.isArray(a.cells) && a.cells.length <= 6 && a.cells.every(k => typeof k === "string") && placeQuarter(S, a.name, a.cells) },
     invest: { phase: ["A_deploy", "A_upgrade"], run: (S, a) => own(TREES, a.t) && own(TREES[a.t], a.s) && isInt(a.n) && a.n > 0 && invest(S, a.t, a.s, a.n) },
     toAttacks: { phase: ["A_upgrade"], run(S) {
       startAttacks(S);
@@ -2813,6 +2881,129 @@ const SF = (() => {
     }
   }
 
+  // ================================================================== EXTENSION « Titans & Quarters » (Oni, 13/11/2026)
+  // Rien de ce bloc ne joue si S.ext est faux : la base reste identique. Conception : docs/extension-titans-et-quarters.md
+  // ---- Titans (essaim) : 3 arbres terminés → pioche de 10 mythiques à 15 de biomasse (2 cartes, on en garde une)
+  const MYTH_COST = 15;
+  const MYTHICS = Object.keys(CREATURES).filter(n => CREATURES[n].myth);
+  const mythUnlocked = S => !!(S.ext && S.upgrades.aggro.r2 && S.upgrades.tank.r2 && S.upgrades.soutien.r2);
+  const canMythDraw = S => !!(S.ext && S.phase === "A_deploy" && mythUnlocked(S) && !S.mythOffer && !S.mythDrawn && S.mythPile.length && S.budget + S.reserve >= MYTH_COST);
+  function mythDraw(S) {
+    if (!canMythDraw(S)) return false;
+    let left = MYTH_COST; const r = Math.min(left, S.reserve); S.reserve -= r; left -= r; S.budget -= left; // la réserve d'abord, comme les améliorations
+    S.mythOffer = S.mythPile.splice(0, 2); S.mythDrawn = true;
+    fx(S, { t: "myth" }); log(S, "essaim", `Pioche mythique : ${MYTH_COST} biomasse, ${S.mythOffer.length} carte${S.mythOffer.length > 1 ? "s" : ""} tirée${S.mythOffer.length > 1 ? "s" : ""}.`);
+    return true;
+  }
+  function mythPick(S, i) {
+    if (!S.mythOffer || !S.mythOffer[i]) return false;
+    const name = S.mythOffer[i], other = S.mythOffer.filter((_, j) => j !== i);
+    S.handA.push({ name, free: false, uid: S.nextId++ }); S.mythPile.push(...other); // l'autre carte repart sous la pioche
+    S.mythOffer = null; log(S, "essaim", "Pioche mythique : une carte rejoint la main de l'essaim.");
+    return true;
+  }
+  // ---- Quartiers (colonie) : pièces transparentes de 2 à 5 cases posées sur des bâtiments, la fusée ou des supports
+  const QSHAPES = {
+    domino: [[0, 0], [1, 0]], droit3: [[0, 0], [1, 0], [2, 0]], l3: [[0, 0], [1, 0], [0, 1]], t4: [[0, 0], [1, 0], [2, 0], [1, 1]],
+    s4: [[0, 0], [1, 0], [1, 1], [2, 1]], droit4: [[0, 0], [1, 0], [2, 0], [3, 0]], o4: [[0, 0], [1, 0], [0, 1], [1, 1]],
+    croix5: [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]],
+  };
+  // crit : critères (un bâtiment construit différent par critère ; « support » et « fusee » = cases recouvertes) ; bonus : fixes
+  const QUARTERS = {
+    "Poste de garde": { shape: "domino", crit: ["tech"], bonus: { ep: 1 }, text: "+1 Épines à chaque bâtiment dessous." },
+    "Atelier": { shape: "domino", crit: ["ren"], bonus: { workers: 1 }, text: "+1 travailleur." },
+    "Laboratoire central": { shape: "droit3", crit: ["piege"], bonus: { tech: 1 }, text: "+1 technologie." },
+    "Mur d'enceinte": { shape: "l3", crit: ["travail"], bonus: { ren: 1 }, text: "+1 Renforcé à chaque bâtiment dessous." },
+    "Sanctuaire de la fusée": { shape: "l3", crit: ["fusee", "ren"], bonus: { rocketEp: 2 }, text: "La fusée gagne Épines 2." },
+    "Batterie": { shape: "t4", crit: ["support", "ep"], bonus: { turret: 1 }, text: "Le support dessous tire +1 dégât." },
+    "Zone de recherche": { shape: "s4", crit: ["tech", "piege"], bonus: { shield: 1 }, text: "Un jeton Bouclier partagé, rendu à chaque tour de la colonie." },
+    "Quartier ouvrier": { shape: "droit4", crit: ["ren", "piege"], bonus: { workers: 2 }, text: "+2 travailleurs." },
+    "Citadelle": { shape: "o4", crit: ["ren", "tech"], bonus: { ren: 1 }, text: "+1 Renforcé à chaque bâtiment dessous." },
+    "Forteresse": { shape: "croix5", crit: ["ren", "ep", "tech"], bonus: { ep: 1, ren: 1, shield: 1 }, text: "+1 Épines, +1 Renforcé à chaque bâtiment dessous et un jeton Bouclier partagé." },
+  };
+  const QCRIT_TXT = { tech: "un bâtiment de technologie", ren: "un bâtiment Renforcé", ep: "un bâtiment à Épines", travail: "un bâtiment à travailleur", piege: "un piège (Mine ou Siphon)", bouclier: "un bâtiment à Bouclier", support: "un support de coin", fusee: "la fusée" };
+  const QCRIT_FN = { tech: t => t.tech > 0, ren: t => t.ren > 0, ep: t => t.ep > 0, travail: t => t.temp > 0, piege: t => t.trap > 0 || t.siphon > 0, bouclier: t => !!(TILES[t.name] && TILES[t.name].shield) };
+  const qCovers = S => { const m = {}; for (const q of S.quarters || []) for (const k of q.cells) m[k] = q; return m; };
+  const qBonusAt = (S, k) => { const q = (S.quarters || []).find(o => o.cells.includes(k)); return q ? QUARTERS[q.name].bonus : null; };
+  const qSum = (S, f) => (S.quarters || []).reduce((a, q) => a + (QUARTERS[q.name].bonus[f] || 0), 0);
+  const tileRen = (S, k) => { const t = S.tiles[k]; if (!t) return 0; const qb = qBonusAt(S, k); return qb && qb.ren ? Math.min(3, (t.ren || 0) + qb.ren) : (t.ren || 0); }; // plafond 3
+  const turretDmgAt = (S, sk) => { const qb = qBonusAt(S, sk); return turretDmg(S, S.supports[sk]) + (qb && qb.turret ? qb.turret : 0); };
+  function qOrientations(shape) { // les 8 orientations (rotations et symétrie), sans doublon
+    const out = new Map();
+    for (let m = 0; m < 2; m++) {
+      let c = shape.map(([x, y]) => (m ? [-x, y] : [x, y]));
+      for (let r = 0; r < 4; r++) {
+        c = c.map(([x, y]) => [-y, x]);
+        const mx = Math.min(...c.map(p => p[0])), my = Math.min(...c.map(p => p[1]));
+        const n = c.map(([x, y]) => [x - mx, y - my]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+        out.set(JSON.stringify(n), n);
+      }
+    }
+    return [...out.values()];
+  }
+  function qCritMatch(crits, tiles) { // chaque critère de bâtiment prend un bâtiment construit différent
+    if (!crits.length) return true;
+    const [c, ...rest] = crits;
+    return tiles.some((t, i) => QCRIT_FN[c](t) && qCritMatch(rest, tiles.filter((_, j) => j !== i)));
+  }
+  function quarterValid(S, name, keys) {
+    const Q = QUARTERS[name], cover = qCovers(S);
+    for (const k of keys) {
+      if (cover[k]) return false; // un bâtiment n'appartient qu'à un seul quartier
+      if (k === "0,0") continue;
+      const [x, y] = parse(k);
+      if (Math.abs(x) > 3 || Math.abs(y) > 3) return false;
+      if (isSupportCell(x, y)) { if (!S.supports[k]) return false; continue; }
+      if (!S.tiles[k]) return false; // Barbelés compris : ils comptent comme des bâtiments
+    }
+    if (!keys.some(k => S.tiles[k])) return false; // au moins un bâtiment sous la pièce
+    if (Q.crit.includes("fusee") && !keys.includes("0,0")) return false;
+    if (Q.crit.includes("support") && !keys.some(k => S.supports[k])) return false;
+    const built = keys.filter(k => S.tiles[k] && !S.tiles[k].start).map(k => S.tiles[k]); // les Barbelés ne remplissent aucun critère
+    return qCritMatch(Q.crit.filter(c => QCRIT_FN[c]), built);
+  }
+  // tous les placements valables d'un quartier (liste de listes de clés de cases)
+  function quarterPlacements(S, name) {
+    const Q = QUARTERS[name]; if (!Q) return [];
+    const res = new Map();
+    for (const o of qOrientations(QSHAPES[Q.shape])) for (let ox = -3; ox <= 3; ox++) for (let oy = -3; oy <= 3; oy++) {
+      const cells = o.map(([x, y]) => [x + ox, y + oy]);
+      if (cells.some(([x, y]) => Math.abs(x) > 3 || Math.abs(y) > 3)) continue;
+      const keys = cells.map(([x, y]) => key(x, y)).sort(), id = keys.join("|");
+      if (!res.has(id) && quarterValid(S, name, keys)) res.set(id, keys);
+    }
+    return [...res.values()];
+  }
+  const canPlaceQuarter = S => !!(S.ext && S.phase === "D_main" && !S.relocate && S.round > 1 && !S.qPlaced);
+  function placeQuarter(S, name, cells) {
+    if (!canPlaceQuarter(S) || !S.qHand.includes(name)) return false;
+    const keys = [...cells].sort(), id = keys.join("|");
+    if (!quarterPlacements(S, name).some(p => p.join("|") === id)) return false;
+    S.quarters.push({ id: S.nextId++, name, cells: keys, sh: !!QUARTERS[name].bonus.shield });
+    S.qHand.splice(S.qHand.indexOf(name), 1);
+    const next = S.qPile.shift(); if (next) S.qHand.push(next); // on repioche pour toujours avoir 3 choix (pioche cachée pour l'IA : cases vides)
+    S.qPlaced = true;
+    fx(S, { t: "quarter", name, cells: keys }); log(S, "colonie", `Quartier « ${name} » posé (${keys.length} cases) : ${QUARTERS[name].text}`);
+    return true;
+  }
+  // un quartier tombe quand 2 cases de sa pièce sont vides en même temps (bâtiment détruit, support tombé) ; il repart sous sa pioche
+  const quarterEmpty = (S, q) => q.cells.filter(k => { if (k === "0,0") return false; const [x, y] = parse(k); return isSupportCell(x, y) ? !S.supports[k] : !S.tiles[k]; });
+  function checkQuarters(S) {
+    if (!S.quarters || !S.quarters.length) return;
+    for (const q of [...S.quarters]) {
+      const empty = quarterEmpty(S, q);
+      if (empty.length >= 2) {
+        S.quarters.splice(S.quarters.indexOf(q), 1); S.qPile.push(q.name);
+        fx(S, { t: "quarterDown", name: q.name, cells: q.cells }); log(S, "essaim", `Le quartier « ${q.name} » tombe (2 cases vides) : il repart sous la pioche.`);
+      }
+    }
+  }
+  function initExt(S) {
+    S.ext = true;
+    S.mythPile = shuffle(MYTHICS.slice()); S.mythOffer = null; S.mythDrawn = false;
+    S.qPile = shuffle(Object.keys(QUARTERS)); S.qHand = S.qPile.splice(0, 3); S.quarters = []; S.qPlaced = false;
+  }
+
   // ------------------------------------------------------------------ vue filtrée par camp (jeu en ligne)
   // Copie de S sans les informations cachées à ce camp. L'ordre des pioches n'est envoyé à personne :
   // les listes cachées sont remplacées par des listes de null de même longueur (seul le nombre est connu).
@@ -2823,6 +3014,7 @@ const SF = (() => {
     V.tileDecks = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDecks[c])])); V.tileDiscards = Object.fromEntries(TILE_CATS.map(c => [c, blank(V.tileDiscards[c])]));
     V.spellDeck = blank(V.spellDeck); // la défausse des sortilèges est publique (Oni, 09/11/2026)
     for (const l of [1, 2, 3]) V.piles[l] = blank(V.piles[l]);
+    if (V.ext) { V.qPile = blank(V.qPile); V.mythPile = blank(V.mythPile); if (side === "colonie" && V.mythOffer) V.mythOffer = blank(V.mythOffer); } // les quartiers piochés sont publics, pas l'ordre des pioches
     if (side === "colonie") V.handA = blank(V.handA);
     if (side === "essaim") {
       V.hand = blank(V.hand); V.spells = blank(V.spells); if (V.spellOffer) V.spellOffer = blank(V.spellOffer);
@@ -2853,6 +3045,7 @@ const SF = (() => {
     VERSION,
     fxFor, migrate, firstTurnCap, damageCreature, hitTile, famineBudget, MIN_BIOMASS, siphonLoss, relocateTargets, buildTargets, canBuildAt, pointsLeft, TILE_CATS, CAT_NAME, tileCat, tilesLeft, needDraw, shotsLeft, SUP3_WORKERS, TRAP_DMG, floorCost, FLOOR_COSTS, START_WALL,
     PHASE_SIDE, ACTIONS, actor, apply, viewFor,
+    MYTH_COST, MYTHICS, mythUnlocked, canMythDraw, QUARTERS, QSHAPES, quarterEmpty, QCRIT_TXT, quarterPlacements, canPlaceQuarter, qCovers, tileRen, turretDmgAt, checkQuarters,
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
@@ -2978,7 +3171,7 @@ const AIDE = (() => {
     return `<table class="rt"><thead><tr><th>Palier</th><th>Biomasse</th><th>Cartes à piocher</th><th>Créatures max par lane</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
   function creaturesTable(h) {
-    const rows = Object.entries(SF.CREATURES).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
+    const rows = Object.entries(SF.CREATURES).filter(([, c]) => !c.myth).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
     return `<div class="rt-wrap"><table class="rt"><thead><tr><th>Créature</th><th>Type</th><th>Niv.</th><th>Coût</th><th>PV</th><th>ATQ</th><th>Capacité</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   function tilePv(t) { return t.pv === "ap" ? "2 (4 dans sa lane)" : t.pv === "front" ? "1 + couronne" : t.pv === "reduit" ? "5 − couronne" : t.pv; }
@@ -3035,7 +3228,14 @@ const AIDE = (() => {
       <h3>Jouer en ligne</h3>
       <p>Créez une partie en choisissant votre camp et donnez le code (ou le lien) à votre adversaire. Chaque joueur ne reçoit que ce que son camp a le droit de voir. Vous pouvez recharger la page : la partie reprend.</p>
       <h3>Mode découverte</h3>
-      <p>Activé sur l'accueil ou ici, il affiche un conseil la première fois que chaque situation se présente, selon le camp que vous jouez. « Compris » le range ; il ne revient plus.</p>`;
+      <p>Activé sur l'accueil ou ici, il affiche un conseil la première fois que chaque situation se présente, selon le camp que vous jouez. « Compris » le range ; il ne revient plus.</p>
+      <h3>Extension « Titans &amp; Quarters » (optionnelle)</h3>
+      <p>Activée sur l'accueil (le menu passe au vert acide), choisie à la création de la partie.</p>
+      <ul>
+        <li><b>Titans (essaim)</b> : une fois les 3 arbres terminés (rang 2), une pioche de <b>10 créatures mythiques</b> s'ouvre. Pendant le déploiement, une pioche par tour coûte ${SF.MYTH_COST} biomasse : on tire 2 cartes, on en garde une (l'autre repart sous la pioche), puis on la déploie en payant son coût. Un mythique mort est perdu pour la partie ; il compte dans le plafond de la lane.</li>
+        <li><b>Quartiers (colonie)</b> : 3 quartiers visibles des deux camps, piochés parmi 10. Un quartier est une <b>pièce transparente de 2 à 5 cases</b> posée sur des bâtiments (Barbelés compris), sur la fusée et/ou sur des supports, y compris à cheval sur plusieurs lanes. Il ne coûte aucun point mais exige des bâtiments précis dessous (technologie, Renforcé, piège…), vérifiés à la pose ; <b>un seul quartier par tour, jamais au premier tour</b>. Tout ce qui est dessous gagne le bonus. Un bâtiment ne peut être que dans un quartier.</li>
+        <li><b>Chute</b> : quand <b>2 cases</b> de la pièce sont vides en même temps (bâtiment détruit, support tombé), le quartier tombe et repart sous la pioche des quartiers ; on en repioche un pour toujours avoir 3 choix.</li>
+      </ul>`;
   }
 
   function essaim(h) {
@@ -3261,6 +3461,7 @@ const IA = (() => {
       s -= (t.hp * 2.5 + (t.ren || 0) * 1.5 + (t.ep || 0) * 1.5 + (t.tech || 0) * 4 + (t.temp || 0) * 6 + (t.shield ? 3 : 0) + (t.trap || t.siphon ? 2 : 0)) * (1 + (3 - Math.min(3, r)) * 0.15);
     }
     for (const l of Object.values(S.supports)) s -= 5 + l * 3;
+    s -= (S.quarters || []).length * 12; // chaque quartier posé protège la colonie (extension)
     s += (S.depouilles || []).length * 6; // une Dépouille bloque une case de construction (bon pour l'essaim)
     s -= (S.hand || []).length * 2 + (S.spells || []).length * 3;
     return s;
@@ -3428,6 +3629,7 @@ const IA = (() => {
     }
     v -= E.tech(S) * 4 + E.spellsPerTurn(S) * 6;
     for (const [k, t] of Object.entries(S.tiles)) if (t.tech) prio.add(k);
+    for (const q of S.quarters || []) for (const k of q.cells) if (S.tiles[k]) prio.add(k); // extension : casser un quartier fait tomber ses bonus
     // début de partie (Oni, 11/11/2026) : la biomasse est un revenu permanent (budget de chaque tour) ; chaque Barbelé détruit
     // en rapporte 1 → on les vise en priorité pendant les 6 premières manches
     const early = (S.round || 1) <= 6;
@@ -3462,12 +3664,12 @@ const IA = (() => {
     for (const card of V.handA) {
       const key = card.name + (card.free ? "*" : "");
       if (seen.has(key)) continue; seen.add(key);
-      const sap = card.name === "Sapeur";
+      const sap = card.name === "Sapeur", bri = card.name === "Briseur de coins";
       for (const lane of E.LANES) {
-        const targets = sap ? E.laneTiles(V, lane) : [undefined];
+        const targets = sap ? E.laneTiles(V, lane) : bri ? Object.keys(V.supports).sort((a, b) => V.supports[b] - V.supports[a]).slice(0, 3) : [undefined];
         for (const target of targets.length ? targets : [undefined]) {
           for (let u = -2; u <= 2; u++) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target }, cost: card.free ? 0 : E.CREATURES[card.name].cost * 0.8 });
-          if (E.CREATURES[card.name].type === "soutien") for (let u = -2; u <= 2; u++) for (let k = 1; k <= 3; k++) if (E.canDrop(V, card.name, lane, u, k)) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target, k }, cost: E.CREATURES[card.name].cost * 0.8 });
+          if (E.CREATURES[card.name].type === "soutien" || card.name === "Ver des profondeurs") for (let u = -2; u <= 2; u++) for (let k = 1; k <= 3; k++) if (E.canDrop(V, card.name, lane, u, k)) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target, k }, cost: E.CREATURES[card.name].cost * 0.8 });
         }
       }
     }
@@ -3484,7 +3686,16 @@ const IA = (() => {
     const n = (V.reserve || 0) + V.budget * 0.6 >= left ? left : (V.reserve || 0) + share;
     return n > 0 ? { type: "invest", args: { t, s, n: Math.min(n, left) } } : null;
   }
+  // extension Titans & Quarters : préférence d'une mythique, pioche dès que l'on peut en payer une et la déployer
+  const MYTH_PREF = ["Briseur de coins", "Titan écorcheur", "Léviathan", "Phénix", "Dévoreur de technologies", "Ver des profondeurs", "Mère des spores", "Source de biomasse", "Reine de la ruche", "Oracle"];
+  function swarmMyth(V) {
+    if (!V.ext) return null;
+    if (V.mythOffer) { let i = 0; V.mythOffer.forEach((n, j) => { if (MYTH_PREF.indexOf(n) < MYTH_PREF.indexOf(V.mythOffer[i])) i = j; }); return { type: "mythPick", args: { i } }; }
+    if (E.canMythDraw(V) && V.budget + V.reserve >= E.MYTH_COST + 6 && V.handA.length < 8) return { type: "mythDraw" };
+    return null;
+  }
   function swarmDeploy(V) {
+    const my = swarmMyth(V); if (my) return my;
     const pi = planInvest(V); if (pi) return pi;
     const long = W => swarmLong(W, V.__plan);
     const F = finishSwarm(clone(V)), base = val(F, "essaim") + long(F);
@@ -3553,6 +3764,8 @@ const IA = (() => {
     const cands = [{ type: "build" }];
     // construction immédiate (v0.5.8) : chaque tuile de la main sur chaque case possible
     V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k } }); });
+    // extension : poser un quartier dès qu'une forme valable existe (quelques placements par carte)
+    if (V.ext && E.canPlaceQuarter(V)) for (const name of V.qHand) for (const cells of E.quarterPlacements(V, name).slice(0, 8)) cands.push({ type: "quartier", args: { name, cells } });
     if (cands.length === 1) return cands[0];
     return best(V, "colonie", cands, finishColony, colonyLong).move || { type: "build" };
   }
@@ -3629,7 +3842,7 @@ const IA = (() => {
         if (S.startHand) return { type: "draw" };
         return { type: "pickOne", args: { l: [1, 2, 3].find(l => S.piles[l].length > 0) } };
       }
-      case "A_deploy": return { type: "endDeploy" };
+      case "A_deploy": return S.mythOffer ? { type: "mythPick", args: { i: 0 } } : { type: "endDeploy" };
       case "A_upgrade": return { type: "toAttacks" };
       case "A_react": return { type: "reactDone" };
       case "A_attack": return { type: "actAll" };
@@ -3729,7 +3942,7 @@ if (typeof module !== "undefined") module.exports = IA;
 
   const newGid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   function newGame(solo) { // solo : camp du joueur face à l'IA (Oni, 08/11/2026)
-    MODE = "local"; S = SF.newGame(); S.gid = newGid(); S.t0 = Date.now(); if (DISC) S.decouverte = true;
+    MODE = "local"; S = SF.newGame({ ext: EXT }); S.gid = newGid(); S.t0 = Date.now(); if (DISC) S.decouverte = true;
     if (solo) { S.ia = IA.other(solo); S.view = solo; S.handoff = null; } else { S.handoff = "essaim"; S.view = null; }
     UI = resetUI(); save(); render();
   }
@@ -3746,7 +3959,7 @@ if (typeof module !== "undefined") module.exports = IA;
       if (d) { play.byIa = true; try { play(d.type, d.args); } finally { play.byIa = false; } }
     }, animOn ? 650 : 250);
   }
-  const resetUI = () => ({ tp: null, sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, help: false, recoHand: null });
+  const resetUI = () => ({ tp: null, sel: null, selCreature: null, spell: null, picks: [], support: null, blk: null, ord: [], sap: null, bri: null, qSel: null, qPick: null, qI: 0, help: false, recoHand: null });
   // fenêtres de réaction (Oni, 06/11/2026) : pas d'écran de passage pour entrer dans la réaction de la colonie (A_react)
   // ni pour en sortir ; un bandeau « RÉACTIONS ! » traverse l'écran à la place
   const REACT = ["A_famine", "A_react"];
@@ -3786,6 +3999,7 @@ if (typeof module !== "undefined") module.exports = IA;
   function render() { pvClear(); renderInner(); colorDirs($("#app")); iaTick(); }
   function renderInner() {
     document.documentElement.dataset.motion = animOn ? "on" : "off"; // animations CSS suivant le bouton « Animations »
+    document.body.classList.toggle("ext", extOn()); // extension Titans & Quarters : menu vert acide (Oni, 13/11/2026)
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
     const bar = staleBar();
     if (MODE === "stats" || MODE === "home" || !S) document.body.classList.remove("pc");
@@ -3864,7 +4078,7 @@ if (typeof module !== "undefined") module.exports = IA;
           <div class="h2-row"><button data-a="create" data-side="essaim" class="h2-btn side essaim">${sideLogo("essaim")}Jouer l'essaim</button><button data-a="create" data-side="colonie" class="h2-btn side colonie">${sideLogo("colonie")}Jouer la colonie</button></div>
           <div class="h2-row join"><input id="joincode" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CODE" aria-label="Code de la partie" value="${E(preset.toUpperCase())}"><button data-a="join" class="h2-btn">Rejoindre</button></div>
         </div>
-        <div class="h2-row small"><button data-a="disc" aria-pressed="${DISC}" class="h2-btn ghost${DISC ? " on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button>${HTTP ? `<button data-a="stats" class="h2-btn ghost">Statistiques</button>` : ""}</div>
+        <div class="h2-row small"><button data-a="ext" aria-pressed="${EXT}" class="h2-btn ghost ext-btn${EXT ? " on" : ""}" data-tip="Extension : l'essaim peut piocher des créatures mythiques une fois ses 3 arbres terminés, la colonie pose des quartiers (pièces transparentes) sur ses bâtiments.">Titans &amp; Quarters : ${EXT ? "oui" : "non"}</button><button data-a="disc" aria-pressed="${DISC}" class="h2-btn ghost${DISC ? " on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button>${HTTP ? `<button data-a="stats" class="h2-btn ghost">Statistiques</button>` : ""}</div>
       </nav>
       <div class="h2-music">${musicCtl("h2-ic")}</div>
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
@@ -4031,12 +4245,15 @@ if (typeof module !== "undefined") module.exports = IA;
       body = `<p class="hint">Palier ${SF.tier(S) + 1} : <b>${n}</b>/${total} cartes. Piochez-les une à une, dans la pile de votre choix.</p><div class="pick">${rows}</div>`;
     } else if (ph === "A_deploy" && UI.sap) {
       body = `<p class="hint">Sapeur : touchez le bâtiment à détruire, lane ${SF.LANE_NAME[UI.sap.lane]}.</p><div class="choices"><button data-a="sapCancel">Annuler</button></div>`;
+    } else if (ph === "A_deploy" && UI.bri) {
+      body = `<p class="hint">Briseur de coins : touchez le support à détruire (pour toute la partie).</p><div class="choices"><button data-a="briCancel">Annuler</button></div>`;
     } else if (ph === "A_deploy") {
-      const para = UI.sel && SF.CREATURES[cardOf(UI.sel).name] && SF.CREATURES[cardOf(UI.sel).name].type === "soutien";
+      const para = UI.sel && SF.CREATURES[cardOf(UI.sel).name] && (SF.CREATURES[cardOf(UI.sel).name].type === "soutien" || cardOf(UI.sel).name === "Ver des profondeurs");
       body = UI.sel ? (sh ? `<p class="hint"><b>${E(cardOf(UI.sel).name)}</b> → cliquez ${para ? "une case surlignée (parachutage : n'importe quelle case libre)" : "une entrée surlignée"}.</p>` : `<p class="hint">Carte choisie : <b>${E(cardOf(UI.sel).name)}</b>. Cliquez ${para ? "une case surlignée : un soutien se parachute sur n'importe quelle case libre" : "une case d'entrée surlignée"}.</p>`) : (sh ? `<p class="hint">Choisissez une carte de votre main.</p>` : "");
       // Déploiement (aggro C2) : redéployer une aggro à l'entrée de n'importe quelle lane, une fois par tour (Oni, 08/11/2026)
       if (canTp()) body += UI.tp ? `<p class="hint">Redéploiement : touchez une entrée surlignée.</p>` : `<p class="hint">Déploiement : touchez une aggro en jeu pour la redéployer à l'entrée d'une lane (une fois par tour).</p>`;
-      acts = `<button data-a="endDeploy" class="primary">Passer aux attaques</button>`;
+      body += mythHtml();
+      acts = `<button data-a="endDeploy" class="primary"${S.mythOffer ? " disabled" : ""}>Passer aux attaques</button>`;
     } else if (ph === "A_upgrade") {
       body = sh ? `<p class="hint">Réserve <b>${S.reserve}</b> : investissez-la dans un arbre, ou gardez-la.</p>` : `<p class="hint">Réserve disponible : <b>${S.reserve}</b>. Investissez-la dans un nœud des arbres (panneau Essaim) ou gardez-la pour plus tard.</p>`;
       acts = `<button data-a="toAttacks" class="primary">Passer aux attaques</button>`;
@@ -4066,6 +4283,11 @@ if (typeof module !== "undefined") module.exports = IA;
       const max = SF.handSize(S), CAT_HINT = { renfort: "murs, Épines, Renforcé (camouflés)", actif: "technologies, travailleurs, Avant-postes", piege: "Mines et Siphons" };
       body = `<p class="hint">Main : <b>${S.hand.length}</b>/${max}. Encore ${max - S.hand.length} tuile${max - S.hand.length > 1 ? "s" : ""} à piocher, une à une.</p><div class="pick col">` +
         SF.TILE_CATS.map(c => { const n = SF.tilesLeft(S, c); return `<div class="pick-row${n ? "" : " off"}"><span class="pick-nm"><b>${E(SF.CAT_NAME[c])}</b><small>${E(CAT_HINT[c])} · ${n} tuile${n > 1 ? "s" : ""}</small></span><span class="step"><button data-a="tdraw" data-v="${c}"${n ? "" : " disabled"}>Piocher</button></span></div>`; }).join("") + `</div>`;
+    } else if (ph === "D_main" && S.ext && UI.qSel && !S.relocate) {
+      const pl = SF.quarterPlacements(S, UI.qSel), pk = UI.qPick;
+      body = `<p class="hint"><b>${E(UI.qSel)}</b> : ${E(SF.QUARTERS[UI.qSel].text)}<br>${pk ? `Placement ${UI.qI + 1} sur ${pk.length}.` : `${pl.length} placement${pl.length > 1 ? "s" : ""} possible${pl.length > 1 ? "s" : ""} : touchez une case surlignée.`}</p>`
+        + (pk ? `<div class="choices"><button data-a="qGo" class="primary">Poser ici</button>${pk.length > 1 ? `<button data-a="qNext">Autre placement (${UI.qI + 1}/${pk.length})</button>` : ""}<button data-a="qCancel">Autre case</button></div>` : `<div class="choices"><button data-a="qSel" data-n="${E(UI.qSel)}">Annuler</button></div>`);
+      acts = `<button data-a="build" class="primary">Fin de la construction</button>`;
     } else if (ph === "D_main") {
       const left = SF.pointsLeft(S), pts = `<p class="hint">Points : <b>${left}</b> restant${left > 1 ? "s" : ""} (le reste ira à la fusée).</p>`;
       const sel = UI.sel !== null ? S.hand[UI.sel] : null, cost = sel ? SF.TILES[sel].d : 0, n = sel ? SF.buildTargets(S, UI.sel).length : 0;
@@ -4077,7 +4299,7 @@ if (typeof module !== "undefined") module.exports = IA;
     } else if (ph === "D_fire") {
       if (UI.support) {
         const c = SF.supportTargets(S, UI.support);
-        body = `<p class="hint">Tourelle ${["", "I", "II"][S.supports[UI.support]]} (${SF.turretDmg(S, S.supports[UI.support])} dégâts) : ${sh ? "touchez une cible" : "touchez une créature surlignée sur le plateau, ou choisissez-la ici"}.</p><div class="choices">` +
+        body = `<p class="hint">Tourelle ${["", "I", "II"][S.supports[UI.support]]} (${SF.turretDmgAt(S, UI.support)} dégâts) : ${sh ? "touchez une cible" : "touchez une créature surlignée sur le plateau, ou choisissez-la ici"}.</p><div class="choices">` +
           c.map(o => `<button data-a="fireAt" data-id="${o.id}">${E(o.name)} · ${o.hp} PV · ${posTxt(o)}</button>`).join("")
           + SF.depTargets(S, UI.support).map(k => `<button data-a="fireDep" data-k="${k}">${icon("depouille")} Dépouille · ${E(tileLabel(k))}</button>`).join("") + `</div>`;
       } else {
@@ -4177,6 +4399,19 @@ if (typeof module !== "undefined") module.exports = IA;
     const relHot = S.phase === "D_main" && S.view === "colonie" && S.relocate ? SF.relocateTargets(S) : null;
     const placeHot = S.phase === "D_place" && S.view === "colonie" ? SF.placeTargets(S) : relHot || buildHot;
     const TT = tileTargets();
+    // ---- quartiers (extension) : pièces posées, cases candidates et aperçu du placement choisi
+    const QC = S.ext ? SF.qCovers(S) : {};
+    const qSelOn = S.ext && S.phase === "D_main" && S.view === "colonie" && UI.qSel && !S.relocate && SF.canPlaceQuarter(S);
+    const QCAND = new Set(qSelOn ? SF.quarterPlacements(S, UI.qSel).flat() : []);
+    const QPV = new Set(qSelOn && UI.qPick && UI.qPick[UI.qI] ? UI.qPick[UI.qI] : []);
+    const qc = k => (QPV.has(k) ? " qpv" : QCAND.has(k) ? " qcand" : "");
+    const qa = k => (QCAND.has(k) ? ` data-a="qCell" data-k="${k}"` : "");
+    const qov = k => {
+      const q = QC[k]; if (!q) return "";
+      const [qx, qy] = SF.parse(k), same = (dx, dy) => QC[SF.key(qx + dx, qy + dy)] === q;
+      const bw = [same(0, 1) ? 0 : 3, same(1, 0) ? 0 : 3, same(0, -1) ? 0 : 3, same(-1, 0) ? 0 : 3].map(n => n + "px").join(" ");
+      return `<i class="qov" style="--qc:${qColor(q.name)};border-width:${bw}"></i>${q.cells[0] === k ? `<span class="qlab" tabindex="0" style="--qc:${qColor(q.name)}" data-tip="${E(qTip(q))}">${icon("quartier")}</span>` : ""}`;
+    };
     // créature choisie en phase d'attaque : cases où elle peut aller, cibles qu'elle peut attaquer
     const mover = S.phase === "A_attack" && S.view === "essaim" ? S.creatures.find(c => c.id === UI.selCreature && !c.acted) : null;
     const R = mover ? SF.reachable(S, mover) : {}, T = mover ? SF.strikeTargets(S, mover) : [];
@@ -4202,15 +4437,16 @@ if (typeof module !== "undefined") module.exports = IA;
         continue;
       }
       if (x === 0 && y === 0) {
-        html += `<div class="cell core ${imCls("Fusée")}${T.includes("fusee") ? " atk" : ""}" data-tip="Fusée : ${S.floors} étage${S.floors > 1 ? "s" : ""} sur 12 ; ${S.workersBase} travailleur${S.workersBase > 1 ? "s" : ""} de base. Si l'essaim tue tous les travailleurs, il gagne ; si la colonie achève les 12 étages, elle décolle." data-xy="${k}"${T.includes("fusee") ? ` data-a="strike" data-k="fusee"` : ""}>${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
+        html += `<div class="cell core ${imCls("Fusée")}${T.includes("fusee") ? " atk" : ""}${qc(k)}" data-tip="Fusée : ${S.floors} étage${S.floors > 1 ? "s" : ""} sur 12 ; ${S.workersBase} travailleur${S.workersBase > 1 ? "s" : ""} de base. Si l'essaim tue tous les travailleurs, il gagne ; si la colonie achève les 12 étages, elle décolle." data-xy="${k}"${qa(k)}${T.includes("fusee") ? ` data-a="strike" data-k="fusee"` : ""}>${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small>${qov(k)}</div>`;
         continue;
       }
       if (SF.isSupportCell(x, y)) {
         const lvl = S.supports[k];
         const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && SF.shotsLeft(S, k) > 0 && (SF.supportTargets(S, k).length || SF.depTargets(S, k).length);
         const fired = lvl && lvl < 3 && SF.shotsLeft(S, k) <= 0;
-        html += lvl ? `<div class="cell sup ${imCls("support " + lvl)}${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
-            <span class="lv" tabindex="0" data-tip="Support de niveau ${["", "I", "II", "III"][lvl]}${lvl < 3 ? " : tourelle, tire sur une créature dans les 8 cases autour" : " : donne des travailleurs, ne tire pas"}. Il tombe (+1 biomasse pour l'essaim) si ses bâtiments voisins sont détruits.">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? ic("tourelle", `<b>${SF.turretDmg(S, lvl)}</b>`, `Tourelle de niveau ${["", "I", "II"][lvl]} : ${SF.turretDmg(S, lvl)} dégât${SF.turretDmg(S, lvl) > 1 ? "s" : ""} par tir (+1 par palier de la fusée pour le niveau I), 1 tir par tour.`, true) : ic("travailleur", `<b>+${SF.SUP3_WORKERS}</b>`, `Support de niveau III : +${SF.SUP3_WORKERS} travailleurs tant qu'il tient.`, true)}</div>`
+        const briHot = S.phase === "A_deploy" && S.view === "essaim" && UI.bri && lvl; // Briseur de coins : choisir le support à détruire
+        html += lvl ? `<div class="cell sup ${imCls("support " + lvl)}${ready || briHot ? " hot" : ""}${qc(k)}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${briHot ? `data-a="briTarget" data-k="${k}"` : ready ? `data-a="support" data-k="${k}"` : qa(k)}>
+            <span class="lv" tabindex="0" data-tip="Support de niveau ${["", "I", "II", "III"][lvl]}${lvl < 3 ? " : tourelle, tire sur une créature dans les 8 cases autour" : " : donne des travailleurs, ne tire pas"}. Il tombe (+1 biomasse pour l'essaim) si ses bâtiments voisins sont détruits.">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? ic("tourelle", `<b>${SF.turretDmgAt(S, k)}</b>`, `Tourelle de niveau ${["", "I", "II"][lvl]} : ${SF.turretDmgAt(S, k)} dégât${SF.turretDmgAt(S, k) > 1 ? "s" : ""} par tir (+1 par palier de la fusée pour le niveau I), 1 tir par tour.`, true) : ic("travailleur", `<b>+${SF.SUP3_WORKERS}</b>`, `Support de niveau III : +${SF.SUP3_WORKERS} travailleurs tant qu'il tient.`, true)}${qov(k)}</div>`
           : `<div class="cell corner"><span class="lv" tabindex="0" data-tip="Coin de niveau ${["", "I", "II", "III"][r]} : un support y apparaît quand ses deux bâtiments intérieurs sont construits.">${["", "I", "II", "III"][r]}</span></div>`;
         continue;
       }
@@ -4223,9 +4459,9 @@ if (typeof module !== "undefined") module.exports = IA;
       if (t) {
         if (hiddenTrap(t)) inner = `<div class="tile hidden"><b>?</b><small>camouflée</small>${newBadge(t.new && S.view === "essaim")}</div>`;
         else {
-          const ep = SF.epinesOf(S, k, S.view === "essaim");
+          const ep = SF.epinesOf(S, k, S.view === "essaim"), rn = SF.tileRen(S, k);
           inner = `<div class="tile ${imCls(t.name)}${t.camo && !t.revealed ? " trap" : ""}"${t.camo && !t.revealed ? ` data-tip="Camouflée : l'essaim ne la voit pas (révélée à la première attaque)"` : ""}><span class="tn">${E(short(t.name))}</span>${newBadge(t.new && S.view === "essaim")}<b class="hp" tabindex="0" data-tip="Points de vie : ${t.hp} sur ${t.max}">${t.hp}<small>/${t.max}</small></b>
-            <span class="tb">${ep ? ic("epines", ep, `Épines ${ep} : une créature qui attaque ce bâtiment subit ${ep} dégât${ep > 1 ? "s" : ""} après son attaque (+1 par Avant-poste dans les 8 cases autour).`) : ""}${t.ren ? ic("renforce", t.ren, `Renforcé ${t.ren} : chaque attaque contre ce bâtiment fait ${t.ren} dégât${t.ren > 1 ? "s" : ""} de moins (sans minimum).`) : ""}${t.tech ? ic("tech", t.tech, `+${t.tech} technologie${t.tech > 1 ? "s" : ""} tant que le bâtiment tient (technologies = sortilèges par tour).`) : ""}${t.temp ? ic("temp", "", "+1 travailleur tant que le bâtiment tient.") : ""}${t.trap ? ic("piege", t.trap, `Mine ${t.trap} : ${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui la révèle en l'attaquant, avant qu'elle frappe.`) : ""}${t.siphon ? ic("biomasse", t.siphon, `Siphon ${t.siphon} : révélé par une attaque, l'essaim perd ${t.siphon} biomasse (+${t.siphon} par tranche de 10 qu'il possède, jamais sous ${SF.MIN_BIOMASS}).`) : ""}${t.shield ? `<span class="shield-tk" tabindex="0" data-tip="Bouclier : la prochaine attaque ne lui fait rien (la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.">${icon("protection")}</span>` : ""}</span></div>`;
+            <span class="tb">${ep ? ic("epines", ep, `Épines ${ep} : une créature qui attaque ce bâtiment subit ${ep} dégât${ep > 1 ? "s" : ""} après son attaque (+1 par Avant-poste dans les 8 cases autour).`) : ""}${rn ? ic("renforce", rn, `Renforcé ${rn} : chaque attaque contre ce bâtiment fait ${rn} dégât${rn > 1 ? "s" : ""} de moins (sans minimum).`) : ""}${t.tech ? ic("tech", t.tech, `+${t.tech} technologie${t.tech > 1 ? "s" : ""} tant que le bâtiment tient (technologies = sortilèges par tour).`) : ""}${t.temp ? ic("temp", "", "+1 travailleur tant que le bâtiment tient.") : ""}${t.trap ? ic("piege", t.trap, `Mine ${t.trap} : ${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui la révèle en l'attaquant, avant qu'elle frappe.`) : ""}${t.siphon ? ic("biomasse", t.siphon, `Siphon ${t.siphon} : révélé par une attaque, l'essaim perd ${t.siphon} biomasse (+${t.siphon} par tranche de 10 qu'il possède, jamais sous ${SF.MIN_BIOMASS}).`) : ""}${t.shield ? `<span class="shield-tk" tabindex="0" data-tip="Bouclier : la prochaine attaque ne lui fait rien (la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.">${icon("protection")}</span>` : ""}</span></div>`;
         }
       }
       const stased = S.stase.includes(k);
@@ -4236,7 +4472,7 @@ if (typeof module !== "undefined") module.exports = IA;
       const [pu, pk] = SF.toLocal(lane, x, y);
       const drop = !t && S.phase === "A_deploy" && S.view === "essaim" && UI.sel && !UI.sap && SF.canDeploy(S, cardOf(UI.sel), lane) && SF.canDrop(S, cardOf(UI.sel).name, lane, pu, pk);
       const atk = !target && T.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target || drop || tt || depHot ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${depHot ? `data-a="fireDep" data-k="${k}"` : tt ? tt : target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${dep ? `<span class="dep" data-tip="Dépouille : aucune construction ici tant qu'une tourelle à portée n'a pas tiré dessus (ou Nuke, Barrage, Onde de choc)">${icon("depouille")}</span>` : ""}${rng(k)}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target || drop || tt || depHot || QCAND.has(k) ? " hot" : ""}${qc(k)}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${QCAND.has(k) ? qa(k) : depHot ? `data-a="fireDep" data-k="${k}"` : tt ? tt : target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${qov(k)}${dep ? `<span class="dep" data-tip="Dépouille : aucune construction ici tant qu'une tourelle à portée n'a pas tiré dessus (ou Nuke, Barrage, Onde de choc)">${icon("depouille")}</span>` : ""}${rng(k)}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
@@ -4376,7 +4612,7 @@ if (typeof module !== "undefined") module.exports = IA;
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     const giv = givenAuras(c), rec = receivedAuras(c);
     const grid = caseGrid(c);
-    return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · niveau ${["", "I", "II", "III"][b.lvl]}</span></div>
+    return `<section class="detail ${b.type}"><div class="d-head">${icon(b.type)}<b>${E(c.name)}</b><span>${b.type} · ${b.myth ? "mythique" : "niveau " + lvlTxt(b)}</span></div>
       <p>${icon("atq")} ATQ ${SF.effAtq(S, c)}${SF.attacks(c) ? "" : " (n'attaque pas : avance avec l'essaim)"} · ${icon("pv")} PV ${c.hp + SF.bonusHp(S, c)}/${SF.maxHp(S, c.name)} · ${icon("mobilite")} vitesse ${v}${v !== vb ? ` (${vWhy.join(" ")})` : ""} · ${posTxt(c)}</p>
       ${b.cap ? `<p class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></p>` : ""}
       ${giv.length ? `<p class="aulist"><span class="lab">Donne à sa case :</span>${giv.map(x => auraChip(x, true)).join("")}</p>` : ""}
@@ -4402,6 +4638,42 @@ if (typeof module !== "undefined") module.exports = IA;
     ? `<div class="hand">${S.hand.map((t, i) => `<button data-a="tile" data-i="${i}" class="tcard${UI.sel === i ? " sel" : ""}"${S.phase === "D_main" ? "" : " disabled"}>${tileCard(t)}</button>`).join("")}</div>`
     : `<p class="hidden-hand">${S.hand.length} tuiles en main (cachées)</p>`;
   const spellsHtml = mine => mine ? (S.spells.length ? `<div class="spells">${S.spells.map(s => spellCard(s)).join("")}</div>` : `<span class="muted">aucun</span>`) : `<span class="muted">${S.spells.length} en main (cachés)</span>`;
+  // ================================================================ EXTENSION « Titans & Quarters » (Oni, 13/11/2026)
+  const QCOL = ["#4fd1c5", "#f6ad55", "#b794f4", "#68d391", "#fc8181", "#63b3ed", "#f6e05e", "#f687b3", "#9ae6b4", "#a0aec0"]; // une teinte par quartier
+  const qColor = name => QCOL[Math.max(0, Object.keys(SF.QUARTERS).indexOf(name)) % QCOL.length];
+  const lvlTxt = b => (b.myth ? "mythique" : ["", "I", "II", "III"][b.lvl]);
+  function qTip(q) {
+    const Q = SF.QUARTERS[q.name], empty = SF.quarterEmpty(S, q).length;
+    return `Quartier « ${q.name} » : ${Q.text}\nCases vides : ${empty}/2 (à 2 cases vides en même temps, il tombe et repart sous la pioche).${Q.bonus.shield ? `\nBouclier partagé : ${q.sh ? "prêt" : "utilisé ce tour"}.` : ""}`;
+  }
+  function qShape(name) { // mini-grille de la forme, y vers le haut
+    const sh = SF.QSHAPES[SF.QUARTERS[name].shape], w = Math.max(...sh.map(c => c[0])) + 1, h = Math.max(...sh.map(c => c[1])) + 1;
+    let g = "";
+    for (let y = h - 1; y >= 0; y--) for (let x = 0; x < w; x++) g += `<i class="${sh.some(c => c[0] === x && c[1] === y) ? "on" : ""}"></i>`;
+    return `<span class="qgrid" style="--w:${w};--c:${qColor(name)}">${g}</span>`;
+  }
+  // quartiers de la colonie : 3 cartes visibles des deux camps, boutons de pose pour la colonie, quartiers posés et leur état
+  function quartersHtml(mine) {
+    if (!S.ext) return "";
+    const can = mine && SF.canPlaceQuarter(S);
+    const cards = S.qHand.map(name => {
+      const Q = SF.QUARTERS[name], n = can ? SF.quarterPlacements(S, name).length : 0, sel = UI.qSel === name;
+      const why = S.round <= 1 ? "pas au premier tour" : S.qPlaced ? "déjà posé ce tour" : S.phase !== "D_main" ? "pendant la construction" : !n ? "conditions non remplies" : "";
+      return `<div class="qcard${sel ? " sel" : ""}" style="--qc:${qColor(name)}">${qShape(name)}
+        <span class="qbody"><b>${E(name)}</b><small>Il faut : ${Q.crit.map(c => E(SF.QCRIT_TXT[c])).join(" + ")}</small><small class="qbonus">${E(Q.text)}</small></span>
+        ${mine ? `<button data-a="qSel" data-n="${E(name)}"${n || sel ? "" : " disabled"} class="${sel ? "primary" : ""}" title="${E(why)}">${sel ? "Annuler" : n ? `Poser · ${n}` : E(why || "—")}</button>` : ""}</div>`;
+    }).join("");
+    const placed = S.quarters.map(q => { const e = SF.quarterEmpty(S, q).length; return `<span class="qchip${e ? " warn" : ""}" style="--qc:${qColor(q.name)}" tabindex="0" data-tip="${E(qTip(q))}">${icon("quartier")}${E(q.name)} <b>${e}/2</b></span>`; }).join("");
+    return `<h4 data-fx="quartiers">Quartiers <span class="small">${S.qPile.length} sous la pioche</span></h4><div class="qhand">${cards}</div>${placed ? `<div class="qplaced">${placed}</div>` : ""}`;
+  }
+  // pioche mythique de l'essaim (déploiement)
+  function mythHtml() {
+    if (!S.ext || S.view !== "essaim") return "";
+    if (S.mythOffer) return `<div class="myth"><p class="hint"><b>Pioche mythique</b> : gardez une carte, l'autre repart sous la pioche.</p><div class="choices">${S.mythOffer.map((n, i) => { const b = SF.CREATURES[n]; return `<button data-a="mythPick" data-i="${i}" class="primary" data-tip="${E(b.capName + " : " + b.capText)}">${E(n)} · ${b.atq}/${b.pv} · coût ${b.cost}</button>`; }).join("")}</div></div>`;
+    if (!SF.mythUnlocked(S)) return `<p class="hint small">Pioche mythique : terminez les 3 arbres (rang 2) pour la débloquer.</p>`;
+    const ok = SF.canMythDraw(S);
+    return `<div class="myth"><button data-a="mythDraw"${ok ? "" : " disabled"} class="${ok ? "primary" : ""}" data-tip="Tirez 2 cartes mythiques, gardez-en une (l'autre repart sous la pioche). Une seule pioche par tour ; il faudra payer le coût de la carte pour la déployer.">Pioche mythique · ${SF.MYTH_COST} biomasse</button><small> ${S.mythPile.length} carte${S.mythPile.length > 1 ? "s" : ""} dans la pioche${S.mythDrawn ? " · déjà piochée ce tour" : ""}</small></div>`;
+  }
   function colonyPanel() {
     const mine = S.view === "colonie";
     const pts = SF.totalPoints(S), used = SF.allocated(S);
@@ -4411,7 +4683,7 @@ if (typeof module !== "undefined") module.exports = IA;
       <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
       <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 2 points (étages 1 à 3), puis 4, 7 et 10 après les paliers 3 · 6 · 9.</p>
       <h4 data-fx="ateliers">Construction ${mine && S.phase === "D_main" ? `<span class="small">${SF.pointsLeft(S)} point(s) restant(s)</span>` : ""}</h4>${ateliersHtml(mine, false)}
-      <h4 data-fx="tilehand">Main de tuiles</h4>${tileHandHtml(mine)}<h4>Sortilèges</h4>${spellsHtml(mine)}`;
+      <h4 data-fx="tilehand">Main de tuiles</h4>${tileHandHtml(mine)}${quartersHtml(mine)}<h4>Sortilèges</h4>${spellsHtml(mine)}`;
   }
   const acquiredUps = ty => { // améliorations acquises pour ce type
     const u = S.upgrades[ty], out = [];
@@ -4433,12 +4705,12 @@ if (typeof module !== "undefined") module.exports = IA;
           + ua.map(x => `<span class="cap" tabindex="0" data-tip="${E(`${x.name} (${x.from}) : ${x.fx}${x.self ? ", lui compris" : ""} pour les autres créatures de sa case`)}">${icon(x.icon)}${E(x.labs.join(" "))}</span>`).join("")
           + acquiredUps(b.type).filter(([n]) => !uaFrom.has(n)).map(([n, txt]) => `<span class="cap up" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon(n === "Mobilité" ? "mobilite" : "palier")}${E(n === "Mobilité" ? "+1 VIT" : n)}</span>`).join("");
         return `<button data-a="card" data-uid="${c.uid}" class="ccard sh ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
-          <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
+          <b>${E(c.name)}</b><small>${b.type} · ${b.myth ? "mythique" : "niveau " + b.lvl}${c.free ? " · gratuit" : ""}</small>
           <span class="stats"><span class="st atq">${icon("atq")}${b.type === "soutien" ? 0 : atq}</span><span class="st pv">${icon("pv")}${pv}</span><span class="st vit" title="Vitesse de base">${icon("mobilite")}${SF.baseSpeed(c)}</span></span>${chips ? `<span class="caps">${chips}</span>` : ""}</button>`;
       }
       const ups = acquiredUps(b.type).map(([n, txt]) => `<span class="upline">${icon("palier")}<span><b>${E(n)}</b> : ${E(txt)}</span></span>`).join("");
       return `<button data-a="card" data-uid="${c.uid}" class="ccard ${b.type}${c.free ? " free" : ""}${UI.sel === c.uid ? " sel" : ""}"${S.phase === "A_deploy" ? "" : " disabled"}><span class="cost">${c.free ? "0" : b.cost}</span>${imCls(c.name) ? `<span class="thumb ${imCls(c.name)}"></span>` : ""}
-        <b>${E(c.name)}</b><small>${b.type} · niveau ${b.lvl}${c.free ? " · gratuit" : ""}</small>
+        <b>${E(c.name)}</b><small>${b.type} · ${b.myth ? "mythique" : "niveau " + b.lvl}${c.free ? " · gratuit" : ""}</small>
         <span class="stats">${b.type === "soutien" ? `${icon("atq")} 0 ATQ <em>(n'attaque pas)</em>` : `${icon("atq")} ${atq} ATQ${atq !== b.atq ? ` <em>(base ${b.atq})</em>` : ""}`} · ${icon("pv")} ${pv} PV${pv !== b.pv ? ` <em>(base ${b.pv})</em>` : ""} · ${icon("mobilite")} vitesse ${SF.baseSpeed(c)}</span>
         ${b.cap ? `<span class="capline">${icon(capIcon(b.cap))}<span><b>${E(b.capName)}</b> : ${E(b.capText)}</span></span>` : `<span class="capline none">Aucune capacité propre.</span>`}${ups}</button>`;
     }).join("")}</div>`;
@@ -4488,6 +4760,7 @@ if (typeof module !== "undefined") module.exports = IA;
       <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
+      ${S.ext ? `<div class="kv"><span>Pioche mythique</span><b>${S.mythPile.length} carte${S.mythPile.length > 1 ? "s" : ""}${SF.mythUnlocked(S) ? "" : " (3 arbres à finir)"}</b></div>` : ""}
       <h4>Main</h4>${swarmHandHtml(mine)}<h4>Arbres d'amélioration</h4>${treesHtml(mine)}`;
   }
   // ================================================================ mise en page PC (Oni, 06/11/2026)
@@ -4569,6 +4842,7 @@ if (typeof module !== "undefined") module.exports = IA;
       <div class="built-row">${SF.LANES.map(l => { const d = (S.built && S.built[l]) || 0; return `<span class="bchip lane-${l}${d >= S.chPerLane || SF.firstTurnCap(S) ? " full" : ""}" title="${SF.firstTurnCap(S) ? "Premier tour : un seul bâtiment au total" : "Bâtiments construits ce tour en lane " + SF.LANE_NAME[l]}"><b>${l}</b>${d}/${S.chPerLane}</span>`; }).join("")}</div>
       <div class="po-scroll">
         <h4 data-fx="tilehand">Main de tuiles <span class="small">${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}</span></h4>${tileHandHtml(true)}
+        ${quartersHtml(true)}
         <h4>Sortilèges</h4>${spellsHtml(true)}
         ${logPanel()}</div>
       <div class="po-bottom">${pcSteps("colonie")}${top}</div></div></aside>`;
@@ -4586,7 +4860,7 @@ if (typeof module !== "undefined") module.exports = IA;
         <span tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b> tuiles</span>
       </div>
       ${pcRocket(true)}
-      <h4 data-fx="ateliers">Construits ce tour</h4><div class="pc-ateliers sum">${at}</div>${spellDiscardHtml()}</div></aside>`;
+      <h4 data-fx="ateliers">Construits ce tour</h4><div class="pc-ateliers sum">${at}</div>${quartersHtml(false)}${spellDiscardHtml()}</div></aside>`;
   }
   // résumé de l'essaim vu par la colonie (colonne de droite) : améliorations en grosses icônes
   function pcSwarmSum() {
@@ -4778,6 +5052,10 @@ if (typeof module !== "undefined") module.exports = IA;
   }
   // ---------------------------------------------------------------- mode découverte (conseils au fil de la partie)
   const DISC_KEY = "swarm-steel-decouverte", SEEN_KEY = "swarm-steel-vus";
+  const EXT_KEY = "swarm-steel-ext"; // extension Titans & Quarters, activée sur l'accueil (Oni, 13/11/2026)
+  let EXT = (() => { try { return localStorage.getItem(EXT_KEY) === "1"; } catch (e) { return false; } })();
+  const saveExt = () => { try { localStorage.setItem(EXT_KEY, EXT ? "1" : "0"); } catch (e) { /* rien */ } };
+  const extOn = () => (S && MODE !== "home" && MODE !== "stats" ? !!S.ext : EXT);
   let DISC = (() => { try { return localStorage.getItem(DISC_KEY) === "1"; } catch (e) { return false; } })();
   let SEEN = (() => { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) { return new Set(); } })();
   function saveDisc() { try { localStorage.setItem(DISC_KEY, DISC ? "1" : "0"); localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN])); } catch (e) { /* rien */ } }
@@ -4809,6 +5087,7 @@ if (typeof module !== "undefined") module.exports = IA;
     if (a === "help") { UI.help = !UI.help; render(); return; }
     if (a === "changes") { UI.changes = !UI.changes; render(); return; }
     if (a === "helpTab") { UI.helpTab = d.v; render(); return; }
+    if (a === "ext") { EXT = !EXT; saveExt(); render(); return; }
     if (a === "disc") { DISC = !DISC; if (DISC && S && MODE === "local") { S.decouverte = true; save(); } saveDisc(); render(); return; }
     if (a === "discReset") { SEEN = new Set(); saveDisc(); render(); return; }
     if (a === "tipOk") { SEEN.add(d.id); saveDisc(); render(); return; }
@@ -4858,7 +5137,7 @@ if (typeof module !== "undefined") module.exports = IA;
       }
       case "popClose": UI.pop = null; break;
       case "reinc": return play("reinc", { i: Number(d.i) });
-      case "tile": UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
+      case "tile": UI.qSel = null; UI.qPick = null; UI.sel = UI.sel === Number(d.i) ? null : Number(d.i); break;
       case "spell": UI.spell = Number(d.i); UI.picks = []; UI.recoHand = null; break;
       case "spellCancel": UI.spell = null; UI.picks = []; UI.recoHand = null; break;
       case "pick": if (UI.picks.length < (S.spells[UI.spell] === "Double bouclier" ? 2 : 3) && !(S.spells[UI.spell] === "Double bouclier" && UI.picks.includes(d.k))) UI.picks.push(d.k); break;
@@ -4888,10 +5167,20 @@ if (typeof module !== "undefined") module.exports = IA;
         // Sapeur : choisir d'abord le bâtiment de la lane à détruire ; k : case de parachutage d'un soutien
         const k = d.k !== undefined ? Number(d.k) : undefined;
         if (cardOf(UI.sel).name === "Sapeur" && SF.laneTiles(S, d.l).length) { UI.sap = { uid: UI.sel, lane: d.l, u: Number(d.u), k }; break; }
+        if (cardOf(UI.sel).name === "Briseur de coins" && Object.keys(S.supports).length) { UI.bri = { uid: UI.sel, lane: d.l, u: Number(d.u), k }; break; }
         return play("deploy", { uid: UI.sel, lane: d.l, u: Number(d.u), k }, () => { UI.sel = null; });
       }
       case "sapTarget": { const sp = UI.sap; UI.sap = null; if (sp) return play("deploy", { uid: sp.uid, lane: sp.lane, u: sp.u, k: sp.k, target: d.k }, () => { UI.sel = null; }); break; }
       case "sapCancel": UI.sap = null; break;
+      case "briTarget": { const b = UI.bri; UI.bri = null; if (b) return play("deploy", { uid: b.uid, lane: b.lane, u: b.u, k: b.k, target: d.k }, () => { UI.sel = null; }); break; }
+      case "briCancel": UI.bri = null; break;
+      case "mythDraw": return play("mythDraw");
+      case "mythPick": return play("mythPick", { i: Number(d.i) });
+      case "qSel": UI.qSel = UI.qSel === d.n ? null : d.n; UI.qPick = null; UI.qI = 0; UI.sel = null; break;
+      case "qCell": { const pl = SF.quarterPlacements(S, UI.qSel).filter(p => p.includes(d.k)); UI.qPick = pl.length ? pl : null; UI.qI = 0; break; }
+      case "qNext": if (UI.qPick) UI.qI = (UI.qI + 1) % UI.qPick.length; break;
+      case "qCancel": UI.qPick = null; UI.qI = 0; break;
+      case "qGo": { const name = UI.qSel, cells = UI.qPick && UI.qPick[UI.qI]; UI.qSel = null; UI.qPick = null; UI.qI = 0; if (cells) return play("quartier", { name, cells }); break; }
       case "frenzy": return play("frenzy", { src: Number(d.id), target: Number(d.v) });
       case "endDeploy": UI.sel = null; return play("endDeploy");
       case "invest": return play("invest", { t: d.t, s: d.s, n: Number(d.n) });
@@ -5358,7 +5647,7 @@ if (typeof module !== "undefined") module.exports = IA;
   }
   function createOnline(side) {
     withBusy(async () => {
-      const j = await api("create", { side, test: TEST, disc: DISC });
+      const j = await api("create", { side, test: TEST, disc: DISC, ext: EXT });
       setNet({ code: j.code, token: j.token, side: j.side }); MODE = "online"; UI = resetUI(); receive(j);
       history.replaceState(null, "", location.pathname);
     });

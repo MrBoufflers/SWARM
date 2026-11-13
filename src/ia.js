@@ -57,6 +57,7 @@ const IA = (() => {
       s -= (t.hp * 2.5 + (t.ren || 0) * 1.5 + (t.ep || 0) * 1.5 + (t.tech || 0) * 4 + (t.temp || 0) * 6 + (t.shield ? 3 : 0) + (t.trap || t.siphon ? 2 : 0)) * (1 + (3 - Math.min(3, r)) * 0.15);
     }
     for (const l of Object.values(S.supports)) s -= 5 + l * 3;
+    s -= (S.quarters || []).length * 12; // chaque quartier posé protège la colonie (extension)
     s += (S.depouilles || []).length * 6; // une Dépouille bloque une case de construction (bon pour l'essaim)
     s -= (S.hand || []).length * 2 + (S.spells || []).length * 3;
     return s;
@@ -224,6 +225,7 @@ const IA = (() => {
     }
     v -= E.tech(S) * 4 + E.spellsPerTurn(S) * 6;
     for (const [k, t] of Object.entries(S.tiles)) if (t.tech) prio.add(k);
+    for (const q of S.quarters || []) for (const k of q.cells) if (S.tiles[k]) prio.add(k); // extension : casser un quartier fait tomber ses bonus
     // début de partie (Oni, 11/11/2026) : la biomasse est un revenu permanent (budget de chaque tour) ; chaque Barbelé détruit
     // en rapporte 1 → on les vise en priorité pendant les 6 premières manches
     const early = (S.round || 1) <= 6;
@@ -258,12 +260,12 @@ const IA = (() => {
     for (const card of V.handA) {
       const key = card.name + (card.free ? "*" : "");
       if (seen.has(key)) continue; seen.add(key);
-      const sap = card.name === "Sapeur";
+      const sap = card.name === "Sapeur", bri = card.name === "Briseur de coins";
       for (const lane of E.LANES) {
-        const targets = sap ? E.laneTiles(V, lane) : [undefined];
+        const targets = sap ? E.laneTiles(V, lane) : bri ? Object.keys(V.supports).sort((a, b) => V.supports[b] - V.supports[a]).slice(0, 3) : [undefined];
         for (const target of targets.length ? targets : [undefined]) {
           for (let u = -2; u <= 2; u++) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target }, cost: card.free ? 0 : E.CREATURES[card.name].cost * 0.8 });
-          if (E.CREATURES[card.name].type === "soutien") for (let u = -2; u <= 2; u++) for (let k = 1; k <= 3; k++) if (E.canDrop(V, card.name, lane, u, k)) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target, k }, cost: E.CREATURES[card.name].cost * 0.8 });
+          if (E.CREATURES[card.name].type === "soutien" || card.name === "Ver des profondeurs") for (let u = -2; u <= 2; u++) for (let k = 1; k <= 3; k++) if (E.canDrop(V, card.name, lane, u, k)) out.push({ type: "deploy", args: { uid: card.uid, lane, u, target, k }, cost: E.CREATURES[card.name].cost * 0.8 });
         }
       }
     }
@@ -280,7 +282,16 @@ const IA = (() => {
     const n = (V.reserve || 0) + V.budget * 0.6 >= left ? left : (V.reserve || 0) + share;
     return n > 0 ? { type: "invest", args: { t, s, n: Math.min(n, left) } } : null;
   }
+  // extension Titans & Quarters : préférence d'une mythique, pioche dès que l'on peut en payer une et la déployer
+  const MYTH_PREF = ["Briseur de coins", "Titan écorcheur", "Léviathan", "Phénix", "Dévoreur de technologies", "Ver des profondeurs", "Mère des spores", "Source de biomasse", "Reine de la ruche", "Oracle"];
+  function swarmMyth(V) {
+    if (!V.ext) return null;
+    if (V.mythOffer) { let i = 0; V.mythOffer.forEach((n, j) => { if (MYTH_PREF.indexOf(n) < MYTH_PREF.indexOf(V.mythOffer[i])) i = j; }); return { type: "mythPick", args: { i } }; }
+    if (E.canMythDraw(V) && V.budget + V.reserve >= E.MYTH_COST + 6 && V.handA.length < 8) return { type: "mythDraw" };
+    return null;
+  }
   function swarmDeploy(V) {
+    const my = swarmMyth(V); if (my) return my;
     const pi = planInvest(V); if (pi) return pi;
     const long = W => swarmLong(W, V.__plan);
     const F = finishSwarm(clone(V)), base = val(F, "essaim") + long(F);
@@ -349,6 +360,8 @@ const IA = (() => {
     const cands = [{ type: "build" }];
     // construction immédiate (v0.5.8) : chaque tuile de la main sur chaque case possible
     V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k } }); });
+    // extension : poser un quartier dès qu'une forme valable existe (quelques placements par carte)
+    if (V.ext && E.canPlaceQuarter(V)) for (const name of V.qHand) for (const cells of E.quarterPlacements(V, name).slice(0, 8)) cands.push({ type: "quartier", args: { name, cells } });
     if (cands.length === 1) return cands[0];
     return best(V, "colonie", cands, finishColony, colonyLong).move || { type: "build" };
   }
@@ -425,7 +438,7 @@ const IA = (() => {
         if (S.startHand) return { type: "draw" };
         return { type: "pickOne", args: { l: [1, 2, 3].find(l => S.piles[l].length > 0) } };
       }
-      case "A_deploy": return { type: "endDeploy" };
+      case "A_deploy": return S.mythOffer ? { type: "mythPick", args: { i: 0 } } : { type: "endDeploy" };
       case "A_upgrade": return { type: "toAttacks" };
       case "A_react": return { type: "reactDone" };
       case "A_attack": return { type: "actAll" };

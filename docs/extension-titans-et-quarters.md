@@ -1,6 +1,6 @@
 # Titans & Quarters — première extension (brouillon)
 
-> **Statut : brouillon de conception, rien n'est codé.** Tout le travail de l'extension vit sur la **branche `extension`** (partie de
+> **Statut : prototype jouable (v0.1), implémenté sur la branche `extension`** (moteur, interface, IA, serveur). Tout le travail de l'extension vit sur la **branche `extension`** (partie de
 > `staging` le 13/11/2026), jamais sur `staging` ni `main` tant qu'Oni n'en a pas décidé. L'extension est **hors de la version de base** :
 > elle s'active à la demande, sur l'accueil. Les décisions prises sont dans le journal en bas, les points encore à trancher dans
 > « Questions ouvertes ».
@@ -53,8 +53,8 @@ Effets simples, sans calcul, avec les jetons déjà connus (Blindage, Échappée
 2. **Léviathan** (tank) : tous les tirs de sa lane le visent ; arrive avec un jeton Blindage.
 3. **Titan écorcheur** (aggro) : très grosse attaque, frappe deux bâtiments à la fois.
 4. **Mère des spores** (soutien) : ses Spores font 3 dégâts.
-5. **Ver des profondeurs** : se déploie directement en couronne 1.
-6. **Oracle** (soutien) : révèle toutes les tuiles camouflées ; une tourelle de sa lane ne peut pas tirer ce tour.
+5. **Ver des profondeurs** : se déploie sur n'importe quelle case libre de sa lane (parachutage, comme les soutiens). *(Version codée ; l'idée initiale était « en couronne 1 », impossible tant que les Barbelés l'occupent.)*
+6. **Oracle** (soutien) : révèle toutes les tuiles camouflées tant qu'il est en vie (Clairvoyance ; pièges et Siphons ne se déclenchent plus). *(Version codée ; l'idée initiale ajoutait « une tourelle ne tire pas ».)*
 7. **Phénix** (aggro) : revient une fois à sa mort.
 8. **Dévoreur de technologies** : détruit tous les bâtiments de technologie d'une lane.
 9. **Reine de la ruche** (soutien) : les créatures de sa lane gagnent Furtivité ou +1 vitesse.
@@ -171,16 +171,23 @@ distinctes à fabriquer).
 
 ---
 
-## 5. Impact technique prévu (quand on codera)
-- État `S.ext` (par module), fixé à la création de la partie, sauvegardé ; `SF.migrate` (anciennes parties : désactivé).
-- **Titans** : pioche `S.piles.mythic`, action de pioche payante (2 cartes, on en garde une, l'autre sous la pioche), indicateur
-  « arbres terminés ».
-- **Quartiers** : pioche de 10 quartiers visible (3 en main toujours), `S.quartiers` (posés), détection de forme (rotations, symétries)
-  avec fusée et supports comme cases, critères, pose d'un quartier par tour (jamais en manche 1), contrôle « 2 cases vides » après chaque
-  destruction, bonus lus dans `epinesOf`, Renforcé (dont la fusée), `bonusWorkers`, `tech`, `turretDmg`, `checkSupportsFall`.
-- **Interface** : interrupteur d'accueil, thème vert acide, cartes de mythiques, pièces transparentes superposées au plateau, infobulles.
-- **IA** : plans pour les deux modules. **Stats** : marqueur « extension ». **Tests** : règles dédiées, base inchangée extension éteinte.
-- **Livret** : un chapitre d'extension séparé.
+## 5. Ce qui est implémenté (prototype v0.1, 13/11/2026)
+Tout est conditionné par `S.ext` (extension éteinte = jeu identique à la base ; l'IA et les tests de base n'y touchent pas).
+- **Activation** : bouton « Titans & Quarters » sur l'accueil (mémorisé), thème vert acide (variables `--hot*`), choix de l'hôte en ligne
+  (`create` / `rematch` du serveur).
+- **Titans** : `S.mythPile` (10), `mythDraw` (15, réserve d'abord, une fois par tour, 3 arbres terminés) puis `mythPick` (2 cartes, on en garde
+  une, l'autre sous la pioche) ; `endDeploy` refusé tant que le choix n'est pas fait ; mythique non joué → sous la pioche ; mort → perdu (pas
+  de Réincarnation). Valeurs provisoires : Briseur 7 (4/3), Léviathan 8 (3/8), Titan écorcheur 8 (8/4), Mère des spores 6 (6 PV), Ver 6 (6/3),
+  Oracle 5 (5 PV), Phénix 7 (6/3), Dévoreur 7 (5/4), Reine 6 (6 PV), Source 5 (5 PV).
+- **Quartiers** : `S.qPile` / `S.qHand` (3 visibles) / `S.quarters`, `quarterPlacements` (8 orientations, fusée et supports comme cases, critères
+  à bâtiments différents), action `quartier`, `checkQuarters` (2 cases vides → sous la pioche), bonus lus dans `epinesOf`, `tileRen`
+  (plafond 3), `bonusWorkers`, `tech`, `turretDmgAt`, Bouclier partagé (`q.sh`, rendu à chaque tour de la colonie), Épines de la fusée.
+- **Interface** : cartes de quartier (forme, critères, bonus) dans le panneau de la colonie (visibles des deux camps), pose en 3 temps
+  (choisir la carte → cases candidates en pointillés → aperçu « placement n sur m » → « Poser ici »), pièces transparentes teintées sur le
+  plateau avec pastille et infobulle (cases vides 0/2), pioche mythique dans le cadre de déploiement, section d'aide « Extension ».
+- **IA** : l'essaim pioche (si 15 + 6 de biomasse) et choisit selon une préférence ; la colonie pose un quartier dès qu'une forme est
+  valable ; les cases des quartiers deviennent des cibles prioritaires de l'essaim.
+- **Non fait** : images des mythiques, fabrication des pièces, tests de règles dédiés, équilibrage chiffré (à valider en jouant).
 
 ## 6. Questions ouvertes
 Les principes sont validés (voir le journal). Il reste à décider, plus tard :
@@ -197,6 +204,7 @@ Les principes sont validés (voir le journal). Il reste à décider, plus tard :
   de la pièce sont vides en même temps**, 10 quartiers dont 3 piochés au hasard et toujours 3 disponibles, visibles, un quartier tombé retourne
   **en bas de la pioche**, jamais posé au premier tour, certains quartiers donnent de l'Épines ou du Renforcé (fusée comprise).
 - **13/11/2026 (Oni)** : l'extension s'appelle **Titans & Quarters**. Tout le travail est sur la branche **`extension`**.
+- **13/11/2026** : première version jouable de l'extension codée sur la branche `extension` (voir section 5).
 - **13/11/2026 (Oni)** : **validés** : la proposition de critères, de bonus et des 10 quartiers ; le sens du Renforcé sur la fusée (ATQ ≤ X
   sans effet) ; critère vérifié **à la pose seulement** ; **pas d'échange** des quartiers de départ. **Refusé** : « le support recouvert
   ne tombe plus » (trop fort). **Ajouté** : un support recouvert **compte comme une des 2 cases** qui font tomber le quartier.
