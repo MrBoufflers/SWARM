@@ -29,3 +29,10 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 ## v0.5.29
 - Renforcé X : −X dégâts à chaque attaque, sans minimum. Valeurs réduites de 1 (Rempart 1, Bastion 2, Dortoir 1, Ronceraie 1).
 - Avant-postes : toujours 4 PV, mais seulement dans leur propre lane.
+
+## v0.5.30
+- Paliers de biomasse : au survol de la biomasse ou du palier, tous les paliers et ce qu'ils apportent.
+- Infobulles sur toutes les icônes des bâtiments du plateau (Épines, Renforcé, tech, Mines, Siphons, Bouclier, supports, fusée…).
+- Aperçu de la résolution d'une attaque au survol d'un bâtiment (créature choisie) : PV en rouge, Percée, Spores, Épines, Bouclier, Renforcé.
+- Nouvelle icône de construction : travailleur avec clé à molette (à la place du sablier).
+- Pastille NEW sur ce que l'adversaire a posé à son dernier tour.

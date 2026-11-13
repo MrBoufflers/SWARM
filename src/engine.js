@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.5.29";
+  const VERSION = "0.5.30";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1143,7 +1143,7 @@ const SF = (() => {
         if (!arg || S.hand[arg.hand] === undefined || !S.tiles[arg.tile] || S.tiles[arg.tile].start) return false;
         const old = S.tiles[arg.tile], nn = S.hand[arg.hand];
         const [x, y] = parse(arg.tile);
-        S.tiles[arg.tile] = tileStats(nn, x, y);
+        S.tiles[arg.tile] = tileStats(nn, x, y); S.tiles[arg.tile].new = 1;
         fx(S, { t: "place", k: arg.tile });
         if (TILES[nn].perm) S.workersBase += 1;
         S.hand.splice(arg.hand, 1);
@@ -1170,6 +1170,7 @@ const SF = (() => {
     return true;
   }
   function startDefenderTurn(S) {
+    for (const t of Object.values(S.tiles)) delete t.new; // les bâtiments posés au tour précédent ne sont plus « nouveaux »
     S.phase = needDraw(S) ? "D_draw" : "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
     // construction immédiate (Oni, 08/11/2026) : points du tour fixés au début du tour (un bâtiment posé ce tour, ou un
     // support de niveau 3 apparu, ne donne ses travailleurs qu'au tour suivant), dépensés bâtiment par bâtiment
@@ -1319,7 +1320,7 @@ const SF = (() => {
   function putTile(S, name, k, lane) {
     const [x, y] = parse(k);
     pushBack(S, k);
-    S.tiles[k] = tileStats(name, x, y);
+    S.tiles[k] = tileStats(name, x, y); S.tiles[k].new = 1; // pastille NEW pour l'essaim jusqu'au prochain tour de la colonie (Oni, 13/11/2026)
     S.builtCount = S.builtCount || {}; S.builtCount[name] = (S.builtCount[name] || 0) + 1; // statistiques (Oni, 09/11/2026)
     fx(S, { t: "place", k });
     if (TILES[name].perm) { S.workersBase += 1; log(S, "colonie", "+1 travailleur permanent."); }
@@ -1625,7 +1626,7 @@ const SF = (() => {
       for (const p of V.toPlace) p.tile = hideName(p.tile);
       if (!clairvoyance(S)) for (const k of Object.keys(V.tiles)) {
         const t = V.tiles[k];
-        if (t.camo && !t.revealed) V.tiles[k] = { name: null, camo: 1, revealed: false, hidden: true, hp: null, max: null, ep: 0, ren: 0, tech: 0, temp: 0, trap: 0, shield: 0 };
+        if (t.camo && !t.revealed) V.tiles[k] = { name: null, camo: 1, revealed: false, hidden: true, hp: null, max: null, ep: 0, ren: 0, tech: 0, temp: 0, trap: 0, shield: 0, new: t.new };
       }
     }
     return V;

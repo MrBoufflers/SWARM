@@ -1126,3 +1126,16 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 /* jeton Dépouille (Phéromone, Oni 12/11/2026) */
 .cell .dep { position: absolute; left: 3px; bottom: 3px; z-index: 2; display: flex; padding: 2px; border-radius: 50%; color: #e8e0d0; background: rgba(60,20,20,.8); box-shadow: 0 0 0 1.5px #c97b7b; pointer-events: none; }
 .cell .dep .i { width: max(12px, calc(var(--cell) * .24)); height: max(12px, calc(var(--cell) * .24)); }
+/* icônes des bâtiments avec infobulle (Oni, 13/11/2026) */
+.tb .ic, .cell.sup .ic { display: inline-flex; align-items: center; gap: inherit; cursor: help; }
+.cell.sup .ic { gap: 2px; }
+.tile .hp, .tile .shield-tk, .cell .lv { cursor: help; }
+/* pastille NEW : posé au dernier tour de l'adversaire (Oni, 13/11/2026) */
+.newb { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); z-index: 3; padding: 0 4px; border-radius: 99px; background: #ffd24a; color: #1b1f1d; font: 800 max(8px, calc(var(--cell) * .11))/1.25 var(--body); font-style: normal; letter-spacing: .04em; box-shadow: 0 0 0 1px rgba(0,0,0,.45); pointer-events: auto; }
+/* aperçu de la résolution d'une attaque (Oni, 13/11/2026) */
+.pvr { color: #ff5c5c !important; font-weight: 800; }
+.tile .hp.pvr small { color: #ff9a9a; }
+#pvcard { position: fixed; z-index: 60; max-width: 340px; padding: 8px 12px; border-radius: 8px; background: var(--panel); border: 1px solid #c94a4a; box-shadow: 0 8px 24px rgba(0,0,0,.55); font-size: 1rem; pointer-events: none; }
+#pvcard h5 { margin: 0 0 4px; font: 700 1rem/1.2 var(--display); text-transform: uppercase; letter-spacing: .06em; color: #ff8a8a; }
+#pvcard p { margin: 3px 0; line-height: 1.3; }
+#pvcard .pv-main { border-left: 3px solid #ff5c5c; padding-left: 6px; }

@@ -4,6 +4,15 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.30 — 13 novembre 2026
+
+**Interface (Oni)**
+- **Paliers de biomasse** : au survol de la biomasse et du palier, tous les paliers sont listés (seuil de biomasse, nombre de cartes piochées, créatures max par lane), le palier actuel marqué.
+- **Infobulles sur toutes les icônes des bâtiments** du plateau : Épines, Renforcé, technologies, travailleur, Mines, Siphons, Bouclier, PV, supports et coins, fusée, cases à portée, Dépouille.
+- **Aperçu de la résolution d'une attaque** : créature choisie, au survol d'un bâtiment attaquable, nouveaux PV en rouge sur le plateau (bâtiments touchés par la Percée ou les Spores, PV de l'attaquant après Épines ou Mine, travailleurs perdus de la fusée) et une carte de détail (Bouclier, Renforcé, Corrosion, biomasse gagnée). Un bâtiment camouflé n'est pas simulé.
+- **Icône de construction** : le sablier devient un travailleur avec une clé à molette (N points = N travailleurs à mobiliser).
+- **Pastille NEW** : sur les bâtiments posés au dernier tour de la colonie (vue essaim) et sur les créatures déployées au dernier tour de l'essaim (vue colonie).
+
 ## v0.5.29 — 12 novembre 2026
 
 **Règles (Oni)**

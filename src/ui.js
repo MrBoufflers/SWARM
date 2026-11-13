@@ -136,7 +136,7 @@
       n.replaceWith(f);
     }
   }
-  function render() { renderInner(); colorDirs($("#app")); iaTick(); }
+  function render() { pvClear(); renderInner(); colorDirs($("#app")); iaTick(); }
   function renderInner() {
     document.documentElement.dataset.motion = animOn ? "on" : "off"; // animations CSS suivant le bouton « Animations »
     document.body.dataset.myturn = online() && S && myTurn() ? "1" : "0";
@@ -320,6 +320,13 @@
     tank: { A1: "carapace", B1: "protection", A2: "blindage", C2: "reincarnation", B2: "masse" },
     soutien: { A1: "mue", B1: "griffes", A2: "regeneration", C2: "clairvoyance", B2: "corrosion" },
   };
+  // Paliers de biomasse (Oni, 13/11/2026) : tous les paliers et ce qu'ils apportent, au survol de la biomasse et du palier
+  function tierTip() {
+    const cur = SF.tier(S), next = SF.TIERS[cur + 1], big = S.upgrades.aggro.r2 === "B" ? 3 : 0;
+    return `Biomasse : ${S.biomass}. ${next ? `Prochain palier à ${next.min} biomasse.` : "Dernier palier atteint."}\n`
+      + SF.TIERS.map((t, i) => `${i === cur ? "▶ " : "   "}Palier ${i + 1} (dès ${t.min}) : pioche ${SF.tierCards(i)} cartes · ${t.cap + big} créatures max par lane`).join("\n")
+      + "\nLe palier fixe le nombre de cartes piochées (réparties entre les piles de niveau 1, 2, 3, remplies par vos améliorations) et le nombre maximum de créatures par lane (+3 avec Essaim agrandi).";
+  }
   // résumé de l'essaim vu par la colonie : chiffres clés et améliorations en icônes (détail au survol)
   function swarmSummary() {
     const t = SF.TIERS[SF.tier(S)], next = SF.TIERS[SF.tier(S) + 1];
@@ -337,7 +344,7 @@
     const turn = ["A_deploy", "A_upgrade", "A_attack", "A_react"].includes(S.phase);
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kcs">
-        <span class="kc" tabindex="0" data-tip="Biomasse : ${S.biomass}${next ? ` (palier suivant à ${next.min})` : ""}">${icon("biomasse")}<b>${S.biomass}</b><small>bio</small></span>
+        <span class="kc" tabindex="0" data-tip="${E(tierTip())}">${icon("biomasse")}<b>${S.biomass}</b><small>bio</small></span>
         <span class="kc" tabindex="0" data-tip="Palier ${SF.tier(S) + 1} : pioche de ${SF.tierCards(SF.tier(S))} cartes, plafond ${SF.capOf(S)} créatures par lane">${icon("palier")}<b>${SF.tier(S) + 1}</b><small>max ${SF.capOf(S)}/lane</small></span>
         ${turn ? `<span class="kc" data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b><small>budget</small></span>` : `<span class="kc" data-fx="budget" tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b><small>réserve</small></span>`}
         <span class="kc hidden-hand" tabindex="0" data-tip="${S.handA.length} cartes en main (cachées) · pioches ${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}">${icon("sort")}<b>${S.handA.length}</b><small>cartes</small></span>
@@ -533,7 +540,7 @@
       const [sx, sy] = SF.parse(sk);
       for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) if (dx || dy) { const kk = SF.key(sx + dx, sy + dy); RNG[kk] = (RNG[kk] || 0) + 1; }
     }
-    const rng = k => RNG[k] && !S.tiles[k] ? `<span class="rng" title="À portée de ${RNG[k]} tourelle${RNG[k] > 1 ? "s" : ""}">${icon("tourelle")}${RNG[k] > 1 ? `<b>${RNG[k]}</b>` : ""}</span>` : "";
+    const rng = k => RNG[k] && !S.tiles[k] ? `<span class="rng" tabindex="0" data-tip="À portée de ${RNG[k]} tourelle${RNG[k] > 1 ? "s" : ""} : une créature qui s'y trouve peut être visée.">${icon("tourelle")}${RNG[k] > 1 ? `<b>${RNG[k]}</b>` : ""}</span>` : "";
     let html = "";
     for (let y = 4; y >= -4; y--) for (let x = -4; x <= 4; x++) {
       const r = SF.ring(x, y), k = SF.key(x, y);
@@ -548,7 +555,7 @@
         continue;
       }
       if (x === 0 && y === 0) {
-        html += `<div class="cell core ${imCls("Fusée")}${T.includes("fusee") ? " atk" : ""}" data-xy="${k}"${T.includes("fusee") ? ` data-a="strike" data-k="fusee"` : ""}>${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
+        html += `<div class="cell core ${imCls("Fusée")}${T.includes("fusee") ? " atk" : ""}" data-tip="Fusée : ${S.floors} étage${S.floors > 1 ? "s" : ""} sur 12 ; ${S.workersBase} travailleur${S.workersBase > 1 ? "s" : ""} de base. Si l'essaim tue tous les travailleurs, il gagne ; si la colonie achève les 12 étages, elle décolle." data-xy="${k}"${T.includes("fusee") ? ` data-a="strike" data-k="fusee"` : ""}>${icon("fusee")}<b>${S.floors}/12</b><small>${S.workersBase} trav.</small></div>`;
         continue;
       }
       if (SF.isSupportCell(x, y)) {
@@ -556,8 +563,8 @@
         const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && SF.shotsLeft(S, k) > 0 && (SF.supportTargets(S, k).length || SF.depTargets(S, k).length);
         const fired = lvl && lvl < 3 && SF.shotsLeft(S, k) <= 0;
         html += lvl ? `<div class="cell sup ${imCls("support " + lvl)}${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
-            <span class="lv">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? icon("tourelle") + `<b>${SF.turretDmg(S, lvl)}</b>` : icon("travailleur") + `<b>+${SF.SUP3_WORKERS}</b>`}</div>`
-          : `<div class="cell corner"><span class="lv">${["", "I", "II", "III"][r]}</span></div>`;
+            <span class="lv" tabindex="0" data-tip="Support de niveau ${["", "I", "II", "III"][lvl]}${lvl < 3 ? " : tourelle, tire sur une créature dans les 8 cases autour" : " : donne des travailleurs, ne tire pas"}. Il tombe (+1 biomasse pour l'essaim) si ses bâtiments voisins sont détruits.">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? ic("tourelle", `<b>${SF.turretDmg(S, lvl)}</b>`, `Tourelle de niveau ${["", "I", "II"][lvl]} : ${SF.turretDmg(S, lvl)} dégât${SF.turretDmg(S, lvl) > 1 ? "s" : ""} par tir (+1 par palier de la fusée pour le niveau I), 1 tir par tour.`, true) : ic("travailleur", `<b>+${SF.SUP3_WORKERS}</b>`, `Support de niveau III : +${SF.SUP3_WORKERS} travailleurs tant qu'il tient.`, true)}</div>`
+          : `<div class="cell corner"><span class="lv" tabindex="0" data-tip="Coin de niveau ${["", "I", "II", "III"][r]} : un support y apparaît quand ses deux bâtiments intérieurs sont construits.">${["", "I", "II", "III"][r]}</span></div>`;
         continue;
       }
       const lane = SF.cellLane(x, y);
@@ -567,11 +574,11 @@
       const tt = TT && TT.keys.includes(k) ? `data-a="${TT.a}" data-k="${k}" data-v="${k}"` : "";
       let inner = "";
       if (t) {
-        if (hiddenTrap(t)) inner = `<div class="tile hidden"><b>?</b><small>camouflée</small></div>`;
+        if (hiddenTrap(t)) inner = `<div class="tile hidden"><b>?</b><small>camouflée</small>${newBadge(t.new && S.view === "essaim")}</div>`;
         else {
           const ep = SF.epinesOf(S, k, S.view === "essaim");
-          inner = `<div class="tile ${imCls(t.name)}${t.camo && !t.revealed ? " trap" : ""}" title="${t.camo && !t.revealed ? "Camouflée : l'essaim ne la voit pas" : ""}"><span class="tn">${E(short(t.name))}</span><b class="hp">${t.hp}<small>/${t.max}</small></b>
-            <span class="tb">${ep ? icon("epines") + ep : ""}${t.ren ? icon("renforce") + t.ren : ""}${t.tech ? icon("tech") + t.tech : ""}${t.temp ? icon("temp") : ""}${t.trap ? icon("piege") + t.trap : ""}${t.siphon ? icon("biomasse") + t.siphon : ""}${t.shield ? `<span class="shield-tk" title="Bouclier : la prochaine attaque ne lui fait rien">${icon("protection")}</span>` : ""}</span></div>`;
+          inner = `<div class="tile ${imCls(t.name)}${t.camo && !t.revealed ? " trap" : ""}"${t.camo && !t.revealed ? ` data-tip="Camouflée : l'essaim ne la voit pas (révélée à la première attaque)"` : ""}><span class="tn">${E(short(t.name))}</span>${newBadge(t.new && S.view === "essaim")}<b class="hp" tabindex="0" data-tip="Points de vie : ${t.hp} sur ${t.max}">${t.hp}<small>/${t.max}</small></b>
+            <span class="tb">${ep ? ic("epines", ep, `Épines ${ep} : une créature qui attaque ce bâtiment subit ${ep} dégât${ep > 1 ? "s" : ""} après son attaque (+1 par Avant-poste dans les 8 cases autour).`) : ""}${t.ren ? ic("renforce", t.ren, `Renforcé ${t.ren} : chaque attaque contre ce bâtiment fait ${t.ren} dégât${t.ren > 1 ? "s" : ""} de moins (sans minimum).`) : ""}${t.tech ? ic("tech", t.tech, `+${t.tech} technologie${t.tech > 1 ? "s" : ""} tant que le bâtiment tient (technologies = sortilèges par tour).`) : ""}${t.temp ? ic("temp", "", "+1 travailleur tant que le bâtiment tient.") : ""}${t.trap ? ic("piege", t.trap, `Mine ${t.trap} : ${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui la révèle en l'attaquant, avant qu'elle frappe.`) : ""}${t.siphon ? ic("biomasse", t.siphon, `Siphon ${t.siphon} : révélé par une attaque, l'essaim perd ${t.siphon} biomasse (+${t.siphon} par tranche de 10 qu'il possède, jamais sous ${SF.MIN_BIOMASS}).`) : ""}${t.shield ? `<span class="shield-tk" tabindex="0" data-tip="Bouclier : la prochaine attaque ne lui fait rien (la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.">${icon("protection")}</span>` : ""}</span></div>`;
         }
       }
       const stased = S.stase.includes(k);
@@ -582,11 +589,15 @@
       const [pu, pk] = SF.toLocal(lane, x, y);
       const drop = !t && S.phase === "A_deploy" && S.view === "essaim" && UI.sel && !UI.sap && SF.canDeploy(S, cardOf(UI.sel), lane) && SF.canDrop(S, cardOf(UI.sel).name, lane, pu, pk);
       const atk = !target && T.includes(k);
-      html += `<div class="cell lane lane-${lane} r${r}${target || drop || tt || depHot ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${depHot ? `data-a="fireDep" data-k="${k}"` : tt ? tt : target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${dep ? `<span class="dep" title="Dépouille : aucune construction ici tant qu'une tourelle à portée n'a pas tiré dessus">${icon("depouille")}</span>` : ""}${rng(k)}${tokens(crs)}</div>`;
+      html += `<div class="cell lane lane-${lane} r${r}${target || drop || tt || depHot ? " hot" : ""}${R[k] ? " mv" : ""}${atk ? " atk" : ""}${stased ? " stase" : ""}" data-xy="${k}" ${depHot ? `data-a="fireDep" data-k="${k}"` : tt ? tt : target ? `data-a="${relHot ? "relocate" : S.phase === "D_main" ? "buildAt" : "placeAt"}" data-k="${k}"` : drop ? `data-a="deployAt" data-l="${lane}" data-u="${pu}" data-k="${pk}"` : atk ? `data-a="strike" data-k="${k}"` : mvAttr(k)}>${inner}${dep ? `<span class="dep" data-tip="Dépouille : aucune construction ici tant qu'une tourelle à portée n'a pas tiré dessus (ou Nuke, Barrage, Onde de choc)">${icon("depouille")}</span>` : ""}${rng(k)}${tokens(crs)}</div>`;
     }
     return `<div class="board ${imCls("Champ de bataille")}" role="grid" aria-label="Plateau">${html}</div>
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
   }
+  // pastille « NEW » : ce que l'adversaire a posé à son dernier tour (bâtiments pour l'essaim, créatures pour la colonie) — Oni, 13/11/2026
+  const newBadge = on => on ? `<i class="newb" data-tip="Posé au dernier tour de l'adversaire">NEW</i>` : "";
+  // pastille d'icône avec infobulle (bâtiments du plateau) ; raw : la valeur est déjà du HTML
+  const ic = (name, val, tip, raw) => `<span class="ic" tabindex="0" data-tip="${E(tip)}">${icon(name)}${val === "" ? "" : raw ? val : E(String(val))}</span>`;
   // Carte de tuile en main : durée, PV, Épines et capacités (libellés du Catalogue du livret v0.3)
   function tileCard(name) {
     const t = SF.TILES[name], L = SF.LANE_NAME;
@@ -606,7 +617,7 @@
     if (t.shield) cap("protection", "Bouclier", "arrive avec un jeton : la prochaine attaque ne lui fait rien (comme en stase : la percée et les spores passent, pas d'Épines), puis le jeton est défaussé.");
     if (t.trap) cap("piege", `Mine ${t.trap}`, `${t.trap} dégât${t.trap > 1 ? "s" : ""} à la créature qui la révèle en l'attaquant, avant qu'elle frappe (si elle en meurt, elle ne frappe pas). Un piège rendu visible par Vision ou Clairvoyance ne se déclenche plus.`);
     if (t.ep) cap("epines", `Épines ${t.ep}`, `${t.ep} dégât${t.ep > 1 ? "s" : ""} à la créature qui l'attaque, après son attaque (+1 par Avant-poste dans les 8 cases autour).`);
-    return `<span class="art ${imCls(name)}">${imCls(name) ? "" : icon("mur")}</span><b>${E(name)}</b><small>${icon("duree")} ${t.d} pt${t.d > 1 ? "s" : ""} · ${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} ${t.ep}` : ""}</small><span class="caps">${caps.join("")}</span>`;
+    return `<span class="art ${imCls(name)}">${imCls(name) ? "" : icon("mur")}</span><b>${E(name)}</b><small><span class="ic" tabindex="0" data-tip="Construction : ${t.d} point${t.d > 1 ? "s" : ""}, soit ${t.d} travailleur${t.d > 1 ? "s" : ""} à mobiliser pour construire ce bâtiment (les points non dépensés vont à la fusée).">${icon("duree")} ${t.d} pt${t.d > 1 ? "s" : ""}</span> · ${icon("pv")} ${pv} PV${t.ep ? ` · ${icon("epines")} ${t.ep}` : ""}</small><span class="caps">${caps.join("")}</span>`;
   }
   // illustration d'une tuile, d'un support ou d'une créature : classe CSS « im im-… » ajoutée au build (vide si pas d'image)
   const imCls = n => (typeof IMG_CLASS !== "undefined" && IMG_CLASS[n]) || "";
@@ -620,7 +631,7 @@
       const tgt = (S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c)) || spT || tpT;
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" ? (SF.canAct(S, c) ? (S.view === "essaim" ? " go" : "") : " done") : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       const au = auraOf(c);
-      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${c.esc ? `<i class="blind" title="Jeton Échappée : sauvera une créature de sa case">${icon("mue")}</i>` : ""}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${c.esc ? `<i class="blind" title="Jeton Échappée : sauvera une créature de sa case">${icon("mue")}</i>` : ""}${newBadge(c.new && S.view === "colonie")}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
@@ -826,7 +837,7 @@
     const t = SF.TIERS[SF.tier(S)];
     return `<h3>${icon("spores")} Essaim</h3>
       <div class="kv"><span>Biomasse</span><b>${S.biomass}</b></div>
-      <div class="kv"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${SF.tierCards(SF.tier(S))} cartes · plafond ${SF.capOf(S)}</b></div>
+      <div class="kv" tabindex="0" data-tip="${E(tierTip())}"><span>Palier</span><b>${SF.tier(S) + 1} · pioche ${SF.tierCards(SF.tier(S))} cartes · plafond ${SF.capOf(S)}</b></div>
       <div class="kv" data-fx="budget"><span>Budget du tour</span><b>${S.budget}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}</b></div>
       <div class="kv"><span>Réserve (non investie)</span><b>${S.reserve}</b></div>
       <div class="kv"><span>Pioches N1 / N2 / N3</span><b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></div>
@@ -878,14 +889,14 @@
     const full = S.famine ? SF.famineBudget(S.biomass) : S.biomass; // budget du tour (Famine : biomasse ÷ 2)
     const { top } = pcAction("essaim");
     const big = deploy
-      ? bigStat(`${S.budget}<small>/${full}</small>`, "disponible / budget", `Biomasse disponible ce tour : ${S.budget} sur un budget de ${full}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}. Le reste ira à la réserve.`, "bio")
-      : bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : " · dernier palier atteint"}`, "bio");
+      ? bigStat(`${S.budget}<small>/${full}</small>`, "disponible / budget", `Biomasse disponible ce tour : ${S.budget} sur un budget de ${full}${S.famine ? " (Famine : biomasse ÷ 2)" : ""}. Le reste ira à la réserve.\n\n${tierTip()}`, "bio")
+      : bigStat(S.biomass, "biomasse", tierTip(), "bio");
     return `<aside class="panel essaim pc-own">
       <div class="po-head">${sideLogo("essaim")}${sideName("essaim")}<span class="bigwrap" data-fx="budget">${big}</span></div>
       <div class="pc-boxes">
         ${box2(S.reserve, "réserve", "Réserve : biomasse non investie, gardée d'un tour à l'autre")}
-        ${deploy ? box2(S.biomass, "biomasse", `Biomasse totale : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`) : ""}
-        ${box2(SF.tier(S) + 1, "palier", `Palier ${SF.tier(S) + 1}${next ? ` · palier suivant à ${next.min} biomasse` : ""}`)}
+        ${deploy ? box2(S.biomass, "biomasse", tierTip()) : ""}
+        ${box2(SF.tier(S) + 1, "palier", tierTip())}
         ${box2(SF.capOf(S), "max / lane", "Plafond de créatures par lane")}
       </div>
       <div class="pc-lines"><span>Cartes à piocher <b>${SF.tierCards(SF.tier(S))}</b></span><span>Pioche N1 / N2 / N3 <b>${S.piles[1].length} / ${S.piles[2].length} / ${S.piles[3].length}</b></span></div>
@@ -947,7 +958,7 @@
     }).join("");
     return `<aside class="panel essaim mini pc-sum"><div class="ps-main">
       <h3>${sideLogo("essaim")}${sideName("essaim")}</h3>
-      ${bigStat(S.biomass, "biomasse", `Biomasse : ${S.biomass}${next ? ` · palier suivant à ${next.min}` : ""}`, "bio")}
+      ${bigStat(S.biomass, "biomasse", tierTip(), "bio")}
       <div class="ps-rows">
         ${turn ? `<span data-fx="budget" tabindex="0" data-tip="Budget de ce tour${S.famine ? " (Famine : biomasse ÷ 2)" : ""}">${icon("biomasse")}<b>${S.budget}</b> budget</span>` : ""}
         <span tabindex="0" data-tip="Réserve : biomasse non investie">${icon("biomasse")}<b>${S.reserve}</b> réserve</span>
@@ -991,6 +1002,86 @@
     const y = Math.min(Math.max(8, r.top + r.height / 2 - h / 2), innerHeight - h - 8);
     pop.style.left = x + "px"; pop.style.top = y + "px";
   }
+  // ---------------------------------------------------------------- aperçu de la résolution d'une attaque (Oni, 13/11/2026)
+  // Créature choisie en phase d'attaque : au survol d'un bâtiment (ou de la fusée) attaquable, on simule l'attaque sur une copie de la
+  // partie (mêmes règles : Bouclier, Renforcé, Corrosion, Percée, Spores, Épines, Mines…) et on affiche le résultat : nouveaux PV en rouge
+  // sur le plateau, et le détail dans une carte. Un bâtiment encore camouflé n'est pas simulé (l'essaim ne le connaît pas).
+  const PV = { saved: [], cell: null };
+  function pvClear() {
+    for (const [el, html, cls] of PV.saved) { if (el.isConnected) { el.innerHTML = html; if (cls !== undefined) el.className = cls; } }
+    PV.saved = []; PV.cell = null;
+    const card = $("#pvcard"); if (card) card.hidden = true;
+  }
+  function pvSet(el, html) { if (!el) return; PV.saved.push([el, el.innerHTML, el.className]); el.innerHTML = html; el.classList.add("pvr"); }
+  function strikePreview(id, target) {
+    const c = S.creatures.find(o => o.id === id);
+    if (!c || !SF.strikeTargets(S, c).includes(target)) return null;
+    const t0 = target === "fusee" ? null : S.tiles[target];
+    if (t0 && hiddenTrap(t0)) return { c, hidden: true };
+    const W = JSON.parse(JSON.stringify(S)); W.fx = []; W.log = [];
+    if (!SF.strikeAt(W, id, target)) return null;
+    const c1 = W.creatures.find(o => o.id === id);
+    const [ax, ay] = SF.toGlobal(c.lane, c.u, c.k), [tx, ty] = target === "fusee" ? [0, 0] : SF.parse(target);
+    const behind = SF.key(tx + (tx - ax), ty + (ty - ay)); // case visée par la Percée (côté opposé à l'attaquant)
+    // origine des dégâts hors cible : Percée seulement s'il y a un excédent, Spores sur les 8 cases autour de la cible
+    const corr = S.upgrades.soutien.r2 === "B" && SF.caseMates(S, c).some(o => SF.CREATURES[o.name].type === "soutien"), atq = SF.effAtq(S, c);
+    const hasP = SF.hasPercee(S, c), nSp = SF.caseMates(S, c).filter(o => o.name === "Sporeur").length;
+    const shielded = !!(t0 && t0.shield && !corr);
+    const excess = t0 ? (shielded ? atq : Math.max(0, Math.max(0, atq - (corr ? 0 : t0.ren)) - t0.hp)) : 0;
+    const near = (x, y) => Math.max(Math.abs(x - tx), Math.abs(y - ty)) === 1;
+    const howOf = (k, x, y) => [hasP && excess > 0 && k === behind ? "Percée" : "", nSp && near(x, y) ? "Spores" : ""].filter(Boolean).join(" + ") || "Dégâts";
+    const tiles = [];
+    for (const [k, t] of Object.entries(S.tiles)) {
+      if (t.hidden) continue;
+      const n = W.tiles[k];
+      if (!n || n.hp !== t.hp || (t.shield && !n.shield)) tiles.push({ k, name: t.name, from: t.hp, to: n ? n.hp : 0, max: t.max, gone: !n, shieldGone: !!(t.shield && n && !n.shield), main: k === target, how: k === target ? "" : howOf(k, ...SF.parse(k)) });
+    }
+    const atkFrom = c.hp + SF.bonusHp(S, c), atkTo = c1 ? c1.hp + SF.bonusHp(W, c1) : 0;
+    return { c, t0, target, tiles, workers: S.workersBase - W.workersBase, workersHow: target === "fusee" ? (nSp ? "Spores" : "") : howOf("0,0", 0, 0), atkFrom, atkTo, dead: !c1 || atkTo <= 0, bio: W.biomass - S.biomass, atq, corr, won: W.winner === "essaim" };
+  }
+  function pvShow(cell) {
+    const id = UI.selCreature, target = cell.dataset.k, P = id != null ? strikePreview(id, target) : null;
+    if (!P) return;
+    PV.cell = cell;
+    let lines = [];
+    if (P.hidden) lines.push(`<p>Bâtiment camouflé : on ne connaît ni ses PV ni ses effets. L'attaque (${SF.effAtq(S, P.c)} ATQ) le révélera.</p>`);
+    else {
+      for (const t of P.tiles) {
+        const el = document.querySelector(`.cell[data-xy="${t.k}"] .tile .hp`);
+        pvSet(el, `${t.gone ? "✕" : t.to}<small>/${t.max}</small>`);
+        let why = "";
+        if (t.main) {
+          const o = P.t0, ren = P.corr ? 0 : o.ren;
+          if (o.shield && !P.corr) why = " · Bouclier : l'attaque ne fait rien, le jeton est défaussé";
+          else { why = ` · ATQ ${P.atq}`; if (o.shield) why += " · Corrosion : Bouclier détruit"; if (o.ren) why += P.corr ? " · Renforcé ignoré (Corrosion)" : ` · Renforcé ${o.ren} : −${o.ren}`; }
+        }
+        lines.push(`<p class="${t.main ? "pv-main" : ""}"><b>${t.how ? t.how + " : " : ""}${E(t.name)}</b> ${t.from} → <span class="pvr">${t.gone ? "détruit" : t.to + " PV"}</span>${E(why)}</p>`);
+      }
+      if (P.target === "fusee" || P.workers > 0) {
+        const core = document.querySelector(".cell.core small");
+        if (P.workers > 0) pvSet(core, `${S.workersBase - P.workers} trav.`);
+        lines.push(`<p><b>${P.workersHow ? P.workersHow + " : " : ""}Fusée</b> ${P.workers > 0 ? `<span class="pvr">−${P.workers} travailleur${P.workers > 1 ? "s" : ""}</span>` : "aucun travailleur perdu"}</p>`);
+      }
+      lines.push(P.atkTo !== P.atkFrom || P.dead
+        ? `<p><b>${E(P.c.name)}</b> (défense) ${P.atkFrom} → <span class="pvr">${P.dead ? "meurt" : P.atkTo + " PV"}</span> · Épines / Mine</p>`
+        : `<p><b>${E(P.c.name)}</b> (défense) ${P.atkFrom} PV, aucun dégât subi</p>`);
+      const tok = document.querySelector(`.tok[data-id="${P.c.id}"] .tp`);
+      if (tok && P.atkTo !== P.atkFrom) pvSet(tok, P.dead ? "✕" : String(P.atkTo));
+      if (P.bio) lines.push(`<p>Biomasse +${P.bio}</p>`);
+      if (P.won) lines.push(`<p><b>L'essaim gagne la partie.</b></p>`);
+    }
+    let card = $("#pvcard"); if (!card) { card = document.createElement("div"); card.id = "pvcard"; document.body.appendChild(card); }
+    card.innerHTML = `<h5>Résolution de l'attaque</h5>${lines.join("")}`; card.hidden = false;
+    const r = cell.getBoundingClientRect(), w = card.offsetWidth, h = card.offsetHeight;
+    let x = r.right + 10; if (x + w > innerWidth - 8) x = r.left - w - 10; x = Math.max(8, x);
+    card.style.left = x + "px"; card.style.top = Math.min(Math.max(8, r.top + r.height / 2 - h / 2), innerHeight - h - 8) + "px";
+  }
+  document.addEventListener("mouseover", e => {
+    const cell = S && S.phase === "A_attack" && S.view === "essaim" && UI.selCreature != null && e.target.closest ? e.target.closest('.cell[data-a="strike"]') : null;
+    if (cell === PV.cell) return;
+    pvClear();
+    if (cell) pvShow(cell);
+  });
   // info-bulles en PC : une bulle flottante (jamais coupée par une zone défilante)
   function tipShow(el) {
     let t = $("#tipbox"); if (!t) { t = document.createElement("div"); t.id = "tipbox"; document.body.appendChild(t); }
@@ -1003,6 +1094,7 @@
   const tipHide = () => { const t = $("#tipbox"); if (t) t.hidden = true; };
   for (const ev of ["mouseover", "focusin"]) document.addEventListener(ev, e => {
     if (!document.body.classList.contains("pc")) return;
+    if (PV.cell) { tipHide(); return; } // pas d'infobulle par-dessus l'aperçu d'attaque
     const el = e.target.closest && e.target.closest("[data-tip]"); if (el) tipShow(el); else tipHide();
   });
   document.addEventListener("mouseout", e => { if (!e.relatedTarget || !(e.relatedTarget.closest && e.relatedTarget.closest("[data-tip]"))) tipHide(); });

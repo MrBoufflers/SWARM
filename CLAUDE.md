@@ -1,6 +1,6 @@
 # Swarm & Steel — prototype (dépôt SWARM)
 
-Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.5.29 au 12/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
+Jeu de société asymétrique 2 joueurs (Essaim contre Colonie) conçu par **Oni**, game designer francophone. Prototype HTML/JS : hot-seat, en ligne (code à 5 caractères) ou solo contre l'IA. Version du jeu : `SF.VERSION` (0.5.30 au 13/11/2026). Le module moteur s'appelle `SF` (ancien nom « Siège & Fusée »).
 Tout est **en français** : réponds à Oni en français.
 
 Historique détaillé (décisions, lots, anciennes règles) : `docs/historique-claude.md`. Journal des versions : `docs/versions.md`. Livret : `docs/regles-v0.3.md` (le jeu fait foi en cas d'écart).
@@ -37,6 +37,7 @@ assets/  miniatures, logos, audio/musique.mp3 ; images/ = originaux d'Oni
 - **État** `S` unique, sérialisable (localStorage `swarm-steel-v03`), `SF.newGame(solo)`, `SF.migrate` pour les anciennes parties.
 - **Actions** : `SF.apply(S, camp, type, args)` (table `SF.ACTIONS`) → `""` ou raison du refus, puis `autoAdvance`. Interface locale, IA et serveur passent par là. `SF.viewFor(S, camp)` = vue filtrée. `S.fx` = événements d'animation (sans effet sur les règles). Hasard : `SF.setRng`.
 - **Phases** : Essaim `A_start` (pioche `pickOne`) → `A_deploy` (`deploy`, `teleport`, `invest`) → `A_react` (colonie) → `A_attack` (blocs, `actCase`) ; `A_famine` (colonie). Colonie `D_draw` (`tdraw {cat}`) → `D_main` (sorts, `buildAt {i,k}`, `relocate`, `build` = fin) → `D_fire` (`fire`, `fireAt`) → `D_spell` (`spellPick {i}`).
+- **UI (13/11)** : `tierTip()` (paliers), `ic()` (icônes de bâtiments avec `data-tip`), aperçu d'attaque `strikePreview` / `pvShow` / `pvClear` (simulation de `SF.strikeAt` sur une copie, PV en rouge, `#pvcard`), pastille `newBadge` (`t.new` posé dans `putTile`, effacé par `startDefenderTurn` ; `c.new` pour les créatures).
 - **UI** : `pcLayout` (écran ≥ 1100 × 620, colonie à gauche / essaim à droite) sinon `layout()` ; `phaseParts`, `pcHandoff`, `tileTargets()`, `spellCreatures()`, `iaTick()` (S.ia = camp de l'IA), `NET` / `receive` (en ligne, écran de passage `NET.ho`), `MUSIC`.
 - **Stats** : `BILAN.summary` enregistré en fin de partie (`/api/resultat`), page Statistiques par version, `balanceTables` (victoires par amélioration / bâtiment), durée (`minutes`), marqueurs `test`, `ia`, `decouverte`. Page périmée → 409 `{reload}`.
 
@@ -48,7 +49,7 @@ Serveur qui fait autorité, clients qui envoient des actions, vue filtrée :
 - à personne : ordre des pioches (seulement les nombres). La **défausse des sortilèges est publique**. Le journal évite de nommer les tuiles camouflées (`pubName`).
 Fenêtres `A_famine` / `A_react` seulement si la colonie tient le bon sort (validé). Netlify : interrogation toutes les 2 s, écriture conditionnelle (etag).
 
-## Règles en vigueur (résumé, v0.5.29)
+## Règles en vigueur (résumé, v0.5.30)
 
 - **Pioche essaim** carte par carte (palier = total 3/5/7/10) ; main de départ sans Œil-sonde.
 - **Mouvement en blocs** (`moveBlock`) : même case = avance ensemble à la vitesse du plus lent ; les soutiens restent avec un compagnon immobile. Carnage : pas d'avancée après la frappe (`c.struck`).
