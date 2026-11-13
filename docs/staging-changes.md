@@ -39,3 +39,6 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.31
 - La pastille NEW est verticale, en haut à gauche (ne cache plus les noms).
+
+## v0.5.32
+- Correctif : les bâtiments camouflés (vue colonie) remplissent de nouveau toute leur case.

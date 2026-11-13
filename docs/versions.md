@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.5.32 — 13 novembre 2026
+
+**Correctif (Oni)**
+- Les bâtiments camouflés (vue colonie) ne remplissaient plus toute leur case : la règle des infobulles forçait leur position. Elle ne prend plus le dessus sur le positionnement des éléments (tuiles, cases à portée de tourelle, niveaux des coins, pastille NEW).
+
 ## v0.5.31 — 13 novembre 2026
 
 **Interface (Oni)**

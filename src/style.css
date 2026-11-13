@@ -351,7 +351,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .node.un.closed { opacity: .28; }
 .node.un.needR1 { opacity: .55; }
 /* info-bulles (survol, ou toucher sur mobile : focus) */
-[data-tip] { position: relative; }
+:where([data-tip]) { position: relative; } /* poids 0 : ne doit jamais écraser un position: absolute (.tile, .rng, .lv, .newb…) — v0.5.32 */
 [data-tip]:hover::after, [data-tip]:focus-visible::after, [data-tip]:focus::after {
   content: attr(data-tip); position: absolute; z-index: 40; top: 50%; left: calc(100% + 8px); transform: translateY(-50%);
   width: max-content; max-width: 230px; white-space: pre-line; text-align: left;
