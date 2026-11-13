@@ -595,7 +595,7 @@
       <div class="legend"><span><i class="sw lane-N"></i>Nord</span><span><i class="sw lane-E"></i>Est</span><span><i class="sw lane-S"></i>Sud</span><span><i class="sw lane-O"></i>Ouest</span><span>Lettres : colonnes d'entrée</span></div>`;
   }
   // pastille « NEW » : ce que l'adversaire a posé à son dernier tour (bâtiments pour l'essaim, créatures pour la colonie) — Oni, 13/11/2026
-  const newBadge = on => on ? `<i class="newb" data-tip="Posé au dernier tour de l'adversaire">NEW</i>` : "";
+  const newBadge = on => on ? `<i class="newb" tabindex="0" data-tip="NEW : posé au dernier tour de l'adversaire">N</i>` : "";
   // pastille d'icône avec infobulle (bâtiments du plateau) ; raw : la valeur est déjà du HTML
   const ic = (name, val, tip, raw) => `<span class="ic" tabindex="0" data-tip="${E(tip)}">${icon(name)}${val === "" ? "" : raw ? val : E(String(val))}</span>`;
   // Carte de tuile en main : durée, PV, Épines et capacités (libellés du Catalogue du livret v0.3)

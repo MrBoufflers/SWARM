@@ -42,3 +42,6 @@ dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans
 
 ## v0.5.32
 - Correctif : les bâtiments camouflés (vue colonie) remplissent de nouveau toute leur case.
+
+## v0.5.33
+- La pastille NEW devient un petit rond jaune avec un « N » centré.
