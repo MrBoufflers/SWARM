@@ -118,7 +118,7 @@ const SF = (() => {
       B2: ["Provocation renforcée", "+1 PV pour les tanks. Les tourelles qui ont un tank à portée doivent le viser en priorité."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
       B1: ["Griffes", "Aura Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit. Aura Mobilité 1 (+1 vitesse)."],
-      A2: ["Régénération", "Aura Soin de case : au début de chaque tour de l'essaim, les autres créatures de la case d'un soutien reçoivent un jeton Blindage (la première perte de PV est annulée), qui revient à chaque tour. Les tanks avec Blindage retrouvent aussi leur jeton."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      A2: ["Régénération", "Chaque soutien porte un jeton Soin : il annule la première perte de PV d'une autre créature de sa case (aggro, tank ou soutien), puis est défaussé. Les jetons Soin (et Blindage) reviennent au début de chaque tour de l'essaim."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.10";
+  const VERSION = "0.6.11";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -422,6 +422,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ créatures
   function makeCreature(S, name, lane, u, extra) {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
+    if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r2 === "A") c.soin = 1; // Régénération : jeton Soin à l'arrivée
     if (CREATURES[name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1; // Blindage : jeton à l'arrivée (Oni, 11/11/2026)
     return c;
   }
@@ -468,6 +469,14 @@ const SF = (() => {
       c.blind = 0;
       fx(S, { t: "dmg", id: c.id, n: 0, hp: c.hp });
       log(S, "essaim", `Blindage : ${c.name} ne perd rien${why ? " (" + why + ")" : ""} ; le jeton est défaussé.`);
+      return;
+    }
+    // Régénération : le jeton Soin d'un autre soutien de la case annule la première perte de PV d'une créature de la case
+    const sh = n > 0 ? caseMates(S, c).find(o => isSoutien(o) && o.soin && o.hp > 0) : null;
+    if (sh) {
+      sh.soin = 0;
+      fx(S, { t: "dmg", id: c.id, n: 0, hp: c.hp });
+      log(S, "essaim", `Régénération : le jeton Soin de ${sh.name} annule les dégâts subis par ${c.name}${why ? " (" + why + ")" : ""}.`);
       return;
     }
     c.hp -= n;
@@ -849,7 +858,7 @@ const SF = (() => {
     clearDamage(S);
     if (S.upgrades.soutien.r2 === "A") for (const c of S.creatures) { // Régénération : les jetons utilisés reviennent
       if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1;
-      if (caseMates(S, c).some(isSoutien)) c.blind = 1; // Aura Soin de case (Oni, 14/11/2026) : jeton pour les autres créatures de la case d'un soutien
+      if (isSoutien(c)) c.soin = 1; // Régénération (Oni, 14/11/2026) : chaque soutien retrouve son jeton Soin
     }
     S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.morphed; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
@@ -1054,6 +1063,7 @@ const SF = (() => {
     fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
+    if (type === "soutien" && slot === "A2") for (const c of S.creatures) if (isSoutien(c)) c.soin = 1; // Régénération : jeton Soin aux soutiens en jeu
     if (type === "tank" && slot === "A2") { // Blindage : les tanks déjà en jeu reçoivent aussi leur jeton (Oni, 11/11/2026)
       for (const c of S.creatures) if (CREATURES[c.name].type === "tank") c.blind = 1;
     }

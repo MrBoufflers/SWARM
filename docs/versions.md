@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.11 — 14 novembre 2026
+
+- Régénération : un jeton Soin par soutien (`c.soin`), qui annule la première perte de PV d'une autre créature de sa case, puis est défaussé ; il revient au début de chaque tour de l'essaim (remplace l'Aura Soin de case, trop forte).
+
 ## v0.6.10 — 14 novembre 2026
 
 - Bélier (tank B2) remplacé par **Provocation renforcée** : +1 PV pour les tanks, et les tourelles qui ont un tank à portée doivent le viser en priorité (`supportTargets`).

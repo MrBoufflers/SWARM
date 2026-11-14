@@ -742,6 +742,7 @@
     const vWhy = [`base ${vb}`, SF.hasMobility(S, c) ? "+1 Mobilité" : "", mob ? `+${mob} Aura Mobilité 1` : ""].filter(Boolean);
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.blind) extras.push("jeton Blindage (les prochains dégâts sont annulés)");
+    if (c.soin) extras.push("jeton Soin (annule la première perte de PV d'une autre créature de sa case)");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     const giv = givenAuras(c), rec = receivedAuras(c);
     const grid = caseGrid(c);
