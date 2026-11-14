@@ -3,6 +3,11 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.5
+- **Boosts de départ** : chacun des 4 Barbelés de la couronne 1 reçoit au hasard un boost unique (Renforcé 1, Bouclier, Épines +1, +1 PV), perdu avec la tuile.
+- **Bâtiment posé sur des créatures** : la colonie choisit la case voisine où les envoyer (au lieu d'un recul automatique).
+- Bandeau « FIN DES RÉACTIONS » à la place de l'écran « À vous de jouer » après les réactions de la colonie.
+
 ## v0.6.4
 - Population max par lane : 4 au plus (palier 4 : 4 au lieu de 5). Les paliers et le nombre de cartes ne changent pas.
 

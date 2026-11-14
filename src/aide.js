@@ -131,7 +131,7 @@ const AIDE = (() => {
       <h3>Votre tour</h3>
       <ol>
         <li><b>Sortilèges de soutien</b> : jouez ceux que vous voulez.</li>
-        <li><b>Construction immédiate</b> : touchez une tuile de votre main, puis une case surlignée : vous payez tout de suite ses points de construction et le bâtiment est posé aussitôt. Un bâtiment par lane et par tour (deux après l'étage 6) ; au tout premier tour, un seul bâtiment au total. Case valable : libre, dans la lane, touchant un bâtiment, un support ou la fusée (sans diagonale) ; les créatures présentes reculent d'une case.</li>
+        <li><b>Construction immédiate</b> : touchez une tuile de votre main, puis une case surlignée : vous payez tout de suite ses points de construction et le bâtiment est posé aussitôt. Un bâtiment par lane et par tour (deux après l'étage 6) ; au tout premier tour, un seul bâtiment au total. Case valable : libre, dans la lane, touchant un bâtiment, un support ou la fusée (sans diagonale) ; les créatures présentes sont envoyées par la colonie sur une case voisine de son choix.</li>
         <li><b>Fusée</b> : les points non dépensés vont à la fusée quand vous terminez la construction. Les points du tour sont fixés au début du tour : un bâtiment posé ce tour ne donne ses travailleurs qu'au tour suivant.</li>
         <li><b>Supports et fusée</b> : les nouveaux supports apparaissent, puis la fusée gagne ses étages.</li>
         <li><b>Tirs</b> : touchez une tourelle surlignée, puis une créature surlignée (ou « Tirs automatiques »). « Terminer le tour » fait tirer les tourelles restantes. Le tour passe seul quand plus aucune tourelle ne peut tirer.</li>
@@ -211,7 +211,7 @@ const AIDE = (() => {
     { id: "c-fusee", side: "colonie", img: "Fusée", title: "La fusée", when: S => S.phase === "D_main",
       text: () => `Un étage coûte ${F[0]} points (étages 1 à 3), puis ${F[1]}, ${F[2]} et ${F[3]}. Chaque étage donne +1 travailleur. Étage 3 : +2 technologies. Étage 6 : +1 chantier par lane. Étage 9 : la Nuke détruit toutes les créatures. Survolez les étages pour le détail.` },
     { id: "c-pose", side: "colonie", img: "Rempart", title: "Poser un bâtiment", when: S => S.phase === "D_place",
-      text: () => `Le bâtiment est achevé : touchez une case surlignée. Elle doit être libre, dans sa lane, et toucher un bâtiment, un support ou la fusée. Les créatures présentes reculent d'une case.` },
+      text: () => `Le bâtiment est achevé : touchez une case surlignée. Elle doit être libre, dans sa lane, et toucher un bâtiment, un support ou la fusée. Les créatures présentes sont envoyées par la colonie sur une case voisine de son choix.` },
     { id: "c-supports", side: "colonie", img: "support 1", title: "Les supports", when: S => S.phase === "D_place" || S.phase === "D_fire",
       text: () => `Un support apparaît sur un coin dès que ses 2 bâtiments côté fusée sont posés, et tombe quand tous ceux qui le touchent sont détruits. Niveau I (couronne 1) et II (couronne 2) : tourelles. Niveau III (couronne 3) : +${SF.SUP3_WORKERS} travailleurs.` },
     { id: "c-tirs", side: "colonie", img: "support 2", title: "Tirer", when: S => S.phase === "D_fire",

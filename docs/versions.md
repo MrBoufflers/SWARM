@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.5 — 14 novembre 2026
+
+- Départ : les 4 Barbelés de la couronne 1 reçoivent chacun un boost unique au hasard (Renforcé 1, Bouclier, Épines +1, +1 PV), perdu avec la tuile.
+- Un bâtiment posé sur une case occupée : la colonie choisit la case voisine (même lane, couronne ±1, colonne ±1, entrée comprise, sans bâtiment) où vont les créatures chassées ; sans choix, recul d'une couronne comme avant (IA). Argument `to: [colonne, couronne]` des actions `buildAt`, `placeAt`, `relocate`.
+- En ligne : à la fin des réactions de la colonie, plus d'écran « À vous de jouer » mais un bandeau « FIN DES RÉACTIONS » (même style que « RÉACTIONS ! »), aussi en local.
+
 ## v0.6.4 — 14 novembre 2026
 
 - Population max par lane : 2 / 3 / 4 / 4 (le palier 4 reste à 4 au lieu de 5) ; les paliers et les 10 cartes en main ne changent pas.

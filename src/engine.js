@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.4";
+  const VERSION = "0.6.5";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -212,6 +212,13 @@ const SF = (() => {
       const [x, y] = toGlobal(lane, u, k);
       S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 2, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
+    // boosts de départ (Oni, 14/11/2026) : les 4 Barbelés de la couronne 1 reçoivent chacun un boost unique au hasard
+    // (Renforcé 1, Bouclier, Épines +1, +1 PV), les 4 représentés ; il disparaît avec la tuile
+    const boosts = shuffle(["ren", "shield", "ep", "hp"]);
+    LANES.forEach((lane, i) => {
+      const t = S.tiles[key(...toGlobal(lane, 0, 1))], b = boosts[i]; t.boost = b;
+      if (b === "ren") t.ren = 1; else if (b === "shield") t.shield = 1; else if (b === "ep") t.ep += 1; else { t.hp += 1; t.max += 1; }
+    });
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     placeSupports(S); // supports de niveau 2 aux coins de la couronne 2 (leurs murs sont posés)
     for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDecks[tileCat(n)].push(n);
@@ -376,16 +383,33 @@ const SF = (() => {
   }
   // Un bâtiment qui sort de chantier sur une case occupée fait reculer les créatures d'une case vers le fond
   // (même colonne, couronne +1). Si cette case porte déjà une tuile, elles reculent jusqu'à la première case libre.
-  function pushBack(S, k) {
+  // Cases où l'on peut envoyer les créatures chassées par un bâtiment posé en k (Oni, 14/11/2026) : les cases voisines de la
+  // même lane (couronne ±1, colonne ±1), vides de bâtiment, entrée comprise ; renvoie [] s'il n'y a pas de créature à chasser.
+  function pushOptions(S, k) {
+    const here = S.creatures.filter(c => c.k < 4 && posKey(c) === k);
+    if (!here.length) return [];
+    const { lane, u, k: kk } = here[0], out = [];
+    for (let dk = -1; dk <= 1; dk++) for (let du = -1; du <= 1; du++) {
+      const nk = kk + dk, nu = u + du;
+      if ((!dk && !du) || nk < 1 || nk > 4 || Math.abs(nu) > (nk === 4 ? 2 : nk - 1)) continue;
+      if (nk < 4 && S.tiles[key(...toGlobal(lane, nu, nk))]) continue;
+      out.push([nu, nk]);
+    }
+    return out;
+  }
+  // to : [colonne, couronne] choisi par la colonie ; sinon (ou choix invalide) recul d'office d'une couronne vers le fond
+  function pushBack(S, k, to) {
     const here = S.creatures.filter(c => c.k < 4 && posKey(c) === k);
     if (!here.length) return;
     const { lane, u } = here[0];
-    let nk = here[0].k + 1;
-    while (nk < 4 && S.tiles[key(...toGlobal(lane, u, nk))]) nk++;
-    fx(S, { t: "push", ids: here.map(c => c.id), lane, u, to: nk });
-    for (const c of here) c.k = nk;
-    const where = nk === 4 ? "sur la case d'entrée" : `en couronne ${nk}`;
-    log(S, "colonie", `${here.map(c => c.name).join(", ")} recule${here.length > 1 ? "nt" : ""} ${where} pour laisser place au bâtiment.`);
+    let nk = here[0].k + 1, nu = u;
+    const pick = Array.isArray(to) && pushOptions(S, k).find(o => o[0] === to[0] && o[1] === to[1]);
+    if (pick) { nu = pick[0]; nk = pick[1]; }
+    else while (nk < 4 && S.tiles[key(...toGlobal(lane, u, nk))]) nk++;
+    fx(S, { t: "push", ids: here.map(c => c.id), lane, u: nu, to: nk });
+    for (const c of here) { c.k = nk; c.u = nu; }
+    const where = nk === 4 ? "sur la case d'entrée" : `en ${cellName(nu, nk)}`;
+    log(S, "colonie", `${here.map(c => c.name).join(", ")} est envoyé${here.length > 1 ? "s" : ""} ${where} pour laisser place au bâtiment.`);
   }
   function canTarget(S, lane, k) { // case cible valable pour un chantier de cette lane
     const [x, y] = parse(k);
@@ -1197,7 +1221,7 @@ const SF = (() => {
     for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) { const k = key(x, y); if (canBuildAt(S, name, k)) out.push(k); }
     return out;
   }
-  function buildAt(S, i, k) {
+  function buildAt(S, i, k, to) {
     const name = S.hand[i];
     if (!name || !canBuildAt(S, name, k)) return false;
     const lane = cellLane(...parse(k));
@@ -1205,7 +1229,7 @@ const SF = (() => {
     S.spent = (S.spent || 0) + TILES[name].d;
     S.built = S.built || { N: 0, E: 0, S: 0, O: 0 }; S.built[lane] += 1;
     fx(S, { t: "work", lane, n: TILES[name].d });
-    putTile(S, name, k, lane);
+    putTile(S, name, k, lane, to);
     return true;
   }
   const pubName = name => (TILES[name] && TILES[name].camo ? "tuile camouflée" : name);
@@ -1309,18 +1333,18 @@ const SF = (() => {
       log(S, "colonie", `${pubName(p.tile)} : aucune case libre en lane ${LANE_NAME[p.lane]}, la tuile revient en main.`);
     }
   }
-  function placeTile(S, k) {
+  function placeTile(S, k, to) {
     if (S.phase !== "D_place" || !placeTargets(S).includes(k)) return false;
     const p = S.toPlace.shift();
-    putTile(S, p.tile, k, p.lane);
+    putTile(S, p.tile, k, p.lane, to);
     skipUnplaceable(S);
     if (!S.toPlace.length) finishDefenderTurn(S);
     return true;
   }
   // pose d'une tuile (chantier achevé ou construction immédiate)
-  function putTile(S, name, k, lane) {
+  function putTile(S, name, k, lane, to) {
     const [x, y] = parse(k);
-    pushBack(S, k);
+    pushBack(S, k, to);
     S.tiles[k] = tileStats(name, x, y); S.tiles[k].new = 1; // pastille NEW pour l'essaim jusqu'au prochain tour de la colonie (Oni, 13/11/2026)
     S.builtCount = S.builtCount || {}; S.builtCount[name] = (S.builtCount[name] || 0) + 1; // statistiques (Oni, 09/11/2026)
     fx(S, { t: "place", k });
@@ -1398,10 +1422,10 @@ const SF = (() => {
     for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) { const k = key(x, y), lane = cellLane(x, y), d = TILES[S.relocate.name] && TILES[S.relocate.name].dir; if (lane && (!d || d === lane) && canTarget(S, lane, k)) out.push(k); }
     return out;
   }
-  function relocate(S, k) {
+  function relocate(S, k, to) {
     if (!S.relocate || !relocateTargets(S).includes(k)) return false;
     const t = S.relocate; delete S.relocate;
-    pushBack(S, k); S.tiles[k] = t;
+    pushBack(S, k, to); S.tiles[k] = t;
     fx(S, { t: "place", k });
     placeSupports(S); visionSweep(S);
     log(S, "colonie", `Reconversion : ${t.camo && !t.revealed ? "la tuile camouflée" : t.name} est reposée en lane ${LANE_NAME[cellLane(...parse(k))]}.`);
@@ -1556,7 +1580,7 @@ const SF = (() => {
     } },
     endA: { phase: ["A_attack"], run(S) { if (S.creatures.some(c => mustAdvance(S, c))) return false; endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
     tdraw: { phase: ["D_draw"], run: (S, a) => drawTileFrom(S, a.cat) }, // pioche d'une tuile dans la pioche choisie
-    buildAt: { phase: ["D_main"], run: (S, a) => isInt(a.i) && typeof a.k === "string" && /^-?\d,-?\d$/.test(a.k) && buildAt(S, a.i, a.k) },
+    buildAt: { phase: ["D_main"], run: (S, a) => isInt(a.i) && typeof a.k === "string" && /^-?\d,-?\d$/.test(a.k) && buildAt(S, a.i, a.k, a.to) },
     startCh: { phase: ["D_main"], run(S, a) {
       if (!(isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane))) return false;
       // travailleurs assignés d'office (Oni, 04/11/2026) : juste assez pour finir les chantiers de la lane, dans la
@@ -1574,14 +1598,14 @@ const SF = (() => {
       S.alloc[a.lane] = v; return true;
     } },
     build: { phase: ["D_main"], run: S => { if (S.relocate) return false; endDefenderTurn(S); return true; } }, // construction et fusée, puis tirs
-    relocate: { phase: ["D_main"], run: (S, a) => typeof a.k === "string" && relocate(S, a.k) }, // Reconversion : repose la tuile remplacée
+    relocate: { phase: ["D_main"], run: (S, a) => typeof a.k === "string" && relocate(S, a.k, a.to) }, // Reconversion : repose la tuile remplacée
     spellPick: { phase: ["D_spell"], run(S, a) { if (!(isInt(a.i) && pickSpell(S, a.i))) return false; openFamine(S); return true; } },
     toFire: { phase: ["D_main"], run: S => { endDefenderTurn(S); return true; } }, // ancien nom (pages encore ouvertes)
     fire: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && isInt(a.id) && fire(S, a.sk, a.id) },
     fireDep: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && typeof a.k === "string" && fireDep(S, a.sk, a.k) },
     autoFire: { phase: ["D_fire"], run: S => { autoFire(S); return true; } },
     endD: { phase: ["D_fire"], run(S) { endColonyTurn(S); openFamine(S); return true; } },
-    placeAt: { phase: ["D_place"], run(S, a) { if (!placeTile(S, a.k)) return false; openFamine(S); return true; } },
+    placeAt: { phase: ["D_place"], run(S, a) { if (!placeTile(S, a.k, a.to)) return false; openFamine(S); return true; } },
   };
   // renvoie "" si l'action est appliquée, sinon la raison du refus (S n'est pas modifié dans ce cas)
   function apply(S, side, type, args) {
@@ -1656,7 +1680,7 @@ const SF = (() => {
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
     clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, mustAdvance, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
-    attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
+    attacks, pushBack, pushOptions, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, depTargets, fireDep, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };

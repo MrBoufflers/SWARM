@@ -68,7 +68,7 @@
     D_draw: ["colonie", "Pioche de la colonie", "Complétez votre main carte par carte : pour chaque tuile, choisissez sa pioche (renforts, actifs ou pièges)."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, puis construction : choisissez une tuile et sa case, elle est payée et posée tout de suite (un bâtiment par lane et par tour). Les points restants vont à la fusée, puis les tourelles tirent."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
-    D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes reculent d'une case."],
+    D_place: ["colonie", "Pose des bâtiments", "Un chantier est achevé : choisissez la case de sa lane où poser le bâtiment. Les créatures présentes sont envoyées par la colonie sur une case voisine de son choix."],
   };
   const who = () => SF.actor(S) || "essaim";
   const online = () => MODE === "online";
@@ -362,11 +362,29 @@
       <p class="ph-txt">${E(p[2])}</p>${body}<div class="acts">${acts}</div></section>`;
   }
   // contenu de la boîte d'action (consignes, choix, boutons) : partagé par la mise en page mobile et la mise en page PC
+  // pose d'un bâtiment sur une case occupée : la colonie choisit la case voisine des créatures chassées (Oni, 14/11/2026)
+  function pushAsk(a, k, i) {
+    const f = { a, k, i: i === undefined ? null : i };
+    if (SF.pushOptions(S, k).length > 1) { UI.pushFor = f; return render(); }
+    return pushPlay(f, null);
+  }
+  function pushPlay(f, to) {
+    const args = f.a === "buildAt" ? { i: f.i, k: f.k } : { k: f.k };
+    if (to) args.to = to;
+    return play(f.a, args, f.a === "buildAt" ? () => { UI.sel = null; } : undefined);
+  }
   function phaseParts(sh) { // sh : textes courts (mise en page PC, le détail est au survol)
     const p = PHASE_TXT[S.phase];
     if ((online() && !myTurn()) || iaTurn()) return { p, body: "", acts: "", waiting: true };
     let body = "", acts = "";
     const ph = S.phase;
+    if (UI.pushFor && (ph === "D_main" || ph === "D_place")) { // la colonie choisit où vont les créatures chassées (Oni, 14/11/2026)
+      const f = UI.pushFor, cs = S.creatures.filter(c => c.k < 4 && SF.posKey(c) === f.k);
+      body = `<p class="hint">${E(cs.map(c => c.name).join(", "))} ${cs.length > 1 ? "occupent" : "occupe"} cette case : choisissez la case voisine où ${cs.length > 1 ? "les" : "le"} envoyer.</p><div class="choices">`
+        + SF.pushOptions(S, f.k).map(([u, k]) => `<button data-a="pushTo" data-u="${u}" data-v="${k}">${k === 4 ? "Entrée " + SF.COLS[u + 2] : SF.COLS[u + 2] + k}</button>`).join("") + `</div>`;
+      acts = `<button data-a="pushCancel">Annuler</button>`;
+      return { p, body, acts, waiting: false };
+    }
     if (ph === "A_famine") {
       acts = `<button data-a="famine" data-v="1" class="primary">Jouer Famine</button><button data-a="famine" data-v="0">Ne pas jouer</button>`;
     } else if (ph === "A_reinc") { // Réincarnation au choix (Oni, 10/11/2026)
@@ -1148,8 +1166,8 @@
     if (!S.winner) setPhaseHandoff(prev);
     save();
     if (S.winner) recordLocal();
-    const reacts = !REACT.includes(prev) && REACT.includes(S.phase);
-    animate(events).then(() => { render(); afterRender(events); if (reacts) reactBanner(); });
+    const reacts = !REACT.includes(prev) && REACT.includes(S.phase), reactEnds = REACT.includes(prev) && !REACT.includes(S.phase) && !S.winner;
+    animate(events).then(() => { render(); afterRender(events); if (reacts) reactBanner(); else if (reactEnds) reactBanner("FIN DES RÉACTIONS", "de la colonie"); });
   }
   function handle(a, d) {
     if (a === "help") { UI.help = !UI.help; render(); return; }
@@ -1246,10 +1264,12 @@
       case "actAll": return play("actAll");
       case "endA": return play("endA");
       case "startCh": if (UI.sel !== null) return play("startCh", { i: UI.sel, lane: d.l }, () => { UI.sel = null; }); break;
-      case "placeAt": return play("placeAt", { k: d.k });
+      case "placeAt": return pushAsk("placeAt", d.k);
       case "spellPick": return play("spellPick", { i: Number(d.v) });
-      case "relocate": return play("relocate", { k: d.k });
-      case "buildAt": { const i = UI.sel; UI.sel = null; if (i !== null) return play("buildAt", { i, k: d.k }); break; }
+      case "relocate": return pushAsk("relocate", d.k);
+      case "buildAt": if (UI.sel !== null) return pushAsk("buildAt", d.k, UI.sel); break;
+      case "pushCancel": UI.pushFor = null; return render();
+      case "pushTo": { const f = UI.pushFor; UI.pushFor = null; if (!f) break; return pushPlay(f, [Number(d.u), Number(d.v)]); }
       case "cancelCh": return play("cancelCh", { lane: d.l, i: Number(d.i) });
       case "alloc": return play("alloc", { lane: d.l, d: Number(d.d) });
       case "spellArg": {
@@ -1555,12 +1575,12 @@
     }
   }
   // bandeau « RÉACTIONS ! » (Oni, 06/11/2026) : arrive de la droite, reste 1 s au centre, repart vers la gauche
-  function reactBanner() {
+  function reactBanner(title, sub) {
     const old = document.querySelector(".react-banner"); if (old) old.remove();
     const b = document.createElement("div");
     b.className = "react-banner" + (animOn ? "" : " still");
     b.setAttribute("role", "status");
-    b.innerHTML = `<div class="rb-band"></div><div class="rb-txt"><b>RÉACTIONS !</b><span>${S.phase === "A_famine" ? "La colonie peut jouer Famine" : "La colonie peut jouer un sortilège offensif"}</span></div>`;
+    b.innerHTML = `<div class="rb-band"></div><div class="rb-txt"><b>${title || "RÉACTIONS !"}</b><span>${sub || (S.phase === "A_famine" ? "La colonie peut jouer Famine" : "La colonie peut jouer un sortilège offensif")}</span></div>`;
     document.body.appendChild(b);
     setTimeout(() => b.remove(), animOn ? 2300 : 1600);
   }
@@ -1679,13 +1699,15 @@
     if (!j || !j.S) return;
     if (S && !REACT.includes(S.phase) && REACT.includes(j.S.phase)) NET.react = true;
     if (Number.isInteger(j.fxN)) NET.fx = j.fxN;
-    const had = !!S, turnBefore = had && myTurn();
+    const had = !!S, turnBefore = had && myTurn(), prevPhase = S && S.phase;
     if (j.S.winner !== (S && S.winner) || (S && S.round !== j.S.round)) UI = { ...resetUI(), help: UI.help, changes: UI.changes };
     S = j.S; NET.v = j.v; NET.full = j.players.essaim && j.players.colonie;
     if (!turnBefore && myTurn()) {
       UI = { ...resetUI(), help: UI.help, changes: UI.changes, selCreature: UI.selCreature }; NET.banner = had;
       // écran de passage en ligne aussi (Oni, 09/11/2026), sauf pour les fenêtres de réaction (comme en local)
-      if (had && !S.winner && !REACT.includes(S.phase)) { NET.ho = true; NET.banner = false; }
+      // sortie d'une réaction : ni écran de passage ni « À vous de jouer », un bandeau « Fin des réactions » (Oni, 14/11/2026)
+      if (had && !S.winner && REACT.includes(prevPhase) && !REACT.includes(S.phase)) { NET.banner = false; NET.reactEnd = true; }
+      else if (had && !S.winner && !REACT.includes(S.phase)) { NET.ho = true; NET.banner = false; }
     }
     if (NET.ho && myTurn() && !S.winner) S.handoff = NET.side; else NET.ho = false;
   }
@@ -1695,6 +1717,7 @@
     receive(j);
     if (j.ok && onOk) onOk(); // ex. désélectionner la carte jouée, avant de redessiner
     render(); afterRender(j.fx || []);
+    if (NET.reactEnd) { NET.reactEnd = false; reactBanner("FIN DES RÉACTIONS", "de la colonie"); }
     if (NET.react) { NET.react = false; NET.banner = false; reactBanner(); }
     if (NET.banner) { NET.banner = false; banner(`À vous de jouer · ${PHASE_TXT[S.phase][1]}`); }
   }
