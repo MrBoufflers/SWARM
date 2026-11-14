@@ -4,9 +4,13 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.3 — 14 novembre 2026
+
+- Front et Réduit : 4 PV (validé par Oni). Tanks : PV 2 / 3 / 4 (Carapace, Béhémoth, Colosse ; ATQ inchangée 1 / 2 / 3).
+
 ## v0.6.2 — 14 novembre 2026
 
-- Ligne de front et Réduit : PV fixes (3, à confirmer par Oni) et Épines 2 ; Front seulement sur la 3e couronne, Réduit sur la 1re.
+- Ligne de front et Réduit : PV fixes et Épines 2 ; Front seulement sur la 3e couronne, Réduit sur la 1re.
 - +1 Épines à tous les bâtiments qui en avaient (Barbelé 2, Baraquement 2, Haie 3, Mur hérissé 3, Ronceraie 3).
 - Un support qui tombe ne rapporte plus de biomasse.
 - Fusée : le 3e palier d'étages coûte 6 au lieu de 7 (2 / 4 / 6 / 10).

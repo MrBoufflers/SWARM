@@ -3,6 +3,10 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.3
+- Ligne de front et Réduit : 4 PV.
+- Tanks : PV 2 / 3 / 4 (Béhémoth 3 au lieu de 4, Colosse 4 au lieu de 6).
+
 ## v0.6.2
 - **Ligne de front / Réduit** : PV fixes (3) et Épines 2 ; Front uniquement sur la 3e couronne, Réduit sur la 1re.
 - **+1 Épines** sur tous les bâtiments qui en avaient (Barbelé 2, Baraquement 2, Haie 3, Mur hérissé 3, Ronceraie 3).

@@ -9,8 +9,8 @@ const SF = (() => {
     "Massacreur": { type: "aggro", lvl: 3, cost: 6, pv: 3, atq: 5 }, // niveau 3 = niveau 1 +2 ATQ +2 PV (Oni, 11/11/2026 ; avant 7/1) // coût 6 (Oni, 07/11/2026 ; avant 7)
     "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 2, atq: 1 },
     // tanks : 1/3, 2/4, 3/5 (ATQ/PV, Oni 11/11/2026 ; tous à 1 ATQ du 01/11 au 11/11)
-    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 4, atq: 2 }, // Oni, 11/11/2026 (avant 1/5)
-    "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 6, atq: 3 }, // Oni, 11/11/2026 (avant 1/7) // coût 6 (Oni, 07/11/2026 ; avant 7)
+    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 3, atq: 2 }, // Oni, 11/11/2026 (avant 1/5)
+    "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 4, atq: 3 }, // Oni, 11/11/2026 (avant 1/7) // coût 6 (Oni, 07/11/2026 ; avant 7)
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
     "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "recolte", capName: "Aura Récolte", capText: "Quand une autre créature de sa case détruit un bâtiment, l'essaim gagne +1 biomasse de plus." },
@@ -50,8 +50,8 @@ const SF = (() => {
     "Avant-poste de l'Est": { d: 2, pv: 4, dir: "E", ep: 0, aura: 1, n: 1 },
     "Avant-poste du Sud": { d: 2, pv: 4, dir: "S", ep: 0, aura: 1, n: 1 },
     "Avant-poste de l'Ouest": { d: 2, pv: 4, dir: "O", ep: 0, aura: 1, n: 1 },
-    "Ligne de front": { d: 2, pv: 3, ep: 2, ring: 3, camo: 1, n: 2 }, // PV fixes + Épines 2, 3e couronne seulement (Oni, 14/11/2026)
-    "Réduit": { d: 2, pv: 3, ep: 2, ring: 1, camo: 1, n: 2 }, // PV fixes + Épines 2, 1re couronne seulement (Oni, 14/11/2026)
+    "Ligne de front": { d: 2, pv: 4, ep: 2, ring: 3, camo: 1, n: 2 }, // PV fixes + Épines 2, 3e couronne seulement (Oni, 14/11/2026)
+    "Réduit": { d: 2, pv: 4, ep: 2, ring: 1, camo: 1, n: 2 }, // PV fixes + Épines 2, 1re couronne seulement (Oni, 14/11/2026)
     // Pièges (Oni, 07/11/2026 ; remplacent le Piège à 3 dégâts et le Siphon à 3 biomasse) : effet = PV = tours de construction
     "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 1, camo: 1, n: 2 },
     "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 3, camo: 1, n: 2 }, // dégâts 1 / 3 / 5 (Oni, 09/11/2026 ; avant 1 / 2 / 3)
@@ -70,7 +70,7 @@ const SF = (() => {
     "Rempart": "Renforcé 1 : −1 dégât à chaque attaque.", "Bastion": "Renforcé 2 : −2 dégâts à chaque attaque.",
     "Avant-poste du Nord": "4 PV. Seulement dans la lane Nord.", "Avant-poste de l'Est": "4 PV. Seulement dans la lane Est.",
     "Avant-poste du Sud": "4 PV. Seulement dans la lane Sud.", "Avant-poste de l'Ouest": "4 PV. Seulement dans la lane Ouest.",
-    "Ligne de front": "3 PV, Épines 2. Seulement sur la 3e couronne.", "Réduit": "3 PV, Épines 2. Seulement sur la 1re couronne.",
+    "Ligne de front": "4 PV, Épines 2. Seulement sur la 3e couronne.", "Réduit": "4 PV, Épines 2. Seulement sur la 1re couronne.",
     "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Mine majeure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Mine supérieure": "Camouflée. 5 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.2";
+  const VERSION = "0.6.3";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
