@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.6";
+  const VERSION = "0.6.7";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -210,7 +210,7 @@ const SF = (() => {
     // haies d'épines de départ : la couronne 1 et toute la couronne 2 (Oni, 01/11/2026) ; les supports de niveau 2 suivent
     for (const lane of LANES) for (const [u, k] of [[0, 1], [-1, 2], [0, 2], [1, 2]]) {
       const [x, y] = toGlobal(lane, u, k);
-      S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 2, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
+      S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
     // boosts de départ (Oni, 14/11/2026) : les 4 Barbelés de la couronne 1 reçoivent chacun un boost unique au hasard
     // (Renforcé 1, Bouclier, Épines +1, +1 PV), les 4 représentés ; il disparaît avec la tuile
@@ -1470,7 +1470,7 @@ const SF = (() => {
     for (const c of S.creatures || []) if (CREATURES[c.name] && c.hp > maxHp(S, c.name)) c.hp = maxHp(S, c.name); // Mue : plus de +1 PV au soutien
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
-      if (t.start) { t.name = START_WALL; t.ep = 2; } // Barbelé : Épines 2
+      if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1 (Oni, 14/11/2026 : reste à 1)
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
       if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
     }

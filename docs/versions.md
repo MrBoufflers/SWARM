@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.7 — 14 novembre 2026
+
+- Les Barbelés de départ restent à Épines 1 (corrige la v0.6.2).
+
 ## v0.6.6 — 14 novembre 2026
 
 - IA colonie : quand un bâtiment chasse des créatures, elle les envoie en priorité sur une case battue par le plus de tourelles (supports I / II dans les 8 cases autour) ; sans tourelle à portée, recul d'office.
@@ -25,7 +29,7 @@ Une partie garde la version à laquelle elle a commencé. Si une mise à jour ar
 ## v0.6.2 — 14 novembre 2026
 
 - Ligne de front et Réduit : PV fixes et Épines 2 ; Front seulement sur la 3e couronne, Réduit sur la 1re.
-- +1 Épines à tous les bâtiments qui en avaient (Barbelé 2, Baraquement 2, Haie 3, Mur hérissé 3, Ronceraie 3).
+- +1 Épines à tous les bâtiments qui en avaient (Baraquement 2, Haie 3, Mur hérissé 3, Ronceraie 3).
 - Un support qui tombe ne rapporte plus de biomasse.
 - Fusée : le 3e palier d'étages coûte 6 au lieu de 7 (2 / 4 / 6 / 10).
 - « Essaim agrandi » : +2 au plafond de population par lane (au lieu de +3).

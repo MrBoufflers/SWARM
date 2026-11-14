@@ -51,7 +51,7 @@ const AIDE = (() => {
         <li>Une grille de 9 × 9 cases, la fusée au centre. Quatre <b>lanes</b> en partent : Nord, Est, Sud, Ouest (couleurs bleue, verte, jaune, violette).</li>
         <li>Autour de la fusée, trois <b>couronnes</b> (1 au contact de la fusée, 3 au bord). Au-delà, les <b>cases d'entrée</b> de chaque lane, colonnes A à E : c'est là que l'essaim déploie ses créatures.</li>
         <li>Les cases en diagonale de la fusée (les coins) accueillent les <b>supports</b> de la colonie ; les créatures n'y vont jamais.</li>
-        <li>Au départ, ${plural(16, "Barbelé")} (1 PV, Épines 2) couvrent les couronnes 1 et 2, et les supports de niveau 1 et 2 sont déjà en place.</li>
+        <li>Au départ, ${plural(16, "Barbelé")} (1 PV, Épines 1) couvrent les couronnes 1 et 2, et les supports de niveau 1 et 2 sont déjà en place.</li>
       </ul>
       <h3>Une manche</h3>
       <p>L'essaim joue d'abord, puis la colonie. La colonie peut jouer certains sortilèges pendant le tour de l'essaim (fenêtres de réaction).</p>
