@@ -8,6 +8,18 @@ const IA = (() => {
   const E = typeof SF !== "undefined" ? SF : require("./engine.js");
   const clone = o => JSON.parse(JSON.stringify(o));
   const other = side => (side === "essaim" ? "colonie" : "essaim");
+  // Créatures chassées par un bâtiment posé en k (Oni, 14/11/2026) : l'IA les envoie en priorité sur une case battue par des tourelles
+  // (supports de niveau I ou II dans les 8 cases autour), le plus possible ; sans tourelle, le recul d'office.
+  function pushArg(V, k) {
+    let best = null, bs = 0;
+    for (const [u, c] of E.pushOptions(V, k)) {
+      const lane = (V.creatures.find(o => o.k < 4 && E.posKey(o) === k) || {}).lane; if (!lane) return {};
+      const [x, y] = E.toGlobal(lane, u, c);
+      const n = Object.entries(V.supports).filter(([sk, l]) => { const [a, b] = sk.split(",").map(Number); return l < 3 && Math.max(Math.abs(a - x), Math.abs(b - y)) === 1; }).length;
+      if (n > bs) { bs = n; best = [u, c]; }
+    }
+    return best ? { to: best } : {};
+  }
   const ok = (V, side, type, args) => E.apply(V, side, type, args || {}) === "";
 
   // ------------------------------------------------------------ état « croyance » (ce que le camp voit + estimations)
@@ -80,7 +92,7 @@ const IA = (() => {
     for (let i = 0; i < 20 && !V.winner; i++) {
       if (V.phase === "D_draw") { const c = E.TILE_CATS.find(c => E.tilesLeft(V, c) > 0); if (!c || !ok(V, "colonie", "tdraw", { cat: c })) break; }
       else if (V.phase === "D_main") ok(V, "colonie", "build");
-      else if (V.phase === "D_place") { const t = E.placeTargets(V); if (!t.length || !ok(V, "colonie", "placeAt", { k: bestPlaceGuess(V, t) })) break; }
+      else if (V.phase === "D_place") { const t = E.placeTargets(V); if (!t.length || !ok(V, "colonie", "placeAt", { k: bestPlaceGuess(V, t), ...pushArg(V, bestPlaceGuess(V, t)) })) break; }
       else if (V.phase === "D_fire") ok(V, "colonie", "endD");
       else if (V.phase === "D_spell") ok(V, "colonie", "spellPick", { i: 0 });
       else break;
@@ -345,12 +357,12 @@ const IA = (() => {
     // chantiers : la meilleure tuile et la meilleure lane, tant que ça améliore la position
     const cands = [{ type: "build" }];
     // construction immédiate (v0.5.8) : chaque tuile de la main sur chaque case possible
-    V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k } }); });
+    V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k, ...pushArg(V, k) } }); });
     if (cands.length === 1) return cands[0];
     return best(V, "colonie", cands, finishColony, colonyLong).move || { type: "build" };
   }
   function colonyPlace(V) {
-    const cands = E.placeTargets(V).map(k => ({ type: "placeAt", args: { k } }));
+    const cands = E.placeTargets(V).map(k => ({ type: "placeAt", args: { k, ...pushArg(V, k) } }));
     return best(V, "colonie", cands, finishColony, colonyLong).move || cands[0];
   }
   function colonyFire(V) {
@@ -428,7 +440,7 @@ const IA = (() => {
       case "A_attack": return { type: "actAll" };
       case "D_draw": return { type: "tdraw", args: { cat: E.TILE_CATS.find(c => E.tilesLeft(S, c) > 0) } };
       case "D_main": return { type: "build" };
-      case "D_place": return { type: "placeAt", args: { k: E.placeTargets(S)[0] } };
+      case "D_place": return { type: "placeAt", args: { k: E.placeTargets(S)[0], ...pushArg(S, E.placeTargets(S)[0]) } };
       case "D_fire": return { type: "endD" };
       case "D_spell": return { type: "spellPick", args: { i: 0 } };
     }
