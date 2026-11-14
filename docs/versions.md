@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.10 — 14 novembre 2026
+
+- Bélier (tank B2) remplacé par **Provocation renforcée** : +1 PV pour les tanks, et les tourelles qui ont un tank à portée doivent le viser en priorité (`supportTargets`).
+- **Régénération** : Aura Soin de case. Au début de chaque tour de l'essaim, toute créature qui partage sa case avec un soutien reçoit un jeton Blindage (première perte de PV annulée) ; le Blindage des tanks revient toujours.
+
 ## v0.6.9 — 14 novembre 2026
 
 - Métamorphose : seuls les aggros et les tanks peuvent être transformés (pas les soutiens).

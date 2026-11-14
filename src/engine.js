@@ -115,10 +115,10 @@ const SF = (() => {
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "Insensibles aux Épines et aux Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
       A2: ["Blindage", "Chaque tank en jeu, et chaque tank qui arrive ensuite, reçoit un jeton Blindage : la prochaine perte de PV qu'il subirait est annulée, puis le jeton est défaussé."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
-      B2: ["Bélier", "+1 ATQ pour les tanks."] },
+      B2: ["Provocation renforcée", "+1 PV pour les tanks. Les tourelles qui ont un tank à portée doivent le viser en priorité."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
       B1: ["Griffes", "Aura Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit. Aura Mobilité 1 (+1 vitesse)."],
-      A2: ["Régénération", "Au début de chaque tour de l'essaim, les jetons Blindage déjà utilisés reviennent."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      A2: ["Régénération", "Aura Soin de case : au début de chaque tour de l'essaim, les autres créatures de la case d'un soutien reçoivent un jeton Blindage (la première perte de PV est annulée), qui revient à chaque tour. Les tanks avec Blindage retrouvent aussi leur jeton."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.9";
+  const VERSION = "0.6.10";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -280,13 +280,14 @@ const SF = (() => {
   }
   function maxHp(S, name) {
     const b = CREATURES[name]; let m = b.pv;
-    // branche test : plus aucun bonus de PV (Carapace épaisse = immunités seulement) // ; Blindage ne donne plus de PV (jeton, Oni 11/11/2026)
+    // Provocation renforcée (tank B2, Oni 14/11/2026) : +1 PV pour les tanks (remplace le Bélier : +1 ATQ)
+    if (b.type === "tank" && S.upgrades.tank.r2 === "B") m += 1;
     return m;
   }
   function baseAtq(S, name) {
     const b = CREATURES[name]; let a = b.atq;
     if (b.type === "aggro" && S.upgrades.aggro.r1 === "A") a += 1;
-    if (b.type === "tank" && S.upgrades.tank.r2 === "B") a += 1; // Bélier (remplace Masse vivante, branche test) // Carnage ne donne plus d'ATQ (2 attaques, Oni 07/11/2026)
+    // Carnage ne donne plus d'ATQ (2 attaques, Oni 07/11/2026)
     return a;
   }
   // Frénésie (soutien, rang 2 côté B) : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim
@@ -848,6 +849,7 @@ const SF = (() => {
     clearDamage(S);
     if (S.upgrades.soutien.r2 === "A") for (const c of S.creatures) { // Régénération : les jetons utilisés reviennent
       if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1;
+      if (caseMates(S, c).some(isSoutien)) c.blind = 1; // Aura Soin de case (Oni, 14/11/2026) : jeton pour les autres créatures de la case d'un soutien
     }
     S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.morphed; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
@@ -1252,7 +1254,10 @@ const SF = (() => {
   }
   function supportTargets(S, sk) { // portée : les 8 cases autour du support (diagonales comprises)
     const [x, y] = parse(sk);
-    return S.creatures.filter(c => { const [a, b] = toGlobal(c.lane, c.u, c.k); return Math.max(Math.abs(a - x), Math.abs(b - y)) === 1 && targetable(S, c); });
+    const inRange = S.creatures.filter(c => { const [a, b] = toGlobal(c.lane, c.u, c.k); return Math.max(Math.abs(a - x), Math.abs(b - y)) === 1 && targetable(S, c); });
+    // Provocation renforcée (tank B2) : un tank à portée doit être visé en priorité
+    const tanks = S.upgrades.tank.r2 === "B" ? inRange.filter(c => CREATURES[c.name].type === "tank") : [];
+    return tanks.length ? tanks : inRange;
   }
   const rocketMilestones = S => [3, 6, 9].filter(f => S.floors >= f).length;
   const turretDmg = (S, l) => (l === 1 ? 1 + rocketMilestones(S) : l === 2 ? 2 : 0);

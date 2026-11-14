@@ -3,6 +3,10 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.10
+- **Provocation renforcée** (remplace le Bélier) : +1 PV pour les tanks ; les tourelles qui ont un tank à portée doivent le viser en priorité.
+- **Régénération = Aura Soin de case** : au début de son tour, l'essaim donne un jeton Blindage à chaque créature qui partage sa case avec un soutien.
+
 ## v0.6.9
 - Métamorphose : uniquement les aggros et les tanks (plus les soutiens).
 
