@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.12 — 14 novembre 2026
+
+- Régénération = Aura Échappée (rétablie, déplacée depuis la Mue) : chaque soutien porte un jeton Échappée qui sauve une autre créature de sa case (elle recule d'une case), défaussé puis rendu au début de chaque tour de l'essaim. Le jeton Soin de la v0.6.11 disparaît.
+
 ## v0.6.11 — 14 novembre 2026
 
 - Régénération : un jeton Soin par soutien (`c.soin`), qui annule la première perte de PV d'une autre créature de sa case, puis est défaussé ; il revient au début de chaque tour de l'essaim (remplace l'Aura Soin de case, trop forte).

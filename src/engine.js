@@ -118,7 +118,7 @@ const SF = (() => {
       B2: ["Provocation renforcée", "+1 PV pour les tanks. Les tourelles qui ont un tank à portée doivent le viser en priorité."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
       B1: ["Griffes", "Aura Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit. Aura Mobilité 1 (+1 vitesse)."],
-      A2: ["Régénération", "Chaque soutien porte un jeton Soin : il annule la première perte de PV d'une autre créature de sa case (aggro, tank ou soutien), puis est défaussé. Les jetons Soin (et Blindage) reviennent au début de chaque tour de l'essaim."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      A2: ["Régénération", "Aura Échappée : chaque soutien porte un jeton Échappée ; il sauve une autre créature de sa case qui devrait être détruite (elle recule d'une case), puis le jeton est défaussé. Les jetons Échappée et Blindage utilisés reviennent au début de chaque tour de l'essaim."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.11";
+  const VERSION = "0.6.12";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -422,7 +422,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ créatures
   function makeCreature(S, name, lane, u, extra) {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
-    if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r2 === "A") c.soin = 1; // Régénération : jeton Soin à l'arrivée
+    if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r2 === "A") c.esc = 1; // Régénération : jeton Échappée à l'arrivée
     if (CREATURES[name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1; // Blindage : jeton à l'arrivée (Oni, 11/11/2026)
     return c;
   }
@@ -444,6 +444,7 @@ const SF = (() => {
     const dead = S.creatures.filter(c => c.hp + bonusHp(S, c) <= 0);
     const deadSet = new Set(dead);
     for (const c of dead) {
+      if (escape(S, c)) { deadSet.delete(c); continue; }
       // Dépouille (Charognard, Oni 12/11/2026) : une créature qui meurt hors de la case d'entrée, avec une Charognard vivant sur sa case, laisse un jeton
       if (c.k < 4 && S.creatures.some(o => o !== c && o.name === "Charognard" && !deadSet.has(o) && posKey(o) === posKey(c))) {
         const dk = posKey(c); S.depouilles = S.depouilles || [];
@@ -464,19 +465,27 @@ const SF = (() => {
     }
     if (dead.length) syncBonus(S); // les survivants qui perdent un bonus (soutien mort) gardent leurs PV
   }
+  // Échappée (Régénération depuis le 14/11/2026 ; avant : Mue, Oni 11/11/2026 ; jetons depuis le 12/11/2026, car trop forte) : chaque soutien porte un jeton Échappée (`esc`) ;
+  // une créature qui devrait mourir, accompagnée d'un autre soutien vivant qui a encore son jeton, recule d'une case (même colonne,
+  // vers l'entrée, au-delà des bâtiments) avec 1 PV, et ce jeton est défaussé pour de bon ; sur la case d'entrée, elle reste
+  function escape(S, c) {
+    if (S.upgrades.soutien.r2 !== "A") return false;
+    const saver = caseMates(S, c).find(o => isSoutien(o) && o.esc && o.hp + bonusHp(S, o) > 0);
+    if (!saver) return false;
+    saver.esc = 0;
+    let nk = Math.min(4, c.k + 1);
+    while (nk < 4 && S.tiles[key(...toGlobal(c.lane, c.u, nk))]) nk++;
+    c.hp = maxHp(S, c.name); // branche test : elle survit, ses dégâts du tour sont effacés
+    if (nk !== c.k) { fx(S, { t: "push", ids: [c.id], lane: c.lane, u: c.u, to: nk }); c.k = nk; }
+    fx(S, { t: "cheal", id: c.id, n: 1, hp: 1 });
+    log(S, "essaim", `Échappée : ${saver.name} sauve ${c.name} (jeton défaussé) : il survit et recule ${nk === 4 ? "sur la case d'entrée" : "en " + cellName(c.u, nk)}.`);
+    return true;
+  }
   function damageCreature(S, c, n, why) {
     if (n > 0 && c.blind) { // Blindage (Oni, 11/11/2026) : la prochaine perte de PV est annulée, puis le jeton est défaussé
       c.blind = 0;
       fx(S, { t: "dmg", id: c.id, n: 0, hp: c.hp });
       log(S, "essaim", `Blindage : ${c.name} ne perd rien${why ? " (" + why + ")" : ""} ; le jeton est défaussé.`);
-      return;
-    }
-    // Régénération : le jeton Soin d'un autre soutien de la case annule la première perte de PV d'une créature de la case
-    const sh = n > 0 ? caseMates(S, c).find(o => isSoutien(o) && o.soin && o.hp > 0) : null;
-    if (sh) {
-      sh.soin = 0;
-      fx(S, { t: "dmg", id: c.id, n: 0, hp: c.hp });
-      log(S, "essaim", `Régénération : le jeton Soin de ${sh.name} annule les dégâts subis par ${c.name}${why ? " (" + why + ")" : ""}.`);
       return;
     }
     c.hp -= n;
@@ -858,7 +867,7 @@ const SF = (() => {
     clearDamage(S);
     if (S.upgrades.soutien.r2 === "A") for (const c of S.creatures) { // Régénération : les jetons utilisés reviennent
       if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1;
-      if (isSoutien(c)) c.soin = 1; // Régénération (Oni, 14/11/2026) : chaque soutien retrouve son jeton Soin
+      if (isSoutien(c)) c.esc = 1; // Régénération : le jeton Échappée revient
     }
     S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.morphed; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
@@ -1063,7 +1072,7 @@ const SF = (() => {
     fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
-    if (type === "soutien" && slot === "A2") for (const c of S.creatures) if (isSoutien(c)) c.soin = 1; // Régénération : jeton Soin aux soutiens en jeu
+    if (type === "soutien" && slot === "A2") for (const c of S.creatures) if (isSoutien(c)) c.esc = 1; // Régénération : jeton Échappée aux soutiens en jeu
     if (type === "tank" && slot === "A2") { // Blindage : les tanks déjà en jeu reçoivent aussi leur jeton (Oni, 11/11/2026)
       for (const c of S.creatures) if (CREATURES[c.name].type === "tank") c.blind = 1;
     }
@@ -1470,7 +1479,6 @@ const SF = (() => {
       for (const f of ["spells", "spellDeck", "spellDiscard", "spellOffer"]) if (Array.isArray(S[f])) S[f] = S[f].map(rn);
       if (!S.totV && S.tiles && S.creatures && S.upgrades) { clearDamage(S); S.totV = 1; }
     }
-    for (const c of S.creatures || []) delete c.esc; // Échappée supprimée (Oni, 14/11/2026)
     delete S.escaped;
     { // Phéromone renommée Charognard (Oni, 12/11/2026)
       const ren = n => (n === "Phéromone" ? "Charognard" : n);

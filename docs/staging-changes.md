@@ -3,6 +3,9 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.12
+- **Régénération = Aura Échappée** : chaque soutien porte un jeton Échappée qui sauve une créature de sa case de la destruction ; il revient au début de chaque tour (le jeton Soin disparaît).
+
 ## v0.6.11
 - **Régénération** : chaque soutien porte un jeton Soin qui annule la première perte de PV d'une autre créature de sa case ; il revient à chaque tour (avant : un jeton pour toute la case, trop fort).
 

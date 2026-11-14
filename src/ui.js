@@ -649,7 +649,7 @@
       const tgt = (S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c)) || spT || tpT;
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" ? (SF.canAct(S, c) ? (S.view === "essaim" ? " go" : "") : " done") : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       const au = auraOf(c);
-      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${newBadge(c.new && S.view === "colonie")}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp${c.hp < SF.maxHp(S, c.name) ? " dmg" : ""}">${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${c.esc ? `<i class="blind" title="Jeton Échappée : sauvera une créature de sa case">${icon("mue")}</i>` : ""}${newBadge(c.new && S.view === "colonie")}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp${c.hp < SF.maxHp(S, c.name) ? " dmg" : ""}">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
@@ -674,6 +674,7 @@
   const UP_AURAS = {
     A1: [MOB, { icon: "mue", name: "Aura Métamorphose", labs: ["MÉTAMORPHOSE"], fx: "en fin de tour, transforme un aggro ou un tank de la case en celui du niveau supérieur (même type)" }],
     B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment détruit s'il ne manque qu'1 dégât", once: true }, MOB],
+    A2: [{ icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "chaque soutien sauve 1 créature de la destruction (jeton défaussé, il revient chaque tour)" }],
     B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
   };
   function upAuras() { // auras données par chaque soutien grâce aux améliorations, avec le nom de l'amélioration
@@ -742,7 +743,7 @@
     const vWhy = [`base ${vb}`, SF.hasMobility(S, c) ? "+1 Mobilité" : "", mob ? `+${mob} Aura Mobilité 1` : ""].filter(Boolean);
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.blind) extras.push("jeton Blindage (les prochains dégâts sont annulés)");
-    if (c.soin) extras.push("jeton Soin (annule la première perte de PV d'une autre créature de sa case)");
+    if (c.esc) extras.push("jeton Échappée (sauvera une créature de sa case qui devrait mourir)");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     const giv = givenAuras(c), rec = receivedAuras(c);
     const grid = caseGrid(c);
