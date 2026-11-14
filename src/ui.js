@@ -325,7 +325,7 @@
     const cur = SF.tier(S), next = SF.TIERS[cur + 1], big = S.upgrades.aggro.r2 === "B" ? 3 : 0;
     return `Biomasse : ${S.biomass}. ${next ? `Prochain palier à ${next.min} biomasse.` : "Dernier palier atteint."}\n`
       + SF.TIERS.map((t, i) => `${i === cur ? "▶ " : "   "}Palier ${i + 1} (dès ${t.min}) : pioche ${SF.tierCards(i)} cartes · ${t.cap + big} créatures max par lane`).join("\n")
-      + "\nLe palier fixe le nombre de cartes piochées (réparties entre les piles de niveau 1, 2, 3, remplies par vos améliorations) et le nombre maximum de créatures par lane (+3 avec Essaim agrandi).";
+      + "\nLe palier fixe le nombre de cartes piochées (réparties entre les piles de niveau 1, 2, 3, remplies par vos améliorations) et le nombre maximum de créatures par lane (+2 avec Essaim agrandi).";
   }
   // résumé de l'essaim vu par la colonie : chiffres clés et améliorations en icônes (détail au survol)
   function swarmSummary() {
@@ -557,7 +557,7 @@
         const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && SF.shotsLeft(S, k) > 0 && (SF.supportTargets(S, k).length || SF.depTargets(S, k).length);
         const fired = lvl && lvl < 3 && SF.shotsLeft(S, k) <= 0;
         html += lvl ? `<div class="cell sup ${imCls("support " + lvl)}${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
-            <span class="lv" tabindex="0" data-tip="Support de niveau ${["", "I", "II", "III"][lvl]}${lvl < 3 ? " : tourelle, tire sur une créature dans les 8 cases autour" : " : donne des travailleurs, ne tire pas"}. Il tombe (+1 biomasse pour l'essaim) si ses bâtiments voisins sont détruits.">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? ic("tourelle", `<b>${SF.turretDmg(S, lvl)}</b>`, `Tourelle de niveau ${["", "I", "II"][lvl]} : ${SF.turretDmg(S, lvl)} dégât${SF.turretDmg(S, lvl) > 1 ? "s" : ""} par tir (+1 par palier de la fusée pour le niveau I), 1 tir par tour.`, true) : ic("travailleur", `<b>+${SF.SUP3_WORKERS}</b>`, `Support de niveau III : +${SF.SUP3_WORKERS} travailleurs tant qu'il tient.`, true)}</div>`
+            <span class="lv" tabindex="0" data-tip="Support de niveau ${["", "I", "II", "III"][lvl]}${lvl < 3 ? " : tourelle, tire sur une créature dans les 8 cases autour" : " : donne des travailleurs, ne tire pas"}. Il tombe si ses bâtiments voisins sont détruits.">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? ic("tourelle", `<b>${SF.turretDmg(S, lvl)}</b>`, `Tourelle de niveau ${["", "I", "II"][lvl]} : ${SF.turretDmg(S, lvl)} dégât${SF.turretDmg(S, lvl) > 1 ? "s" : ""} par tir (+1 par palier de la fusée pour le niveau I), 1 tir par tour.`, true) : ic("travailleur", `<b>+${SF.SUP3_WORKERS}</b>`, `Support de niveau III : +${SF.SUP3_WORKERS} travailleurs tant qu'il tient.`, true)}</div>`
           : `<div class="cell corner"><span class="lv" tabindex="0" data-tip="Coin de niveau ${["", "I", "II", "III"][r]} : un support y apparaît quand ses deux bâtiments intérieurs sont construits.">${["", "I", "II", "III"][r]}</span></div>`;
         continue;
       }
@@ -595,13 +595,13 @@
   // Carte de tuile en main : durée, PV, Épines et capacités (libellés du Catalogue du livret v0.3)
   function tileCard(name) {
     const t = SF.TILES[name], L = SF.LANE_NAME;
-    const pv = t.pv === "front" ? "2 à 4" : t.pv === "reduit" ? "2 à 4" : t.pv;
+    const pv = t.pv;
     const caps = [];
     const cap = (ic, n, txt) => caps.push(`<span class="cap" tabindex="0" data-tip="${E(n + " : " + txt)}">${icon(ic)}${E(n)}</span>`);
     if (t.aura) cap("epines", "Aura d'épines", "+1 Épines à chaque bâtiment des 8 cases autour (cumulable).");
     if (t.dir) cap("cardinal", "Avant-poste", `ne peut être posé que dans la lane ${L[t.dir]}.`);
-    if (t.pv === "front") cap("couronne", "Ligne de front", "PV = 1 + couronne (2 / 3 / 4) : plus solide loin de la fusée.");
-    if (t.pv === "reduit") cap("couronne", "Réduit", "PV = 5 − couronne (4 / 3 / 2) : plus solide près de la fusée.");
+    if (t.ring === 3) cap("couronne", "Ligne de front", "Seulement sur la 3e couronne (la plus éloignée de la fusée).");
+    if (t.ring === 1) cap("couronne", "Réduit", "Seulement sur la 1re couronne (la plus proche de la fusée).");
     if (t.ren) cap("renforce", `Renforcé ${t.ren}`, `réduit de ${t.ren} les dégâts de chaque attaque (sans minimum).`);
     if (t.tech) cap("tech", `+${t.tech} technologie${t.tech > 1 ? "s" : ""}`, "compte dans votre total de technologies tant que la tuile tient.");
     if (t.temp) cap("temp", "+1 travailleur", "+1 travailleur tant que la tuile tient.");

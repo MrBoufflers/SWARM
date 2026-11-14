@@ -15,7 +15,7 @@ const AIDE = (() => {
     const rows = Object.entries(SF.CREATURES).map(([n, c]) => `<tr><td><span class="rt-n">${c && h.imCls(n) ? `<i class="rt-img ${h.imCls(n)}"></i>` : ""}<b>${h.E(n)}</b></span></td><td>${c.type}</td><td>${c.lvl}</td><td>${c.cost}</td><td>${c.pv}</td><td>${c.atq}</td><td>${c.cap ? `<b>${h.E(c.capName)}</b> : ${h.E(c.capText)}` : "—"}</td></tr>`).join("");
     return `<div class="rt-wrap"><table class="rt"><thead><tr><th>Créature</th><th>Type</th><th>Niv.</th><th>Coût</th><th>PV</th><th>ATQ</th><th>Capacité</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
-  function tilePv(t) { return t.pv === "ap" ? "2 (4 dans sa lane)" : t.pv === "front" ? "1 + couronne" : t.pv === "reduit" ? "5 − couronne" : t.pv; }
+  function tilePv(t) { return t.pv === "ap" ? "2 (4 dans sa lane)" : t.pv; }
   function tilesTable(h) {
     const rows = Object.entries(SF.TILES).map(([n, t]) => {
       const caps = [];
@@ -51,7 +51,7 @@ const AIDE = (() => {
         <li>Une grille de 9 × 9 cases, la fusée au centre. Quatre <b>lanes</b> en partent : Nord, Est, Sud, Ouest (couleurs bleue, verte, jaune, violette).</li>
         <li>Autour de la fusée, trois <b>couronnes</b> (1 au contact de la fusée, 3 au bord). Au-delà, les <b>cases d'entrée</b> de chaque lane, colonnes A à E : c'est là que l'essaim déploie ses créatures.</li>
         <li>Les cases en diagonale de la fusée (les coins) accueillent les <b>supports</b> de la colonie ; les créatures n'y vont jamais.</li>
-        <li>Au départ, ${plural(16, "Barbelé")} (1 PV, Épines 1) couvrent les couronnes 1 et 2, et les supports de niveau 1 et 2 sont déjà en place.</li>
+        <li>Au départ, ${plural(16, "Barbelé")} (1 PV, Épines 2) couvrent les couronnes 1 et 2, et les supports de niveau 1 et 2 sont déjà en place.</li>
       </ul>
       <h3>Une manche</h3>
       <p>L'essaim joue d'abord, puis la colonie. La colonie peut jouer certains sortilèges pendant le tour de l'essaim (fenêtres de réaction).</p>
@@ -79,7 +79,7 @@ const AIDE = (() => {
       <p>Tuer <b>tous les travailleurs</b> de la colonie avant qu'elle n'achève sa fusée. Chaque attaque contre la fusée tue 1 travailleur. La colonie en gagne 1 à chaque étage : frappez vite et souvent.</p>
       <h3>Vos ressources</h3>
       <ul>
-        <li><b>Biomasse</b> : vous commencez avec 5. Elle n'est jamais dépensée : chaque tour, votre <b>budget</b> est égal à votre biomasse. Elle augmente de 1 par bâtiment détruit et par support tombé.</li>
+        <li><b>Biomasse</b> : vous commencez avec 5. Elle n'est jamais dépensée : chaque tour, votre <b>budget</b> est égal à votre biomasse. Elle augmente de 1 par bâtiment détruit.</li>
         <li><b>Réserve</b> : le budget non dépensé à la fin du déploiement y est versé ; elle ne sert qu'aux améliorations.</li>
         <li><b>Paliers</b> : votre biomasse fixe votre pioche et le nombre maximum de créatures par lane.</li>
       </ul>
@@ -158,7 +158,7 @@ const AIDE = (() => {
       <h3>Ce qui vous menace</h3>
       <ul>
         <li>Les <b>aggros</b> détruisent vite vos bâtiments ; les <b>tanks</b> encaissent vos tirs et vos Épines.</li>
-        <li>Chaque bâtiment détruit et chaque support tombé rapporte de la <b>biomasse</b> à l'essaim, qui monte alors de palier (plus de cartes, de meilleur niveau).</li>
+        <li>Chaque bâtiment détruit rapporte de la <b>biomasse</b> à l'essaim, qui monte alors de palier (plus de cartes, de meilleur niveau).</li>
         <li>Le <b>Sapeur</b> détruit un bâtiment de sa lane à son arrivée ; l'<b>Œil-sonde</b> révèle vos tuiles camouflées de sa lane.</li>
       </ul>`;
   }
@@ -192,9 +192,9 @@ const AIDE = (() => {
     { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),
       text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : chaque attaque contre ce bâtiment fait X dégâts de moins (sans minimum).` },
     { id: "e-tourelles", side: "essaim", img: "support 2", title: "Les tourelles", when: S => S.phase === "A_attack" && S.creatures.some(c => c.k <= 3),
-      text: () => `Les coins turquoise sont des supports. Ceux de niveau I et II sont des tourelles : à la fin de son tour, la colonie tire avec chacune sur une créature des 8 cases autour. Un support tombe quand tous les bâtiments qui le touchent sont détruits, et vous rapporte 1 biomasse.` },
+      text: () => `Les coins turquoise sont des supports. Ceux de niveau I et II sont des tourelles : à la fin de son tour, la colonie tire avec chacune sur une créature des 8 cases autour. Un support tombe quand tous les bâtiments qui le touchent sont détruits` },
     { id: "e-biomasse", side: "essaim", img: "Charognard", title: "Gagner de la biomasse", when: S => S.biomass > 5,
-      text: S => `Chaque bâtiment détruit et chaque support tombé rapporte 1 biomasse. Paliers suivants : ${SF.TIERS.slice(1).map(t => t.min).join(", ")} de biomasse. Ils donnent plus de cartes, de meilleur niveau, et plus de créatures par lane.` },
+      text: S => `Chaque bâtiment détruit rapporte 1 biomasse. Paliers suivants : ${SF.TIERS.slice(1).map(t => t.min).join(", ")} de biomasse. Ils donnent plus de cartes, de meilleur niveau, et plus de créatures par lane.` },
     { id: "e-fusee", side: "essaim", img: "Fusée", title: "Frapper la fusée", when: S => nearRocket(S),
       text: () => `Une créature qui touche la fusée peut l'attaquer : chaque attaque tue 1 travailleur, quelle que soit sa force. La colonie perd quand elle n'a plus de travailleurs.` },
     { id: "e-sorts", side: "essaim", img: null, title: "Les sortilèges de la colonie", when: S => (S.spells || []).length > 0,

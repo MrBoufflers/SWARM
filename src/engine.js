@@ -35,12 +35,12 @@ const SF = (() => {
     "Muraille": { d: 2, pv: 4, ep: 0, camo: 1, n: 3 }, // 3 ex. (Oni, 02/11/2026 ; avant 6, puis 4)
     "Rempart": { d: 3, pv: 4, ep: 0, ren: 1, camo: 1, n: 3 },
     "Bastion": { d: 3, pv: 3, ep: 0, ren: 2, camo: 1, n: 2 },
-    "Haie d'épines": { d: 1, pv: 1, ep: 2, camo: 1, n: 3 },
-    "Mur hérissé": { d: 2, pv: 2, ep: 2, camo: 1, n: 2 },
+    "Haie d'épines": { d: 1, pv: 1, ep: 3, camo: 1, n: 3 },
+    "Mur hérissé": { d: 2, pv: 2, ep: 3, camo: 1, n: 2 },
     "Antenne": { d: 1, pv: 1, ep: 0, tech: 1, n: 3 },
     "Laboratoire": { d: 2, pv: 2, ep: 0, tech: 2, n: 3 }, // 3 ex. (Oni, 02/11/2026 ; avant 2)
     "Observatoire": { d: 3, pv: 2, ep: 0, tech: 3, shield: 1, n: 3 }, // 2 PV + Bouclier (Oni, 09/11/2026 ; avant 3 PV) // 3 ex. (Oni, 02/11/2026 ; avant 1)
-    "Baraquement": { d: 1, pv: 1, ep: 1, temp: 1, n: 3 }, // Épines 1 (Oni, 01/11/2026)
+    "Baraquement": { d: 1, pv: 1, ep: 2, temp: 1, n: 3 }, // Épines 1 (Oni, 01/11/2026)
     // Dortoir (Oni, 01/11/2026 ; avant 1 PV, travailleur permanent, 2 ex.) : 3 PV, Renforcé 2 (d'abord « Bouclier 2 »), +1 travailleur temporaire
     "Dortoir": { d: 3, pv: 3, ep: 0, ren: 1, temp: 1, n: 3 },
     // Archives (Oni, 01/11/2026) : 3 PV, +1 technologie, face visible
@@ -50,8 +50,8 @@ const SF = (() => {
     "Avant-poste de l'Est": { d: 2, pv: 4, dir: "E", ep: 0, aura: 1, n: 1 },
     "Avant-poste du Sud": { d: 2, pv: 4, dir: "S", ep: 0, aura: 1, n: 1 },
     "Avant-poste de l'Ouest": { d: 2, pv: 4, dir: "O", ep: 0, aura: 1, n: 1 },
-    "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
-    "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
+    "Ligne de front": { d: 2, pv: 3, ep: 2, ring: 3, camo: 1, n: 2 }, // PV fixes + Épines 2, 3e couronne seulement (Oni, 14/11/2026)
+    "Réduit": { d: 2, pv: 3, ep: 2, ring: 1, camo: 1, n: 2 }, // PV fixes + Épines 2, 1re couronne seulement (Oni, 14/11/2026)
     // Pièges (Oni, 07/11/2026 ; remplacent le Piège à 3 dégâts et le Siphon à 3 biomasse) : effet = PV = tours de construction
     "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 1, camo: 1, n: 2 },
     "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 3, camo: 1, n: 2 }, // dégâts 1 / 3 / 5 (Oni, 09/11/2026 ; avant 1 / 2 / 3)
@@ -62,7 +62,7 @@ const SF = (() => {
     // Abri blindé (Oni, 07/11/2026) : +1 travailleur tant qu'il tient, Bouclier (jeton qui annule la prochaine attaque), face visible
     "Abri blindé": { d: 2, pv: 2, ep: 0, temp: 1, shield: 1, n: 3 },
     // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
-    "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 1, camo: 1, n: 3 },
+    "Ronceraie": { d: 3, pv: 2, ep: 3, ren: 1, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Renforcé 2 (02/11/2026 : le Bouclier est fondu dans Renforcé)
     "Égide": { d: 2, pv: 2, ep: 0, camo: 1, shield: 1, n: 3 }, // Bouclier au lieu de Renforcé 2 (Oni, 09/11/2026) // 2 PV (Oni, 04/11/2026 ; avant 3)
   };
@@ -70,7 +70,7 @@ const SF = (() => {
     "Rempart": "Renforcé 1 : −1 dégât à chaque attaque.", "Bastion": "Renforcé 2 : −2 dégâts à chaque attaque.",
     "Avant-poste du Nord": "4 PV. Seulement dans la lane Nord.", "Avant-poste de l'Est": "4 PV. Seulement dans la lane Est.",
     "Avant-poste du Sud": "4 PV. Seulement dans la lane Sud.", "Avant-poste de l'Ouest": "4 PV. Seulement dans la lane Ouest.",
-    "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
+    "Ligne de front": "3 PV, Épines 2. Seulement sur la 3e couronne.", "Réduit": "3 PV, Épines 2. Seulement sur la 1re couronne.",
     "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Mine majeure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Mine supérieure": "Camouflée. 5 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
@@ -111,7 +111,7 @@ const SF = (() => {
   const TREES = {
     aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 vitesse."],
       A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 2 cartes de niveau 1 gratuites en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
-      B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
+      B2: ["Essaim agrandi", "+2 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "Insensibles aux Épines et aux Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
       A2: ["Blindage", "Chaque tank en jeu, et chaque tank qui arrive ensuite, reçoit un jeton Blindage : la prochaine perte de PV qu'il subirait est annulée, puis le jeton est défaussé."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
@@ -133,14 +133,14 @@ const SF = (() => {
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
-  const FLOOR_COSTS = [2, 4, 7, 10]; // Oni, 11/11/2026 (2 / 4 / 6 / 8 depuis le 04/11/2026 (avant 2 / 3 / 4 / 5 ; à l'origine 3 / 4 / 5 / 6)
+  const FLOOR_COSTS = [2, 4, 6, 10]; // 6 au lieu de 7 pour le 3e palier (Oni, 14/11/2026) ; avant : 2 / 4 / 7 / 10 // Oni, 11/11/2026 (2 / 4 / 6 / 8 depuis le 04/11/2026 (avant 2 / 3 / 4 / 5 ; à l'origine 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
   // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
   // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.1";
+  const VERSION = "0.6.2";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -210,7 +210,7 @@ const SF = (() => {
     // haies d'épines de départ : la couronne 1 et toute la couronne 2 (Oni, 01/11/2026) ; les supports de niveau 2 suivent
     for (const lane of LANES) for (const [u, k] of [[0, 1], [-1, 2], [0, 2], [1, 2]]) {
       const [x, y] = toGlobal(lane, u, k);
-      S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
+      S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 2, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     placeSupports(S); // supports de niveau 2 aux coins de la couronne 2 (leurs murs sont posés)
@@ -236,7 +236,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ dérivés
   const tier = S => { let t = 0; TIERS.forEach((r, i) => { if (S.biomass >= r.min) t = i; }); return t; };
   // plafond de population par lane : celui du palier, +3 avec l'amélioration aggro « Essaim agrandi » (décision d'Oni, 30/10/2026)
-  const capOf = S => TIERS[tier(S)].cap + (S.upgrades.aggro.r2 === "B" ? 3 : 0);
+  const capOf = S => TIERS[tier(S)].cap + (S.upgrades.aggro.r2 === "B" ? 2 : 0);
   const laneCount = (S, lane) => S.creatures.filter(c => c.lane === lane).length;
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
@@ -358,10 +358,9 @@ const SF = (() => {
   function checkSupportsFall(S) {
     for (const sk of Object.keys(S.supports)) {
       if (!supportWalls(...parse(sk)).some(w => S.tiles[w])) {
-        log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe : +1 biomasse.`);
+        log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe.`); // plus de biomasse (Oni, 14/11/2026)
         delete S.supports[sk];
-        S.biomass += 1;
-        fx(S, { t: "tileDown", k: sk, n: 1 });
+        fx(S, { t: "tileDown", k: sk, n: 0 });
       }
     }
   }
@@ -1187,6 +1186,7 @@ const SF = (() => {
     const t = TILES[name]; if (!t || S.phase !== "D_main" || S.relocate) return false;
     if (firstTurnCap(S)) return false;
     const lane = cellLane(...parse(k)); if (!lane) return false;
+    if (t.ring && t.ring !== ring(...parse(k))) return false; // Front : 3e couronne, Réduit : 1re (Oni, 14/11/2026)
     if (t.dir && t.dir !== lane) return false; // Avant-poste : seulement dans sa lane (Oni, 12/11/2026)
     if (((S.built && S.built[lane]) || 0) + S.chantiers[lane].length >= S.chPerLane) return false;
     return t.d <= pointsLeft(S) && canTarget(S, lane, k);
@@ -1446,7 +1446,7 @@ const SF = (() => {
     for (const c of S.creatures || []) if (CREATURES[c.name] && c.hp > maxHp(S, c.name)) c.hp = maxHp(S, c.name); // Mue : plus de +1 PV au soutien
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
-      if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1
+      if (t.start) { t.name = START_WALL; t.ep = 2; } // Barbelé : Épines 2
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
       if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
     }
