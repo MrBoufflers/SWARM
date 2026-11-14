@@ -110,7 +110,7 @@ const SF = (() => {
   ];
   const TREES = {
     aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 vitesse."],
-      A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 2 cartes de niveau 1 gratuites en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
+      A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 1 carte de niveau 1 gratuite en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
       B2: ["Essaim agrandi", "+2 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
     tank: { A1: ["Carapace épaisse", "Insensibles aux Épines et aux Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
@@ -118,7 +118,7 @@ const SF = (() => {
       B2: ["Provocation renforcée", "+1 PV pour les tanks. Les tourelles qui ont un tank à portée doivent le viser en priorité."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
       B1: ["Griffes", "Aura Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit. Aura Mobilité 1 (+1 vitesse)."],
-      A2: ["Régénération", "Aura Échappée : chaque soutien porte un jeton Échappée ; il sauve une autre créature de sa case qui devrait être détruite (elle recule d'une case), puis le jeton est défaussé. Les jetons Échappée et Blindage utilisés reviennent au début de chaque tour de l'essaim."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      A2: ["Régénération", "Aura Échappée : chaque soutien porte un seul jeton Échappée ; il sauve une autre créature de sa case qui devrait être détruite (elle recule d'une case), puis le jeton est défaussé pour de bon."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.12";
+  const VERSION = "0.6.13";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -465,7 +465,7 @@ const SF = (() => {
     }
     if (dead.length) syncBonus(S); // les survivants qui perdent un bonus (soutien mort) gardent leurs PV
   }
-  // Échappée (Régénération depuis le 14/11/2026 ; avant : Mue, Oni 11/11/2026 ; jetons depuis le 12/11/2026, car trop forte) : chaque soutien porte un jeton Échappée (`esc`) ;
+  // Échappée (Régénération depuis le 14/11/2026, jeton unique non renouvelé ; avant : Mue, Oni 11/11/2026 ; jetons depuis le 12/11/2026) : chaque soutien porte un jeton Échappée (`esc`) ;
   // une créature qui devrait mourir, accompagnée d'un autre soutien vivant qui a encore son jeton, recule d'une case (même colonne,
   // vers l'entrée, au-delà des bâtiments) avec 1 PV, et ce jeton est défaussé pour de bon ; sur la case d'entrée, elle reste
   function escape(S, c) {
@@ -865,10 +865,6 @@ const SF = (() => {
   }
   function startAttackerTurn(S) {
     clearDamage(S);
-    if (S.upgrades.soutien.r2 === "A") for (const c of S.creatures) { // Régénération : les jetons utilisés reviennent
-      if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1;
-      if (isSoutien(c)) c.esc = 1; // Régénération : le jeton Échappée revient
-    }
     S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
     for (const c of S.creatures) { c.new = false; c.acted = false; delete c.morphed; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
     // Réincarnation : un seul tank mort → il revient ; plusieurs → l'essaim choisit (étape A_reinc, action reinc)
@@ -907,12 +903,12 @@ const SF = (() => {
       log(S, "essaim", `Main de départ : ${S.handA.map(c => c.name).join(", ")} ; budget ${S.budget}.`);
       return;
     }
-    // Déploiement (aggro, centre du rang 2) : les 2 cartes gratuites de niveau 1 sont piochées EN PREMIER, sinon la pioche
+    // Déploiement (aggro, centre du rang 2) : la carte gratuite de niveau 1 est piochée EN PREMIER, sinon la pioche
     // normale (qui se rabat sur le niveau 1 quand les niveaux 2 et 3 sont vides) pouvait vider le niveau 1 avant elles.
     if (S.upgrades.aggro.r2 === "C") {
       let n = 0;
-      for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); n++; }
-      log(S, "essaim", n === 2 ? "Déploiement : 2 cartes de niveau 1 gratuites." : `Déploiement : pioche de niveau 1 ${n ? "presque vide, 1 seule carte gratuite" : "vide, aucune carte gratuite"}.`);
+      for (let i = 0; i < 1; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); n++; }
+      log(S, "essaim", n ? "Déploiement : 1 carte de niveau 1 gratuite." : "Déploiement : pioche de niveau 1 vide, aucune carte gratuite.");
     }
     for (let lvl = 3; lvl >= 1; lvl--) {
       for (let i = 0; i < t.n[lvl - 1]; i++) {
@@ -948,10 +944,10 @@ const SF = (() => {
     return true;
   }
   function finishPick(S, counts) {
-    if (S.upgrades.aggro.r2 === "C") { // Déploiement : 2 cartes de niveau 1 gratuites, au hasard, en plus
+    if (S.upgrades.aggro.r2 === "C") { // Déploiement : 1 carte de niveau 1 gratuite, au hasard, en plus
       let m = 0;
-      for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); m++; }
-      log(S, "essaim", m === 2 ? "Déploiement : 2 cartes de niveau 1 gratuites." : `Déploiement : pioche de niveau 1 ${m ? "presque vide, 1 seule carte gratuite" : "vide, aucune carte gratuite"}.`);
+      for (let i = 0; i < 1; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); m++; }
+      log(S, "essaim", m ? "Déploiement : 1 carte de niveau 1 gratuite." : "Déploiement : pioche de niveau 1 vide, aucune carte gratuite.");
     }
     S.budget = S.famine ? famineBudget(S.biomass) : S.biomass;
     fx(S, { t: "draw", n: S.handA.length });

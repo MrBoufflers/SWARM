@@ -3,6 +3,10 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.13
+- **Régénération** : plus de retour des jetons. Chaque soutien n'a qu'un seul jeton Échappée (le Blindage ne revient plus non plus).
+- **Déploiement** : 1 carte de niveau 1 gratuite en plus (au lieu de 2).
+
 ## v0.6.12
 - **Régénération = Aura Échappée** : chaque soutien porte un jeton Échappée qui sauve une créature de sa case de la destruction ; il revient au début de chaque tour (le jeton Soin disparaît).
 

@@ -674,7 +674,7 @@
   const UP_AURAS = {
     A1: [MOB, { icon: "mue", name: "Aura Métamorphose", labs: ["MÉTAMORPHOSE"], fx: "en fin de tour, transforme un aggro ou un tank de la case en celui du niveau supérieur (même type)" }],
     B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment détruit s'il ne manque qu'1 dégât", once: true }, MOB],
-    A2: [{ icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "chaque soutien sauve 1 créature de la destruction (jeton défaussé, il revient chaque tour)" }],
+    A2: [{ icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "chaque soutien sauve 1 créature de la destruction (un seul jeton par soutien, défaussé ensuite)" }],
     B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
   };
   function upAuras() { // auras données par chaque soutien grâce aux améliorations, avec le nom de l'amélioration
