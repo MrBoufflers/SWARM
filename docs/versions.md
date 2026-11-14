@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.9 — 14 novembre 2026
+
+- Métamorphose : seuls les aggros et les tanks peuvent être transformés (pas les soutiens).
+
 ## v0.6.8 — 14 novembre 2026
 
 - Mue : l'Aura Échappée (jetons, sauvetage) est supprimée, remplacée par l'Aura Métamorphose. Nouvelle étape `A_morph` à la fin du tour de l'essaim (si une transformation est possible) : chaque soutien, une fois par tour, transforme une autre créature de sa case en une créature du niveau supérieur et du même type, si ce niveau est débloqué (amélioration du type acquise). Actions `morph {sid, id, to}` et `morphDone`. Régénération ne rend plus que le Blindage.

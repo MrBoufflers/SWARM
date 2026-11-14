@@ -58,7 +58,7 @@
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
-    A_morph: ["essaim", "Métamorphose", "Fin du tour : vos soutiens avec la Mue peuvent transformer une autre créature de leur case en la créature de niveau supérieur du même type."],
+    A_morph: ["essaim", "Métamorphose", "Fin du tour : vos soutiens avec la Mue peuvent transformer un aggro ou un tank de leur case en la créature de niveau supérieur du même type."],
     A_reinc: ["essaim", "Réincarnation", "Plusieurs tanks sont morts depuis votre dernier tour : choisissez celui qui revient, là où il est mort. Les autres retournent dans la pioche."],
     A_start: ["essaim", "Tour de l'essaim", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe seulement le nombre total de cartes."],
     A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane ; un soutien peut être parachuté sur n'importe quelle case libre) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
@@ -672,7 +672,7 @@
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
   // Oni, 11/11/2026 : Mue = Métamorphose, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
   const UP_AURAS = {
-    A1: [MOB, { icon: "mue", name: "Aura Métamorphose", labs: ["MÉTAMORPHOSE"], fx: "en fin de tour, transforme une autre créature de la case en celle du niveau supérieur (même type)" }],
+    A1: [MOB, { icon: "mue", name: "Aura Métamorphose", labs: ["MÉTAMORPHOSE"], fx: "en fin de tour, transforme un aggro ou un tank de la case en celui du niveau supérieur (même type)" }],
     B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment détruit s'il ne manque qu'1 dégât", once: true }, MOB],
     B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
   };

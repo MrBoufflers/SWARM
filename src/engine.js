@@ -116,7 +116,7 @@ const SF = (() => {
     tank: { A1: ["Carapace épaisse", "Insensibles aux Épines et aux Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
       A2: ["Blindage", "Chaque tank en jeu, et chaque tank qui arrive ensuite, reçoit un jeton Blindage : la prochaine perte de PV qu'il subirait est annulée, puis le jeton est défaussé."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
       B2: ["Bélier", "+1 ATQ pour les tanks."] },
-    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer une autre créature de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
+    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
       B1: ["Griffes", "Aura Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit. Aura Mobilité 1 (+1 vitesse)."],
       A2: ["Régénération", "Au début de chaque tour de l'essaim, les jetons Blindage déjà utilisés reviennent."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.8";
+  const VERSION = "0.6.9";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1083,7 +1083,7 @@ const SF = (() => {
       if (!isSoutien(s) || s.morphed) continue;
       for (const c of caseMates(S, s)) {
         const d = CREATURES[c.name], up = S.upgrades[d.type];
-        if (!d || d.lvl >= 3 || !up[d.lvl === 1 ? "r1" : "r2"]) continue;
+        if (!d || d.type === "soutien" || d.lvl >= 3 || !up[d.lvl === 1 ? "r1" : "r2"]) continue;
         for (const [to] of PILES[d.lvl + 1][d.type]) out.push({ sid: s.id, id: c.id, to });
       }
     }
