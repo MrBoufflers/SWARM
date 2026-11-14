@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.14";
+  const VERSION = "0.6.15";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -827,6 +827,11 @@ const SF = (() => {
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
       log(S, "colonie", `Bouclier : ${t.name} ne subit rien de cette attaque ; le jeton est défaussé.`);
       sporesAround();
+      // Coup de grâce aussi contre un bâtiment à 1 PV protégé par un Bouclier : le jeton part, mais le bâtiment est achevé (Oni, 14/11/2026)
+      if (t.hp === 1 && primary && S.upgrades.soutien.r1 === "B" && countMates(S, c, isSoutien) > 0) {
+        t.hp = 0; fx(S, { t: "hit", id: c.id, k: tk, n: 1, hp: 0 }); log(S, "essaim", `Coup de grâce : ${t.name} est achevé malgré le Bouclier.`);
+        destroyTile(S, tk, "", c);
+      }
       pierce(dmg);
     } else if (S.stase.includes(tk)) {
       // Champ de stase (Oni, 07/11/2026) : l'attaque a lieu mais ne fait rien au bâtiment ; toute l'attaque passe en percée,
