@@ -3,6 +3,10 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.14
+- **Mines** : mineure 2 dégâts, majeure 4 dégâts, **Mine à fragmentation** (ex-supérieure) 3 dégâts à toutes les créatures de la case.
+- **Carapace épaisse** : −1 dégât des Mines (et non plus insensible), toujours insensible aux Épines.
+
 ## v0.6.13
 - **Régénération** : plus de retour des jetons. Chaque soutien n'a qu'un seul jeton Échappée (le Blindage ne revient plus non plus).
 - **Déploiement** : 1 carte de niveau 1 gratuite en plus (au lieu de 2).

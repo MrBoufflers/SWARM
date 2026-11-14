@@ -53,9 +53,9 @@ const SF = (() => {
     "Ligne de front": { d: 2, pv: 4, ep: 2, ring: 3, camo: 1, n: 2 }, // PV fixes + Épines 2, 3e couronne seulement (Oni, 14/11/2026)
     "Réduit": { d: 2, pv: 4, ep: 2, ring: 1, camo: 1, n: 2 }, // PV fixes + Épines 2, 1re couronne seulement (Oni, 14/11/2026)
     // Pièges (Oni, 07/11/2026 ; remplacent le Piège à 3 dégâts et le Siphon à 3 biomasse) : effet = PV = tours de construction
-    "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 1, camo: 1, n: 2 },
-    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 3, camo: 1, n: 2 }, // dégâts 1 / 3 / 5 (Oni, 09/11/2026 ; avant 1 / 2 / 3)
-    "Mine supérieure": { d: 3, pv: 3, ep: 0, trap: 5, camo: 1, n: 2 },
+    "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 2, camo: 1, n: 2 },
+    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 4, camo: 1, n: 2 }, // dégâts 2 / 4 / 3 en zone (Oni, 14/11/2026 ; avant 1 / 3 / 5)
+    "Mine à fragmentation": { d: 3, pv: 3, ep: 0, trap: 3, zone: 1, camo: 1, n: 2 }, // ex-Mine supérieure : 3 dégâts à toutes les créatures de la case (Oni, 14/11/2026)
     "Siphon mineur": { d: 1, pv: 1, ep: 0, siphon: 1, camo: 1, n: 2 },
     "Siphon majeur": { d: 2, pv: 2, ep: 0, siphon: 2, camo: 1, n: 2 },
     "Siphon supérieur": { d: 3, pv: 3, ep: 0, siphon: 3, camo: 1, n: 2 },
@@ -71,9 +71,9 @@ const SF = (() => {
     "Avant-poste du Nord": "4 PV. Seulement dans la lane Nord.", "Avant-poste de l'Est": "4 PV. Seulement dans la lane Est.",
     "Avant-poste du Sud": "4 PV. Seulement dans la lane Sud.", "Avant-poste de l'Ouest": "4 PV. Seulement dans la lane Ouest.",
     "Ligne de front": "4 PV, Épines 2. Seulement sur la 3e couronne.", "Réduit": "4 PV, Épines 2. Seulement sur la 1re couronne.",
-    "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
-    "Mine majeure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
-    "Mine supérieure": "Camouflée. 5 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine mineure": "Camouflée. 2 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine majeure": "Camouflée. 4 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine à fragmentation": "Camouflée. 3 dégâts à chaque créature de la case de celle qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Siphon mineur": "Camouflé. Révélé par une attaque : l'essaim perd 1 biomasse, +1 par tranche de 10 qu'il possède (jamais sous 5).",
     "Siphon majeur": "Camouflé. Révélé par une attaque : l'essaim perd 2 biomasse, +2 par tranche de 10 qu'il possède (jamais sous 5).",
     "Siphon supérieur": "Camouflé. Révélé par une attaque : l'essaim perd 3 biomasse, +3 par tranche de 10 qu'il possède (jamais sous 5).",
@@ -113,7 +113,7 @@ const SF = (() => {
       A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 1 carte de niveau 1 gratuite en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
       B2: ["Essaim agrandi", "+2 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
-    tank: { A1: ["Carapace épaisse", "Insensibles aux Épines et aux Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
+    tank: { A1: ["Carapace épaisse", "Insensibles aux Épines ; −1 dégât des Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
       A2: ["Blindage", "Chaque tank en jeu, et chaque tank qui arrive ensuite, reçoit un jeton Blindage : la prochaine perte de PV qu'il subirait est annulée, puis le jeton est défaussé."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
       B2: ["Provocation renforcée", "+1 PV pour les tanks. Les tourelles qui ont un tank à portée doivent le viser en priorité."] },
     soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
@@ -129,7 +129,7 @@ const SF = (() => {
   const TILE_CATS = ["renfort", "actif", "piege"], CAT_NAME = { renfort: "Renforts", actif: "Actifs", piege: "Pièges" };
   const tileCat = name => { const t = TILES[name]; return !t ? "renfort" : t.trap || t.siphon ? "piege" : !t.camo ? "actif" : "renfort"; };
   // anciens noms (parties en cours) : le Piège et le Siphon deviennent leur version supérieure
-  const OLD_TILE = { "Piège": "Mine supérieure", "Siphon": "Siphon supérieur" };
+  const OLD_TILE = { "Piège": "Mine à fragmentation", "Mine supérieure": "Mine à fragmentation", "Siphon": "Siphon supérieur" };
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.13";
+  const VERSION = "0.6.14";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -780,8 +780,12 @@ const SF = (() => {
         log(S, "essaim", "Un piège est révélé.");
         // le piège blesse la créature AVANT qu'elle frappe : si elle en meurt, elle n'inflige rien (Oni, 01/11/2026)
         if (!clairvoyance(S)) {
-          const cara = CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "A"; // Carapace épaisse : insensible aux Mines (branche test)
-          if (cara) log(S, "essaim", `Carapace épaisse : ${c.name} ne subit pas la Mine.`); else damageCreature(S, c, t.trap, "piège");
+          // Mine à fragmentation (zone) : toute la case de la créature subit les dégâts ; Carapace épaisse : −1 dégât des Mines (Oni, 14/11/2026)
+          for (const v of t.zone ? [c, ...caseMates(S, c)] : [c]) {
+            const cara = CREATURES[v.name].type === "tank" && S.upgrades.tank.r1 === "A";
+            const dm = Math.max(0, t.trap - (cara ? 1 : 0));
+            if (dm) damageCreature(S, v, dm, "piège"); else log(S, "essaim", `Carapace épaisse : ${v.name} ne subit rien de la Mine.`);
+          }
           if (c.hp + bonusHp(S, c) <= 0) { log(S, "essaim", `${c.name} meurt dans le piège avant de frapper.`); return; }
         }
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);

@@ -47,11 +47,11 @@ const fresh = () => {
 // 4. piège : révélé à la première attaque, 2 dégâts à la créature
 {
   const S = fresh(); SF.attackerDraw(S);
-  S.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
+  S.tiles["0,1"] = SF.tileStats("Mine à fragmentation", 0, 1);
   S.creatures.push({ id: 902, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, new: true, acted: false });
   SF.act(S, S.creatures[0]);
   const c = S.creatures[0];
-  ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 3, "Mine supérieure révélée ; la Carapace meurt avant de frapper : la mine garde ses 3 PV");
+  ok(S.tiles["0,1"].revealed && S.tiles["0,1"].hp === 3, "Mine à fragmentation révélée ; la Carapace meurt avant de frapper : la mine garde ses 3 PV");
   ok(!c, "Carapace (3 PV) : 3 dégâts du piège, détruite");
 }
 // 5. un support tombe quand tous les murs qui le touchent ont disparu
@@ -261,7 +261,7 @@ const fresh = () => {
 // 25. vue filtrée : rien de caché n'est envoyé à l'autre camp
 {
   const S = fresh(); SF.attackerDraw(S);
-  S.tiles["0,2"] = SF.tileStats("Mine supérieure", 0, 2);
+  S.tiles["0,2"] = SF.tileStats("Mine à fragmentation", 0, 2);
   S.chantiers.E.push({ tile: "Muraille", left: 2, fresh: true }); S.chantiers.S.push({ tile: "Antenne", left: 1, fresh: true });
   S.toPlace.push({ tile: "Rempart", lane: "O" }); S.spells = ["Famine", "Effort"];
   const A = SF.viewFor(S, "essaim"), txt = JSON.stringify(A);
@@ -274,16 +274,16 @@ const fresh = () => {
   ok([1, 2, 3].every(l => A.piles[l].every(x => x === null)) && Object.values(A.tileDecks).every(d => d.every(x => x === null)) && A.spellDeck.every(x => x === null), "personne ne voit l'ordre des pioches");
   const C = SF.viewFor(S, "colonie");
   ok(C.handA.length === S.handA.length && C.handA.every(x => x === null), "colonie : main de l'essaim réduite à son nombre");
-  ok(C.tiles["0,2"].name === "Mine supérieure" && C.hand[0] === S.hand[0], "colonie : voit ses tuiles et sa main");
+  ok(C.tiles["0,2"].name === "Mine à fragmentation" && C.hand[0] === S.hand[0], "colonie : voit ses tuiles et sa main");
   S.upgrades.soutien.r2 = "C"; S.creatures.push({ id: 90, name: "Glaneur", lane: "N", u: 0, k: 4, hp: 2 });
-  ok(SF.viewFor(S, "essaim").tiles["0,2"].name === "Mine supérieure", "Clairvoyance : la tuile camouflée est visible pour l'essaim");
+  ok(SF.viewFor(S, "essaim").tiles["0,2"].name === "Mine à fragmentation", "Clairvoyance : la tuile camouflée est visible pour l'essaim");
 }
 // 26. événements visuels (animations) : produits seulement à la demande, et filtrés pour l'essaim
 {
   const S = fresh(); SF.attackerDraw(S);
   SF.apply(S, "essaim", "endDeploy");
   ok(!("fx" in S), "sans demande, le moteur ne garde aucun événement dans l'état");
-  const T = fresh(); T.tiles["1,2"] = SF.tileStats("Muraille", 1, 2); T.tiles["0,2"] = SF.tileStats("Mine supérieure", 0, 2);
+  const T = fresh(); T.tiles["1,2"] = SF.tileStats("Muraille", 1, 2); T.tiles["0,2"] = SF.tileStats("Mine à fragmentation", 0, 2);
   const c = { id: 50, name: "Écorcheur", lane: "N", u: 0, k: 4, hp: 1, acted: false }; T.creatures.push(c);
   T.phase = "A_attack"; T.fx = [];
   SF.apply(T, "essaim", "act", { key: SF.posKey(c) });
@@ -524,7 +524,7 @@ const fresh = () => {
   const R = SF.TILES["Ronceraie"];
   ok(R.d === 3 && R.pv === 2 && R.ren === 1 && R.ep === 2 && R.camo && R.n === 3, "Ronceraie : 3 tours, 2 PV, Renforcé 1, Épines 2, camouflée, 3 ex.");
   ok(SF.TRAP_DMG === 3, "Piège : 3 dégâts");
-  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
+  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine à fragmentation", 0, 1);
   T.handA = [{ name: "Œil-sonde", free: true, uid: 990 }]; T.phase = "A_deploy"; T.budget = 0;
   SF.deploy(T, 990, "N", 1);
   const c = { id: 97, name: "Carapace", lane: "N", u: 0, k: 4, hp: 3, acted: false }; T.creatures.push(c); SF.act(T, c);
@@ -607,10 +607,10 @@ const fresh = () => {
     SF.actCase(S, SF.posKey(c), [130]); return c.hp;
   };
   ok(run(false) === 1 && run(true) === 3, "Carapace contre un Mur hérissé : −2 d'Épines sans Catalyseur, rien avec");
-  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine supérieure", 0, 1);
+  const T = fresh(); T.supports = {}; delete T.tiles["0,1"]; T.tiles["0,1"] = SF.tileStats("Mine à fragmentation", 0, 1);
   const d = { id: 132, name: "Béhémoth", lane: "N", u: 0, k: 2, hp: 7, acted: false }; T.creatures.push(d, { id: 133, name: "Catalyseur", lane: "N", u: 0, k: 2, hp: 5, acted: false });
   SF.actCase(T, SF.posKey(d), [132]);
-  ok(d.hp === 2, "le piège blesse quand même (Mine supérieure : 5 dégâts, ce ne sont pas des Épines)");
+  ok(d.hp === 2, "le piège blesse quand même (Mine à fragmentation : 5 dégâts, ce ne sont pas des Épines)");
   ok(SF.CREATURES["Catalyseur"].capName === "Aura Cuirasse" && !SF.ACTIONS.instinct && !SF.hasMobility(T, { name: "Carapace", lane: "N", u: 0, k: 4 }), "plus d'Aura Instinct : un tank n'a plus de Mobilité");
 }
 // 48. Muraille et Palissade à 4 ex., Feu nourri, support de niveau 3 à +3 travailleurs (Oni, 02/11/2026)
@@ -680,7 +680,7 @@ const fresh = () => {
   ok(!r.T.tiles["0,3"] && r.T.tiles["0,2"].hp === 2 && !r.T.tiles["0,2"].revealed, "Percée sur une Égide camouflée : aucun dégât, elle reste cachée");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Égide", 0, 2); T.tiles["0,2"].revealed = true; });
   ok(!r.T.tiles["0,2"], "Percée sur une Égide déjà révélée : 6 en trop − bouclier 2 = 4 → détruite (3 PV)");
-  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Mine supérieure", 0, 2); });
+  r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Mine à fragmentation", 0, 2); });
   ok(r.T.tiles["0,2"].hp === 3 && !r.T.tiles["0,2"].revealed && r.T.creatures.some(c => c.id === 170), "Percée sur une Mine camouflée : il ne se déclenche pas et reste caché");
   r = P(T => { T.tiles["0,3"] = SF.tileStats("Antenne", 0, 3); T.tiles["0,2"] = SF.tileStats("Siphon supérieur", 0, 2); });
   ok(r.dBio === 1 && !r.T.tiles["0,2"].revealed, "Percée sur un Siphon camouflé : aucun effet (seulement +1 biomasse pour l'Antenne)");
@@ -1027,7 +1027,7 @@ const fresh = () => {
 {
   ok(["Palissade", "Muraille", "Rempart", "Bastion", "Égide", "Haie d'épines", "Mur hérissé", "Ronceraie", "Ligne de front", "Réduit"].every(n => SF.tileCat(n) === "renfort")
     && ["Antenne", "Laboratoire", "Observatoire", "Archives", "Baraquement", "Dortoir", "Avant-poste du Nord", "Abri blindé"].every(n => SF.tileCat(n) === "actif")
-    && ["Mine mineure", "Mine majeure", "Mine supérieure", "Siphon mineur", "Siphon majeur", "Siphon supérieur"].every(n => SF.tileCat(n) === "piege"),
+    && ["Mine mineure", "Mine majeure", "Mine à fragmentation", "Siphon mineur", "Siphon majeur", "Siphon supérieur"].every(n => SF.tileCat(n) === "piege"),
     "catégories : renforts (dont les tuiles à Épines), actifs (face visible), pièges");
   const A = SF.TILES["Abri blindé"];
   ok(A.d === 2 && A.pv === 2 && A.temp === 1 && A.shield && !A.camo && A.n === 3, "Abri blindé : 2 points, 2 PV, +1 travailleur, Bouclier, face visible, 3 exemplaires");
@@ -1067,10 +1067,10 @@ const fresh = () => {
   // anciennes parties : Piège et Siphon renommés, pioche unique répartie en trois
   const O = { tiles: { "0,2": { name: "Piège", hp: 2, max: 2, trap: 1, camo: 1 } }, tileDeck: ["Muraille", "Siphon", "Antenne"], tileDiscard: ["Piège"], hand: ["Siphon"], chantiers: { N: [{ tile: "Piège", left: 1 }], E: [], S: [], O: [] }, toPlace: [] };
   SF.migrate(O);
-  ok(O.tiles["0,2"].name === "Mine supérieure" && O.hand[0] === "Siphon supérieur" && O.chantiers.N[0].tile === "Mine supérieure" && !O.tileDeck
-    && O.tileDecks.renfort.includes("Muraille") && O.tileDecks.actif.includes("Antenne") && O.tileDecks.piege.includes("Siphon supérieur") && O.tileDiscards.piege.join() === "Mine supérieure"
+  ok(O.tiles["0,2"].name === "Mine à fragmentation" && O.hand[0] === "Siphon supérieur" && O.chantiers.N[0].tile === "Mine à fragmentation" && !O.tileDeck
+    && O.tileDecks.renfort.includes("Muraille") && O.tileDecks.actif.includes("Antenne") && O.tileDecks.piege.includes("Siphon supérieur") && O.tileDiscards.piege.join() === "Mine à fragmentation"
     && O.tileDecks.actif.filter(n => n === "Abri blindé").length === 3 && O.tileDecks.piege.includes("Mine mineure"),
-    "ancienne partie : Piège → Mine supérieure, Siphon → Siphon supérieur, trois pioches, nouvelles tuiles ajoutées");
+    "ancienne partie : Piège → Mine à fragmentation, Siphon → Siphon supérieur, trois pioches, nouvelles tuiles ajoutées");
   const AB = { tiles: { "0,2": Object.assign(SF.tileStats("Abri blindé", 0, 2)) }, tileDecks: { renfort: [], actif: [], piege: [] }, tileDiscards: { renfort: [], actif: [], piege: [] }, hand: [] };
   SF.migrate(AB);
   ok(AB.tiles["0,2"].shield === 1 && !AB.tiles["0,2"].ren, "rechargement : le jeton Bouclier de l'Abri reste un Bouclier");
@@ -1231,10 +1231,10 @@ const fresh = () => {
 // 67. IA pour jouer en solo (Oni, 08/11/2026) : honnête, une action légale à chaque étape, une partie jusqu'au bout
 {
   const IA = require("../src/ia.js");
-  const S = SF.newGame(); S.hand = ["Mine supérieure"]; S.spells = ["Frappe orbitale"];
+  const S = SF.newGame(); S.hand = ["Mine à fragmentation"]; S.spells = ["Frappe orbitale"];
   const B = IA.belief(S, "essaim");
   ok(B.hand.length === 0 && B.spells.length === 0 && Object.values(B.tileDecks).every(d => d.every(x => x === null)), "IA de l'essaim : ni la main ni les sortilèges de la colonie, ni l'ordre des pioches");
-  S.tiles["0,3"] = SF.tileStats("Mine supérieure", 0, 3);
+  S.tiles["0,3"] = SF.tileStats("Mine à fragmentation", 0, 3);
   ok(IA.belief(S, "essaim").tiles["0,3"].name === "Palissade" && !IA.belief(S, "essaim").tiles["0,3"].trap, "une tuile camouflée inconnue est estimée (Palissade), pas lue");
   ok(IA.belief(S, "colonie").handA.length === 0, "IA de la colonie : la main de l'essaim est cachée");
   ok(IA.decide(S, "colonie") === null && IA.decide(S, "essaim").type === "draw", "elle ne joue que pendant son tour");

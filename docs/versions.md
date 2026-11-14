@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.14 — 14 novembre 2026
+
+- Mines : mineure (coût 1, 1 PV) 2 dégâts ; majeure (coût 2, 2 PV) 4 dégâts ; **Mine à fragmentation** (ex-Mine supérieure, coût 3, 3 PV) 3 dégâts à **toutes les créatures de la case** de celle qui la révèle (interprétation de « toute la zone », à confirmer).
+- Carapace épaisse : n'insensibilise plus aux Mines, elle réduit seulement leurs dégâts de 1 (toujours insensible aux Épines).
+
 ## v0.6.13 — 14 novembre 2026
 
 - Les jetons Échappée et Blindage ne reviennent plus à chaque tour : un soutien n'a qu'un seul jeton Échappée (à l'arrivée ou à l'achat de la Régénération), défaussé pour de bon. Régénération = ce jeton unique.
