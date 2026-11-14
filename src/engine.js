@@ -116,9 +116,9 @@ const SF = (() => {
     tank: { A1: ["Carapace épaisse", "Insensibles aux Épines et aux Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
       A2: ["Blindage", "Chaque tank en jeu, et chaque tank qui arrive ensuite, reçoit un jeton Blindage : la prochaine perte de PV qu'il subirait est annulée, puis le jeton est défaussé."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
       B2: ["Bélier", "+1 ATQ pour les tanks."] },
-    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Échappée : chaque soutien a un jeton Échappée ; il sauve une créature de sa case qui devrait être détruite (elle recule d'une case), puis le jeton est défaussé."],
+    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer une autre créature de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
       B1: ["Griffes", "Aura Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit. Aura Mobilité 1 (+1 vitesse)."],
-      A2: ["Régénération", "Au début de chaque tour de l'essaim, les jetons Blindage et Échappée déjà utilisés reviennent."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      A2: ["Régénération", "Au début de chaque tour de l'essaim, les jetons Blindage déjà utilisés reviennent."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.7";
+  const VERSION = "0.6.8";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -421,7 +421,6 @@ const SF = (() => {
   // ------------------------------------------------------------------ créatures
   function makeCreature(S, name, lane, u, extra) {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
-    if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r1 === "A") c.esc = 1; // Mue : jeton Échappée à l'arrivée (Oni, 12/11/2026)
     if (CREATURES[name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1; // Blindage : jeton à l'arrivée (Oni, 11/11/2026)
     return c;
   }
@@ -443,7 +442,6 @@ const SF = (() => {
     const dead = S.creatures.filter(c => c.hp + bonusHp(S, c) <= 0);
     const deadSet = new Set(dead);
     for (const c of dead) {
-      if (escape(S, c)) { deadSet.delete(c); continue; }
       // Dépouille (Charognard, Oni 12/11/2026) : une créature qui meurt hors de la case d'entrée, avec une Charognard vivant sur sa case, laisse un jeton
       if (c.k < 4 && S.creatures.some(o => o !== c && o.name === "Charognard" && !deadSet.has(o) && posKey(o) === posKey(c))) {
         const dk = posKey(c); S.depouilles = S.depouilles || [];
@@ -463,22 +461,6 @@ const SF = (() => {
       }
     }
     if (dead.length) syncBonus(S); // les survivants qui perdent un bonus (soutien mort) gardent leurs PV
-  }
-  // Échappée (Mue, Oni 11/11/2026 ; jetons depuis le 12/11/2026, car trop forte) : chaque soutien porte un jeton Échappée (`esc`) ;
-  // une créature qui devrait mourir, accompagnée d'un autre soutien vivant qui a encore son jeton, recule d'une case (même colonne,
-  // vers l'entrée, au-delà des bâtiments) avec 1 PV, et ce jeton est défaussé pour de bon ; sur la case d'entrée, elle reste
-  function escape(S, c) {
-    if (S.upgrades.soutien.r1 !== "A") return false;
-    const saver = caseMates(S, c).find(o => isSoutien(o) && o.esc && o.hp + bonusHp(S, o) > 0);
-    if (!saver) return false;
-    saver.esc = 0;
-    let nk = Math.min(4, c.k + 1);
-    while (nk < 4 && S.tiles[key(...toGlobal(c.lane, c.u, nk))]) nk++;
-    c.hp = maxHp(S, c.name); // branche test : elle survit, ses dégâts du tour sont effacés
-    if (nk !== c.k) { fx(S, { t: "push", ids: [c.id], lane: c.lane, u: c.u, to: nk }); c.k = nk; }
-    fx(S, { t: "cheal", id: c.id, n: 1, hp: 1 });
-    log(S, "essaim", `Échappée : ${saver.name} sauve ${c.name} (jeton défaussé) : il survit et recule ${nk === 4 ? "sur la case d'entrée" : "en " + cellName(c.u, nk)}.`);
-    return true;
   }
   function damageCreature(S, c, n, why) {
     if (n > 0 && c.blind) { // Blindage (Oni, 11/11/2026) : la prochaine perte de PV est annulée, puis le jeton est défaussé
@@ -866,10 +848,9 @@ const SF = (() => {
     clearDamage(S);
     if (S.upgrades.soutien.r2 === "A") for (const c of S.creatures) { // Régénération : les jetons utilisés reviennent
       if (CREATURES[c.name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1;
-      if (CREATURES[c.name].type === "soutien" && S.upgrades.soutien.r1 === "A") c.esc = 1;
     }
     S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
-    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
+    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.morphed; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
     // Réincarnation : un seul tank mort → il revient ; plusieurs → l'essaim choisit (étape A_reinc, action reinc)
     S.reincQueue = S.reincQueue || [];
     if (S.reincQueue.length === 1) reincarnate(S, 0);
@@ -1071,9 +1052,6 @@ const SF = (() => {
     fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
-    if (type === "soutien" && slot === "A1") { // Mue : les soutiens déjà en jeu reçoivent aussi leur jeton Échappée (Oni, 12/11/2026)
-      for (const c of S.creatures) if (CREATURES[c.name].type === "soutien") c.esc = 1;
-    }
     if (type === "tank" && slot === "A2") { // Blindage : les tanks déjà en jeu reçoivent aussi leur jeton (Oni, 11/11/2026)
       for (const c of S.creatures) if (CREATURES[c.name].type === "tank") c.blind = 1;
     }
@@ -1093,7 +1071,33 @@ const SF = (() => {
     if (S.winner) return;
     // sortilèges non joués : ils restent en main jusqu'à ce qu'ils soient joués (Oni, 01/11/2026 ; avant : défaussés)
     S.stase = [];
+    if (S.phase !== "A_morph" && morphOptions(S).length) { S.phase = "A_morph"; return; } // Métamorphose (Mue) : l'essaim peut transformer
     startDefenderTurn(S);
+  }
+  // Aura Métamorphose (Mue, Oni 14/11/2026) : à la fin du tour de l'essaim, chaque soutien (une fois) peut transformer une autre
+  // créature de sa case en une créature du niveau supérieur et du même type, si ce niveau est débloqué (amélioration acquise)
+  function morphOptions(S) {
+    const out = [];
+    if (S.upgrades.soutien.r1 !== "A") return out;
+    for (const s of S.creatures) {
+      if (!isSoutien(s) || s.morphed) continue;
+      for (const c of caseMates(S, s)) {
+        const d = CREATURES[c.name], up = S.upgrades[d.type];
+        if (!d || d.lvl >= 3 || !up[d.lvl === 1 ? "r1" : "r2"]) continue;
+        for (const [to] of PILES[d.lvl + 1][d.type]) out.push({ sid: s.id, id: c.id, to });
+      }
+    }
+    return out;
+  }
+  function morph(S, a) {
+    const o = morphOptions(S).find(x => x.sid === a.sid && x.id === a.id && x.to === a.to); if (!o) return false;
+    const s = S.creatures.find(c => c.id === o.sid), c = S.creatures.find(c => c.id === o.id), old = c.name;
+    s.morphed = 1; c.name = o.to; c.hp = maxHp(S, o.to);
+    fx(S, { t: "cheal", id: c.id, n: 0, hp: c.hp });
+    log(S, "essaim", `Métamorphose : ${old} devient ${o.to} (${s.name}).`);
+    syncBonus(S);
+    if (!morphOptions(S).length) startDefenderTurn(S);
+    return true;
   }
 
   // ------------------------------------------------------------------ sortilèges
@@ -1451,7 +1455,7 @@ const SF = (() => {
       for (const f of ["spells", "spellDeck", "spellDiscard", "spellOffer"]) if (Array.isArray(S[f])) S[f] = S[f].map(rn);
       if (!S.totV && S.tiles && S.creatures && S.upgrades) { clearDamage(S); S.totV = 1; }
     }
-    if (S.upgrades && S.upgrades.soutien.r1 === "A") for (const c of S.creatures || []) if (CREATURES[c.name] && CREATURES[c.name].type === "soutien" && c.esc === undefined) c.esc = 1; // anciennes parties
+    for (const c of S.creatures || []) delete c.esc; // Échappée supprimée (Oni, 14/11/2026)
     delete S.escaped;
     { // Phéromone renommée Charognard (Oni, 12/11/2026)
       const ren = n => (n === "Phéromone" ? "Charognard" : n);
@@ -1504,7 +1508,7 @@ const SF = (() => {
   // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
   // vérifie le camp, la phase et les paramètres, puis appelle les fonctions de règles ci-dessus.
   // Les transitions de phase qui vivaient dans l'interface (fenêtres Famine / Réaction, passage aux tirs) sont ici.
-  const PHASE_SIDE = { A_reinc: "essaim", D_spell: "colonie", D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
+  const PHASE_SIDE = { A_morph: "essaim", A_reinc: "essaim", D_spell: "colonie", D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
   const actor = S => PHASE_SIDE[S.phase] || null;
   const isInt = v => Number.isInteger(v);
   const isLane = l => LANES.includes(l);
@@ -1532,6 +1536,8 @@ const SF = (() => {
       return true;
     } },
     // Réincarnation : l'essaim choisit le tank qui revient (Oni, 10/11/2026) ; ensuite, fenêtre Famine éventuelle
+    morph: { phase: ["A_morph"], run: (S, a) => isInt(a.sid) && isInt(a.id) && typeof a.to === "string" && morph(S, a) },
+    morphDone: { phase: ["A_morph"], run(S) { startDefenderTurn(S); return true; } },
     reinc: { phase: ["A_reinc"], run(S, a) { if (!isInt(a.i) || !reincarnate(S, a.i)) return false; S.phase = "A_start"; openFamine(S); return true; } },
     draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } }, // pioche au hasard (premier tour, tests)
     pickOne: { phase: ["A_start"], run: (S, a) => isInt(a.l) && pickOne(S, a.l) }, // une carte dans la pile choisie
@@ -1680,7 +1686,7 @@ const SF = (() => {
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
     clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, mustAdvance, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
-    attacks, pushBack, pushOptions, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
+    attacks, pushBack, pushOptions, morphOptions, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, depTargets, fireDep, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };

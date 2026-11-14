@@ -394,6 +394,11 @@ const IA = (() => {
     try {
       switch (V.phase) {
         case "A_famine": return { type: "famine", args: { play: V.spells.includes("Famine") } };
+        case "A_morph": { // Métamorphose : la plus forte transformation (aggro, puis tank, puis soutien)
+          const o = E.morphOptions(V), w = x => ({ aggro: 3, tank: 2, soutien: 1 })[E.CREATURES[V.creatures.find(c => c.id === x.id).name].type];
+          o.sort((a, b) => w(b) - w(a));
+          return o.length ? { type: "morph", args: o[0] } : { type: "morphDone" };
+        }
         case "A_reinc": { // Réincarnation : le tank de plus haut niveau, puis le plus proche de la fusée
           const q = V.reincQueue || [], lv = r => E.CREATURES[r.name].lvl;
           let i = 0; q.forEach((r, j) => { if (lv(r) > lv(q[i]) || (lv(r) === lv(q[i]) && r.k < q[i].k)) i = j; });
@@ -429,6 +434,7 @@ const IA = (() => {
   function fallback(S, side) {
     switch (S.phase) {
       case "A_famine": return { type: "famine", args: { play: false } };
+      case "A_morph": return { type: "morphDone" };
       case "A_reinc": return { type: "reinc", args: { i: 0 } };
       case "A_start": {
         if (S.startHand) return { type: "draw" };

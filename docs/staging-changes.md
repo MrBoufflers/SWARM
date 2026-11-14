@@ -3,6 +3,9 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.8
+- **Mue : Aura Métamorphose** à la place de l'Aura Échappée. En fin de tour, chaque soutien peut transformer une autre créature de sa case en la créature de niveau supérieur du même type, à condition que ce niveau soit déjà débloqué. Une fois par soutien et par tour.
+
 ## v0.6.7
 - Les Barbelés de départ restent à Épines 1.
 

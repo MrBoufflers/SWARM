@@ -58,6 +58,7 @@
 
   const PHASE_TXT = {
     A_famine: ["colonie", "Début du tour de l'essaim", "La colonie peut jouer Famine avant que l'essaim calcule son budget."],
+    A_morph: ["essaim", "Métamorphose", "Fin du tour : vos soutiens avec la Mue peuvent transformer une autre créature de leur case en la créature de niveau supérieur du même type."],
     A_reinc: ["essaim", "Réincarnation", "Plusieurs tanks sont morts depuis votre dernier tour : choisissez celui qui revient, là où il est mort. Les autres retournent dans la pioche."],
     A_start: ["essaim", "Tour de l'essaim", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe seulement le nombre total de cartes."],
     A_deploy: ["essaim", "Déploiement et améliorations", "Répartissez votre biomasse comme vous voulez : déployez des cartes (une carte, puis une case d'entrée dans une lane ; un soutien peut être parachuté sur n'importe quelle case libre) et investissez dans les arbres d'amélioration, dans l'ordre que vous voulez. Le budget du tour est dépensé en premier, puis la réserve. Ce qui reste du budget ira à la réserve."],
@@ -387,6 +388,11 @@
     }
     if (ph === "A_famine") {
       acts = `<button data-a="famine" data-v="1" class="primary">Jouer Famine</button><button data-a="famine" data-v="0">Ne pas jouer</button>`;
+    } else if (ph === "A_morph") { // Métamorphose (Mue, Oni 14/11/2026)
+      const nm = id => (S.creatures.find(c => c.id === id) || {}).name || "?";
+      body = `<p class="hint">Métamorphose : choisissez une transformation (une par soutien), ou terminez le tour.</p><div class="choices">`
+        + SF.morphOptions(S).map(o => { const c = S.creatures.find(x => x.id === o.id); return `<button data-a="morph" data-sid="${o.sid}" data-id="${o.id}" data-v="${E(o.to)}">${E(c.name)} · ${E(posTxt(c))} → ${E(o.to)} <small>(par ${E(nm(o.sid))})</small></button>`; }).join("") + `</div>`;
+      acts = `<button data-a="morphDone" class="primary">Terminer le tour</button>`;
     } else if (ph === "A_reinc") { // Réincarnation au choix (Oni, 10/11/2026)
       body = `<p class="hint">Réincarnation : choisissez le tank qui revient (les autres retournent dans la pioche).</p>`;
       acts = (S.reincQueue || []).map((r, i) => `<button data-a="reinc" data-i="${i}"${i ? "" : ` class="primary"`}>${E(r.name)} · ${E(posTxt(r))}</button>`).join("");
@@ -643,7 +649,7 @@
       const tgt = (S.phase === "D_fire" && UI.support && SF.supportTargets(S, UI.support).includes(c)) || spT || tpT;
       const cls = `tok ${t} ${imCls(c.name)}${UI.selCreature === c.id ? " sel" : ""}${S.phase === "A_attack" ? (SF.canAct(S, c) ? (S.view === "essaim" ? " go" : "") : " done") : ""}${c.new ? " new" : ""}${tgt ? " tgt" : ""}`;
       const au = auraOf(c);
-      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${c.esc ? `<i class="blind" title="Jeton Échappée : sauvera une créature de sa case">${icon("mue")}</i>` : ""}${newBadge(c.new && S.view === "colonie")}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp${c.hp < SF.maxHp(S, c.name) ? " dmg" : ""}">${c.hp + SF.bonusHp(S, c)}</span></button>`;
+      return `<button class="${cls}" data-a="${spT ? "spellArg" : tpT ? "tpPick" : tgt ? "fireAt" : "creature"}" data-id="${c.id}" data-v="${c.id}" title="${E(c.name)}${au ? " · " + au.txt : ""}${tgt ? " : tirer dessus" : ""}">${au ? (crs.length === 1 && au.lab.length ? `<i class="au ${au.kind} lab">${au.lab.map(l => `<span>${E(l)}</span>`).join("")}</i>` : `<i class="au ${au.kind}">${icon(au.icon)}</i>`) : ""}${c.blind ? `<i class="blind" title="Jeton Blindage">${icon("blindage")}</i>` : ""}${newBadge(c.new && S.view === "colonie")}<span class="ta">${SF.effAtq(S, c)}</span><span class="tp${c.hp < SF.maxHp(S, c.name) ? " dmg" : ""}">${c.hp + SF.bonusHp(S, c)}</span></button>`;
     }).join("") + `</div>`;
   }
   // effet court de chaque aura ou capacité de soutien (pastilles, Oni 06/11/2026) : « +1 ATQ », « +1 DEF », « +2 HEAL »…
@@ -664,9 +670,9 @@
   const CAP_FX = { recolte: "+1 biomasse par bâtiment détruit", fureur: "+2 ATQ", percee: "Percée",
     cuirasse: "insensible aux Épines", spores: "1 dégât autour de la cible" };
   const MOB = { icon: "mobilite", name: "Aura Mobilité 1", labs: ["+1 VIT"], fx: "+1 vitesse", self: true };
-  // Oni, 11/11/2026 : Mue = Échappée, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
+  // Oni, 11/11/2026 : Mue = Métamorphose, Griffes = Coup de grâce ; Régénération = Aura Soin total (case du soutien)
   const UP_AURAS = {
-    A1: [MOB, { icon: "mue", name: "Aura Échappée", labs: ["ÉCHAPPÉE"], fx: "chaque soutien sauve 1 créature de la destruction (jeton défaussé)" }],
+    A1: [MOB, { icon: "mue", name: "Aura Métamorphose", labs: ["MÉTAMORPHOSE"], fx: "en fin de tour, transforme une autre créature de la case en celle du niveau supérieur (même type)" }],
     B1: [{ icon: "griffes", name: "Aura Coup de grâce", labs: ["COUP DE GRÂCE"], fx: "bâtiment détruit s'il ne manque qu'1 dégât", once: true }, MOB],
     B2: [{ icon: "corrosion", name: "Aura Corrosion", labs: ["CORROSION"], fx: "Renforcé sans effet, Bouclier détruit" }],
   };
@@ -736,7 +742,6 @@
     const vWhy = [`base ${vb}`, SF.hasMobility(S, c) ? "+1 Mobilité" : "", mob ? `+${mob} Aura Mobilité 1` : ""].filter(Boolean);
     if (SF.isStealthy(S, c)) extras.push("Furtivité");
     if (c.blind) extras.push("jeton Blindage (les prochains dégâts sont annulés)");
-    if (c.esc) extras.push("jeton Échappée (sauvera une créature de sa case qui devrait mourir)");
     if (c.jammed) extras.push("brouillée ce tour : ne bouge pas et n'attaque pas");
     const giv = givenAuras(c), rec = receivedAuras(c);
     const grid = caseGrid(c);
@@ -866,7 +871,7 @@
     colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_fire", "Tirs"]], // « Pose » retirée (construction immédiate, v0.5.8)
   };
   function pcSteps(side) {
-    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_upgrade" || S.phase === "A_start" || S.phase === "A_reinc" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase === "D_spell" ? "D_fire" : S.phase;
+    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_morph" ? "A_attack" : S.phase === "A_upgrade" || S.phase === "A_start" || S.phase === "A_reinc" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase === "D_spell" ? "D_fire" : S.phase;
     const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
     const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
@@ -1264,6 +1269,8 @@
       case "actAll": return play("actAll");
       case "endA": return play("endA");
       case "startCh": if (UI.sel !== null) return play("startCh", { i: UI.sel, lane: d.l }, () => { UI.sel = null; }); break;
+      case "morph": return play("morph", { sid: Number(d.sid), id: Number(d.id), to: d.v });
+      case "morphDone": return play("morphDone");
       case "placeAt": return pushAsk("placeAt", d.k);
       case "spellPick": return play("spellPick", { i: Number(d.v) });
       case "relocate": return pushAsk("relocate", d.k);
