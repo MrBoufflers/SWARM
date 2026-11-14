@@ -3,6 +3,9 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.4
+- Population max par lane : 4 au plus (palier 4 : 4 au lieu de 5). Les paliers et le nombre de cartes ne changent pas.
+
 ## v0.6.3
 - Ligne de front et Réduit : 4 PV.
 - Tanks : PV 2 / 3 / 4 (Béhémoth 3 au lieu de 4, Colosse 4 au lieu de 6).

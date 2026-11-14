@@ -106,7 +106,7 @@ const SF = (() => {
     // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 9, 15, 21 de biomasse (brièvement 10 / 15 / 20, puis 9 / 15 / 20)
     // (avant : 5 paliers, départ 3 puis 6 / 9 / 12 / 15, plafonds 1 à 5 ; à l'origine 4 / 7 / 10 / 13)
     { min: 0, n: [3, 0, 0], cap: 2 }, { min: 9, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
-    { min: 21, n: [4, 3, 3], cap: 5 },
+    { min: 21, n: [4, 3, 3], cap: 4 }, // population max 4 par lane (Oni, 14/11/2026 ; avant 5)
   ];
   const TREES = {
     aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 vitesse."],
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.3";
+  const VERSION = "0.6.4";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
