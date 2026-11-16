@@ -878,16 +878,14 @@
     ],
     colonie: [
       [["D_draw"], "Pioche", "Complétez votre main de tuiles, une par une, en choisissant à chaque fois la pioche (renforts, actifs ou pièges)."],
-      [["A_famine", "A_react"], "Réaction (sort)", "Pendant le tour de l'essaim, vous pouvez jouer un sortilège offensif (Famine avant sa pioche)."],
-      [["D_main"], "Construction", "Jouez vos sortilèges de soutien, puis construisez avec vos points de travailleurs ; le reste va à la fusée."],
+      [["D_main"], "Soutien & construction", "Jouez vos sortilèges de soutien, puis construisez avec vos points de travailleurs ; le reste va à la fusée."],
       [["D_fire"], "Tirs", "Vos tourelles (supports de niveau I et II) tirent sur les créatures des 8 cases autour."],
       [["D_spell"], "Pioche (sort)", "Vous piochez des sortilèges : 3 technologies = 1 sort par tour, 6 = 2, 9 = 3. Pour chacun, gardez 1 des 2 du dessus."],
     ],
   };
   function pcSteps(side) {
     const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0].includes(S.phase));
-    // la réaction a lieu pendant le tour de l'essaim : rien n'est « fait » quand on y est
-    const items = steps.map(([ph, n, d], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && cur === 1) ? "done" : ""}" tabindex="0" data-tip="${E(d)}"><span>${E(n)}</span></li>`).join("");
+    const items = steps.map(([ph, n, d], i) => `<li class="${i === cur ? "on" : cur > i ? "done" : ""}" tabindex="0" data-tip="${E(d)}"><span>${E(n)}</span></li>`).join("");
     const detail = cur >= 0 ? `<p class="small st-detail">${E(steps[cur][2])}</p>` : "";
     return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : detail}</div>`;
   }

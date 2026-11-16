@@ -3,6 +3,9 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.20
+- Barre des étapes de la colonie : plus d'étape « Réaction » ; « Construction » devient « Soutien & construction ».
+
 ## v0.6.19
 - **Étapes du tour détaillées** : colonie Pioche → Réaction (sort) → Construction → Tirs → Pioche (sort) ; essaim Pioche → Déployer & améliorer → Déplacements & attaques, avec une explication sous l'étape en cours.
 - **Technologies** : « 3 techno = +1 sort/tour » clairement affiché côté colonie.

@@ -1143,5 +1143,5 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 /* branche test : dégâts du tour en rouge (effacés à la fin du tour) */
 .tile .hp.dmg, .tok .tp.dmg { color: #ff5c5c !important; }
 /* étapes du tour : 5 étapes côté colonie (Oni, 16/11/2026) */
-.pc-steps.colonie .chev li span { font-size: .82em; padding: 0 3px 0 10px; }
+.pc-steps.colonie .chev li span { font-size: .88em; padding: 0 3px 0 10px; }
 .pc-steps .st-detail { margin: 6px 2px 0; color: var(--ink-soft); line-height: 1.3; }

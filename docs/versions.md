@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.20 — 16 novembre 2026
+
+- Étapes de la colonie : l'étape « Réaction » est retirée de la barre (elle a lieu pendant le tour de l'essaim) ; « Construction » devient « Soutien & construction ». Colonie : Pioche → Soutien & construction → Tirs → Pioche (sort).
+
 ## v0.6.19 — 16 novembre 2026
 
 - Étapes du tour (chevrons) détaillées : colonie Pioche → Réaction (sort) → Construction → Tirs → Pioche (sort) ; essaim Pioche → Déployer & améliorer → Déplacements & attaques. Le détail de l'étape en cours s'affiche dessous, et au survol de chaque étape.
