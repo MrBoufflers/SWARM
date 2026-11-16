@@ -307,7 +307,7 @@
         <div class="rocket" aria-label="Fusée : ${S.floors} étages sur 12"><div class="floors v">${rocket}</div><span class="rk-lab"><b>${S.floors}</b>/12</span></div>
         <div class="kcs">
           <span class="kc" tabindex="0" data-tip="Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.">${icon("travailleur")}<b>${S.workersBase}</b>${bonus ? `<small>+${bonus}</small>` : ""}</span>
-          <span class="kc" tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b><small>${SF.spellsPerTurn(S)} sort/t</small></span>
+          <span class="kc" tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour (+1 par tranche de 3 technologies)">${icon("tech")}<b>${SF.tech(S)}</b><small>${SF.spellsPerTurn(S)} sort/t · 3 techno = +1</small></span>
           <span class="kc" tabindex="0" data-tip="Fusée : ${S.rocketPts} / ${SF.floorCost(S)} points vers l'étage ${Math.min(12, S.floors + 1)}">${icon("fusee")}<b>${S.rocketPts}</b><small>/${SF.floorCost(S)} pts</small></span>
           <span class="kc" tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b><small>tuiles</small></span>
           <span class="kc" tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b><small>sorts</small></span>
@@ -780,7 +780,7 @@
     return `<h3>${icon("fusee")} Colonie</h3>
       <div class="kv"><span>Travailleurs</span><b>${S.workersBase}${SF.bonusWorkers(S) ? ` + ${SF.bonusWorkers(S)}` : ""}</b></div>
       ${mine && S.phase === "D_main" ? `<div class="kv"><span>Points restants</span><b>${SF.pointsLeft(S)} / ${pts}</b></div>` : ""}
-      <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
+      <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour <small>(3 techno = +1)</small></b></div>
       <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 2 points (étages 1 à 3), puis 4, 7 et 10 après les paliers 3 · 6 · 9.</p>
       <h4 data-fx="ateliers">Construction</h4>${ateliersHtml(mine, false)}
       <h4 data-fx="tilehand">Main de tuiles</h4>${tileHandHtml(mine)}<h4>Sortilèges</h4>${spellsHtml(mine)}`;
@@ -869,15 +869,27 @@
   const isPC = () => !!(PC_MQ && PC_MQ.matches);
   if (PC_MQ && PC_MQ.addEventListener) PC_MQ.addEventListener("change", () => render());
   // étapes du tour de chaque camp (chevrons) ; la réaction de la colonie a lieu pendant le tour de l'essaim
+  // chaque étape : phases du moteur concernées, libellé court, détail affiché sous les chevrons (Oni, 16/11/2026)
   const PC_STEPS = {
-    essaim: [["A_deploy", "Déployer & améliorer"], ["A_attack", "Attaques"]],
-    colonie: [["A_react", "Réaction"], ["D_main", "Construction"], ["D_fire", "Tirs"]], // « Pose » retirée (construction immédiate, v0.5.8)
+    essaim: [
+      [["A_start", "A_reinc"], "Pioche", "Choisissez combien de cartes piocher dans chaque pile (niveau 1, 2, 3) : le palier fixe le total. Un tank mort peut se réincarner."],
+      [["A_deploy", "A_upgrade"], "Déployer & améliorer", "Dépensez votre budget : déployez des créatures sur les cases d'entrée et investissez dans les arbres d'amélioration."],
+      [["A_attack", "A_morph"], "Déplacements & attaques", "Chaque créature avance sur son chemin puis peut attaquer. En fin de tour, la Mue permet la Métamorphose."],
+    ],
+    colonie: [
+      [["D_draw"], "Pioche", "Complétez votre main de tuiles, une par une, en choisissant à chaque fois la pioche (renforts, actifs ou pièges)."],
+      [["A_famine", "A_react"], "Réaction (sort)", "Pendant le tour de l'essaim, vous pouvez jouer un sortilège offensif (Famine avant sa pioche)."],
+      [["D_main"], "Construction", "Jouez vos sortilèges de soutien, puis construisez avec vos points de travailleurs ; le reste va à la fusée."],
+      [["D_fire"], "Tirs", "Vos tourelles (supports de niveau I et II) tirent sur les créatures des 8 cases autour."],
+      [["D_spell"], "Pioche (sort)", "Vous piochez des sortilèges : 3 technologies = 1 sort par tour, 6 = 2, 9 = 3. Pour chacun, gardez 1 des 2 du dessus."],
+    ],
   };
   function pcSteps(side) {
-    const ph = S.phase === "A_famine" ? "A_react" : S.phase === "A_morph" ? "A_attack" : S.phase === "A_upgrade" || S.phase === "A_start" || S.phase === "A_reinc" ? "A_deploy" : S.phase === "D_draw" ? "D_main" : S.phase === "D_spell" ? "D_fire" : S.phase;
-    const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0] === ph);
-    const items = steps.map(([k, n], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && i === 0) ? "done" : ""}"><span>${E(n)}</span></li>`).join("");
-    return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : ""}</div>`;
+    const steps = PC_STEPS[side], cur = steps.findIndex(s => s[0].includes(S.phase));
+    // la réaction a lieu pendant le tour de l'essaim : rien n'est « fait » quand on y est
+    const items = steps.map(([ph, n, d], i) => `<li class="${i === cur ? "on" : cur > i && !(side === "colonie" && cur === 1) ? "done" : ""}" tabindex="0" data-tip="${E(d)}"><span>${E(n)}</span></li>`).join("");
+    const detail = cur >= 0 ? `<p class="small st-detail">${E(steps[cur][2])}</p>` : "";
+    return `<div class="pc-steps ${side}${cur < 0 ? " idle" : ""}"><ol class="chev">${items}</ol>${cur < 0 ? `<p class="small">Tour de ${E(SIDE[side === "essaim" ? "colonie" : "essaim"])}</p>` : detail}</div>`;
   }
   // fusée horizontale (étage 1 à gauche) ; grid : 6 × 2 dans le résumé étroit ; info-bulle de chaque étage
   function pcRocket(grid) {
@@ -935,7 +947,7 @@
           : bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "travailleurs", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}</div>
       ${pcRocket(false)}
       <div class="pc-boxes">
-        ${box2(SF.tech(S), "techno", `Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour`)}
+        ${box2(`${SF.tech(S)}<small>/${SF.tech(S) >= 9 ? 9 : 3 * (Math.floor(SF.tech(S) / 3) + 1)}</small>`, "techno · 3 = +1 sort/tour", `Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour. Chaque tranche de 3 technologies donne +1 sortilège par tour (3 → 1, 6 → 2, 9 → 3) ; prochain sortilège à ${SF.tech(S) >= 9 ? "—" : 3 * (Math.floor(SF.tech(S) / 3) + 1)} technologies.`)}
         ${box2(SF.spellsPerTurn(S), "sorts / tour", "Sortilèges piochés par tour")}
         ${box2(S.spells.length, "sorts en main", "Sortilèges en main")}
       </div>
@@ -955,7 +967,7 @@
       <h3>${sideLogo("colonie")}${sideName("colonie")}</h3>
       ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "pop.", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}
       <div class="ps-rows">
-        <span tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour">${icon("tech")}<b>${SF.tech(S)}</b> techno</span>
+        <span tabindex="0" data-tip="Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour (+1 par tranche de 3)">${icon("tech")}<b>${SF.tech(S)}</b> techno · ${SF.spellsPerTurn(S)} sort/t</span>
         <span tabindex="0" data-tip="${S.spells.length} sortilège(s) en main (cachés)">${icon("sort")}<b>${S.spells.length}</b> sort${S.spells.length > 1 ? "s" : ""}</span>
         <span tabindex="0" data-tip="${S.hand.length} tuiles en main (cachées)">${icon("mur")}<b>${S.hand.length}</b> tuiles</span>
       </div>
