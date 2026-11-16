@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.18 — 16 novembre 2026
+
+- Mode découverte : relecture dans le navigateur ; conseil « Poser un bâtiment » supprimé (étape disparue), conseil Construire complété (1er tour, choix de la case des créatures chassées), conseil Supports (+1 biomasse) affiché dès la construction.
+
 ## v0.6.17 — 16 novembre 2026
 
 - « Étage 6 : +1 chantier par lane » devient « +1 construction par lane » (interface, journal, aide).
