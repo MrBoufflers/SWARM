@@ -3,6 +3,10 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.17
+- « Étage 6 : +1 construction par lane » (au lieu de « chantier »).
+- **Règles et conseils mis à jour** : boosts de départ, Siphon, Boucliers, Métamorphose, tableau des bâtiments.
+
 ## v0.6.16
 - **Barbelés de départ** : les 4 boosts (Renforcé 1, Bouclier, Épines +1, +1 PV) ne disparaissent plus au chargement.
 - **Soutiens échangés** : Glaneur (+1 biomasse) niveau 2, coût 3 ; Charognard (Dépouille) niveau 1, coût 2.

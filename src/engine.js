@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.16";
+  const VERSION = "0.6.17";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1397,7 +1397,7 @@ const SF = (() => {
       fx(S, { t: "floor", n: S.floors });
       log(S, "colonie", `Étage ${S.floors} de la fusée achevé : +1 travailleur.`);
       if (S.floors === 3) { S.techBonus += 2; log(S, "colonie", "Palier 3 : +2 technologies permanentes."); }
-      if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
+      if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 construction par lane."); }
       if (S.floors === 9) {
         fx(S, { t: "nuke", ids: S.creatures.map(c => c.id) });
         // Réincarnation (Oni, 10/11/2026) : les tanks détruits par la Nuke sont mis de côté comme les autres tanks morts

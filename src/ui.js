@@ -279,7 +279,7 @@
     const next = SF.FLOOR_COSTS[Math.floor(n / 3)];
     const extra = {
       3: `Palier 1 : +2 technologies · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
-      6: `Palier 2 : +1 chantier par lane · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
+      6: `Palier 2 : +1 construction par lane · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
       9: `Palier 3 : Nuke, toutes les créatures sont détruites · +1 tuile en main · tourelles I +1 dégât · étages suivants : ${next} points`,
       12: "Décollage : la colonie gagne",
     }[n];
@@ -1531,7 +1531,7 @@
       const fl = document.querySelectorAll(".floors .fl")[e.n - 1], core = cellAt("0,0");
       if (fl) { fl.classList.add("on"); fl.animate([{ transform: "scale(1)" }, { transform: "scale(1.35)" }, { transform: "scale(1)" }], { duration: dur(360) }); }
       if (core) { const b = core.querySelector("b"); if (b) b.textContent = e.n + "/12"; float(core, `Étage ${e.n} · +1 travailleur`, "heal"); }
-      const bonus = { 3: "Palier 3 : +2 technologies", 6: "Palier 6 : +1 chantier par lane", 9: "Palier 9 : Nuke !" }[e.n];
+      const bonus = { 3: "Palier 3 : +2 technologies", 6: "Palier 6 : +1 construction par lane", 9: "Palier 9 : Nuke !" }[e.n];
       if (bonus) { if (core) flashEl(core, "var(--hot)"); spellBanner(bonus, "sup", true); await wait(700); }
       await wait(260);
     },

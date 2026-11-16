@@ -24,7 +24,9 @@ const AIDE = (() => {
       if (t.ren) caps.push(`Renforcé ${t.ren}`);
       if (t.tech) caps.push(`+${t.tech} technologie${t.tech > 1 ? "s" : ""}`);
       if (t.temp) caps.push("+1 travailleur");
-      if (t.trap) caps.push(`Mine ${t.trap} (${t.trap} dégât${t.trap > 1 ? "s" : ""})`);
+      if (t.trap) caps.push(`Mine ${t.trap} (${t.trap} dégât${t.trap > 1 ? "s" : ""}${t.zone ? " à toute la case" : ""})`);
+      if (t.ring) caps.push(t.ring === 1 ? "couronne 1 seulement" : `couronne ${t.ring} seulement`);
+      if (t.dir) caps.push("seulement dans sa lane");
       if (t.shield) caps.push("Bouclier");
       if (t.siphon) caps.push(`Siphon ${t.siphon} (−${t.siphon} biomasse)`);
       if (t.aura) caps.push("Aura d'épines");
@@ -51,7 +53,7 @@ const AIDE = (() => {
         <li>Une grille de 9 × 9 cases, la fusée au centre. Quatre <b>lanes</b> en partent : Nord, Est, Sud, Ouest (couleurs bleue, verte, jaune, violette).</li>
         <li>Autour de la fusée, trois <b>couronnes</b> (1 au contact de la fusée, 3 au bord). Au-delà, les <b>cases d'entrée</b> de chaque lane, colonnes A à E : c'est là que l'essaim déploie ses créatures.</li>
         <li>Les cases en diagonale de la fusée (les coins) accueillent les <b>supports</b> de la colonie ; les créatures n'y vont jamais.</li>
-        <li>Au départ, ${plural(16, "Barbelé")} (1 PV, Épines 1) couvrent les couronnes 1 et 2, et les supports de niveau 1 et 2 sont déjà en place.</li>
+        <li>Au départ, ${plural(16, "Barbelé")} (1 PV, Épines 1) couvrent les couronnes 1 et 2, et les supports de niveau 1 et 2 sont déjà en place. Les 4 Barbelés de la couronne 1 portent chacun un <b>boost unique</b> tiré au hasard (Renforcé 1, Bouclier, Épines +1 ou +1 PV), perdu avec le Barbelé.</li>
       </ul>
       <h3>Une manche</h3>
       <p>L'essaim joue d'abord, puis la colonie. La colonie peut jouer certains sortilèges pendant le tour de l'essaim (fenêtres de réaction).</p>
@@ -61,7 +63,7 @@ const AIDE = (() => {
         <li><b>Tout ou rien</b> : les dégâts de toutes les sources s'additionnent pendant le tour (plusieurs attaquants, plusieurs tourelles, sortilèges, Épines, Mines). S'ils atteignent les PV, la cible est détruite ; sinon, ils sont <b>effacés à la fin du tour</b>. Une Muraille (4 PV) résiste à un Écorcheur (3) seul, mais pas à un Écorcheur et une Carapace (3 + 1).</li>
         <li><b>Épines X</b> : une créature qui attaque ce bâtiment subit X dégâts après son attaque. +1 par Avant-poste dans les 8 cases autour.</li>
         <li><b>Renforcé X</b> : chaque attaque contre ce bâtiment fait X dégâts de moins, sans minimum (5 dégâts contre Renforcé 2 : 3 dégâts comptés ; 2 dégâts contre Renforcé 2 : rien).</li>
-        <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Une <b>Mine</b> camouflée inflige 2 dégâts (mineure) ou 4 dégâts (majeure) à la créature qui la révèle, avant qu'elle frappe ; la <b>Mine à fragmentation</b> inflige 3 dégâts à toutes les créatures de sa case ; un <b>Siphon</b> retire 1, 2 ou 3 biomasse à l'essaim (jamais sous ${SF.MIN_BIOMASS}). Une tuile encore cachée ne subit ni la percée ni les spores.</li>
+        <li><b>Camouflage</b> : certains bâtiments sont posés face cachée. L'essaim ne voit ni leur nom ni leurs PV tant qu'il ne les a pas attaqués (ou révélés avec un Œil-sonde ou la Clairvoyance). Une <b>Mine</b> camouflée inflige 2 dégâts (mineure) ou 4 dégâts (majeure) à la créature qui la révèle, avant qu'elle frappe ; la <b>Mine à fragmentation</b> inflige 3 dégâts à toutes les créatures de sa case ; un <b>Siphon</b> retire 1, 2 ou 3 biomasse à l'essaim, plus autant par tranche de 10 biomasse qu'il possède (jamais sous ${SF.MIN_BIOMASS}). Une tuile encore cachée ne subit ni la percée ni les spores.</li>
         <li><b>Percée</b> (Aura du Perforeur) : les dégâts en trop après la destruction d'un bâtiment passent à la case juste derrière la cible, du côté opposé à l'attaquant (la fusée perd 1 travailleur si c'est elle).</li>
         <li><b>Auras</b> : effets des soutiens sur les <b>autres</b> créatures de leur case ; elles se cumulent toutes.</li>
       </ul>
@@ -95,6 +97,7 @@ const AIDE = (() => {
             <li><b>Attaque, facultative</b> : elle frappe n'importe quel bâtiment qui touche sa case par un côté, ou la fusée. Avec Carnage, une aggro peut attaquer deux fois. Les soutiens n'attaquent jamais.</li>
           </ul>
           Touchez une créature, puis une case surlignée de son chemin, puis une cible encadrée (ou « Terminer pour cette créature »). « Tout résoudre et finir le tour » fait agir toutes les créatures restantes (elles avancent au maximum et frappent devant elles), puis termine le tour.</li>
+        <li><b>Métamorphose</b> (amélioration Mue) : en fin de tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type, si ce niveau est débloqué.</li>
         <li><b>Fin du tour</b> : tous les dégâts du tour sont effacés.</li>
       </ol>
       <h3>Vos créatures</h3>
@@ -125,7 +128,7 @@ const AIDE = (() => {
       <ul>
         <li><b>Travailleurs</b> : 3 au départ, +1 par étage achevé, +1 par bâtiment à travailleur temporaire encore debout, +${SF.SUP3_WORKERS} par support de niveau 3. Chaque travailleur donne <b>1 point de construction</b> par tour.</li>
         <li><b>Main de tuiles</b> : 4 tuiles, +1 à chaque palier de la fusée (étages 3, 6 et 9). Vous la complétez au début de votre tour, tuile par tuile, en choisissant à chaque fois la pioche : <b>renforts</b> (murs, Épines, Renforcé, camouflés), <b>actifs</b> (face visible : technologies, travailleurs, Avant-postes) ou <b>pièges</b> (Mines et Siphons).</li>
-        <li><b>Bouclier</b> (Abri blindé) : la première attaque contre le bâtiment ne lui fait rien (comme en stase), puis le jeton est défaussé.</li>
+        <li><b>Bouclier</b> (Palissade, Observatoire, Archives, Égide, Abri blindé, sortilège Double bouclier) : la première attaque contre le bâtiment ne lui fait rien (comme en stase), puis le jeton est défaussé. La Corrosion le détruit.</li>
         <li><b>Technologies</b> : à 3, 6 et 9 technologies, vous piochez 1, 2 ou 3 sortilèges à la fin de chaque tour. Elles viennent des bâtiments à technologies et du palier de l'étage 3 (+2).</li>
       </ul>
       <h3>Votre tour</h3>
@@ -140,7 +143,7 @@ const AIDE = (() => {
       <h3>La fusée</h3>
       <ul>
         <li>Un étage coûte <b>${F[0]} points</b> (étages 1 à 3), puis ${F[1]} (4 à 6), ${F[2]} (7 à 9) et ${F[3]} (10 à 12). Les points en trop passent à l'étage suivant. Chaque étage donne <b>+1 travailleur</b>.</li>
-        <li><b>Étage 3</b> : +2 technologies. <b>Étage 6</b> : +1 bâtiment par lane et par tour. <b>Étage 9</b> : la <b>Nuke</b> détruit toutes les créatures. Chaque palier (3, 6, 9) donne aussi +1 tuile en main et +1 dégât aux tourelles de niveau 1.</li>
+        <li><b>Étage 3</b> : +2 technologies. <b>Étage 6</b> : +1 construction par lane. <b>Étage 9</b> : la <b>Nuke</b> détruit toutes les créatures. Chaque palier (3, 6, 9) donne aussi +1 tuile en main et +1 dégât aux tourelles de niveau 1.</li>
         <li><b>Étage 12</b> : décollage, vous gagnez.</li>
       </ul>
       <h3>Les supports</h3>
@@ -188,13 +191,15 @@ const AIDE = (() => {
     { id: "e-attaque", side: "essaim", img: "Ravageur", title: "Déplacer et attaquer", when: S => S.phase === "A_attack",
       text: () => `Touchez une créature (cadre jaune), puis une case surlignée de son chemin : elle avance de 1 case jusqu'à son maximum, tout droit ou en escalier. Ensuite, si vous voulez, touchez un bâtiment encadré qui touche sa case. « Tout résoudre et finir le tour » fait agir les autres créatures et termine le tour.` },
     { id: "e-camo", side: "essaim", img: "Mine à fragmentation", title: "Tuiles camouflées", when: S => hasTile(S, t => t.hidden || (t.camo && !t.revealed && !SF.clairvoyance(S))),
-      text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être une Mine (2 ou 4 dégâts à votre créature avant qu'elle frappe, ou 3 à toute sa case pour la Mine à fragmentation) ou un Siphon (vous perdez 1 à 3 biomasse, jamais sous ${SF.MIN_BIOMASS}). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
+      text: () => `Une tuile « ? » est camouflée : vous ignorez ce que c'est jusqu'à ce que vous l'attaquiez. Ce peut être une Mine (2 ou 4 dégâts à votre créature avant qu'elle frappe, ou 3 à toute sa case pour la Mine à fragmentation) ou un Siphon (vous perdez 1 à 3 biomasse, davantage si vous en avez beaucoup, jamais sous ${SF.MIN_BIOMASS}). Un Œil-sonde vivant révèle les tuiles camouflées de sa lane.` },
     { id: "e-epines", side: "essaim", img: "Haie d'épines", title: "Épines et Renforcé", when: S => S.phase === "A_attack" && Object.keys(S.tiles).some(k => S.tiles[k] && !S.tiles[k].hidden && !(S.tiles[k].camo && !S.tiles[k].revealed) && SF.epinesOf(S, k, true) > 0),
-      text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros n'ont qu'1 PV ! Renforcé X : chaque attaque contre ce bâtiment fait X dégâts de moins (sans minimum).` },
+      text: () => `Le picto d'épines sur un bâtiment indique ses Épines : une créature qui l'attaque subit autant de dégâts après son attaque. Vos aggros ont peu de PV ! Renforcé X : chaque attaque contre ce bâtiment fait X dégâts de moins (sans minimum).` },
     { id: "e-tourelles", side: "essaim", img: "support 2", title: "Les tourelles", when: S => S.phase === "A_attack" && S.creatures.some(c => c.k <= 3),
       text: () => `Les coins turquoise sont des supports. Ceux de niveau I et II sont des tourelles : à la fin de son tour, la colonie tire avec chacune sur une créature des 8 cases autour. Un support tombe quand tous les bâtiments qui le touchent sont détruits, et vous rapporte 1 biomasse.` },
     { id: "e-biomasse", side: "essaim", img: "Charognard", title: "Gagner de la biomasse", when: S => S.biomass > 5,
       text: S => `Chaque bâtiment détruit et chaque support tombé rapporte 1 biomasse. Paliers suivants : ${SF.TIERS.slice(1).map(t => t.min).join(", ")} de biomasse. Ils donnent plus de cartes, de meilleur niveau, et plus de créatures par lane.` },
+    { id: "e-morph", side: "essaim", img: "Béhémoth", title: "Métamorphose", when: S => S.phase === "A_morph",
+      text: () => `Fin de tour : avec la Mue, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type, si ce niveau est débloqué. Choisissez une transformation, ou terminez le tour.` },
     { id: "e-fusee", side: "essaim", img: "Fusée", title: "Frapper la fusée", when: S => nearRocket(S),
       text: () => `Une créature qui touche la fusée peut l'attaquer : chaque attaque tue 1 travailleur, quelle que soit sa force. La colonie perd quand elle n'a plus de travailleurs.` },
     { id: "e-sorts", side: "essaim", img: null, title: "Les sortilèges de la colonie", when: S => (S.spells || []).length > 0,
@@ -205,11 +210,11 @@ const AIDE = (() => {
     { id: "c-but", side: "colonie", img: "Fusée", title: "Vous jouez la colonie", when: () => true,
       text: () => `Votre but : achever les ${SF.FLOORS} étages de la fusée, au centre. Vous perdez si l'essaim tue tous vos travailleurs. Chaque tour : choisir vos tuiles, construire des bâtiments avec vos points de travailleurs (le reste va à la fusée), jouer vos sortilèges, puis tirer avec vos tourelles. Le bouton « Règles » détaille tout.` },
     { id: "c-chantier", side: "colonie", img: "Muraille", title: "Construire", when: S => S.phase === "D_main" && S.hand.length > 0,
-      text: S => `Touchez une tuile de votre main, puis une case surlignée : elle est payée et construite tout de suite. ${S.chPerLane > 1 ? "Deux bâtiments" : "Un bâtiment"} par lane et par tour.` },
+      text: S => `Touchez une tuile de votre main, puis une case surlignée : elle est payée et construite tout de suite. ${S.chPerLane > 1 ? "Deux constructions" : "Une construction"} par lane et par tour.` },
     { id: "c-points", side: "colonie", img: "Baraquement", title: "Points de construction", when: S => S.phase === "D_main",
       text: S => `Vos travailleurs donnent ${SF.totalPoints(S)} points ce tour. Chaque bâtiment coûte ses points de construction ; ceux qui restent vont à la fusée quand vous touchez « Fin de la construction ».` },
     { id: "c-fusee", side: "colonie", img: "Fusée", title: "La fusée", when: S => S.phase === "D_main",
-      text: () => `Un étage coûte ${F[0]} points (étages 1 à 3), puis ${F[1]}, ${F[2]} et ${F[3]}. Chaque étage donne +1 travailleur. Étage 3 : +2 technologies. Étage 6 : +1 bâtiment par lane et par tour. Étage 9 : la Nuke détruit toutes les créatures. Survolez les étages pour le détail.` },
+      text: () => `Un étage coûte ${F[0]} points (étages 1 à 3), puis ${F[1]}, ${F[2]} et ${F[3]}. Chaque étage donne +1 travailleur. Étage 3 : +2 technologies. Étage 6 : +1 construction par lane. Étage 9 : la Nuke détruit toutes les créatures. Survolez les étages pour le détail.` },
     { id: "c-pose", side: "colonie", img: "Rempart", title: "Poser un bâtiment", when: S => S.phase === "D_place",
       text: () => `Le bâtiment est achevé : touchez une case surlignée. Elle doit être libre, dans sa lane, et toucher un bâtiment, un support ou la fusée. Les créatures présentes sont envoyées par la colonie sur une case voisine de son choix.` },
     { id: "c-supports", side: "colonie", img: "support 1", title: "Les supports", when: S => S.phase === "D_place" || S.phase === "D_fire",
@@ -219,7 +224,7 @@ const AIDE = (() => {
     { id: "c-camo", side: "colonie", img: "Égide", title: "Le camouflage", when: S => inHand(S, t => t.camo),
       text: () => `Les tuiles marquées « Camouflage » sont posées face cachée : l'essaim ne sait pas ce que c'est avant de les attaquer. Les Mines blessent la créature qui les révèle ; les Siphons lui retirent de la biomasse. Un Œil-sonde ennemi révèle votre lane.` },
     { id: "c-epines", side: "colonie", img: "Mur hérissé", title: "Les Épines", when: S => inHand(S, t => t.ep > 0),
-      text: () => `Épines : la créature qui attaque ce bâtiment subit autant de dégâts. Très efficace contre les aggros, qui n'ont qu'1 PV. Un Avant-poste ajoute +1 Épines aux bâtiments des 8 cases autour.` },
+      text: () => `Épines : la créature qui attaque ce bâtiment subit autant de dégâts. Très efficace contre les aggros, qui ont peu de PV. Un Avant-poste ajoute +1 Épines aux bâtiments des 8 cases autour.` },
     { id: "c-tech", side: "colonie", img: "Laboratoire", title: "Les technologies", when: S => inHand(S, t => t.tech > 0) || SF.tech(S) > 0,
       text: () => `À 3, 6 et 9 technologies, vous piochez 1, 2 ou 3 sortilèges à la fin de chaque tour. Antenne, Laboratoire, Observatoire et Archives en donnent, tant qu'ils tiennent ; l'étage 3 de la fusée en donne 2 de plus.` },
     { id: "c-sorts", side: "colonie", img: null, title: "Vos sortilèges", when: S => (S.spells || []).some(Boolean),
@@ -227,7 +232,7 @@ const AIDE = (() => {
     { id: "c-reaction", side: "colonie", img: null, title: "Fenêtre de réaction", when: S => S.phase === "A_react" || S.phase === "A_famine",
       text: () => `C'est le tour de l'essaim, mais vous pouvez jouer un sortilège offensif maintenant. Sinon, laissez passer.` },
     { id: "c-creatures", side: "colonie", img: "Colosse", title: "Les créatures de l'essaim", when: S => S.phase === "D_main" && S.creatures.length > 0,
-      text: () => `Aggros : grosse attaque mais 1 PV. Tanks : beaucoup de PV. Soutiens : auras pour les autres créatures de leur case. Touchez une créature pour voir sa carte. Chaque bâtiment qu'elles détruisent rend l'essaim plus fort.` },
+      text: () => `Aggros : grosse attaque mais peu de PV. Tanks : beaucoup de PV. Soutiens : auras pour les autres créatures de leur case. Touchez une créature pour voir sa carte. Chaque bâtiment qu'elles détruisent rend l'essaim plus fort.` },
   ];
   function nextTip(S, side, seen) {
     for (const t of TIPS) if (t.side === side && !seen.has(t.id)) { try { if (t.when(S)) return t; } catch (e) { /* condition non applicable */ } }

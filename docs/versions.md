@@ -4,6 +4,11 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.17 — 16 novembre 2026
+
+- « Étage 6 : +1 chantier par lane » devient « +1 construction par lane » (interface, journal, aide).
+- Audit de l'aide (règles et conseils du mode découverte) : boosts de départ des Barbelés, Siphon (biomasse en plus par tranche de 10), liste complète des Boucliers, étape Métamorphose (règles + conseil), tableau des bâtiments (couronne, lane, Mine à fragmentation), « peu de PV » au lieu de « 1 PV » pour les aggros.
+
 ## v0.6.16 — 16 novembre 2026
 
 - Boosts de départ des Barbelés : corrigés. `migrate` effaçait l'Épines +1 (remise à 1) et transformait le Bouclier en Renforcé à chaque chargement ; les 4 boosts (Renforcé 1, Bouclier, Épines +1, +1 PV) restent maintenant sur les 4 Barbelés de la couronne 1.
