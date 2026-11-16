@@ -581,7 +581,7 @@
         const ready = S.phase === "D_fire" && S.view === "colonie" && lvl && lvl < 3 && SF.shotsLeft(S, k) > 0 && (SF.supportTargets(S, k).length || SF.depTargets(S, k).length);
         const fired = lvl && lvl < 3 && SF.shotsLeft(S, k) <= 0;
         html += lvl ? `<div class="cell sup ${imCls("support " + lvl)}${ready ? " hot" : ""}${UI.support === k ? " sel" : ""}${fired ? " spent" : ""}" data-xy="${k}" ${ready ? `data-a="support" data-k="${k}"` : ""}>
-            <span class="lv" tabindex="0" data-tip="Support de niveau ${["", "I", "II", "III"][lvl]}${lvl < 3 ? " : tourelle, tire sur une créature dans les 8 cases autour" : " : donne des travailleurs, ne tire pas"}. Il tombe si ses bâtiments voisins sont détruits.">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? ic("tourelle", `<b>${SF.turretDmg(S, lvl)}</b>`, `Tourelle de niveau ${["", "I", "II"][lvl]} : ${SF.turretDmg(S, lvl)} dégât${SF.turretDmg(S, lvl) > 1 ? "s" : ""} par tir (+1 par palier de la fusée pour le niveau I), 1 tir par tour.`, true) : ic("travailleur", `<b>+${SF.SUP3_WORKERS}</b>`, `Support de niveau III : +${SF.SUP3_WORKERS} travailleurs tant qu'il tient.`, true)}</div>`
+            <span class="lv" tabindex="0" data-tip="Support de niveau ${["", "I", "II", "III"][lvl]}${lvl < 3 ? " : tourelle, tire sur une créature dans les 8 cases autour" : " : donne des travailleurs, ne tire pas"}. Il tombe (+1 biomasse pour l'essaim) si ses bâtiments voisins sont détruits.">${["", "I", "II", "III"][lvl]}</span>${lvl < 3 ? ic("tourelle", `<b>${SF.turretDmg(S, lvl)}</b>`, `Tourelle de niveau ${["", "I", "II"][lvl]} : ${SF.turretDmg(S, lvl)} dégât${SF.turretDmg(S, lvl) > 1 ? "s" : ""} par tir (+1 par palier de la fusée pour le niveau I), 1 tir par tour.`, true) : ic("travailleur", `<b>+${SF.SUP3_WORKERS}</b>`, `Support de niveau III : +${SF.SUP3_WORKERS} travailleurs tant qu'il tient.`, true)}</div>`
           : `<div class="cell corner"><span class="lv" tabindex="0" data-tip="Coin de niveau ${["", "I", "II", "III"][r]} : un support y apparaît quand ses deux bâtiments intérieurs sont construits.">${["", "I", "II", "III"][r]}</span></div>`;
         continue;
       }
@@ -779,9 +779,10 @@
     const floors = Array.from({ length: 12 }, (_, i) => `<i class="fl${i < S.floors ? " on" : ""}${[2, 5, 8, 11].includes(i) ? " ms" : ""}" tabindex="0" data-tip="${E(floorTip(i + 1))}">${i + 1}</i>`).join("");
     return `<h3>${icon("fusee")} Colonie</h3>
       <div class="kv"><span>Travailleurs</span><b>${S.workersBase}${SF.bonusWorkers(S) ? ` + ${SF.bonusWorkers(S)}` : ""}</b></div>
+      ${mine && S.phase === "D_main" ? `<div class="kv"><span>Points restants</span><b>${SF.pointsLeft(S)} / ${pts}</b></div>` : ""}
       <div class="kv"><span>Technologies</span><b>${SF.tech(S)} → ${SF.spellsPerTurn(S)} sort./tour</b></div>
       <div class="floors">${floors}</div><p class="small">Fusée : ${S.floors}/12 étages · ${S.rocketPts}/${SF.floorCost(S)} points vers le suivant. Un étage coûte 2 points (étages 1 à 3), puis 4, 7 et 10 après les paliers 3 · 6 · 9.</p>
-      <h4 data-fx="ateliers">Construction ${mine && S.phase === "D_main" ? `<span class="small">${SF.pointsLeft(S)} point(s) restant(s)</span>` : ""}</h4>${ateliersHtml(mine, false)}
+      <h4 data-fx="ateliers">Construction</h4>${ateliersHtml(mine, false)}
       <h4 data-fx="tilehand">Main de tuiles</h4>${tileHandHtml(mine)}<h4>Sortilèges</h4>${spellsHtml(mine)}`;
   }
   const acquiredUps = ty => { // améliorations acquises pour ce type
@@ -929,14 +930,16 @@
     const { top } = pcAction("colonie");
     return `<aside class="panel colonie pc-own"><div class="po-main">
       <div class="po-head">${sideLogo("colonie")}${sideName("colonie")}
-        ${bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "travailleurs", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}</div>
+        ${S.phase === "D_main" && S.view === "colonie"
+          ? bigStat(`${SF.pointsLeft(S)}<small>/${pts}</small>`, "points restants / travailleurs", `Points de construction restants ce tour : ${SF.pointsLeft(S)} sur ${pts} (un point par travailleur : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}). Le reste va à la fusée. L'essaim gagne quand la colonie n'a plus de travailleurs.`, "wk")
+          : bigStat(`${S.workersBase}${bonus ? `<small>+${bonus}</small>` : ""}`, "travailleurs", `Travailleurs : ${S.workersBase} de base${bonus ? ` + ${bonus} grâce aux tuiles et supports` : ""}. L'essaim gagne quand la colonie n'en a plus.`, "wk")}</div>
       ${pcRocket(false)}
       <div class="pc-boxes">
         ${box2(SF.tech(S), "techno", `Technologies : ${SF.tech(S)} → ${SF.spellsPerTurn(S)} sortilège(s) par tour`)}
         ${box2(SF.spellsPerTurn(S), "sorts / tour", "Sortilèges piochés par tour")}
         ${box2(S.spells.length, "sorts en main", "Sortilèges en main")}
       </div>
-      <h4 data-fx="ateliers">Construction ${S.phase === "D_main" && S.view === "colonie" ? `<span class="small">${SF.pointsLeft(S)} point(s) restant(s)</span>` : ""}</h4>
+      <h4 data-fx="ateliers">Construction</h4>
       <div class="built-row">${SF.LANES.map(l => { const d = (S.built && S.built[l]) || 0; return `<span class="bchip lane-${l}${d >= S.chPerLane || SF.firstTurnCap(S) ? " full" : ""}" title="${SF.firstTurnCap(S) ? "Premier tour : un seul bâtiment au total" : "Bâtiments construits ce tour en lane " + SF.LANE_NAME[l]}"><b>${l}</b>${d}/${S.chPerLane}</span>`; }).join("")}</div>
       <div class="po-scroll">
         <h4 data-fx="tilehand">Main de tuiles <span class="small">${S.hand.length} tuile${S.hand.length > 1 ? "s" : ""}</span></h4>${tileHandHtml(true)}

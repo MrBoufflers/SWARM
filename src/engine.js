@@ -13,11 +13,11 @@ const SF = (() => {
     "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 4, atq: 3 }, // Oni, 11/11/2026 (avant 1/7) // coût 6 (Oni, 07/11/2026 ; avant 7)
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
-    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "recolte", capName: "Aura Récolte", capText: "Quand une autre créature de sa case détruit un bâtiment, l'essaim gagne +1 biomasse de plus." },
+    "Glaneur": { type: "soutien", lvl: 2, cost: 3, pv: 3, atq: 0, cap: "recolte", capName: "Aura Récolte", capText: "Quand une autre créature de sa case détruit un bâtiment, l'essaim gagne +1 biomasse de plus." },
     // Catalyseur passe au niveau 1 (0/2) et le Hurleur au niveau 2 (0/4, Aura Fureur +2 ATQ) — Oni, 07/11/2026
     "Catalyseur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les autres créatures de sa case ne subissent pas les dégâts d'Épines." },
     // Charognard : Aura Butin (01/11/2026), remplacée par Dépouille (Oni, 12/11/2026)
-    "Charognard": { type: "soutien", lvl: 2, cost: 3, pv: 3, atq: 0, cap: "depouille", capName: "Dépouille", capText: "Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case : la colonie ne peut plus y construire tant qu'une tourelle à portée n'a pas tiré dessus (un tir)." },
+    "Charognard": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "depouille", capName: "Dépouille", capText: "Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case : la colonie ne peut plus y construire tant qu'une tourelle à portée n'a pas tiré dessus (un tir)." },
     "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 3, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
     "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 3, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case (cumulable)." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
@@ -25,8 +25,8 @@ const SF = (() => {
     "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 4, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 1 dégât par Sporeur ; la fusée touchée perd 1 travailleur." },
   };
   const PILES = {
-    1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Catalyseur", 2]] },
-    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Charognard", 2], ["Perforeur", 2], ["Hurleur", 2]] },
+    1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Charognard", 2], ["Catalyseur", 2]] },
+    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Glaneur", 2], ["Perforeur", 2], ["Hurleur", 2]] },
     3: { aggro: [["Massacreur", 6]], tank: [["Colosse", 6]], soutien: [["Sapeur", 3], ["Sporeur", 3]] },
   };
   // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.15";
+  const VERSION = "0.6.16";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -366,9 +366,10 @@ const SF = (() => {
   function checkSupportsFall(S) {
     for (const sk of Object.keys(S.supports)) {
       if (!supportWalls(...parse(sk)).some(w => S.tiles[w])) {
-        log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe.`); // plus de biomasse (Oni, 14/11/2026)
+        log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe : +1 biomasse.`); // rétabli par Oni, 16/11/2026
         delete S.supports[sk];
-        fx(S, { t: "tileDown", k: sk, n: 0 });
+        S.biomass += 1;
+        fx(S, { t: "tileDown", k: sk, n: 1 });
       }
     }
   }
@@ -1498,11 +1499,11 @@ const SF = (() => {
       if (wrong.length) { S.piles[l] = S.piles[l].filter(n => !wrong.includes(n)); for (const n of wrong) S.piles[CREATURES[n].lvl].push(n); }
     }
     // ancien « Bouclier X » → Renforcé X (02/11/2026) ; le Bouclier de l'Abri blindé (jeton, 07/11/2026) n'est pas concerné
-    for (const t of Object.values(S.tiles || {})) if (t.shield && !(TILES[t.name] && TILES[t.name].shield)) { t.ren = t.shield; delete t.shield; }
+    for (const t of Object.values(S.tiles || {})) if (t.shield && !t.start && !(TILES[t.name] && TILES[t.name].shield)) { t.ren = t.shield; delete t.shield; }
     for (const c of S.creatures || []) if (CREATURES[c.name] && c.hp > maxHp(S, c.name)) c.hp = maxHp(S, c.name); // Mue : plus de +1 PV au soutien
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
-      if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1 (Oni, 14/11/2026 : reste à 1)
+      if (t.start) { t.name = START_WALL; t.ep = 1 + (t.boost === "ep" ? 1 : 0); } // Barbelé : Épines 1 (+1 avec le boost de départ)
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
       if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
     }

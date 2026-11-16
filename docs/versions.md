@@ -4,6 +4,14 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.16 — 16 novembre 2026
+
+- Boosts de départ des Barbelés : corrigés. `migrate` effaçait l'Épines +1 (remise à 1) et transformait le Bouclier en Renforcé à chaque chargement ; les 4 boosts (Renforcé 1, Bouclier, Épines +1, +1 PV) restent maintenant sur les 4 Barbelés de la couronne 1.
+- Soutiens échangés : Glaneur (Aura Récolte, +1 biomasse) passe au niveau 2 (coût 3, 3 PV) ; Charognard (Dépouille) passe au niveau 1 (coût 2, 2 PV).
+- Un support qui tombe rapporte de nouveau +1 biomasse à l'essaim.
+- Interface colonie : en construction, le grand chiffre du haut affiche « points restants / travailleurs » (comme disponible / budget chez l'essaim) ; le compteur « points restants » du titre Construction est supprimé.
+- Aide : textes des Mines, du tour de la colonie et de l'étage 6 mis à jour.
+
 ## v0.6.15 — 14 novembre 2026
 
 - Coup de grâce (Griffes) : fonctionne aussi sur un bâtiment à 1 PV protégé par un Bouclier. Le jeton Bouclier part et le bâtiment est détruit.
