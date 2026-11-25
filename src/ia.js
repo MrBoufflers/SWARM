@@ -8,6 +8,18 @@ const IA = (() => {
   const E = typeof SF !== "undefined" ? SF : require("./engine.js");
   const clone = o => JSON.parse(JSON.stringify(o));
   const other = side => (side === "essaim" ? "colonie" : "essaim");
+  // Créatures chassées par un bâtiment posé en k (Oni, 14/11/2026) : l'IA les envoie en priorité sur une case battue par des tourelles
+  // (supports de niveau I ou II dans les 8 cases autour), le plus possible ; sans tourelle, le recul d'office.
+  function pushArg(V, k) {
+    let best = null, bs = 0;
+    for (const [u, c] of E.pushOptions(V, k)) {
+      const lane = (V.creatures.find(o => o.k < 4 && E.posKey(o) === k) || {}).lane; if (!lane) return {};
+      const [x, y] = E.toGlobal(lane, u, c);
+      const n = Object.entries(V.supports).filter(([sk, l]) => { const [a, b] = sk.split(",").map(Number); return l < 3 && Math.max(Math.abs(a - x), Math.abs(b - y)) === 1; }).length;
+      if (n > bs) { bs = n; best = [u, c]; }
+    }
+    return best ? { to: best } : {};
+  }
   const ok = (V, side, type, args) => E.apply(V, side, type, args || {}) === "";
 
   // ------------------------------------------------------------ état « croyance » (ce que le camp voit + estimations)
@@ -80,7 +92,7 @@ const IA = (() => {
     for (let i = 0; i < 20 && !V.winner; i++) {
       if (V.phase === "D_draw") { const c = E.TILE_CATS.find(c => E.tilesLeft(V, c) > 0); if (!c || !ok(V, "colonie", "tdraw", { cat: c })) break; }
       else if (V.phase === "D_main") ok(V, "colonie", "build");
-      else if (V.phase === "D_place") { const t = E.placeTargets(V); if (!t.length || !ok(V, "colonie", "placeAt", { k: bestPlaceGuess(V, t) })) break; }
+      else if (V.phase === "D_place") { const t = E.placeTargets(V); if (!t.length || !ok(V, "colonie", "placeAt", { k: bestPlaceGuess(V, t), ...pushArg(V, bestPlaceGuess(V, t)) })) break; }
       else if (V.phase === "D_fire") ok(V, "colonie", "endD");
       else if (V.phase === "D_spell") ok(V, "colonie", "spellPick", { i: 0 });
       else break;
@@ -332,10 +344,7 @@ const IA = (() => {
       const name = V.spells[i];
       if (name === "Effort" || name === "Cadence") return { type: "spell", args: { i } };
       if (name === "Feu nourri" && Object.keys(V.supports).some(sk => V.supports[sk] !== 3 && E.supportTargets(V, sk).length)) return { type: "spell", args: { i } };
-      if (name === "Réparation") {
-        const hurt = Object.entries(V.tiles).filter(([, t]) => t.hp < t.max && !t.start).sort((a, b) => (b[1].max - b[1].hp) - (a[1].max - a[1].hp)).slice(0, 3).map(([k]) => k);
-        if (hurt.length) return { type: "spell", args: { i, arg: hurt } };
-      }
+      if (name === "Tir de précision" && Object.keys(V.supports).some(sk => V.supports[sk] !== 3 && E.supportTargets(V, sk).length)) return { type: "spell", args: { i } };
       // Renouvellement : +1 point, et les tuiles de la main qui n'ont aucune case valable sont échangées
       if (name === "Renouvellement") return { type: "spell", args: { i, arg: V.hand.map((n, j) => j).filter(j => !E.buildTargets(V, j).length) } };
       // Double bouclier : sur les deux bâtiments sans bouclier les plus proches des créatures, dès que l'essaim approche
@@ -348,12 +357,12 @@ const IA = (() => {
     // chantiers : la meilleure tuile et la meilleure lane, tant que ça améliore la position
     const cands = [{ type: "build" }];
     // construction immédiate (v0.5.8) : chaque tuile de la main sur chaque case possible
-    V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k } }); });
+    V.hand.forEach((n, i) => { for (const k of E.buildTargets(V, i)) cands.push({ type: "buildAt", args: { i, k, ...pushArg(V, k) } }); });
     if (cands.length === 1) return cands[0];
     return best(V, "colonie", cands, finishColony, colonyLong).move || { type: "build" };
   }
   function colonyPlace(V) {
-    const cands = E.placeTargets(V).map(k => ({ type: "placeAt", args: { k } }));
+    const cands = E.placeTargets(V).map(k => ({ type: "placeAt", args: { k, ...pushArg(V, k) } }));
     return best(V, "colonie", cands, finishColony, colonyLong).move || cands[0];
   }
   function colonyFire(V) {
@@ -385,6 +394,11 @@ const IA = (() => {
     try {
       switch (V.phase) {
         case "A_famine": return { type: "famine", args: { play: V.spells.includes("Famine") } };
+        case "A_morph": { // Métamorphose : la plus forte transformation (aggro, puis tank, puis soutien)
+          const o = E.morphOptions(V), w = x => ({ aggro: 3, tank: 2, soutien: 1 })[E.CREATURES[V.creatures.find(c => c.id === x.id).name].type];
+          o.sort((a, b) => w(b) - w(a));
+          return o.length ? { type: "morph", args: o[0] } : { type: "morphDone" };
+        }
         case "A_reinc": { // Réincarnation : le tank de plus haut niveau, puis le plus proche de la fusée
           const q = V.reincQueue || [], lv = r => E.CREATURES[r.name].lvl;
           let i = 0; q.forEach((r, j) => { if (lv(r) > lv(q[i]) || (lv(r) === lv(q[i]) && r.k < q[i].k)) i = j; });
@@ -405,7 +419,7 @@ const IA = (() => {
         case "D_place": return colonyPlace(V);
         case "D_fire": return colonyFire(V);
         case "D_spell": { // pioche d'un sortilège parmi deux : ordre de préférence fixe
-          const PREF = ["Frappe orbitale", "Salve", "Effort", "Double bouclier", "Champ de stase", "Famine", "Barrage", "Feu nourri", "Réparation", "Brouillage", "Onde de choc", "Renouvellement", "Reconversion"];
+          const PREF = ["Frappe orbitale", "Salve", "Effort", "Double bouclier", "Champ de stase", "Famine", "Barrage", "Feu nourri", "Tir de précision", "Brouillage", "Onde de choc", "Renouvellement", "Reconversion"];
           const o = S.spellOffer || []; let i = 0;
           o.forEach((n, j) => { if (PREF.indexOf(n) >= 0 && (PREF.indexOf(o[i]) < 0 || PREF.indexOf(n) < PREF.indexOf(o[i]))) i = j; });
           return { type: "spellPick", args: { i } };
@@ -420,6 +434,7 @@ const IA = (() => {
   function fallback(S, side) {
     switch (S.phase) {
       case "A_famine": return { type: "famine", args: { play: false } };
+      case "A_morph": return { type: "morphDone" };
       case "A_reinc": return { type: "reinc", args: { i: 0 } };
       case "A_start": {
         if (S.startHand) return { type: "draw" };
@@ -431,7 +446,7 @@ const IA = (() => {
       case "A_attack": return { type: "actAll" };
       case "D_draw": return { type: "tdraw", args: { cat: E.TILE_CATS.find(c => E.tilesLeft(S, c) > 0) } };
       case "D_main": return { type: "build" };
-      case "D_place": return { type: "placeAt", args: { k: E.placeTargets(S)[0] } };
+      case "D_place": return { type: "placeAt", args: { k: E.placeTargets(S)[0], ...pushArg(S, E.placeTargets(S)[0]) } };
       case "D_fire": return { type: "endD" };
       case "D_spell": return { type: "spellPick", args: { i: 0 } };
     }

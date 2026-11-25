@@ -4,6 +4,112 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.20 — 16 novembre 2026
+
+- Étapes de la colonie : l'étape « Réaction » est retirée de la barre (elle a lieu pendant le tour de l'essaim) ; « Construction » devient « Soutien & construction ». Colonie : Pioche → Soutien & construction → Tirs → Pioche (sort).
+
+## v0.6.19 — 16 novembre 2026
+
+- Étapes du tour (chevrons) détaillées : colonie Pioche → Réaction (sort) → Construction → Tirs → Pioche (sort) ; essaim Pioche → Déployer & améliorer → Déplacements & attaques. Le détail de l'étape en cours s'affiche dessous, et au survol de chaque étape.
+- Technologies de la colonie : « 3 techno = +1 sort/tour » affiché (progression vers le prochain palier).
+
+## v0.6.18 — 16 novembre 2026
+
+- Mode découverte : relecture dans le navigateur ; conseil « Poser un bâtiment » supprimé (étape disparue), conseil Construire complété (1er tour, choix de la case des créatures chassées), conseil Supports (+1 biomasse) affiché dès la construction.
+
+## v0.6.17 — 16 novembre 2026
+
+- « Étage 6 : +1 chantier par lane » devient « +1 construction par lane » (interface, journal, aide).
+- Audit de l'aide (règles et conseils du mode découverte) : boosts de départ des Barbelés, Siphon (biomasse en plus par tranche de 10), liste complète des Boucliers, étape Métamorphose (règles + conseil), tableau des bâtiments (couronne, lane, Mine à fragmentation), « peu de PV » au lieu de « 1 PV » pour les aggros.
+
+## v0.6.16 — 16 novembre 2026
+
+- Boosts de départ des Barbelés : corrigés. `migrate` effaçait l'Épines +1 (remise à 1) et transformait le Bouclier en Renforcé à chaque chargement ; les 4 boosts (Renforcé 1, Bouclier, Épines +1, +1 PV) restent maintenant sur les 4 Barbelés de la couronne 1.
+- Soutiens échangés : Glaneur (Aura Récolte, +1 biomasse) passe au niveau 2 (coût 3, 3 PV) ; Charognard (Dépouille) passe au niveau 1 (coût 2, 2 PV).
+- Un support qui tombe rapporte de nouveau +1 biomasse à l'essaim.
+- Interface colonie : en construction, le grand chiffre du haut affiche « points restants / travailleurs » (comme disponible / budget chez l'essaim) ; le compteur « points restants » du titre Construction est supprimé.
+- Aide : textes des Mines, du tour de la colonie et de l'étage 6 mis à jour.
+
+## v0.6.15 — 14 novembre 2026
+
+- Coup de grâce (Griffes) : fonctionne aussi sur un bâtiment à 1 PV protégé par un Bouclier. Le jeton Bouclier part et le bâtiment est détruit.
+
+## v0.6.14 — 14 novembre 2026
+
+- Mines : mineure (coût 1, 1 PV) 2 dégâts ; majeure (coût 2, 2 PV) 4 dégâts ; **Mine à fragmentation** (ex-Mine supérieure, coût 3, 3 PV) 3 dégâts à **toutes les créatures de la case** de celle qui la révèle (interprétation de « toute la zone », à confirmer).
+- Carapace épaisse : n'insensibilise plus aux Mines, elle réduit seulement leurs dégâts de 1 (toujours insensible aux Épines).
+
+## v0.6.13 — 14 novembre 2026
+
+- Les jetons Échappée et Blindage ne reviennent plus à chaque tour : un soutien n'a qu'un seul jeton Échappée (à l'arrivée ou à l'achat de la Régénération), défaussé pour de bon. Régénération = ce jeton unique.
+- Déploiement : 1 carte de niveau 1 gratuite en plus (au lieu de 2).
+
+## v0.6.12 — 14 novembre 2026
+
+- Régénération = Aura Échappée (rétablie, déplacée depuis la Mue) : chaque soutien porte un jeton Échappée qui sauve une autre créature de sa case (elle recule d'une case), défaussé puis rendu au début de chaque tour de l'essaim. Le jeton Soin de la v0.6.11 disparaît.
+
+## v0.6.11 — 14 novembre 2026
+
+- Régénération : un jeton Soin par soutien (`c.soin`), qui annule la première perte de PV d'une autre créature de sa case, puis est défaussé ; il revient au début de chaque tour de l'essaim (remplace l'Aura Soin de case, trop forte).
+
+## v0.6.10 — 14 novembre 2026
+
+- Bélier (tank B2) remplacé par **Provocation renforcée** : +1 PV pour les tanks, et les tourelles qui ont un tank à portée doivent le viser en priorité (`supportTargets`).
+- **Régénération** : Aura Soin de case. Au début de chaque tour de l'essaim, toute créature qui partage sa case avec un soutien reçoit un jeton Blindage (première perte de PV annulée) ; le Blindage des tanks revient toujours.
+
+## v0.6.9 — 14 novembre 2026
+
+- Métamorphose : seuls les aggros et les tanks peuvent être transformés (pas les soutiens).
+
+## v0.6.8 — 14 novembre 2026
+
+- Mue : l'Aura Échappée (jetons, sauvetage) est supprimée, remplacée par l'Aura Métamorphose. Nouvelle étape `A_morph` à la fin du tour de l'essaim (si une transformation est possible) : chaque soutien, une fois par tour, transforme une autre créature de sa case en une créature du niveau supérieur et du même type, si ce niveau est débloqué (amélioration du type acquise). Actions `morph {sid, id, to}` et `morphDone`. Régénération ne rend plus que le Blindage.
+
+## v0.6.7 — 14 novembre 2026
+
+- Les Barbelés de départ restent à Épines 1 (corrige la v0.6.2).
+
+## v0.6.6 — 14 novembre 2026
+
+- IA colonie : quand un bâtiment chasse des créatures, elle les envoie en priorité sur une case battue par le plus de tourelles (supports I / II dans les 8 cases autour) ; sans tourelle à portée, recul d'office.
+
+## v0.6.5 — 14 novembre 2026
+
+- Départ : les 4 Barbelés de la couronne 1 reçoivent chacun un boost unique au hasard (Renforcé 1, Bouclier, Épines +1, +1 PV), perdu avec la tuile.
+- Un bâtiment posé sur une case occupée : la colonie choisit la case voisine (même lane, couronne ±1, colonne ±1, entrée comprise, sans bâtiment) où vont les créatures chassées ; sans choix, recul d'une couronne comme avant (IA). Argument `to: [colonne, couronne]` des actions `buildAt`, `placeAt`, `relocate`.
+- En ligne : à la fin des réactions de la colonie, plus d'écran « À vous de jouer » mais un bandeau « FIN DES RÉACTIONS » (même style que « RÉACTIONS ! »), aussi en local.
+
+## v0.6.4 — 14 novembre 2026
+
+- Population max par lane : 2 / 3 / 4 / 4 (le palier 4 reste à 4 au lieu de 5) ; les paliers et les 10 cartes en main ne changent pas.
+
+## v0.6.3 — 14 novembre 2026
+
+- Front et Réduit : 4 PV (validé par Oni). Tanks : PV 2 / 3 / 4 (Carapace, Béhémoth, Colosse ; ATQ inchangée 1 / 2 / 3).
+
+## v0.6.2 — 14 novembre 2026
+
+- Ligne de front et Réduit : PV fixes et Épines 2 ; Front seulement sur la 3e couronne, Réduit sur la 1re.
+- +1 Épines à tous les bâtiments qui en avaient (Baraquement 2, Haie 3, Mur hérissé 3, Ronceraie 3).
+- Un support qui tombe ne rapporte plus de biomasse.
+- Fusée : le 3e palier d'étages coûte 6 au lieu de 7 (2 / 4 / 6 / 10).
+- « Essaim agrandi » : +2 au plafond de population par lane (au lieu de +3).
+
+## v0.6.1 — 13 novembre 2026
+
+**Règles (Oni) : combat « tout ou rien » (ex-branche test)**
+- Un bâtiment ou une créature n'est **détruit que si les dégâts du tour** (toutes sources cumulées : plusieurs attaquants, plusieurs tourelles, sortilèges,
+  Épines, Mines) **atteignent ses PV** ; sinon les dégâts sont **effacés à la fin du tour** (essaim et colonie). Plus aucun soin.
+- **Stats** : Carapace 1/2, Colosse 3/6, soutiens à 2 / 3 / 4 PV selon le niveau.
+- **Cartes** : Carapace épaisse (insensible aux Épines et aux Mines, sans +1 PV), Provocation sans −1 tourelle, Masse vivante → **Bélier** (+1 ATQ des
+  tanks), Coup de grâce (s'il ne manque qu'1 dégât), Régénération (jetons Blindage et Échappée rendus à chaque tour de l'essaim), Glaneur → **Aura Récolte**
+  (+1 biomasse), Réparation → **Tir de précision** (le premier tir de tourelle du tour fait +2), Échappée (survit sans PV à noter).
+- **Mouvement** : une aggro ou un tank doit avancer d'au moins une case s'il n'y a pas de bâtiment devant lui (les soutiens restent libres).
+
+**Interface** : PV entamés en rouge pendant le tour, aperçu d'attaque « détruit / pas détruit », aide mise à jour.
+
+**Attention** : `tests/rules.test.js` n'est pas encore adapté à cette règle (environ 60 vérifications sur l'ancien modèle de PV).
+
 ## v0.6.0 — 13 novembre 2026
 
 **Version stable : fusion de la branche staging (versions 0.5.22 à 0.5.33).**

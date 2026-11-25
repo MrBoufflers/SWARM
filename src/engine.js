@@ -7,26 +7,26 @@ const SF = (() => {
     // niveaux 2 et 3 : +1/+1 et +2/+2 par rapport au niveau 1 (Oni, 11/11/2026 ; aggros à 1 PV du 01/11 au 11/11)
     "Ravageur": { type: "aggro", lvl: 2, cost: 4, pv: 2, atq: 4 }, // niveau 2 = niveau 1 +1 ATQ +1 PV (Oni, 11/11/2026 ; avant 5/1)
     "Massacreur": { type: "aggro", lvl: 3, cost: 6, pv: 3, atq: 5 }, // niveau 3 = niveau 1 +2 ATQ +2 PV (Oni, 11/11/2026 ; avant 7/1) // coût 6 (Oni, 07/11/2026 ; avant 7)
-    "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 3, atq: 1 },
+    "Carapace": { type: "tank", lvl: 1, cost: 3, pv: 2, atq: 1 },
     // tanks : 1/3, 2/4, 3/5 (ATQ/PV, Oni 11/11/2026 ; tous à 1 ATQ du 01/11 au 11/11)
-    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 4, atq: 2 }, // Oni, 11/11/2026 (avant 1/5)
-    "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 5, atq: 3 }, // Oni, 11/11/2026 (avant 1/7) // coût 6 (Oni, 07/11/2026 ; avant 7)
+    "Béhémoth": { type: "tank", lvl: 2, cost: 4, pv: 3, atq: 2 }, // Oni, 11/11/2026 (avant 1/5)
+    "Colosse": { type: "tank", lvl: 3, cost: 6, pv: 4, atq: 3 }, // Oni, 11/11/2026 (avant 1/7) // coût 6 (Oni, 07/11/2026 ; avant 7)
     // soutiens : 2 / 4 / 6 PV selon le niveau (Oni, 02/11/2026 ; avant 2 / 5 / 8)
     "Œil-sonde": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "vision", capName: "Vision", capText: "Tant qu'il est en vie, toutes les tuiles camouflées de sa lane sont révélées, même celles posées ensuite." },
-    "Glaneur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "soin", capName: "Aura Soin 2", capText: "En fin de tour de l'essaim, les autres créatures de sa case regagnent 2 PV." },
+    "Glaneur": { type: "soutien", lvl: 2, cost: 3, pv: 3, atq: 0, cap: "recolte", capName: "Aura Récolte", capText: "Quand une autre créature de sa case détruit un bâtiment, l'essaim gagne +1 biomasse de plus." },
     // Catalyseur passe au niveau 1 (0/2) et le Hurleur au niveau 2 (0/4, Aura Fureur +2 ATQ) — Oni, 07/11/2026
     "Catalyseur": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "cuirasse", capName: "Aura Cuirasse", capText: "Les autres créatures de sa case ne subissent pas les dégâts d'Épines." },
     // Charognard : Aura Butin (01/11/2026), remplacée par Dépouille (Oni, 12/11/2026)
-    "Charognard": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "depouille", capName: "Dépouille", capText: "Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case : la colonie ne peut plus y construire tant qu'une tourelle à portée n'a pas tiré dessus (un tir)." },
-    "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
-    "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 4, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case (cumulable)." },
+    "Charognard": { type: "soutien", lvl: 1, cost: 2, pv: 2, atq: 0, cap: "depouille", capName: "Dépouille", capText: "Quand une autre créature de sa case meurt, elle laisse un jeton Dépouille sur sa case : la colonie ne peut plus y construire tant qu'une tourelle à portée n'a pas tiré dessus (un tir)." },
+    "Perforeur": { type: "soutien", lvl: 2, cost: 3, pv: 3, atq: 0, cap: "percee", capName: "Aura Percée", capText: "Les autres créatures de sa case gagnent la percée." },
+    "Hurleur": { type: "soutien", lvl: 2, cost: 3, pv: 3, atq: 0, cap: "fureur", capName: "Aura Fureur", capText: "+2 ATQ aux autres créatures de sa case (cumulable)." },
     // Sapeur (Oni, 01/11/2026) : à son déploiement, détruit un bâtiment au choix de sa lane (avant : un chantier de l'atelier)
-    "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
-    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 6, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 1 dégât par Sporeur ; la fusée touchée perd 1 travailleur." },
+    "Sapeur": { type: "soutien", lvl: 3, cost: 5, pv: 4, atq: 0, cap: "sabotage", capName: "Sabotage", capText: "Quand il est déployé, détruit un bâtiment au choix de sa lane." },
+    "Sporeur": { type: "soutien", lvl: 3, cost: 5, pv: 4, atq: 0, cap: "spores", capName: "Aura Spores", capText: "Quand une autre créature de sa case attaque, les 8 cases autour de la cible subissent 1 dégât par Sporeur ; la fusée touchée perd 1 travailleur." },
   };
   const PILES = {
-    1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Glaneur", 2], ["Catalyseur", 2]] },
-    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Charognard", 2], ["Perforeur", 2], ["Hurleur", 2]] },
+    1: { aggro: [["Écorcheur", 6]], tank: [["Carapace", 6]], soutien: [["Œil-sonde", 2], ["Charognard", 2], ["Catalyseur", 2]] },
+    2: { aggro: [["Ravageur", 6]], tank: [["Béhémoth", 6]], soutien: [["Glaneur", 2], ["Perforeur", 2], ["Hurleur", 2]] },
     3: { aggro: [["Massacreur", 6]], tank: [["Colosse", 6]], soutien: [["Sapeur", 3], ["Sporeur", 3]] },
   };
   // nom: durée, pv (nombre ou 'ap' / 'front' / 'reduit'), épines, renforcé, tech, temp, perm, piège, direction, exemplaires
@@ -35,12 +35,12 @@ const SF = (() => {
     "Muraille": { d: 2, pv: 4, ep: 0, camo: 1, n: 3 }, // 3 ex. (Oni, 02/11/2026 ; avant 6, puis 4)
     "Rempart": { d: 3, pv: 4, ep: 0, ren: 1, camo: 1, n: 3 },
     "Bastion": { d: 3, pv: 3, ep: 0, ren: 2, camo: 1, n: 2 },
-    "Haie d'épines": { d: 1, pv: 1, ep: 2, camo: 1, n: 3 },
-    "Mur hérissé": { d: 2, pv: 2, ep: 2, camo: 1, n: 2 },
+    "Haie d'épines": { d: 1, pv: 1, ep: 3, camo: 1, n: 3 },
+    "Mur hérissé": { d: 2, pv: 2, ep: 3, camo: 1, n: 2 },
     "Antenne": { d: 1, pv: 1, ep: 0, tech: 1, n: 3 },
     "Laboratoire": { d: 2, pv: 2, ep: 0, tech: 2, n: 3 }, // 3 ex. (Oni, 02/11/2026 ; avant 2)
     "Observatoire": { d: 3, pv: 2, ep: 0, tech: 3, shield: 1, n: 3 }, // 2 PV + Bouclier (Oni, 09/11/2026 ; avant 3 PV) // 3 ex. (Oni, 02/11/2026 ; avant 1)
-    "Baraquement": { d: 1, pv: 1, ep: 1, temp: 1, n: 3 }, // Épines 1 (Oni, 01/11/2026)
+    "Baraquement": { d: 1, pv: 1, ep: 2, temp: 1, n: 3 }, // Épines 1 (Oni, 01/11/2026)
     // Dortoir (Oni, 01/11/2026 ; avant 1 PV, travailleur permanent, 2 ex.) : 3 PV, Renforcé 2 (d'abord « Bouclier 2 »), +1 travailleur temporaire
     "Dortoir": { d: 3, pv: 3, ep: 0, ren: 1, temp: 1, n: 3 },
     // Archives (Oni, 01/11/2026) : 3 PV, +1 technologie, face visible
@@ -50,19 +50,19 @@ const SF = (() => {
     "Avant-poste de l'Est": { d: 2, pv: 4, dir: "E", ep: 0, aura: 1, n: 1 },
     "Avant-poste du Sud": { d: 2, pv: 4, dir: "S", ep: 0, aura: 1, n: 1 },
     "Avant-poste de l'Ouest": { d: 2, pv: 4, dir: "O", ep: 0, aura: 1, n: 1 },
-    "Ligne de front": { d: 2, pv: "front", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
-    "Réduit": { d: 2, pv: "reduit", ep: 1, camo: 1, n: 2 }, // Épines 1 (Oni, 01/11/2026)
+    "Ligne de front": { d: 2, pv: 4, ep: 2, ring: 3, camo: 1, n: 2 }, // PV fixes + Épines 2, 3e couronne seulement (Oni, 14/11/2026)
+    "Réduit": { d: 2, pv: 4, ep: 2, ring: 1, camo: 1, n: 2 }, // PV fixes + Épines 2, 1re couronne seulement (Oni, 14/11/2026)
     // Pièges (Oni, 07/11/2026 ; remplacent le Piège à 3 dégâts et le Siphon à 3 biomasse) : effet = PV = tours de construction
-    "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 1, camo: 1, n: 2 },
-    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 3, camo: 1, n: 2 }, // dégâts 1 / 3 / 5 (Oni, 09/11/2026 ; avant 1 / 2 / 3)
-    "Mine supérieure": { d: 3, pv: 3, ep: 0, trap: 5, camo: 1, n: 2 },
+    "Mine mineure": { d: 1, pv: 1, ep: 0, trap: 2, camo: 1, n: 2 },
+    "Mine majeure": { d: 2, pv: 2, ep: 0, trap: 4, camo: 1, n: 2 }, // dégâts 2 / 4 / 3 en zone (Oni, 14/11/2026 ; avant 1 / 3 / 5)
+    "Mine à fragmentation": { d: 3, pv: 3, ep: 0, trap: 3, zone: 1, camo: 1, n: 2 }, // ex-Mine supérieure : 3 dégâts à toutes les créatures de la case (Oni, 14/11/2026)
     "Siphon mineur": { d: 1, pv: 1, ep: 0, siphon: 1, camo: 1, n: 2 },
     "Siphon majeur": { d: 2, pv: 2, ep: 0, siphon: 2, camo: 1, n: 2 },
     "Siphon supérieur": { d: 3, pv: 3, ep: 0, siphon: 3, camo: 1, n: 2 },
     // Abri blindé (Oni, 07/11/2026) : +1 travailleur tant qu'il tient, Bouclier (jeton qui annule la prochaine attaque), face visible
     "Abri blindé": { d: 2, pv: 2, ep: 0, temp: 1, shield: 1, n: 3 },
     // Ronceraie (Oni, 01/11/2026) : 3 tours, 2 PV, Renforcé 2, Épines 2, camouflée, 3 exemplaires
-    "Ronceraie": { d: 3, pv: 2, ep: 2, ren: 1, camo: 1, n: 3 },
+    "Ronceraie": { d: 3, pv: 2, ep: 3, ren: 1, camo: 1, n: 3 },
     // Égide (Oni, 01/11/2026) : Renforcé 2 (02/11/2026 : le Bouclier est fondu dans Renforcé)
     "Égide": { d: 2, pv: 2, ep: 0, camo: 1, shield: 1, n: 3 }, // Bouclier au lieu de Renforcé 2 (Oni, 09/11/2026) // 2 PV (Oni, 04/11/2026 ; avant 3)
   };
@@ -70,10 +70,10 @@ const SF = (() => {
     "Rempart": "Renforcé 1 : −1 dégât à chaque attaque.", "Bastion": "Renforcé 2 : −2 dégâts à chaque attaque.",
     "Avant-poste du Nord": "4 PV. Seulement dans la lane Nord.", "Avant-poste de l'Est": "4 PV. Seulement dans la lane Est.",
     "Avant-poste du Sud": "4 PV. Seulement dans la lane Sud.", "Avant-poste de l'Ouest": "4 PV. Seulement dans la lane Ouest.",
-    "Ligne de front": "PV = 1 + couronne (2 / 3 / 4).", "Réduit": "PV = 5 − couronne (4 / 3 / 2).",
-    "Mine mineure": "Camouflée. 1 dégât à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
-    "Mine majeure": "Camouflée. 3 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
-    "Mine supérieure": "Camouflée. 5 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Ligne de front": "4 PV, Épines 2. Seulement sur la 3e couronne.", "Réduit": "4 PV, Épines 2. Seulement sur la 1re couronne.",
+    "Mine mineure": "Camouflée. 2 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine majeure": "Camouflée. 4 dégâts à la créature qui la révèle en l'attaquant, avant qu'elle frappe.",
+    "Mine à fragmentation": "Camouflée. 3 dégâts à chaque créature de la case de celle qui la révèle en l'attaquant, avant qu'elle frappe.",
     "Siphon mineur": "Camouflé. Révélé par une attaque : l'essaim perd 1 biomasse, +1 par tranche de 10 qu'il possède (jamais sous 5).",
     "Siphon majeur": "Camouflé. Révélé par une attaque : l'essaim perd 2 biomasse, +2 par tranche de 10 qu'il possède (jamais sous 5).",
     "Siphon supérieur": "Camouflé. Révélé par une attaque : l'essaim perd 3 biomasse, +3 par tranche de 10 qu'il possède (jamais sous 5).",
@@ -97,7 +97,7 @@ const SF = (() => {
     "Effort": { kind: "sup", n: 1, text: "+2 points de construction ce tour." },
     // Feu nourri (Oni, 02/11/2026) : sort de soutien, 2 exemplaires
     "Feu nourri": { kind: "sup", n: 1, text: "Ce tour, chaque tourelle tire 2 fois." },
-    "Réparation": { kind: "sup", n: 1, text: "Rendez 3 PV, répartis sur vos tuiles abîmées." },
+    "Tir de précision": { kind: "sup", n: 1, text: "Ce tour, votre premier tir de tourelle fait +2 dégâts." }, // remplace Réparation (branche test, 13/11/2026)
     "Double bouclier": { kind: "sup", n: 1, text: "Deux bâtiments au choix gagnent un jeton Bouclier." }, // Oni, 09/11/2026
     "Renouvellement": { kind: "sup", n: 1, text: "Défaussez des tuiles de votre main, puis repiochez-en autant (chacune dans la même pioche) ; +1 point de construction ce tour." },
     "Reconversion": { kind: "sup", n: 1, text: "Une tuile de votre main remplace une tuile construite, qui est aussitôt reposée sur une autre case de votre choix." },
@@ -106,19 +106,19 @@ const SF = (() => {
     // Oni, 02/11/2026 : 4 paliers, départ (plafond 2), puis 9, 15, 21 de biomasse (brièvement 10 / 15 / 20, puis 9 / 15 / 20)
     // (avant : 5 paliers, départ 3 puis 6 / 9 / 12 / 15, plafonds 1 à 5 ; à l'origine 4 / 7 / 10 / 13)
     { min: 0, n: [3, 0, 0], cap: 2 }, { min: 9, n: [3, 2, 0], cap: 3 }, { min: 15, n: [4, 2, 1], cap: 4 },
-    { min: 21, n: [4, 3, 3], cap: 5 },
+    { min: 21, n: [4, 3, 3], cap: 4 }, // population max 4 par lane (Oni, 14/11/2026 ; avant 5)
   ];
   const TREES = {
     aggro: { A1: ["Férocité", "+1 ATQ. Furtivité."], B1: ["Mobilité", "+1 vitesse."],
-      A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 2 cartes de niveau 1 gratuites en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
-      B2: ["Essaim agrandi", "+3 au plafond de population de chaque lane."] },
+      A2: ["Carnage", "Attaquent 2 fois par tour."], C2: ["Déploiement", "Chaque tour : 1 carte de niveau 1 gratuite en plus, et une aggro redéployée à l'entrée de n'importe quelle lane."],
+      B2: ["Essaim agrandi", "+2 au plafond de population de chaque lane."] },
     // Provocation : ancien nom « Protection » (Oni, 02/11/2026)
-    tank: { A1: ["Carapace épaisse", "+1 PV. Insensibles aux Épines. −1 dégât des Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank. −1 dégât des tourelles."],
+    tank: { A1: ["Carapace épaisse", "Insensibles aux Épines ; −1 dégât des Mines."], B1: ["Provocation", "Les tirs et les sortilèges visant une autre créature de sa case visent ce tank."],
       A2: ["Blindage", "Chaque tank en jeu, et chaque tank qui arrive ensuite, reçoit un jeton Blindage : la prochaine perte de PV qu'il subirait est annulée, puis le jeton est défaussé."], C2: ["Réincarnation", "Au début de son tour, l'essaim choisit un tank mort depuis son tour précédent : il revient là où il est mort."],
-      B2: ["Masse vivante", "−1 dégât des tourelles (cumulable avec Provocation)."] },
-    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Échappée : chaque soutien a un jeton Échappée ; il sauve une créature de sa case qui devrait mourir (elle recule d'une case avec 1 PV), puis le jeton est défaussé."],
-      B1: ["Griffes", "Aura Coup de grâce : un bâtiment laissé à 1 PV par une attaque de sa case est détruit. Aura Mobilité 1 (+1 vitesse)."],
-      A2: ["Régénération", "Aura Soin total : en fin de tour de l'essaim, les autres créatures de sa case retrouvent tous leurs PV. Les Glaneurs quittent la pioche."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
+      B2: ["Provocation renforcée", "+1 PV pour les tanks. Les tourelles qui ont un tank à portée doivent le viser en priorité."] },
+    soutien: { A1: ["Mue", "Aura Mobilité 1 (+1 vitesse) et Aura Métamorphose : à la fin de votre tour, chaque soutien peut transformer un aggro ou un tank de sa case en la créature de niveau supérieur du même type (si ce niveau est déjà débloqué)."],
+      B1: ["Griffes", "Aura Coup de grâce : s'il ne manque qu'1 dégât à un bâtiment attaqué depuis sa case, il est détruit. Aura Mobilité 1 (+1 vitesse)."],
+      A2: ["Régénération", "Aura Échappée : chaque soutien porte un seul jeton Échappée ; il sauve une autre créature de sa case qui devrait être détruite (elle recule d'une case), puis le jeton est défaussé pour de bon."], C2: ["Clairvoyance", "Tant qu'un soutien est en jeu, les tuiles camouflées sont visibles. Les Œil-sonde quittent la pioche."],
       B2: ["Corrosion", "Aura Corrosion : contre les attaques de sa case, Renforcé sans effet et Bouclier détruit."] },
   };
   const COST_R1 = 6, COST_R2 = 12, FLOORS = 12;
@@ -129,18 +129,18 @@ const SF = (() => {
   const TILE_CATS = ["renfort", "actif", "piege"], CAT_NAME = { renfort: "Renforts", actif: "Actifs", piege: "Pièges" };
   const tileCat = name => { const t = TILES[name]; return !t ? "renfort" : t.trap || t.siphon ? "piege" : !t.camo ? "actif" : "renfort"; };
   // anciens noms (parties en cours) : le Piège et le Siphon deviennent leur version supérieure
-  const OLD_TILE = { "Piège": "Mine supérieure", "Siphon": "Siphon supérieur" };
+  const OLD_TILE = { "Piège": "Mine à fragmentation", "Mine supérieure": "Mine à fragmentation", "Siphon": "Siphon supérieur" };
   // Famine (Oni, 02/11/2026) : ce tour, le budget de l'essaim est sa biomasse divisée par 2, arrondie à l'inférieur (avant : −5)
   const famineBudget = b => Math.floor(b / 2);
   // coût d'un étage de la fusée selon le palier atteint : étages 1-3 → 3 points, 4-6 → 4, 7-9 → 5, 10-12 → 6 (décision d'Oni, 30/10/2026)
-  const FLOOR_COSTS = [2, 4, 7, 10]; // Oni, 11/11/2026 (2 / 4 / 6 / 8 depuis le 04/11/2026 (avant 2 / 3 / 4 / 5 ; à l'origine 3 / 4 / 5 / 6)
+  const FLOOR_COSTS = [2, 4, 6, 10]; // 6 au lieu de 7 pour le 3e palier (Oni, 14/11/2026) ; avant : 2 / 4 / 7 / 10 // Oni, 11/11/2026 (2 / 4 / 6 / 8 depuis le 04/11/2026 (avant 2 / 3 / 4 / 5 ; à l'origine 3 / 4 / 5 / 6)
   const floorCost = S => FLOOR_COSTS[Math.min(3, Math.floor(S.floors / 3))];
   // tuiles de départ : 16 « Barbelé » (1 PV, Épines 1, face visible), repérées par start: true ; détruites, elles sont
   // retirées du jeu (pas de défausse). Noms successifs : « Mur de départ », « Haie de départ », « Haie d'épines » (Oni, 02/11/2026).
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.0";
+  const VERSION = "0.6.20";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -197,7 +197,7 @@ const SF = (() => {
   function newGame() {
     const S = {
       version: VERSION, round: 1, phase: "A_start", view: "essaim", handoff: "essaim", winner: null, nextId: 1, killed: 0,
-      tiles: {}, supports: {}, depouilles: [], renfV: 1, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
+      tiles: {}, supports: {}, depouilles: [], renfV: 1, totV: 1, chantiers: { N: [], E: [], S: [], O: [] }, chPerLane: 1, toPlace: [], pendingRocket: 0,
       workersBase: 3, floors: 0, rocketPts: 0, techBonus: 0,
       tileDecks: { renfort: [], actif: [], piege: [] }, tileDiscards: { renfort: [], actif: [], piege: [] }, hand: [],
       spellDeck: [], spellDiscard: [], spells: [],
@@ -212,6 +212,13 @@ const SF = (() => {
       const [x, y] = toGlobal(lane, u, k);
       S.tiles[key(x, y)] = { name: START_WALL, start: true, hp: 1, max: 1, ep: 1, ren: 0, tech: 0, temp: 0, trap: 0, revealed: true };
     }
+    // boosts de départ (Oni, 14/11/2026) : les 4 Barbelés de la couronne 1 reçoivent chacun un boost unique au hasard
+    // (Renforcé 1, Bouclier, Épines +1, +1 PV), les 4 représentés ; il disparaît avec la tuile
+    const boosts = shuffle(["ren", "shield", "ep", "hp"]);
+    LANES.forEach((lane, i) => {
+      const t = S.tiles[key(...toGlobal(lane, 0, 1))], b = boosts[i]; t.boost = b;
+      if (b === "ren") t.ren = 1; else if (b === "shield") t.shield = 1; else if (b === "ep") t.ep += 1; else { t.hp += 1; t.max += 1; }
+    });
     for (const sx of [1, -1]) for (const sy of [1, -1]) S.supports[key(sx, sy)] = 1;
     placeSupports(S); // supports de niveau 2 aux coins de la couronne 2 (leurs murs sont posés)
     for (const [n, t] of Object.entries(TILES)) for (let i = 0; i < t.n; i++) S.tileDecks[tileCat(n)].push(n);
@@ -226,7 +233,7 @@ const SF = (() => {
   }
   // une carte revient dans sa pioche (créature morte, carte non jouée, Nuke) — sauf l'Œil-sonde une fois Clairvoyance
   // acquise : il sort du jeu (Oni, 04/11/2026)
-  const retired = (S, name) => (name === "Œil-sonde" && S.upgrades.soutien.r2 === "C") || (name === "Glaneur" && S.upgrades.soutien.r2 === "A");
+  const retired = (S, name) => (name === "Œil-sonde" && S.upgrades.soutien.r2 === "C");
   function toPile(S, name) { if (!retired(S, name)) S.piles[CREATURES[name].lvl].push(name); }
   function addPile(S, lvl, type) {
     for (const [name, n] of PILES[lvl][type]) for (let i = 0; i < n; i++) S.piles[lvl].push(name);
@@ -236,7 +243,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ dérivés
   const tier = S => { let t = 0; TIERS.forEach((r, i) => { if (S.biomass >= r.min) t = i; }); return t; };
   // plafond de population par lane : celui du palier, +3 avec l'amélioration aggro « Essaim agrandi » (décision d'Oni, 30/10/2026)
-  const capOf = S => TIERS[tier(S)].cap + (S.upgrades.aggro.r2 === "B" ? 3 : 0);
+  const capOf = S => TIERS[tier(S)].cap + (S.upgrades.aggro.r2 === "B" ? 2 : 0);
   const laneCount = (S, lane) => S.creatures.filter(c => c.lane === lane).length;
   const tech = S => Object.values(S.tiles).reduce((a, t) => a + (t.tech || 0), 0) + S.techBonus;
   const spellsPerTurn = S => { const t = tech(S); return t >= 9 ? 3 : t >= 6 ? 2 : t >= 3 ? 1 : 0; };
@@ -273,12 +280,14 @@ const SF = (() => {
   }
   function maxHp(S, name) {
     const b = CREATURES[name]; let m = b.pv;
-    if (b.type === "tank") { if (S.upgrades.tank.r1 === "A") m += 1; } // Carapace épaisse +1 ; Blindage ne donne plus de PV (jeton, Oni 11/11/2026)
+    // Provocation renforcée (tank B2, Oni 14/11/2026) : +1 PV pour les tanks (remplace le Bélier : +1 ATQ)
+    if (b.type === "tank" && S.upgrades.tank.r2 === "B") m += 1;
     return m;
   }
   function baseAtq(S, name) {
     const b = CREATURES[name]; let a = b.atq;
-    if (b.type === "aggro" && S.upgrades.aggro.r1 === "A") a += 1; // Carnage ne donne plus d'ATQ (2 attaques, Oni 07/11/2026)
+    if (b.type === "aggro" && S.upgrades.aggro.r1 === "A") a += 1;
+    // Carnage ne donne plus d'ATQ (2 attaques, Oni 07/11/2026)
     return a;
   }
   // Frénésie (soutien, rang 2 côté B) : chaque soutien double les dégâts d'une autre créature de sa case, au choix de l'essaim
@@ -347,17 +356,17 @@ const SF = (() => {
     delete S.tiles[k];
     if (!t.start) S.tileDiscards[tileCat(t.name)].push(t.name);
     // biomasse gagnée : 1, quelle que soit la tuile détruite (Oni, 01/11/2026 ; du 30/10 au 01/11 : sa durée de construction)
-    const gain = 1; // plus d'Aura Butin (Charognard → Dépouille, Oni 12/11/2026)
+    const gain = 1 + (by && caseMates(S, by).some(o => o.name === "Glaneur") ? 1 : 0); // Aura Récolte du Glaneur : +1 (non cumulable)
     S.biomass += gain;
     fx(S, { t: "tileDown", k, n: gain });
     const nm = t.camo && !t.revealed ? "Une tuile camouflée" : t.name; // ne pas nommer une tuile camouflée jamais révélée
-    log(S, "essaim", `${nm} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse.`);
+    log(S, "essaim", `${nm} détruit${why ? " (" + why + ")" : ""} : +${gain} biomasse${gain > 1 ? " (Aura Récolte)" : ""}.`);
     checkSupportsFall(S);
   }
   function checkSupportsFall(S) {
     for (const sk of Object.keys(S.supports)) {
       if (!supportWalls(...parse(sk)).some(w => S.tiles[w])) {
-        log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe : +1 biomasse.`);
+        log(S, "essaim", `Le support de niveau ${S.supports[sk]} tombe : +1 biomasse.`); // rétabli par Oni, 16/11/2026
         delete S.supports[sk];
         S.biomass += 1;
         fx(S, { t: "tileDown", k: sk, n: 1 });
@@ -376,16 +385,33 @@ const SF = (() => {
   }
   // Un bâtiment qui sort de chantier sur une case occupée fait reculer les créatures d'une case vers le fond
   // (même colonne, couronne +1). Si cette case porte déjà une tuile, elles reculent jusqu'à la première case libre.
-  function pushBack(S, k) {
+  // Cases où l'on peut envoyer les créatures chassées par un bâtiment posé en k (Oni, 14/11/2026) : les cases voisines de la
+  // même lane (couronne ±1, colonne ±1), vides de bâtiment, entrée comprise ; renvoie [] s'il n'y a pas de créature à chasser.
+  function pushOptions(S, k) {
+    const here = S.creatures.filter(c => c.k < 4 && posKey(c) === k);
+    if (!here.length) return [];
+    const { lane, u, k: kk } = here[0], out = [];
+    for (let dk = -1; dk <= 1; dk++) for (let du = -1; du <= 1; du++) {
+      const nk = kk + dk, nu = u + du;
+      if ((!dk && !du) || nk < 1 || nk > 4 || Math.abs(nu) > (nk === 4 ? 2 : nk - 1)) continue;
+      if (nk < 4 && S.tiles[key(...toGlobal(lane, nu, nk))]) continue;
+      out.push([nu, nk]);
+    }
+    return out;
+  }
+  // to : [colonne, couronne] choisi par la colonie ; sinon (ou choix invalide) recul d'office d'une couronne vers le fond
+  function pushBack(S, k, to) {
     const here = S.creatures.filter(c => c.k < 4 && posKey(c) === k);
     if (!here.length) return;
     const { lane, u } = here[0];
-    let nk = here[0].k + 1;
-    while (nk < 4 && S.tiles[key(...toGlobal(lane, u, nk))]) nk++;
-    fx(S, { t: "push", ids: here.map(c => c.id), lane, u, to: nk });
-    for (const c of here) c.k = nk;
-    const where = nk === 4 ? "sur la case d'entrée" : `en couronne ${nk}`;
-    log(S, "colonie", `${here.map(c => c.name).join(", ")} recule${here.length > 1 ? "nt" : ""} ${where} pour laisser place au bâtiment.`);
+    let nk = here[0].k + 1, nu = u;
+    const pick = Array.isArray(to) && pushOptions(S, k).find(o => o[0] === to[0] && o[1] === to[1]);
+    if (pick) { nu = pick[0]; nk = pick[1]; }
+    else while (nk < 4 && S.tiles[key(...toGlobal(lane, u, nk))]) nk++;
+    fx(S, { t: "push", ids: here.map(c => c.id), lane, u: nu, to: nk });
+    for (const c of here) { c.k = nk; c.u = nu; }
+    const where = nk === 4 ? "sur la case d'entrée" : `en ${cellName(nu, nk)}`;
+    log(S, "colonie", `${here.map(c => c.name).join(", ")} est envoyé${here.length > 1 ? "s" : ""} ${where} pour laisser place au bâtiment.`);
   }
   function canTarget(S, lane, k) { // case cible valable pour un chantier de cette lane
     const [x, y] = parse(k);
@@ -397,7 +423,7 @@ const SF = (() => {
   // ------------------------------------------------------------------ créatures
   function makeCreature(S, name, lane, u, extra) {
     const c = { id: S.nextId++, name, lane, u, k: 4, hp: maxHp(S, name), new: true, acted: false, ...extra };
-    if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r1 === "A") c.esc = 1; // Mue : jeton Échappée à l'arrivée (Oni, 12/11/2026)
+    if (CREATURES[name].type === "soutien" && S.upgrades.soutien.r2 === "A") c.esc = 1; // Régénération : jeton Échappée à l'arrivée
     if (CREATURES[name].type === "tank" && S.upgrades.tank.r2 === "A") c.blind = 1; // Blindage : jeton à l'arrivée (Oni, 11/11/2026)
     return c;
   }
@@ -440,20 +466,20 @@ const SF = (() => {
     }
     if (dead.length) syncBonus(S); // les survivants qui perdent un bonus (soutien mort) gardent leurs PV
   }
-  // Échappée (Mue, Oni 11/11/2026 ; jetons depuis le 12/11/2026, car trop forte) : chaque soutien porte un jeton Échappée (`esc`) ;
+  // Échappée (Régénération depuis le 14/11/2026, jeton unique non renouvelé ; avant : Mue, Oni 11/11/2026 ; jetons depuis le 12/11/2026) : chaque soutien porte un jeton Échappée (`esc`) ;
   // une créature qui devrait mourir, accompagnée d'un autre soutien vivant qui a encore son jeton, recule d'une case (même colonne,
   // vers l'entrée, au-delà des bâtiments) avec 1 PV, et ce jeton est défaussé pour de bon ; sur la case d'entrée, elle reste
   function escape(S, c) {
-    if (S.upgrades.soutien.r1 !== "A") return false;
+    if (S.upgrades.soutien.r2 !== "A") return false;
     const saver = caseMates(S, c).find(o => isSoutien(o) && o.esc && o.hp + bonusHp(S, o) > 0);
     if (!saver) return false;
     saver.esc = 0;
     let nk = Math.min(4, c.k + 1);
     while (nk < 4 && S.tiles[key(...toGlobal(c.lane, c.u, nk))]) nk++;
-    c.hp = 1;
+    c.hp = maxHp(S, c.name); // branche test : elle survit, ses dégâts du tour sont effacés
     if (nk !== c.k) { fx(S, { t: "push", ids: [c.id], lane: c.lane, u: c.u, to: nk }); c.k = nk; }
     fx(S, { t: "cheal", id: c.id, n: 1, hp: 1 });
-    log(S, "essaim", `Échappée : ${saver.name} sauve ${c.name} (jeton défaussé) : il survit avec 1 PV et recule ${nk === 4 ? "sur la case d'entrée" : "en " + cellName(c.u, nk)}.`);
+    log(S, "essaim", `Échappée : ${saver.name} sauve ${c.name} (jeton défaussé) : il survit et recule ${nk === 4 ? "sur la case d'entrée" : "en " + cellName(c.u, nk)}.`);
     return true;
   }
   function damageCreature(S, c, n, why) {
@@ -689,8 +715,12 @@ const SF = (() => {
     return true;
   }
   // la créature renonce à agir (ou à sa 2ᵉ attaque) pour ce tour
+  // branche test (Oni, 13/11/2026) : une aggro ou un tank n'a pas le choix de rester sur place : s'il n'y a pas de bâtiment ni la fusée
+  // devant lui, il doit avancer d'au moins une case (les soutiens, eux, peuvent rester avec leur groupe)
+  const mustAdvance = (S, c) => !c.acted && !c.moved && !c.struck && CREATURES[c.name].type !== "soutien" && pathCells(S, c).length > 0;
   function restCreature(S, id) {
     const c = S.creatures.find(o => o.id === id); if (!c || c.acted) return false;
+    if (mustAdvance(S, c)) return false; // il doit d'abord avancer
     c.acted = true; return true;
   }
   // résolution automatique d'une créature (bouton « Tout résoudre ») : elle avance au maximum sur son chemin, puis attaque
@@ -751,8 +781,12 @@ const SF = (() => {
         log(S, "essaim", "Un piège est révélé.");
         // le piège blesse la créature AVANT qu'elle frappe : si elle en meurt, elle n'inflige rien (Oni, 01/11/2026)
         if (!clairvoyance(S)) {
-          const cara = CREATURES[c.name].type === "tank" && S.upgrades.tank.r1 === "A"; // Carapace épaisse : −1 dégât des Mines (Oni, 11/11/2026)
-          damageCreature(S, c, Math.max(0, t.trap - (cara ? 1 : 0)), cara ? "piège, Carapace épaisse −1" : "piège");
+          // Mine à fragmentation (zone) : toute la case de la créature subit les dégâts ; Carapace épaisse : −1 dégât des Mines (Oni, 14/11/2026)
+          for (const v of t.zone ? [c, ...caseMates(S, c)] : [c]) {
+            const cara = CREATURES[v.name].type === "tank" && S.upgrades.tank.r1 === "A";
+            const dm = Math.max(0, t.trap - (cara ? 1 : 0));
+            if (dm) damageCreature(S, v, dm, "piège"); else log(S, "essaim", `Carapace épaisse : ${v.name} ne subit rien de la Mine.`);
+          }
           if (c.hp + bonusHp(S, c) <= 0) { log(S, "essaim", `${c.name} meurt dans le piège avant de frapper.`); return; }
         }
       } else log(S, "essaim", `Tuile camouflée révélée : ${t.name}.`);
@@ -794,6 +828,11 @@ const SF = (() => {
       fx(S, { t: "hit", id: c.id, k: tk, n: 0, hp: t.hp });
       log(S, "colonie", `Bouclier : ${t.name} ne subit rien de cette attaque ; le jeton est défaussé.`);
       sporesAround();
+      // Coup de grâce aussi contre un bâtiment à 1 PV protégé par un Bouclier : le jeton part, mais le bâtiment est achevé (Oni, 14/11/2026)
+      if (t.hp === 1 && primary && S.upgrades.soutien.r1 === "B" && countMates(S, c, isSoutien) > 0) {
+        t.hp = 0; fx(S, { t: "hit", id: c.id, k: tk, n: 1, hp: 0 }); log(S, "essaim", `Coup de grâce : ${t.name} est achevé malgré le Bouclier.`);
+        destroyTile(S, tk, "", c);
+      }
       pierce(dmg);
     } else if (S.stase.includes(tk)) {
       // Champ de stase (Oni, 07/11/2026) : l'attaque a lieu mais ne fait rien au bâtiment ; toute l'attaque passe en percée,
@@ -828,9 +867,16 @@ const SF = (() => {
   }
 
   // ------------------------------------------------------------------ tour de l'essaim
+  // RÈGLE « dégâts du tour : tout ou rien » (branche test, Oni 13/11/2026) : les PV perdus ne durent que le tour en cours. Une
+  // créature ou un bâtiment n'est détruit que si les dégâts cumulés du tour (toutes sources) atteignent ses PV ; sinon tout est effacé.
+  function clearDamage(S) {
+    for (const t of Object.values(S.tiles)) if (t.max != null && t.hp < t.max) t.hp = t.max;
+    for (const c of S.creatures) c.hp = maxHp(S, c.name);
+  }
   function startAttackerTurn(S) {
+    clearDamage(S);
     S.phase = "A_start"; S.raidUsed = false; S.stase = []; S.tpUsed = false; delete S.pickTotal;
-    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
+    for (const c of S.creatures) { c.new = false; c.acted = false; delete c.morphed; delete c.mobUsed; delete c.jammed; delete c.moved; delete c.spd; delete c.struck; }
     // Réincarnation : un seul tank mort → il revient ; plusieurs → l'essaim choisit (étape A_reinc, action reinc)
     S.reincQueue = S.reincQueue || [];
     if (S.reincQueue.length === 1) reincarnate(S, 0);
@@ -867,12 +913,12 @@ const SF = (() => {
       log(S, "essaim", `Main de départ : ${S.handA.map(c => c.name).join(", ")} ; budget ${S.budget}.`);
       return;
     }
-    // Déploiement (aggro, centre du rang 2) : les 2 cartes gratuites de niveau 1 sont piochées EN PREMIER, sinon la pioche
+    // Déploiement (aggro, centre du rang 2) : la carte gratuite de niveau 1 est piochée EN PREMIER, sinon la pioche
     // normale (qui se rabat sur le niveau 1 quand les niveaux 2 et 3 sont vides) pouvait vider le niveau 1 avant elles.
     if (S.upgrades.aggro.r2 === "C") {
       let n = 0;
-      for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); n++; }
-      log(S, "essaim", n === 2 ? "Déploiement : 2 cartes de niveau 1 gratuites." : `Déploiement : pioche de niveau 1 ${n ? "presque vide, 1 seule carte gratuite" : "vide, aucune carte gratuite"}.`);
+      for (let i = 0; i < 1; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); n++; }
+      log(S, "essaim", n ? "Déploiement : 1 carte de niveau 1 gratuite." : "Déploiement : pioche de niveau 1 vide, aucune carte gratuite.");
     }
     for (let lvl = 3; lvl >= 1; lvl--) {
       for (let i = 0; i < t.n[lvl - 1]; i++) {
@@ -908,10 +954,10 @@ const SF = (() => {
     return true;
   }
   function finishPick(S, counts) {
-    if (S.upgrades.aggro.r2 === "C") { // Déploiement : 2 cartes de niveau 1 gratuites, au hasard, en plus
+    if (S.upgrades.aggro.r2 === "C") { // Déploiement : 1 carte de niveau 1 gratuite, au hasard, en plus
       let m = 0;
-      for (let i = 0; i < 2; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); m++; }
-      log(S, "essaim", m === 2 ? "Déploiement : 2 cartes de niveau 1 gratuites." : `Déploiement : pioche de niveau 1 ${m ? "presque vide, 1 seule carte gratuite" : "vide, aucune carte gratuite"}.`);
+      for (let i = 0; i < 1; i++) if (S.piles[1].length) { S.handA.push({ name: S.piles[1].pop(), free: true, uid: S.nextId++ }); m++; }
+      log(S, "essaim", m ? "Déploiement : 1 carte de niveau 1 gratuite." : "Déploiement : pioche de niveau 1 vide, aucune carte gratuite.");
     }
     S.budget = S.famine ? famineBudget(S.biomass) : S.biomass;
     fx(S, { t: "draw", n: S.handA.length });
@@ -1032,16 +1078,9 @@ const SF = (() => {
     fx(S, { t: "upgrade", type, slot, name: TREES[type][slot][0] });
     for (const [c, m] of before) c.hp += maxHp(S, c.name) - m;
     log(S, "essaim", `Amélioration ${TREES[type][slot][0]} (${type}) acquise : les cartes de niveau ${slot.endsWith("1") ? 2 : 3} entrent dans la pioche.`);
-    if (type === "soutien" && slot === "A1") { // Mue : les soutiens déjà en jeu reçoivent aussi leur jeton Échappée (Oni, 12/11/2026)
-      for (const c of S.creatures) if (CREATURES[c.name].type === "soutien") c.esc = 1;
-    }
+    if (type === "soutien" && slot === "A2") for (const c of S.creatures) if (isSoutien(c)) c.esc = 1; // Régénération : jeton Échappée aux soutiens en jeu
     if (type === "tank" && slot === "A2") { // Blindage : les tanks déjà en jeu reçoivent aussi leur jeton (Oni, 11/11/2026)
       for (const c of S.creatures) if (CREATURES[c.name].type === "tank") c.blind = 1;
-    }
-    if (type === "soutien" && slot === "A2") { // Régénération : les Glaneurs de la pioche sortent du jeu (Oni, 11/11/2026)
-      const n = S.piles[1].filter(x => x === "Glaneur").length;
-      S.piles[1] = S.piles[1].filter(x => x !== "Glaneur");
-      if (n) log(S, "essaim", `Régénération : ${n} Glaneur${n > 1 ? "s sortent" : " sort"} de la pioche.`);
     }
     if (type === "soutien" && slot === "C2") {
       log(S, "essaim", "Clairvoyance : les tuiles camouflées sont visibles tant qu'un soutien est en jeu.");
@@ -1057,16 +1096,35 @@ const SF = (() => {
   function attackOrder(S) { return [...S.creatures].filter(c => !c.acted).sort((a, b) => a.k - b.k || a.id - b.id); }
   function endAttackerTurn(S) {
     if (S.winner) return;
-    // auras de soin
-    // Régénération = Aura Soin total (Oni, 11/11/2026) : les autres créatures de la case d'un soutien retrouvent tous leurs PV
-    for (const c of S.creatures) {
-      const regen = S.upgrades.soutien.r2 === "A" && countMates(S, c, isSoutien) > 0;
-      const m = maxHp(S, c.name), v = regen ? m : soinValue(S, c);
-      if (v && c.hp < m) { const before = c.hp; c.hp = Math.min(m, c.hp + v); fx(S, { t: "cheal", id: c.id, n: c.hp - before, hp: c.hp + bonusHp(S, c) }); log(S, "essaim", `${c.name} regagne ${c.hp - before} PV.`); }
-    }
     // sortilèges non joués : ils restent en main jusqu'à ce qu'ils soient joués (Oni, 01/11/2026 ; avant : défaussés)
     S.stase = [];
+    if (S.phase !== "A_morph" && morphOptions(S).length) { S.phase = "A_morph"; return; } // Métamorphose (Mue) : l'essaim peut transformer
     startDefenderTurn(S);
+  }
+  // Aura Métamorphose (Mue, Oni 14/11/2026) : à la fin du tour de l'essaim, chaque soutien (une fois) peut transformer une autre
+  // créature de sa case en une créature du niveau supérieur et du même type, si ce niveau est débloqué (amélioration acquise)
+  function morphOptions(S) {
+    const out = [];
+    if (S.upgrades.soutien.r1 !== "A") return out;
+    for (const s of S.creatures) {
+      if (!isSoutien(s) || s.morphed) continue;
+      for (const c of caseMates(S, s)) {
+        const d = CREATURES[c.name], up = S.upgrades[d.type];
+        if (!d || d.type === "soutien" || d.lvl >= 3 || !up[d.lvl === 1 ? "r1" : "r2"]) continue;
+        for (const [to] of PILES[d.lvl + 1][d.type]) out.push({ sid: s.id, id: c.id, to });
+      }
+    }
+    return out;
+  }
+  function morph(S, a) {
+    const o = morphOptions(S).find(x => x.sid === a.sid && x.id === a.id && x.to === a.to); if (!o) return false;
+    const s = S.creatures.find(c => c.id === o.sid), c = S.creatures.find(c => c.id === o.id), old = c.name;
+    s.morphed = 1; c.name = o.to; c.hp = maxHp(S, o.to);
+    fx(S, { t: "cheal", id: c.id, n: 0, hp: c.hp });
+    log(S, "essaim", `Métamorphose : ${old} devient ${o.to} (${s.name}).`);
+    syncBonus(S);
+    if (!morphOptions(S).length) startDefenderTurn(S);
+    return true;
   }
 
   // ------------------------------------------------------------------ sortilèges
@@ -1076,7 +1134,7 @@ const SF = (() => {
     // événement visuel du sort, placé avant ses effets (dégâts, soins…) ; seules des informations publiques
     const at = S.fx ? S.fx.length : 0;
     const pubArg = ["Frappe orbitale", "Salve", "Brouillage"].includes(name) ? { id: arg } : name === "Barrage" ? { lane: arg } : name === "Champ de stase" ? { k: arg }
-      : name === "Double bouclier" ? { keys: arg } : name === "Onde de choc" ? { ring: Number(arg) } : name === "Réparation" ? { keys: arg } : name === "Reconversion" ? { k: arg && arg.tile }
+      : name === "Double bouclier" ? { keys: arg } : name === "Onde de choc" ? { ring: Number(arg) } : name === "Reconversion" ? { k: arg && arg.tile }
       : name === "Renouvellement" ? { n: Array.isArray(arg) ? arg.length : 0 } : {};
     fx(S, { t: "spell", name, kind: sp.kind, ...pubArg });
     const ok = applySpell(S, name, arg);
@@ -1124,11 +1182,7 @@ const SF = (() => {
         for (const k of arg) { const t = S.tiles[k]; if (t) { t.shield = 1; fx(S, { t: "heal", k, n: 0, hp: t.hp }); } }
         return true;
       }
-      case "Réparation": { // arg = liste de clés de tuiles, 3 PV au total
-        if (!Array.isArray(arg) || !arg.length || arg.length > 3) return false;
-        for (const k of arg) { const t = S.tiles[k]; if (t && t.hp < t.max) { t.hp += 1; fx(S, { t: "heal", k, n: 1, hp: t.hp }); } }
-        return true;
-      }
+      case "Tir de précision": S.precise = 1; return true;
       case "Renouvellement": { // arg = indices de la main à défausser
         if (!Array.isArray(arg)) return false;
         const idx = [...arg].sort((a, b) => b - a);
@@ -1170,6 +1224,7 @@ const SF = (() => {
     return true;
   }
   function startDefenderTurn(S) {
+    clearDamage(S); S.precise = 0;
     for (const t of Object.values(S.tiles)) delete t.new; // les bâtiments posés au tour précédent ne sont plus « nouveaux »
     S.phase = needDraw(S) ? "D_draw" : "D_main"; S.alloc = { N: 0, E: 0, S: 0, O: 0 }; S.extraPts = 0; S.cadence = false; S.firedSupports = []; S.doubleFire = false;
     // construction immédiate (Oni, 08/11/2026) : points du tour fixés au début du tour (un bâtiment posé ce tour, ou un
@@ -1186,6 +1241,7 @@ const SF = (() => {
     const t = TILES[name]; if (!t || S.phase !== "D_main" || S.relocate) return false;
     if (firstTurnCap(S)) return false;
     const lane = cellLane(...parse(k)); if (!lane) return false;
+    if (t.ring && t.ring !== ring(...parse(k))) return false; // Front : 3e couronne, Réduit : 1re (Oni, 14/11/2026)
     if (t.dir && t.dir !== lane) return false; // Avant-poste : seulement dans sa lane (Oni, 12/11/2026)
     if (((S.built && S.built[lane]) || 0) + S.chantiers[lane].length >= S.chPerLane) return false;
     return t.d <= pointsLeft(S) && canTarget(S, lane, k);
@@ -1196,7 +1252,7 @@ const SF = (() => {
     for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) { const k = key(x, y); if (canBuildAt(S, name, k)) out.push(k); }
     return out;
   }
-  function buildAt(S, i, k) {
+  function buildAt(S, i, k, to) {
     const name = S.hand[i];
     if (!name || !canBuildAt(S, name, k)) return false;
     const lane = cellLane(...parse(k));
@@ -1204,7 +1260,7 @@ const SF = (() => {
     S.spent = (S.spent || 0) + TILES[name].d;
     S.built = S.built || { N: 0, E: 0, S: 0, O: 0 }; S.built[lane] += 1;
     fx(S, { t: "work", lane, n: TILES[name].d });
-    putTile(S, name, k, lane);
+    putTile(S, name, k, lane, to);
     return true;
   }
   const pubName = name => (TILES[name] && TILES[name].camo ? "tuile camouflée" : name);
@@ -1223,7 +1279,10 @@ const SF = (() => {
   }
   function supportTargets(S, sk) { // portée : les 8 cases autour du support (diagonales comprises)
     const [x, y] = parse(sk);
-    return S.creatures.filter(c => { const [a, b] = toGlobal(c.lane, c.u, c.k); return Math.max(Math.abs(a - x), Math.abs(b - y)) === 1 && targetable(S, c); });
+    const inRange = S.creatures.filter(c => { const [a, b] = toGlobal(c.lane, c.u, c.k); return Math.max(Math.abs(a - x), Math.abs(b - y)) === 1 && targetable(S, c); });
+    // Provocation renforcée (tank B2) : un tank à portée doit être visé en priorité
+    const tanks = S.upgrades.tank.r2 === "B" ? inRange.filter(c => CREATURES[c.name].type === "tank") : [];
+    return tanks.length ? tanks : inRange;
   }
   const rocketMilestones = S => [3, 6, 9].filter(f => S.floors >= f).length;
   const turretDmg = (S, l) => (l === 1 ? 1 + rocketMilestones(S) : l === 2 ? 2 : 0);
@@ -1239,9 +1298,9 @@ const SF = (() => {
     fx(S, { t: "shot", sk, id: t.id });
     // Provocation (tank, côté B) : les tanks subissent 1 dégât de moins des tourelles (Oni, 07/11/2026)
     // Blindage (tank, rang 2 côté A) : aussi −1 dégât des tourelles (Oni, 09/11/2026)
-    // −1 par Provocation et −1 par Masse vivante, cumulables (Oni, 11/11/2026 ; avant Provocation ou Blindage)
-    const tk = CREATURES[t.name].type === "tank", red = [tk && S.upgrades.tank.r1 === "B" ? "Provocation −1" : "", tk && S.upgrades.tank.r2 === "B" ? "Masse vivante −1" : ""].filter(Boolean);
-    damageCreature(S, t, Math.max(0, turretDmg(S, lvl) - red.length), `tourelle de niveau ${lvl}${red.length ? ", " + red.join(", ") : ""}`);
+    // branche test : plus de réduction (Provocation, Masse vivante) ; Tir de précision : +2 au premier tir du tour
+    const prec = S.precise ? 2 : 0; S.precise = 0;
+    damageCreature(S, t, turretDmg(S, lvl) + prec, `tourelle de niveau ${lvl}${prec ? ", Tir de précision +2" : ""}`);
     killCheck(S);
     return true;
   }
@@ -1308,18 +1367,18 @@ const SF = (() => {
       log(S, "colonie", `${pubName(p.tile)} : aucune case libre en lane ${LANE_NAME[p.lane]}, la tuile revient en main.`);
     }
   }
-  function placeTile(S, k) {
+  function placeTile(S, k, to) {
     if (S.phase !== "D_place" || !placeTargets(S).includes(k)) return false;
     const p = S.toPlace.shift();
-    putTile(S, p.tile, k, p.lane);
+    putTile(S, p.tile, k, p.lane, to);
     skipUnplaceable(S);
     if (!S.toPlace.length) finishDefenderTurn(S);
     return true;
   }
   // pose d'une tuile (chantier achevé ou construction immédiate)
-  function putTile(S, name, k, lane) {
+  function putTile(S, name, k, lane, to) {
     const [x, y] = parse(k);
-    pushBack(S, k);
+    pushBack(S, k, to);
     S.tiles[k] = tileStats(name, x, y); S.tiles[k].new = 1; // pastille NEW pour l'essaim jusqu'au prochain tour de la colonie (Oni, 13/11/2026)
     S.builtCount = S.builtCount || {}; S.builtCount[name] = (S.builtCount[name] || 0) + 1; // statistiques (Oni, 09/11/2026)
     fx(S, { t: "place", k });
@@ -1338,7 +1397,7 @@ const SF = (() => {
       fx(S, { t: "floor", n: S.floors });
       log(S, "colonie", `Étage ${S.floors} de la fusée achevé : +1 travailleur.`);
       if (S.floors === 3) { S.techBonus += 2; log(S, "colonie", "Palier 3 : +2 technologies permanentes."); }
-      if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 chantier par lane."); }
+      if (S.floors === 6) { S.chPerLane = 2; log(S, "colonie", "Palier 6 : +1 construction par lane."); }
       if (S.floors === 9) {
         fx(S, { t: "nuke", ids: S.creatures.map(c => c.id) });
         // Réincarnation (Oni, 10/11/2026) : les tanks détruits par la Nuke sont mis de côté comme les autres tanks morts
@@ -1397,10 +1456,10 @@ const SF = (() => {
     for (let x = -3; x <= 3; x++) for (let y = -3; y <= 3; y++) { const k = key(x, y), lane = cellLane(x, y), d = TILES[S.relocate.name] && TILES[S.relocate.name].dir; if (lane && (!d || d === lane) && canTarget(S, lane, k)) out.push(k); }
     return out;
   }
-  function relocate(S, k) {
+  function relocate(S, k, to) {
     if (!S.relocate || !relocateTargets(S).includes(k)) return false;
     const t = S.relocate; delete S.relocate;
-    pushBack(S, k); S.tiles[k] = t;
+    pushBack(S, k, to); S.tiles[k] = t;
     fx(S, { t: "place", k });
     placeSupports(S); visionSweep(S);
     log(S, "colonie", `Reconversion : ${t.camo && !t.revealed ? "la tuile camouflée" : t.name} est reposée en lane ${LANE_NAME[cellLane(...parse(k))]}.`);
@@ -1421,7 +1480,11 @@ const SF = (() => {
       S.renfV = 1;
     }
     if (!S.depouilles) S.depouilles = [];
-    if (S.upgrades && S.upgrades.soutien.r1 === "A") for (const c of S.creatures || []) if (CREATURES[c.name] && CREATURES[c.name].type === "soutien" && c.esc === undefined) c.esc = 1; // anciennes parties
+    { // branche test : Réparation → Tir de précision ; les PV redeviennent pleins (dégâts du tour seulement)
+      const rn = n => (n === "Réparation" ? "Tir de précision" : n);
+      for (const f of ["spells", "spellDeck", "spellDiscard", "spellOffer"]) if (Array.isArray(S[f])) S[f] = S[f].map(rn);
+      if (!S.totV && S.tiles && S.creatures && S.upgrades) { clearDamage(S); S.totV = 1; }
+    }
     delete S.escaped;
     { // Phéromone renommée Charognard (Oni, 12/11/2026)
       const ren = n => (n === "Phéromone" ? "Charognard" : n);
@@ -1436,11 +1499,11 @@ const SF = (() => {
       if (wrong.length) { S.piles[l] = S.piles[l].filter(n => !wrong.includes(n)); for (const n of wrong) S.piles[CREATURES[n].lvl].push(n); }
     }
     // ancien « Bouclier X » → Renforcé X (02/11/2026) ; le Bouclier de l'Abri blindé (jeton, 07/11/2026) n'est pas concerné
-    for (const t of Object.values(S.tiles || {})) if (t.shield && !(TILES[t.name] && TILES[t.name].shield)) { t.ren = t.shield; delete t.shield; }
+    for (const t of Object.values(S.tiles || {})) if (t.shield && !t.start && !(TILES[t.name] && TILES[t.name].shield)) { t.ren = t.shield; delete t.shield; }
     for (const c of S.creatures || []) if (CREATURES[c.name] && c.hp > maxHp(S, c.name)) c.hp = maxHp(S, c.name); // Mue : plus de +1 PV au soutien
     for (const t of Object.values(S.tiles || {})) {
       if (t.name === "Mur de départ" || t.name === "Haie de départ") { t.start = true; t.max = 1; t.hp = Math.min(t.hp, 1); }
-      if (t.start) { t.name = START_WALL; t.ep = 1; } // Barbelé : Épines 1
+      if (t.start) { t.name = START_WALL; t.ep = 1 + (t.boost === "ep" ? 1 : 0); } // Barbelé : Épines 1 (+1 avec le boost de départ)
       else if (TILES[t.name]) t.ep = TILES[t.name].ep;
       if (TILES[t.name] && TILES[t.name].aura && t.camo) { t.camo = 0; t.revealed = true; } // Avant-postes désormais face visible
     }
@@ -1474,7 +1537,7 @@ const SF = (() => {
   // Point d'entrée unique, utilisé par l'interface locale et par le serveur en ligne :
   // vérifie le camp, la phase et les paramètres, puis appelle les fonctions de règles ci-dessus.
   // Les transitions de phase qui vivaient dans l'interface (fenêtres Famine / Réaction, passage aux tirs) sont ici.
-  const PHASE_SIDE = { A_reinc: "essaim", D_spell: "colonie", D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
+  const PHASE_SIDE = { A_morph: "essaim", A_reinc: "essaim", D_spell: "colonie", D_draw: "colonie", A_famine: "colonie", A_start: "essaim", A_deploy: "essaim", A_upgrade: "essaim", A_react: "colonie", A_attack: "essaim", D_main: "colonie", D_fire: "colonie", D_place: "colonie" };
   const actor = S => PHASE_SIDE[S.phase] || null;
   const isInt = v => Number.isInteger(v);
   const isLane = l => LANES.includes(l);
@@ -1488,7 +1551,6 @@ const SF = (() => {
       case "Barrage": return isLane(arg);
       case "Champ de stase": return typeof arg === "string" && /^-?\d,-?\d$/.test(arg);
       case "Onde de choc": return [1, 2, 3, "1", "2", "3"].includes(arg);
-      case "Réparation": return Array.isArray(arg) && arg.length >= 1 && arg.length <= 3 && arg.every(k => own(S.tiles, k));
       case "Double bouclier": return Array.isArray(arg) && arg.length >= 1 && arg.length <= 2 && new Set(arg).size === arg.length && arg.every(k => own(S.tiles, k));
       case "Renouvellement": return Array.isArray(arg) && arg.every(i => isInt(i) && i >= 0 && i < S.hand.length) && new Set(arg).size === arg.length;
       case "Reconversion": return !!arg && isInt(arg.hand) && arg.hand >= 0 && arg.hand < S.hand.length && own(S.tiles, arg.tile)
@@ -1503,6 +1565,8 @@ const SF = (() => {
       return true;
     } },
     // Réincarnation : l'essaim choisit le tank qui revient (Oni, 10/11/2026) ; ensuite, fenêtre Famine éventuelle
+    morph: { phase: ["A_morph"], run: (S, a) => isInt(a.sid) && isInt(a.id) && typeof a.to === "string" && morph(S, a) },
+    morphDone: { phase: ["A_morph"], run(S) { startDefenderTurn(S); return true; } },
     reinc: { phase: ["A_reinc"], run(S, a) { if (!isInt(a.i) || !reincarnate(S, a.i)) return false; S.phase = "A_start"; openFamine(S); return true; } },
     draw: { phase: ["A_start"], run: S => { attackerDraw(S); return true; } }, // pioche au hasard (premier tour, tests)
     pickOne: { phase: ["A_start"], run: (S, a) => isInt(a.l) && pickOne(S, a.l) }, // une carte dans la pile choisie
@@ -1549,9 +1613,9 @@ const SF = (() => {
       for (const c of todo) { if (S.winner) break; if (S.creatures.includes(c)) autoCreature(S, c); }
       return true;
     } },
-    endA: { phase: ["A_attack"], run(S) { endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
+    endA: { phase: ["A_attack"], run(S) { if (S.creatures.some(c => mustAdvance(S, c))) return false; endAttackerTurn(S); return true; } }, // fin du tour : les créatures restantes ne font rien
     tdraw: { phase: ["D_draw"], run: (S, a) => drawTileFrom(S, a.cat) }, // pioche d'une tuile dans la pioche choisie
-    buildAt: { phase: ["D_main"], run: (S, a) => isInt(a.i) && typeof a.k === "string" && /^-?\d,-?\d$/.test(a.k) && buildAt(S, a.i, a.k) },
+    buildAt: { phase: ["D_main"], run: (S, a) => isInt(a.i) && typeof a.k === "string" && /^-?\d,-?\d$/.test(a.k) && buildAt(S, a.i, a.k, a.to) },
     startCh: { phase: ["D_main"], run(S, a) {
       if (!(isInt(a.i) && isLane(a.lane) && startChantier(S, a.i, a.lane))) return false;
       // travailleurs assignés d'office (Oni, 04/11/2026) : juste assez pour finir les chantiers de la lane, dans la
@@ -1569,14 +1633,14 @@ const SF = (() => {
       S.alloc[a.lane] = v; return true;
     } },
     build: { phase: ["D_main"], run: S => { if (S.relocate) return false; endDefenderTurn(S); return true; } }, // construction et fusée, puis tirs
-    relocate: { phase: ["D_main"], run: (S, a) => typeof a.k === "string" && relocate(S, a.k) }, // Reconversion : repose la tuile remplacée
+    relocate: { phase: ["D_main"], run: (S, a) => typeof a.k === "string" && relocate(S, a.k, a.to) }, // Reconversion : repose la tuile remplacée
     spellPick: { phase: ["D_spell"], run(S, a) { if (!(isInt(a.i) && pickSpell(S, a.i))) return false; openFamine(S); return true; } },
     toFire: { phase: ["D_main"], run: S => { endDefenderTurn(S); return true; } }, // ancien nom (pages encore ouvertes)
     fire: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && isInt(a.id) && fire(S, a.sk, a.id) },
     fireDep: { phase: ["D_fire"], run: (S, a) => own(S.supports, a.sk) && typeof a.k === "string" && fireDep(S, a.sk, a.k) },
     autoFire: { phase: ["D_fire"], run: S => { autoFire(S); return true; } },
     endD: { phase: ["D_fire"], run(S) { endColonyTurn(S); openFamine(S); return true; } },
-    placeAt: { phase: ["D_place"], run(S, a) { if (!placeTile(S, a.k)) return false; openFamine(S); return true; } },
+    placeAt: { phase: ["D_place"], run(S, a) { if (!placeTile(S, a.k, a.to)) return false; openFamine(S); return true; } },
   };
   // renvoie "" si l'action est appliquée, sinon la raison du refus (S n'est pas modifié dans ce cas)
   function apply(S, side, type, args) {
@@ -1650,8 +1714,8 @@ const SF = (() => {
     CREATURES, TILES, TILE_TEXT, SPELLS, TIERS, TREES, LANES, LANE_NAME, COLS, COST_R1, COST_R2, FLOORS,
     key, parse, ring, cellLane, toGlobal, toLocal, nextStep, isSupportCell, supportLanes, supportWalls, setRng, shuffle,
     newGame, tier, capOf, laneCount, tech, spellsPerTurn, bonusWorkers, totalPoints, allocated, handSize, posKey, caseMates,
-    clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
-    attacks, pushBack, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
+    clairvoyance, reachable, pathCells, pickRule, tierCards, attackerPick, canDrop, strikeTargets, strikesPerTurn, restCreature, mustAdvance, stepsLeft, canAct, moveCreature, strikeAt, frenzyOf, frenzyCount, hasMobility, hasPercee, isStealthy, maxHp, baseAtq, effAtq, bonusHp, epinesOf, canTarget, walk, laneTiles,
+    attacks, pushBack, pushOptions, morphOptions, act, actCase, readyCases, blockAt, pathLen, attackerDraw, canDeploy, deploy, endDeploy, canBuy, buy, invest, invested, nodeState, investable, nodeCost, speedOf, baseSpeed, startAttacks, attackOrder, endAttackerTurn,
     useSpell, startChantier, cancelChantier, placeTargets, placeTile, supportTargets, depTargets, fireDep, turretDmg, rocketMilestones, fire, autoFire, endDefenderTurn, endColonyTurn, targetable, resolveTarget,
     tileStats, placeSupports, killCheck, pubName,
   };
