@@ -418,12 +418,7 @@ const IA = (() => {
         case "D_main": return colonyMain(V);
         case "D_place": return colonyPlace(V);
         case "D_fire": return colonyFire(V);
-        case "D_spell": { // pioche d'un sortilège parmi deux : ordre de préférence fixe
-          const PREF = ["Frappe orbitale", "Salve", "Effort", "Double bouclier", "Champ de stase", "Famine", "Barrage", "Feu nourri", "Tir de précision", "Brouillage", "Onde de choc", "Renouvellement", "Reconversion"];
-          const o = S.spellOffer || []; let i = 0;
-          o.forEach((n, j) => { if (PREF.indexOf(n) >= 0 && (PREF.indexOf(o[i]) < 0 || PREF.indexOf(n) < PREF.indexOf(o[i]))) i = j; });
-          return { type: "spellPick", args: { i } };
-        }
+        case "D_spell": return { type: "spellPick", args: { i: 0 } }; // plus de choix : l'IA ferme le sortilège pioché
       }
     } catch (e) {
       if (typeof console !== "undefined") console.error("IA :", e);

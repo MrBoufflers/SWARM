@@ -1150,3 +1150,8 @@ body.pc .ccard.sh .caps:has(> :only-child) { grid-template-columns: auto; }
 .home2 { padding-bottom: 72px; }
 .rules .legal { margin: 2px 0 10px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 6px; font-weight: 600; font-size: .95rem; text-align: center; color: var(--ink-soft); background: var(--panel-2); }
 @media (max-width: 600px) { .h2-legal { padding: 8px 16px 30px; text-align: center; } }
+/* sortilège pioché au milieu de l'écran (Oni, 26/11/2026) */
+.spellm .spellcard { max-width: 380px; width: 100%; text-align: center; border-top: 6px solid var(--c); }
+.spellm .spellcard.off { --c: var(--off); } .spellm .spellcard.sup { --c: var(--sup); }
+.spellm .sc-ic { display: inline-block; width: 56px; height: 56px; color: var(--c); } .spellm .sc-ic svg, .spellm .sc-ic .i { width: 100%; height: 100%; }
+.spellm .sc-kind { font-weight: 700; color: var(--c); margin: 2px 0 10px; } .spellm .sc-txt { font-size: 1.15rem; line-height: 1.4; margin: 0 0 16px; }

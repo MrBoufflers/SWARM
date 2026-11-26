@@ -4,6 +4,10 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.6.23 — 26 novembre 2026
+
+- Pioche des sortilèges : plus de choix entre deux cartes. Pour chaque sortilège (3 technologies = 1), la colonie pioche la première carte de la pile ; elle s'affiche au milieu de l'écran, et « Fermer » valide (étape `D_spell`, action `spellPick` = fermer). La carte non choisie n'est plus défaussée.
+
 ## v0.6.22 — 26 novembre 2026
 
 - Avertissement légal complété : « © 2026 Alix & Guillaume – Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites » (accueil, règles). Ajouté aussi au livret (page et en-tête du PDF) et aux maquettes papier.

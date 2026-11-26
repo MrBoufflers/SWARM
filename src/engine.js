@@ -140,7 +140,7 @@ const SF = (() => {
   const START_WALL = "Barbelé";
   // Version du jeu : +1 au dernier chiffre à chaque mise à jour livrée (journal : docs/versions.md).
   // Les statistiques de fin de partie sont regroupées par version ; le serveur refuse une page d'une autre version.
-  const VERSION = "0.6.22";
+  const VERSION = "0.6.23";
   const LANES = ["N", "E", "S", "O"];
   const LANE_NAME = { N: "Nord", E: "Est", S: "Sud", O: "Ouest" };
   const COLS = ["A", "B", "C", "D", "E"];
@@ -1418,8 +1418,8 @@ const SF = (() => {
   function endColonyTurn(S) {
     autoFire(S); // tirs restants (automatiques)
     // sortilèges de soutien non joués : gardés en main (Oni, 01/11/2026) ; les tuiles se piochent au début du tour suivant
-    // pioche des sortilèges (Oni, 09/11/2026) : pour chaque sortilège, la colonie choisit une des deux premières cartes
-    // et défausse l'autre (étape D_spell) ; pioche vide : on remélange la défausse
+    // pioche des sortilèges (Oni, 26/11/2026) : pour chaque sortilège, la première carte de la pile (étape D_spell, la colonie
+    // la lit puis ferme) ; pioche vide : on remélange la défausse
     S.spellDraws = spellsPerTurn(S);
     if (!offerSpell(S)) finishColonyTurn(S);
   }
@@ -1430,15 +1430,12 @@ const SF = (() => {
   function offerSpell(S) {
     if (!(S.spellDraws > 0)) return false;
     const a = spellCard(S); if (!a) return false;
-    const b = spellCard(S);
-    S.spellOffer = b ? [a, b] : [a]; S.phase = "D_spell";
+    // plus de choix entre deux cartes (Oni, 26/11/2026) : la première carte de la pile est piochée, la colonie la lit puis ferme
+    S.spells.push(a); S.spellOffer = [a]; S.phase = "D_spell";
     return true;
   }
   function pickSpell(S, i) {
-    if (S.phase !== "D_spell" || !S.spellOffer || !S.spellOffer[i]) return false;
-    const got = S.spellOffer[i];
-    S.spells.push(got);
-    for (const [j, n] of S.spellOffer.entries()) if (j !== i) S.spellDiscard.push(n);
+    if (S.phase !== "D_spell" || !S.spellOffer || !S.spellOffer[0]) return false; // « Fermer » : valide la lecture du sortilège pioché
     S.spellOffer = null; S.spellDraws -= 1;
     log(S, "colonie", "Un sortilège pioché.");
     if (!offerSpell(S)) finishColonyTurn(S);

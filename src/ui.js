@@ -65,7 +65,7 @@
     A_upgrade: ["essaim", "Améliorations", "Investissez votre réserve dans une amélioration (panneau Essaim), puis passez aux attaques."],
     A_react: ["colonie", "Réaction de la colonie", "Avant les attaques, la colonie peut jouer ses sortilèges offensifs."],
     A_attack: ["essaim", "Attaques", "Touchez une créature : choisissez la case où elle avance sur son chemin vers la fusée (au moins 1 case, au plus sa vitesse), puis, si vous voulez, un bâtiment qui touche sa case (ou la fusée) à attaquer. « Tout résoudre et finir le tour » fait agir toutes les créatures restantes."],
-    D_spell: ["colonie", "Pioche de sortilège", "Choisissez un des deux sortilèges ; l'autre est défaussé."],
+    D_spell: ["colonie", "Pioche de sortilège", "Vous piochez la première carte de la pile : lisez-la, puis fermez pour valider."],
     D_draw: ["colonie", "Pioche de la colonie", "Complétez votre main carte par carte : pour chaque tuile, choisissez sa pioche (renforts, actifs ou pièges)."],
     D_main: ["colonie", "Tour de la colonie", "Sortilèges de soutien, puis construction : choisissez une tuile et sa case, elle est payée et posée tout de suite (un bâtiment par lane et par tour). Les points restants vont à la fusée, puis les tourelles tirent."],
     D_fire: ["colonie", "Tirs des supports", "Construction et fusée faites : les nouveaux supports et les paliers atteints comptent. Choisissez une tourelle puis sa cible (une créature sur l'une des 8 cases qui l'entourent), ou laissez les tirs automatiques."],
@@ -153,7 +153,7 @@
     document.body.classList.toggle("pc", pc);
     if (pc) {
       const main = S.handoff ? pcHandoff() : pcLayout(false);
-      $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + (UI.changes ? changesModal() : "") + tipCard();
+      $("#app").innerHTML = `<div class="pc-hot" aria-hidden="true"><span>Menu</span></div>` + header() + bar + main + (UI.help ? help() : "") + (UI.changes ? changesModal() : "") + tipCard() + spellModal();
       placePop(); autoDraw();
       // carte de passage qui arrive en glissant : animation signalée comme les autres (data-anim), ou coupée
       const card = $(".pc-ho .ho-card:not(.leave)");
@@ -166,7 +166,7 @@
       return;
     }
     const main = online() && !NET.full ? waitingRoom() : S.handoff ? handoff() : S.winner ? winner() + layout() : layout();
-    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + (UI.changes ? changesModal() : "") + tipCard();
+    $("#app").innerHTML = header() + bar + main + (UI.help ? help() : "") + (UI.changes ? changesModal() : "") + tipCard() + spellModal();
     autoDraw();
   }
   function header() {
@@ -437,9 +437,9 @@
       } else body = `<p class="hint">Touchez une créature pour la déplacer puis attaquer${left ? ` (${left} peuvent agir)` : ""}.</p>`;
       acts = `<button data-a="actAll" class="primary">Tout résoudre et finir le tour</button>`;
     } else if (ph === "D_spell") { // un sortilège parmi deux (Oni, 09/11/2026)
-      const o = S.spellOffer || [];
-      body = `<p class="hint">Gardez un sortilège${S.spellDraws > 1 ? ` (encore ${S.spellDraws} à piocher)` : ""} ; l'autre est défaussé.</p><div class="spells">` +
-        o.map((n, i) => `<button data-a="spellPick" data-v="${i}" class="spell ${SF.SPELLS[n].kind}">${icon(spellIcon(n))}<span><b>${E(n)}</b><small>${E(SF.SPELLS[n].text)}</small></span></button>`).join("") + `</div>`;
+      const n = (S.spellOffer || [])[0];
+      body = n ? `<p class="hint">Sortilège pioché : <b>${E(n)}</b>${S.spellDraws > 1 ? ` (encore ${S.spellDraws - 1} à piocher ensuite)` : ""}. Lisez-le, puis fermez pour valider.</p>` : "";
+      acts = `<button data-a="spellPick" data-v="0" class="primary">Fermer</button>`;
     } else if (ph === "D_main" && S.relocate) { // Reconversion : reposer la tuile remplacée
       body = `<p class="hint">Reconversion : touchez une case surlignée pour reposer <b>${E(S.relocate.name)}</b>.</p>`;
     } else if (ph === "D_draw") {
@@ -884,7 +884,7 @@
       [["D_draw"], "Pioche", "Complétez votre main de tuiles, une par une, en choisissant à chaque fois la pioche (renforts, actifs ou pièges)."],
       [["D_main"], "Soutien & construction", "Jouez vos sortilèges de soutien, puis construisez avec vos points de travailleurs ; le reste va à la fusée."],
       [["D_fire"], "Tirs", "Vos tourelles (supports de niveau I et II) tirent sur les créatures des 8 cases autour."],
-      [["D_spell"], "Pioche (sort)", "Vous piochez des sortilèges : 3 technologies = 1 sort par tour, 6 = 2, 9 = 3. Pour chacun, gardez 1 des 2 du dessus."],
+      [["D_spell"], "Pioche (sort)", "Vous piochez des sortilèges : 3 technologies = 1 sort par tour, 6 = 2, 9 = 3. Pour chacun, vous piochez la première carte de la pile ; elle s'affiche au milieu de l'écran, « Fermer » valide."],
     ],
   };
   function pcSteps(side) {
@@ -1169,6 +1169,18 @@
   let DISC = (() => { try { return localStorage.getItem(DISC_KEY) === "1"; } catch (e) { return false; } })();
   let SEEN = (() => { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); } catch (e) { return new Set(); } })();
   function saveDisc() { try { localStorage.setItem(DISC_KEY, DISC ? "1" : "0"); localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN])); } catch (e) { /* rien */ } }
+  // sortilège pioché en fin de tour de la colonie : la carte s'affiche au milieu de l'écran, « Fermer » valide (Oni, 26/11/2026)
+  function spellModal() {
+    const n = S && !S.winner && S.phase === "D_spell" && S.view === "colonie" && !iaTurn() && !(online() && !myTurn()) ? (S.spellOffer || [])[0] : null;
+    if (!n || !SF.SPELLS[n]) return "";
+    const sp = SF.SPELLS[n];
+    return `<div class="modal spellm" role="dialog" aria-label="Sortilège pioché"><div class="modal-card spellcard ${sp.kind}">
+      <p class="small">Sortilège pioché${S.spellDraws > 1 ? ` · encore ${S.spellDraws - 1} ensuite` : ""}</p>
+      <span class="sc-ic">${icon(spellIcon(n))}</span><h2>${E(n)}</h2>
+      <p class="sc-kind">${sp.kind === "off" ? "Offensif · se joue pendant le tour de l'essaim" : "Soutien · se joue pendant votre tour"}</p>
+      <p class="sc-txt">${E(sp.text)}</p>
+      <button data-a="spellPick" data-v="0" class="primary">Fermer</button></div></div>`;
+  }
   function tipCard() {
     if (!DISC || !S || S.handoff || S.winner || !S.view || (online() && !NET.full) || FX.playing) return "";
     const t = AIDE.nextTip(S, S.view, SEEN); if (!t) return "";
