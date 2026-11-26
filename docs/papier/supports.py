@@ -29,4 +29,5 @@ def rack(ox, oy, t, n, label, col, names):
              f'<text x="{ox + 36}" y="{py + 26}" font-size="5.5" fill="#555">tuile de {t} mm : {t - GH} mm visibles (nom en haut)</text>')
 rack(15, 22, 30, 5, "ESSAIM : 2 × 5 tuiles de 30 mm (main de 10)", "#c9b3e6", ["ÉCORCH.", "CARAP.", "ŒIL", "RAVAG.", "HURL."])
 rack(15, 175, 50, 4, "COLONIE : 2 × 4 tuiles de 50 mm (main de 7, 8 places)", "#f2e9d0", ["MURAILLE", "ANTENNE", "HAIE", "MINE ?", "RENFORT", "LABO", "DORTOIR", "?"])
+o.append('<text x="15" y="352" font-size="5" fill="#444">© 2026 Alix &amp; Guillaume – Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites</text>')
 o.append("</svg>"); open("docs/papier/supports-main.svg", "w").write("\n".join(o))

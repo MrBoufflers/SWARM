@@ -196,6 +196,7 @@ svg .d { font-size: 11px; font-weight: 700; text-anchor: middle; fill: #6b6a64; 
 svg .l { font-size: 12px; fill: #3d3c38; } svg .l.s2 { fill: #77766f; }
 svg .lt { font-size: 12.5px; font-weight: 700; fill: #1f1f1d; }
 .ft { font-weight: 700; font-size: 11pt; } .ft span { display: block; font-weight: 400; font-size: 9pt; color: #77766f; }
+.legal { border: 1px solid #b9b8b2; border-radius: 6px; padding: 5px 10px; text-align: center; font-size: 9pt; font-weight: 700; color: #5f5e58; margin: 0 0 14px; }
 .fc { color: #77766f; font-size: 9.5pt; margin-top: 2px; }
 """
 
@@ -203,7 +204,7 @@ svg .lt { font-size: 12.5px; font-weight: 700; fill: #1f1f1d; }
 def main():
     md = SRC.read_text(encoding="utf-8")
     title = md.split("\n", 1)[0].lstrip("# ").strip()
-    page = f'<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>{html.escape(title)}</title><style>{CSS}</style></head><body>{convert(md)}</body></html>'
+    page = f'<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>{html.escape(title)}</title><style>{CSS}</style></head><body><p class="legal">© 2026 Alix &amp; Guillaume – Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites</p>{convert(md)}</body></html>'
     OUT.write_text(page, encoding="utf-8")
     print("ok", OUT.relative_to(ROOT))
 

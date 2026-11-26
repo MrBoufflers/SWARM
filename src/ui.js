@@ -189,7 +189,7 @@
       ${STAGING_CHANGES.map(c => `<h3>v${E(c.v)}</h3><ul>${c.items.map(i => `<li>${E(i)}</li>`).join("")}</ul>`).join("")}</div></div>`;
   }
   // avertissement légal (Oni, 26/11/2026) : accueil, salle d'attente et première page des règles
-  const LEGAL = "Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites";
+  const LEGAL = "© 2026 Alix & Guillaume – Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites";
   function homeHeader() {
     return `<header class="top"><div class="brand"><span class="brand-mk" aria-hidden="true"></span><span class="brand-word" role="img" aria-label="Swarm &amp; Steel"></span><span>prototype v${SF.VERSION}</span></div>
       <div class="menu">${themeBtn()}${changesBtn()}<button data-a="help" class="ghost">Règles</button></div></header>`;
@@ -223,7 +223,7 @@
         <div class="h2-row small"><button data-a="disc" aria-pressed="${DISC}" class="h2-btn ghost${DISC ? " on" : ""}">Mode découverte : ${DISC ? "oui" : "non"}</button>${HTTP ? `<button data-a="stats" class="h2-btn ghost">Statistiques</button>` : ""}</div>
       </nav>
       <div class="h2-music">${musicCtl("h2-ic")}</div>
-      <p class="h2-legal" role="note">${LEGAL}</p>
+      <p class="h2-legal" role="note">${E(LEGAL)}</p>
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
     </section>`;
   }
@@ -251,7 +251,7 @@
       </div>
       <div class="h2-menu h2-quit"><button data-a="quit" class="h2-btn">Quitter</button></div>
       <div class="h2-music">${musicCtl("h2-ic")}</div>
-      <p class="h2-legal" role="note">${LEGAL}</p>
+      <p class="h2-legal" role="note">${E(LEGAL)}</p>
       <p class="h2-ver">Prototype v${E(SF.VERSION)}</p>
     </section>`;
   }
@@ -1160,7 +1160,7 @@
     const tab = UI.helpTab || (S && S.view) || "commun";
     const tabs = [["essaim", "Essaim"], ["colonie", "Colonie"], ["commun", "Commun"]].map(([k, l]) => `<button data-a="helpTab" data-v="${k}" class="${tab === k ? "on" : ""}">${l}</button>`).join("");
     return `<div class="modal" role="dialog" aria-label="Règles"><div class="modal-card rules"><button data-a="help" class="x close" aria-label="Fermer">×</button>
-      <h2>Règles</h2><p class="legal" role="note">${LEGAL}</p><div class="rtabs">${tabs}</div>
+      <h2>Règles</h2><p class="legal" role="note">${E(LEGAL)}</p><div class="rtabs">${tabs}</div>
       <p class="small disc-line">Mode découverte : <b>${DISC ? "activé" : "désactivé"}</b> <button data-a="disc" class="ghost">${DISC ? "Désactiver" : "Activer"}</button>${DISC && SEEN.size ? ` <button data-a="discReset" class="ghost">Revoir tous les conseils</button>` : ""}</p>
       <div class="rbody">${AIDE.rules(tab, { E, icon, imCls })}</div></div></div>`;
   }

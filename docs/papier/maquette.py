@@ -57,5 +57,6 @@ o.append(f'<g transform="translate({M} {N + 5})" font-size="8"><rect width="60" 
          f'<text x="90" y="19">Les cartes sont orientées bande vers la fusée et s\'empilent vers l\'extérieur de la lane (Nord : vers le haut, Est : vers la droite…).</text>'
          f'<text x="90" y="30">Marge de 48 mm autour du plateau : une pile de 4 cartes sur une case d\'entrée dépasse de 45 mm.</text>'
          f'<text x="90" y="41">Piles de démonstration : Nord C3 (3 cartes), Est (2 cartes) et entrée Sud (4 cartes).</text></g>')
+o.append(f'<text x="{M}" y="{N + 62}" font-size="6" fill="#444">© 2026 Alix &amp; Guillaume – Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites</text>')
 o.append("</svg>")
 open("docs/papier/maquette-plateau.svg", "w").write("\n".join(o))

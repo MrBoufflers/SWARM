@@ -11,7 +11,7 @@ const path = require('path');
   await page.pdf({
     path: out, format: 'A4', printBackground: true, displayHeaderFooter: true,
     margin: { top: '22mm', bottom: '20mm', left: '18mm', right: '18mm' },
-    headerTemplate: `<div style="font-size:7px;color:#888;width:100%;padding:0 18mm;font-family:Arial">${title}</div>`,
+    headerTemplate: `<div style="font-size:7px;color:#888;width:100%;padding:0 18mm;font-family:Arial">${title} — © 2026 Alix &amp; Guillaume · Prototype confidentiel · Tous droits réservés · Reproduction et diffusion interdites</div>`,
     footerTemplate: '<div style="font-size:7px;color:#888;width:100%;padding:0 18mm;text-align:right;font-family:Arial">Page <span class="pageNumber"></span> sur <span class="totalPages"></span></div>',
   });
   await browser.close();
