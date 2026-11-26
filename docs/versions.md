@@ -4,21 +4,25 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
-## v0.6.24 — 26 novembre 2026
+## v0.7.4 — 26 novembre 2026
 
 - Accueil : les boutons musique et volume sont remontés au-dessus de la mention légale.
 
-## v0.6.23 — 26 novembre 2026
+## v0.7.3 — 26 novembre 2026
 
 - Pioche des sortilèges : plus de choix entre deux cartes. Pour chaque sortilège (3 technologies = 1), la colonie pioche la première carte de la pile ; elle s'affiche au milieu de l'écran, et « Fermer » valide (étape `D_spell`, action `spellPick` = fermer). La carte non choisie n'est plus défaussée.
 
-## v0.6.22 — 26 novembre 2026
+## v0.7.2 — 26 novembre 2026
 
 - Avertissement légal complété : « © 2026 Alix & Guillaume – Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites » (accueil, règles). Ajouté aussi au livret (page et en-tête du PDF) et aux maquettes papier.
 
-## v0.6.21 — 26 novembre 2026
+## v0.7.1 — 26 novembre 2026
 
 - Avertissement légal « Prototype confidentiel – Tous droits réservés – Reproduction et diffusion interdites » : écran d'accueil, salle d'attente en ligne et haut de la fenêtre Règles.
+
+## v0.7.0 — 25 novembre 2026
+
+Version stable : fusion de `staging` dans `main` (PR #93), c'est-à-dire le contenu de la v0.6.20. Le numéro affiché dans le jeu sur `main` reste « 0.6.20 » jusqu'à la prochaine fusion ; `staging` continue en 0.7.x.
 
 ## v0.6.20 — 16 novembre 2026
 
