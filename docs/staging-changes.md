@@ -3,6 +3,11 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.7.5
+- Accueil : plus de bouton « Reprendre la partie » ; « Nouvelle partie en local » en jaune.
+- Un lien de partie en ligne rejoint directement la partie.
+- Musique et mode découverte ne rechargent plus la page.
+
 ## v0.7.4
 - Accueil : musique et volume remontés au-dessus de la mention légale.
 

@@ -4,6 +4,12 @@ Chaque mise à jour livrée reçoit un numéro : +1 au dernier chiffre (0.4.0, 0
 
 Une partie garde la version à laquelle elle a commencé. Si une mise à jour arrive en cours de partie, la page Statistiques l'indique (« v0.4.0 → v0.4.1 »).
 
+## v0.7.5 — 26 novembre 2026
+
+- Accueil : bouton « Reprendre la partie » supprimé (une partie locale en cours est reprise automatiquement au lancement) ; « Nouvelle partie sur cet appareil » devient « Nouvelle partie en local » (en jaune).
+- Lien de partage en ligne (`?code=…`) : le joueur rejoint directement la partie, sans cliquer sur « Rejoindre ».
+- Musique et mode découverte : bascule sur place à l'accueil, la page n'est plus redessinée.
+
 ## v0.7.4 — 26 novembre 2026
 
 - Accueil : les boutons musique et volume sont remontés au-dessus de la mention légale.

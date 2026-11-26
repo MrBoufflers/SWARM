@@ -202,7 +202,6 @@
   function home() {
     const saved = load();
     const preset = new URLSearchParams(location.search).get("code") || "";
-    const resume = saved && saved.phase;
     return `<section class="home2">${homeBackdrop()}
       <div class="h2-top">${changesBtn("h2-ic")}<button data-a="help" class="h2-ic" title="Règles">Règles</button>${themeBtn().replace('class="ghost"', 'class="h2-ic"')}</div>
       <div class="h2-hero">
@@ -211,8 +210,7 @@
         <p class="h2-tag">L'essaim dévore · La colonie bâtit · Un seul camp survivra</p>
       </div>
       <nav class="h2-menu" aria-label="Menu principal">
-        ${resume ? `<button data-a="resume" class="h2-btn main">Reprendre la partie</button>` : ""}
-        <button data-a="local" class="h2-btn${resume ? "" : " main"}">Nouvelle partie <small>sur cet appareil</small></button>
+        <button data-a="local" class="h2-btn main">Nouvelle partie <small>en local</small></button>
         <div class="h2-online"><span class="h2-k">Solo contre l'IA</span>
           <div class="h2-row"><button data-a="solo" data-side="essaim" class="h2-btn side essaim">${sideLogo("essaim")}Jouer l'essaim</button><button data-a="solo" data-side="colonie" class="h2-btn side colonie">${sideLogo("colonie")}Jouer la colonie</button></div>
         </div>
@@ -1209,7 +1207,10 @@
     if (a === "help") { UI.help = !UI.help; render(); return; }
     if (a === "changes") { UI.changes = !UI.changes; render(); return; }
     if (a === "helpTab") { UI.helpTab = d.v; render(); return; }
-    if (a === "disc") { DISC = !DISC; if (DISC && S && MODE === "local") { S.decouverte = true; save(); } saveDisc(); render(); return; }
+    if (a === "disc") { DISC = !DISC; if (DISC && S && MODE === "local") { S.decouverte = true; save(); } saveDisc();
+      const hb = document.querySelector('.home2 [data-a="disc"]'); // accueil : mise à jour sur place, sans redessiner
+      if (hb) { hb.textContent = "Mode découverte : " + (DISC ? "oui" : "non"); hb.setAttribute("aria-pressed", DISC); hb.classList.toggle("on", DISC); } else render();
+      return; }
     if (a === "discReset") { SEEN = new Set(); saveDisc(); render(); return; }
     if (a === "tipOk") { SEEN.add(d.id); saveDisc(); render(); return; }
     if (a === "tipOff") { DISC = false; saveDisc(); flash("Conseils désactivés. Vous pouvez les réactiver dans « Règles »."); render(); return; }
@@ -1219,7 +1220,11 @@
       try { navigator.clipboard.writeText(d.v).then(ok, ko); } catch (e) { ko(); }
       return;
     }
-    if (a === "music") { MUSIC.toggle(); render(); return; }
+    if (a === "music") { // mise à jour sur place : pas de redessin de la page (Oni, 26/11/2026)
+      MUSIC.toggle();
+      document.querySelectorAll('[data-a="music"]').forEach(b => { b.textContent = "Musique : " + (MUSIC.on ? "oui" : "non"); b.setAttribute("aria-pressed", MUSIC.on); b.title = MUSIC.on ? "Couper la musique" : "Remettre la musique"; });
+      return;
+    }
     if (a === "theme") { THEME = THEMES[(THEMES.indexOf(THEME) + 1) % THEMES.length]; try { localStorage.setItem(THEME_KEY, THEME); } catch (e) { /* rien */ } applyTheme(); render(); return; }
     if (MODE === "stats") { statsAction(a, d); return; }
     if (a === "anim") { animOn = !animOn; try { localStorage.setItem(ANIM_KEY, animOn ? "1" : "0"); } catch (e) { /* rien */ } render(); return; }
@@ -1817,12 +1822,13 @@
   });
   function upgradeSave(t) { SF.migrate(t); t.invest = t.invest || {}; t.toPlace = t.toPlace || []; for (const x of Object.values(t.tiles || {})) if (SF.TILES[x.name] && SF.TILES[x.name].camo && x.camo === undefined) x.camo = 1; return t; }
   // démarrage : partie en ligne en cours, sinon partie locale sauvegardée, sinon accueil
-  // (un lien d'invitation « ?code=… » ouvre toujours l'accueil, code prérempli)
+  // (un lien d'invitation « ?code=… » rejoint directement la partie en ligne, sans passer par le menu)
   let net0 = null; try { net0 = JSON.parse(localStorage.getItem(NET_KEY) || "null"); } catch (e) { /* rien */ }
   const saved = load();
   const invite = new URLSearchParams(location.search).get("code");
   if (new URLSearchParams(location.search).has("stats") && HTTP) openStats(); // lien direct vers les statistiques
   else if (net0 && net0.code && net0.token && (!invite || invite.toUpperCase() === net0.code)) resumeOnline(net0);
+  else if (HTTP && invite && invite.trim().length === 5) { render(); joinOnline(invite.trim().toUpperCase()); } // lien d'invitation : on rejoint directement (Oni, 26/11/2026)
   else if (!invite && saved && saved.phase) { S = upgradeSave(saved); MODE = "local"; render(); if (S.winner) recordLocal(); }
   else render();
   checkVersion();
