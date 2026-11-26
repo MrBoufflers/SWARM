@@ -3,6 +3,9 @@
 Liste affichée par le bouton « Changements » du jeu (accueil et menu en jeu). Une rubrique `## vX.Y.Z` par version de staging, des puces
 dessous. **Vider ce fichier (sauf cet en-tête) quand staging est fusionné dans main** : le bouton disparaît alors.
 
+## v0.6.21
+- Avertissement légal affiché sur l'accueil et en tête des règles.
+
 ## v0.6.20
 - Barre des étapes de la colonie : plus d'étape « Réaction » ; « Construction » devient « Soutien & construction ».
 
